@@ -16,9 +16,15 @@ app.use(express.urlencoded({ extended: true }));
 // 정적 파일 제공
 app.use(express.static(path.join(__dirname, 'public')));
 
-// 메인 라우트
+// 메인 라우트 - 즉시 로딩 버전으로 변경
 app.get('/', (req, res) => {
     console.log('Request received for main page');
+    res.sendFile(path.join(__dirname, 'instant.html'));
+});
+
+// 원래 복잡한 버전
+app.get('/full', (req, res) => {
+    console.log('Request received for full page');
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
