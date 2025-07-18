@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Test - Deadlock API Korean</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(0,0,0,0.7);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .status {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .success { border-left: 5px solid #10b981; }
+        .error { border-left: 5px solid #ef4444; }
+        .info { border-left: 5px solid #3b82f6; }
+        .nav-links {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .nav-links a {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 0 10px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .nav-links a:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Debug Test Page</h1>
+        
+        <div class="status success">
+            <h3>✅ 서버 상태</h3>
+            <p><strong>상태:</strong> 정상 작동</p>
+            <p><strong>시간:</strong> <span id="timestamp"></span></p>
+            <p><strong>URL:</strong> https://deadlock-new-production.up.railway.app/</p>
+        </div>
+        
+        <div class="status info">
+            <h3>📋 테스트 결과</h3>
+            <p>✅ HTML 로딩 완료</p>
+            <p>✅ CSS 스타일 적용</p>
+            <p>✅ JavaScript 실행 가능</p>
+            <p>✅ 한국어 폰트 표시</p>
+        </div>
+        
+        <div class="status info">
+            <h3>🚀 Deadlock API 한국어 웹사이트</h3>
+            <p>완전 한국어 번역된 Deadlock API 문서와 예제를 제공합니다.</p>
+            <p>반응형 디자인으로 모든 디바이스에서 최적화되어 있습니다.</p>
+        </div>
+        
+        <div class="nav-links">
+            <a href="/">🏠 메인 페이지</a>
+            <a href="/health">💚 헬스체크</a>
+        </div>
+    </div>
+
+    <script>
+        // 현재 시간 표시
+        document.getElementById('timestamp').textContent = new Date().toLocaleString('ko-KR');
+        
+        // 페이지 로딩 성공 로그
+        console.log('Debug page loaded successfully');
+        console.log('Current URL:', window.location.href);
+        console.log('User Agent:', navigator.userAgent);
+        
+        // 1초 후 성공 메시지
+        setTimeout(() => {
+            console.log('JavaScript 실행 완료!');
+        }, 1000);
+    </script>
+</body>
+</html>

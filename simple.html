@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deadlock API - 한국어 (간단 버전)</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            margin: 0;
+            padding: 0;
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            text-align: center;
+            padding: 40px 0;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle {
+            font-size: 1.2em;
+            color: #b0b0b0;
+            margin-bottom: 30px;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+        .feature-card {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+        }
+        .feature-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #4fc3f7;
+        }
+        .cta-buttons {
+            text-align: center;
+            margin: 40px 0;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 0 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-secondary {
+            background: linear-gradient(45deg, #4fc3f7, #29b6f6);
+        }
+        .api-example {
+            background: rgba(0,0,0,0.4);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 40px 0;
+        }
+        .code-block {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #4fc3f7;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+        }
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            margin-top: 60px;
+        }
+        @media (max-width: 768px) {
+            h1 { font-size: 2em; }
+            .features { grid-template-columns: 1fr; }
+            .container { padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎮 Deadlock API</h1>
+            <p class="subtitle">게임 데이터, 이미지, 통계를 제공하는 한국어 API 문서</p>
+            <div class="cta-buttons">
+                <a href="#features" class="btn">기능 보기</a>
+                <a href="#api-docs" class="btn btn-secondary">API 문서</a>
+            </div>
+        </header>
+
+        <section id="features" class="features">
+            <div class="feature-card">
+                <div class="feature-icon">🦸‍♂️</div>
+                <h3 class="feature-title">영웅 데이터</h3>
+                <p>모든 영웅의 상세 정보, 능력, 통계를 제공합니다.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎯</div>
+                <h3 class="feature-title">아이템 정보</h3>
+                <p>게임 내 모든 아이템의 효과와 빌드 정보를 제공합니다.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3 class="feature-title">통계 분석</h3>
+                <p>게임 메타, 승률, 픽률 등 다양한 통계 데이터를 제공합니다.</p>
+            </div>
+        </section>
+
+        <section id="api-docs" class="api-example">
+            <h2>🚀 API 사용 예제</h2>
+            <p>간단한 API 호출로 Deadlock 데이터를 가져올 수 있습니다:</p>
+            <div class="code-block">
+                <pre>
+// 모든 영웅 정보 가져오기
+fetch('https://deadlock-api.com/api/heroes')
+  .then(response => response.json())
+  .then(data => {
+    console.log('영웅 데이터:', data);
+  });
+
+// 특정 영웅 정보 가져오기
+fetch('https://deadlock-api.com/api/heroes/1')
+  .then(response => response.json())
+  .then(hero => {
+    console.log('영웅 정보:', hero.name);
+  });
+                </pre>
+            </div>
+        </section>
+
+        <section class="api-example">
+            <h2>📋 주요 API 엔드포인트</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <h4>GET /api/heroes</h4>
+                    <p>모든 영웅 목록 조회</p>
+                </div>
+                <div class="feature-card">
+                    <h4>GET /api/items</h4>
+                    <p>모든 아이템 목록 조회</p>
+                </div>
+                <div class="feature-card">
+                    <h4>GET /api/matches</h4>
+                    <p>최근 매치 데이터 조회</p>
+                </div>
+                <div class="feature-card">
+                    <h4>GET /api/stats</h4>
+                    <p>게임 통계 데이터 조회</p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2024 Deadlock API Korean. 모든 권리 보유.</p>
+            <p>원본 사이트를 한국어로 번역한 버전입니다.</p>
+        </footer>
+    </div>
+
+    <script>
+        console.log('간단 버전 페이지 로드 완료!');
+        
+        // 부드러운 스크롤 효과
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

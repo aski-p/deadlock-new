@@ -18,7 +18,20 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // 메인 라우트
 app.get('/', (req, res) => {
+    console.log('Request received for main page');
     res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// 디버그 페이지
+app.get('/debug', (req, res) => {
+    console.log('Request received for debug page');
+    res.sendFile(path.join(__dirname, 'debug.html'));
+});
+
+// 간단 버전 페이지
+app.get('/simple', (req, res) => {
+    console.log('Request received for simple page');
+    res.sendFile(path.join(__dirname, 'simple.html'));
 });
 
 // favicon 처리

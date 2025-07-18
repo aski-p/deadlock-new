@@ -86,6 +86,16 @@
         .loading.active {
             display: flex;
         }
+
+        /* 백업: CSS로 로딩 화면 자동 숨기기 */
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; display: none; }
+        }
+
+        .loading.active {
+            animation: fadeOut 0.5s ease-out 2s forwards;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen">
@@ -738,13 +748,33 @@ curl -X GET \
     </div>
 
     <script>
-        // 로딩 화면 숨기기
-        window.addEventListener('load', function() {
-            setTimeout(function() {
-                document.getElementById('loading').classList.remove('active');
-                document.getElementById('main-content').classList.remove('hidden');
-            }, 1000);
+        // 로딩 화면 숨기기 - 즉시 실행
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            hideLoading();
         });
+
+        window.addEventListener('load', function() {
+            console.log('Window loaded');
+            hideLoading();
+        });
+
+        function hideLoading() {
+            const loadingElement = document.getElementById('loading');
+            const mainContent = document.getElementById('main-content');
+            
+            if (loadingElement && mainContent) {
+                loadingElement.classList.remove('active');
+                mainContent.classList.remove('hidden');
+                console.log('Loading screen hidden');
+            }
+        }
+
+        // 백업: 3초 후 강제로 로딩 화면 제거
+        setTimeout(function() {
+            console.log('Force hide loading after 3 seconds');
+            hideLoading();
+        }, 3000);
 
         // 네비게이션 스무스 스크롤
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
