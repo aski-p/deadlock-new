@@ -2,11 +2,11 @@
 builder = "NIXPACKS"
 
 [deploy]
-healthcheckPath = "/"
+healthcheckPath = "/health"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
 [env]
 NODE_ENV = "production"
-NPM_CONFIG_PRODUCTION = "false"
+HOST = "0.0.0.0"

@@ -5,6 +5,7 @@ const cors = require('cors');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const HOST = '0.0.0.0'; // Railway에서 외부 트래픽 수신을 위해 0.0.0.0으로 바인딩
 
 // 미들웨어 설정
 app.use(compression());
@@ -35,7 +36,9 @@ app.get('/health', (req, res) => {
     res.status(200).json({
         status: 'healthy',
         timestamp: new Date().toISOString(),
-        uptime: process.uptime()
+        uptime: process.uptime(),
+        port: PORT,
+        host: HOST
     });
 });
 
@@ -50,10 +53,11 @@ app.use((err, req, res, next) => {
     res.status(500).send('서버 오류가 발생했습니다.');
 });
 
-// 서버 시작
-app.listen(PORT, () => {
+// 서버 시작 - 0.0.0.0으로 바인딩하여 외부 트래픽 수신
+app.listen(PORT, HOST, () => {
+    console.log(`Server running on http://${HOST}:${PORT}`);
     console.log(`서버가 포트 ${PORT}에서 실행 중입니다.`);
-    console.log(`URL: http://localhost:${PORT}`);
+    console.log(`External access: Railway will provide public URL`);
 });
 
 module.exports = app;
