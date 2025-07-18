@@ -30,6 +30,15 @@ app.get('/background.svg', (req, res) => {
     res.status(404).send('Background image not found');
 });
 
+// 헬스체크 엔드포인트
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
+
 // 404 처리
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, 'index.html'));
