@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이템 정보 - Deadlock API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            color: #ffffff;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* 헤더 */
+        header {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        .hero-title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .hero-subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            margin: 0 10px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        
+        .btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        /* 네비게이션 */
+        nav {
+            background: rgba(0,0,0,0.9);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #10b981;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            color: #ffffff;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: #10b981;
+        }
+        
+        /* 메인 컨텐츠 */
+        main {
+            padding: 4rem 0;
+        }
+        
+        .section {
+            margin-bottom: 4rem;
+        }
+        
+        .section-title {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            color: #10b981;
+        }
+        
+        .item-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .category-card {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            border: 2px solid rgba(16, 185, 129, 0.3);
+        }
+        
+        .category-card:hover {
+            transform: translateY(-5px);
+            border-color: #10b981;
+        }
+        
+        .category-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .category-name {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #4fc3f7;
+        }
+        
+        .items-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .item-card {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+            border-left: 4px solid #10b981;
+        }
+        
+        .item-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .item-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .item-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .item-name {
+            font-size: 1.2rem;
+            color: #4fc3f7;
+            font-weight: bold;
+        }
+        
+        .item-cost {
+            color: #f59e0b;
+            font-weight: bold;
+            margin-left: auto;
+        }
+        
+        .item-description {
+            margin-bottom: 1rem;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        
+        .item-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .stat-badge {
+            background: rgba(0,0,0,0.3);
+            padding: 0.25rem 0.5rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            color: #10b981;
+        }
+        
+        .api-section {
+            background: rgba(0,0,0,0.3);
+            padding: 3rem 0;
+            border-radius: 20px;
+            margin-top: 3rem;
+        }
+        
+        .api-endpoint {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            border-left: 4px solid #10b981;
+        }
+        
+        .method-tag {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-right: 1rem;
+        }
+        
+        .endpoint-path {
+            font-family: 'Courier New', monospace;
+            color: #4fc3f7;
+            font-size: 1.1rem;
+        }
+        
+        .endpoint-description {
+            margin-top: 0.5rem;
+            opacity: 0.8;
+        }
+        
+        .code-example {
+            background: #1a1a1a;
+            padding: 1.5rem;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 2rem 0;
+        }
+        
+        .code-example pre {
+            font-family: 'Courier New', monospace;
+            color: #4fc3f7;
+            line-height: 1.5;
+        }
+        
+        /* 푸터 */
+        footer {
+            background: #0f0f0f;
+            padding: 2rem 0;
+            text-align: center;
+            margin-top: 4rem;
+        }
+        
+        .footer-content {
+            opacity: 0.7;
+        }
+        
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .item-categories, .items-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header>
+        <div class="container">
+            <h1 class="hero-title">🎯 아이템 정보</h1>
+            <p class="hero-subtitle">Deadlock의 모든 아이템과 빌드 정보를 확인하세요</p>
+            <div>
+                <a href="/" class="btn">홈으로</a>
+                <a href="/heroes" class="btn">영웅 데이터</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 네비게이션 -->
+    <nav>
+        <div class="container">
+            <div class="nav-container">
+                <div class="logo">Deadlock API</div>
+                <ul class="nav-links">
+                    <li><a href="/">홈</a></li>
+                    <li><a href="/heroes">영웅</a></li>
+                    <li><a href="/items">아이템</a></li>
+                    <li><a href="/stats">통계</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 메인 컨텐츠 -->
+    <main>
+        <div class="container">
+            <!-- 아이템 카테고리 -->
+            <section class="section">
+                <h2 class="section-title">아이템 카테고리</h2>
+                <div class="item-categories">
+                    <div class="category-card">
+                        <div class="category-icon">⚔️</div>
+                        <h3 class="category-name">무기</h3>
+                        <p>공격력과 DPS를 증가시키는 무기 아이템들</p>
+                    </div>
+                    
+                    <div class="category-card">
+                        <div class="category-icon">🛡️</div>
+                        <h3 class="category-name">방어구</h3>
+                        <p>체력과 방어력을 증가시키는 방어 아이템들</p>
+                    </div>
+                    
+                    <div class="category-card">
+                        <div class="category-icon">⚡</div>
+                        <h3 class="category-name">정신력</h3>
+                        <p>스킬 파워와 정신력을 증가시키는 아이템들</p>
+                    </div>
+                    
+                    <div class="category-card">
+                        <div class="category-icon">🏃</div>
+                        <h3 class="category-name">활력</h3>
+                        <p>이동속도와 체력을 증가시키는 활력 아이템들</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 인기 아이템 -->
+            <section class="section">
+                <h2 class="section-title">인기 아이템</h2>
+                <div class="items-grid">
+                    <div class="item-card">
+                        <div class="item-header">
+                            <div class="item-icon">🔫</div>
+                            <div class="item-name">기본 매거진</div>
+                            <div class="item-cost">1,250원</div>
+                        </div>
+                        <div class="item-description">
+                            기본 무기의 탄창 크기를 증가시키고 재장전 속도를 향상시킵니다.
+                        </div>
+                        <div class="item-stats">
+                            <span class="stat-badge">+7% 무기 데미지</span>
+                            <span class="stat-badge">+20% 탄창 크기</span>
+                            <span class="stat-badge">+15% 재장전 속도</span>
+                        </div>
+                    </div>
+                    
+                    <div class="item-card">
+                        <div class="item-header">
+                            <div class="item-icon">🩸</div>
+                            <div class="item-name">생명력 흡수</div>
+                            <div class="item-cost">1,750원</div>
+                        </div>
+                        <div class="item-description">
+                            적에게 입힌 데미지의 일부를 체력으로 회복합니다.
+                        </div>
+                        <div class="item-stats">
+                            <span class="stat-badge">+8% 무기 데미지</span>
+                            <span class="stat-badge">+20% 생명력 흡수</span>
+                            <span class="stat-badge">+75 체력</span>
+                        </div>
+                    </div>
+                    
+                    <div class="item-card">
+                        <div class="item-header">
+                            <div class="item-icon">🛡️</div>
+                            <div class="item-name">방탄 조끼</div>
+                            <div class="item-cost">1,100원</div>
+                        </div>
+                        <div class="item-description">
+                            기본적인 방어력을 제공하여 생존력을 향상시킵니다.
+                        </div>
+                        <div class="item-stats">
+                            <span class="stat-badge">+11% 탄환 저항</span>
+                            <span class="stat-badge">+75 체력</span>
+                            <span class="stat-badge">+1 체력 재생</span>
+                        </div>
+                    </div>
+                    
+                    <div class="item-card">
+                        <div class="item-header">
+                            <div class="item-icon">👟</div>
+                            <div class="item-name">신속한 신발</div>
+                            <div class="item-cost">1,200원</div>
+                        </div>
+                        <div class="item-description">
+                            이동 속도와 스프린트 속도를 증가시켜 기동력을 향상시킵니다.
+                        </div>
+                        <div class="item-stats">
+                            <span class="stat-badge">+1 m/s 이동 속도</span>
+                            <span class="stat-badge">+2 m/s 스프린트 속도</span>
+                            <span class="stat-badge">+75 체력</span>
+                        </div>
+                    </div>
+                    
+                    <div class="item-card">
+                        <div class="item-header">
+                            <div class="item-icon">⚡</div>
+                            <div class="item-name">신비한 사격</div>
+                            <div class="item-cost">3,000원</div>
+                        </div>
+                        <div class="item-description">
+                            무기 공격이 정신력 데미지를 추가로 가하고 스킬 파워를 증가시킵니다.
+                        </div>
+                        <div class="item-stats">
+                            <span class="stat-badge">+8% 무기 데미지</span>
+                            <span class="stat-badge">+6 스킬 파워</span>
+                            <span class="stat-badge">+40 정신력 데미지</span>
+                        </div>
+                    </div>
+                    
+                    <div class="item-card">
+                        <div class="item-header">
+                            <div class="item-icon">🎯</div>
+                            <div class="item-name">헤드샷 부스터</div>
+                            <div class="item-cost">1,250원</div>
+                        </div>
+                        <div class="item-description">
+                            헤드샷 데미지를 증가시키고 무기 데미지를 향상시킵니다.
+                        </div>
+                        <div class="item-stats">
+                            <span class="stat-badge">+10% 무기 데미지</span>
+                            <span class="stat-badge">+35% 헤드샷 데미지</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- API 엔드포인트 -->
+            <section class="api-section">
+                <div class="container">
+                    <h2 class="section-title">아이템 API 엔드포인트</h2>
+                    
+                    <div class="api-endpoint">
+                        <span class="method-tag">GET</span>
+                        <span class="endpoint-path">/api/items</span>
+                        <div class="endpoint-description">모든 아이템 목록을 조회합니다.</div>
+                    </div>
+                    
+                    <div class="api-endpoint">
+                        <span class="method-tag">GET</span>
+                        <span class="endpoint-path">/api/items/{id}</span>
+                        <div class="endpoint-description">특정 아이템의 상세 정보를 조회합니다.</div>
+                    </div>
+                    
+                    <div class="api-endpoint">
+                        <span class="method-tag">GET</span>
+                        <span class="endpoint-path">/api/items/categories</span>
+                        <div class="endpoint-description">아이템 카테고리 목록을 조회합니다.</div>
+                    </div>
+                    
+                    <div class="api-endpoint">
+                        <span class="method-tag">GET</span>
+                        <span class="endpoint-path">/api/items/builds</span>
+                        <div class="endpoint-description">추천 아이템 빌드를 조회합니다.</div>
+                    </div>
+                    
+                    <div class="code-example">
+                        <pre>
+// JavaScript 예제
+fetch('https://deadlock-api.com/api/items')
+  .then(response => response.json())
+  .then(items => {
+    console.log('아이템 목록:', items);
+    items.forEach(item => {
+      console.log(`${item.name} - ${item.cost}원`);
+    });
+  });
+
+// 카테고리별 아이템 조회
+fetch('https://deadlock-api.com/api/items/categories/weapon')
+  .then(response => response.json())
+  .then(weapons => {
+    console.log('무기 아이템:', weapons);
+  });
+                        </pre>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2024 Deadlock API Korean. 모든 권리 보유.</p>
+                <p>아이템 정보는 게임 업데이트에 따라 변경될 수 있습니다.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        console.log('아이템 페이지 로드 완료');
+        
+        // 부드러운 스크롤
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

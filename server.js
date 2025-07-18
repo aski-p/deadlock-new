@@ -40,6 +40,24 @@ app.get('/simple', (req, res) => {
     res.sendFile(path.join(__dirname, 'simple.html'));
 });
 
+// 영웅 페이지
+app.get('/heroes', (req, res) => {
+    console.log('Request received for heroes page');
+    res.sendFile(path.join(__dirname, 'heroes.html'));
+});
+
+// 아이템 페이지
+app.get('/items', (req, res) => {
+    console.log('Request received for items page');
+    res.sendFile(path.join(__dirname, 'items.html'));
+});
+
+// 통계 페이지
+app.get('/stats', (req, res) => {
+    console.log('Request received for stats page');
+    res.sendFile(path.join(__dirname, 'stats.html'));
+});
+
 // favicon 처리
 app.get('/favicon.ico', (req, res) => {
     res.status(204).send();
