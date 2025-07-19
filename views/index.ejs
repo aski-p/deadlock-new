@@ -1,5 +1,3 @@
-<% 
-const body = `
 <div class="hero-section">
     <div class="hero-container">
         <h1 class="hero-title">Deadlock Coach</h1>
@@ -20,20 +18,20 @@ const body = `
             </div>
         </div>
 
-        ${!user ? `
+        <% if (!user) { %>
         <div class="hero-cta">
             <a href="/auth/steam" class="cta-button">
                 <img src="/images/steam-icon.png" alt="Steam" class="steam-icon">
                 Steam으로 시작하기
             </a>
         </div>
-        ` : `
+        <% } else { %>
         <div class="hero-cta">
             <a href="/ko/leaderboards/europe" class="cta-button">
                 리더보드 보기
             </a>
         </div>
-        `}
+        <% } %>
     </div>
 </div>
 
@@ -73,10 +71,10 @@ const body = `
     </div>
 </div>
 
-${user ? `
+<% if (user) { %>
 <div class="user-dashboard">
     <div class="dashboard-container">
-        <h2 class="section-title">안녕하세요, ${user.username}님!</h2>
+        <h2 class="section-title">안녕하세요, <%= user.username %>님!</h2>
         
         <div class="dashboard-grid">
             <div class="dashboard-card">
@@ -108,11 +106,11 @@ ${user ? `
 async function loadUserData() {
     try {
         // Load recent games
-        const recentResponse = await fetch('/api/player/${user.steamId}/recent');
+        const recentResponse = await fetch('/api/player/<%= user.steamId %>/recent');
         const recentData = await recentResponse.json();
         
         // Load stats
-        const statsResponse = await fetch('/api/player/${user.steamId}/stats');
+        const statsResponse = await fetch('/api/player/<%= user.steamId %>/stats');
         const statsData = await statsResponse.json();
         
         // Update UI with data
@@ -151,8 +149,4 @@ function updateStats(data) {
 // Load data when page loads
 document.addEventListener('DOMContentLoaded', loadUserData);
 </script>
-` : ''}
-`;
-%>
-
-<%- include('layout', { body: body, title: title, user: user }) %>
+<% } %>

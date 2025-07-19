@@ -1,18 +1,16 @@
-<% 
-const body = `
 <div class="leaderboards-section">
     <div class="leaderboards-container">
         <div class="leaderboards-header">
-            <h1 class="page-title">리더보드 - ${region === 'europe' ? '유럽' : region === 'asia' ? '아시아' : '북미'}</h1>
+            <h1 class="page-title">리더보드 - <%= region === 'europe' ? '유럽' : region === 'asia' ? '아시아' : '북미' %></h1>
             
             <div class="region-selector">
-                <a href="/ko/leaderboards/europe" class="region-btn ${region === 'europe' ? 'active' : ''}">
+                <a href="/ko/leaderboards/europe" class="region-btn <%= region === 'europe' ? 'active' : '' %>">
                     유럽
                 </a>
-                <a href="/ko/leaderboards/asia" class="region-btn ${region === 'asia' ? 'active' : ''}">
+                <a href="/ko/leaderboards/asia" class="region-btn <%= region === 'asia' ? 'active' : '' %>">
                     아시아
                 </a>
-                <a href="/ko/leaderboards/north-america" class="region-btn ${region === 'north-america' ? 'active' : ''}">
+                <a href="/ko/leaderboards/north-america" class="region-btn <%= region === 'north-america' ? 'active' : '' %>">
                     북미
                 </a>
             </div>
@@ -95,7 +93,7 @@ const body = `
 let currentPage = 1;
 let totalPages = 10;
 let currentFilters = {
-    region: '${region}',
+    region: '<%= region %>',
     hero: 'all',
     medal: 'all'
 };
@@ -200,7 +198,3 @@ document.addEventListener('DOMContentLoaded', () => {
     updatePagination();
 });
 </script>
-`;
-%>
-
-<%- include('layout', { body: body, title: title, user: user }) %>
