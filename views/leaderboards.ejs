@@ -162,7 +162,7 @@ function updateLeaderboardTable(data) {
         const color = medalColors[medal.toLowerCase()] || '#808080';
         const medalText = medal.charAt(0).toUpperCase() + subrank;
         
-        return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="${color}" stroke="%23fff" stroke-width="2"/><text x="20" y="26" text-anchor="middle" font-size="12" font-weight="bold" fill="%23fff">${medalText}</text></svg>`;
+        return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="${color}" stroke="#fff" stroke-width="2"/><text x="20" y="26" text-anchor="middle" font-size="12" font-weight="bold" fill="#fff">${medalText}</text></svg>`)}`;
     };
 
     // 영웅 이미지 매핑 - 간단한 색상 아이콘으로 대체
@@ -197,7 +197,7 @@ function updateLeaderboardTable(data) {
         const color = heroColors[heroName] || '#9E9E9E';
         const initials = heroName.split(' ').map(word => word.charAt(0)).join('').substring(0, 2);
         
-        return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" fill="${color}" rx="4"/><text x="16" y="20" text-anchor="middle" font-size="10" font-weight="bold" fill="%23fff">${initials}</text></svg>`;
+        return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" fill="${color}" rx="4"/><text x="16" y="20" text-anchor="middle" font-size="10" font-weight="bold" fill="#fff">${initials}</text></svg>`)}`;
     };
     
     tbody.innerHTML = data.map(player => 
@@ -207,7 +207,7 @@ function updateLeaderboardTable(data) {
         '</td>' +
         '<td class="player-cell">' +
             '<div class="player-info">' +
-                '<img src="' + player.player.avatar + '" alt="' + player.player.name + '" class="player-avatar" onerror="this.src=\'data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"40\" viewBox=\"0 0 40 40\"><circle cx=\"20\" cy=\"20\" r=\"18\" fill=\"%23666\" stroke=\"%23fff\" stroke-width=\"2\"/><text x=\"20\" y=\"26\" text-anchor=\"middle\" font-size=\"20\" fill=\"%23fff\">👤</text></svg>\'">' +
+                '<img src="' + player.player.avatar + '" alt="' + player.player.name + '" class="player-avatar" onerror="this.src=\'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"40\" viewBox=\"0 0 40 40\"><circle cx=\"20\" cy=\"20\" r=\"18\" fill=\"#666\" stroke=\"#fff\" stroke-width=\"2\"/><circle cx=\"20\" cy=\"15\" r=\"5\" fill=\"#fff\"/><path d=\"M10 30 Q20 25 30 30\" stroke=\"#fff\" stroke-width=\"3\" fill=\"none\"/></svg>') + '\'">' +
                 '<span class="player-name">' + player.player.name + '</span>' +
             '</div>' +
         '</td>' +
@@ -218,7 +218,7 @@ function updateLeaderboardTable(data) {
             '<div class="heroes-list">' +
                 player.heroes.map(hero => 
                     '<div class="hero-item">' +
-                        '<img src="' + getHeroImage(hero) + '" alt="' + hero + '" class="hero-image" title="' + hero + '" onerror="this.src=\'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fabrams.webp&w=64&q=75\'">' +
+                        '<img src="' + getHeroImage(hero) + '" alt="' + hero + '" class="hero-image" title="' + hero + '">' +
                     '</div>'
                 ).join('') +
             '</div>' +
