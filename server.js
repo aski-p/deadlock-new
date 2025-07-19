@@ -304,13 +304,16 @@ const convertDeadlockApiToOurFormat = (apiData, region) => {
       };
     });
 
+    // 2000등까지만 표시
+    const limitedPlayers = convertedPlayers.slice(0, 2000);
+
     return {
-      data: convertedPlayers,
+      data: limitedPlayers,
       pagination: {
         current_page: 1,
         total_pages: 1,
-        total_count: convertedPlayers.length,
-        per_page: convertedPlayers.length
+        total_count: limitedPlayers.length,
+        per_page: limitedPlayers.length
       },
       region: region,
       steam_data_included: true,

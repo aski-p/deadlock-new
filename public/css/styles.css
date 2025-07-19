@@ -780,8 +780,28 @@ footer {
 
 .heroes-list {
     display: flex;
-    gap: 8px;
+    gap: 4px;
     flex-wrap: wrap;
+    align-items: center;
+}
+
+.hero-item {
+    display: flex;
+    align-items: center;
+}
+
+.hero-image {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s;
+}
+
+.hero-image:hover {
+    transform: scale(1.1);
+    border-color: #5865F2;
+    box-shadow: 0 2px 8px rgba(88, 101, 242, 0.3);
 }
 
 .hero-tag {
@@ -801,13 +821,21 @@ footer {
 .medal-badge {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
-    padding: 6px 12px;
+    padding: 4px;
     border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+}
+
+.medal-image {
+    width: 40px;
+    height: 40px;
+    transition: all 0.3s;
+}
+
+.medal-image:hover {
+    transform: scale(1.1);
+    filter: brightness(1.2);
 }
 
 .subrank {
