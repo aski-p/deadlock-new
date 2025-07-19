@@ -66,11 +66,17 @@ if (steamApiKey) {
       const userResponse = await axios.get(`http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${process.env.STEAM_API_KEY}&steamids=${steamId}`);
       const userData = userResponse.data.response.players[0];
       
+      // Steam 아바타 URL을 Cloudflare CDN으로 변환
+      let avatarUrl = userData.avatarfull || userData.avatarmedium || userData.avatar;
+      if (avatarUrl) {
+        avatarUrl = avatarUrl.replace('avatars.steamstatic.com', 'avatars.cloudflare.steamstatic.com');
+      }
+
       const user = {
         steamId: steamId,
         accountId: steamId, // For Deadlock API compatibility
         username: userData.personaname,
-        avatar: userData.avatarfull,
+        avatar: avatarUrl,
         profileUrl: userData.profileurl,
         profile: profile
       };
@@ -316,7 +322,7 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
         rank: player.rank,
         player: {
           name: player.account_name || `Player_${player.rank}`,
-          avatar: `https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg`, // 기본 아바타
+          avatar: `https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg`, // 기본 아바타
           steamId: steamId,
           country: getRandomCountryFlag(region)
         },
@@ -365,10 +371,17 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
                 steamUsers.forEach(steamUser => {
                   const playerIndex = convertedPlayers.findIndex(p => p.player.steamId === steamUser.steamid);
                   if (playerIndex !== -1) {
-                    const avatarUrl = steamUser.avatarfull || steamUser.avatarmedium || steamUser.avatar;
+                    let avatarUrl = steamUser.avatarfull || steamUser.avatarmedium || steamUser.avatar;
+                    
+                    // Steam 아바타 URL을 Cloudflare CDN으로 변환
                     if (avatarUrl && avatarUrl !== '' && !avatarUrl.includes('b5bd56c1aa4644a474a2e4972be27ef9e82e517e')) {
+                      // avatars.steamstatic.com을 avatars.cloudflare.steamstatic.com으로 변경
+                      avatarUrl = avatarUrl.replace('avatars.steamstatic.com', 'avatars.cloudflare.steamstatic.com');
+                      
                       convertedPlayers[playerIndex].player.avatar = avatarUrl;
                       convertedPlayers[playerIndex].player.name = steamUser.personaname || convertedPlayers[playerIndex].player.name;
+                      
+                      console.log(`🖼️ 아바타 업데이트: ${steamUser.personaname} -> ${avatarUrl}`);
                     }
                   }
                 });
