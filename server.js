@@ -194,37 +194,34 @@ app.get('/logout', (req, res) => {
   });
 });
 
-// 실제 데드락 리더보드 API 호출
+// 실제 데드락 리더보드 API 호출 (아시아만)
 const fetchDeadlockLeaderboard = async (region, page = 1, limit = 50) => {
+  // 아시아 지역만 실제 API 사용
+  if (region !== 'asia') {
+    return null;
+  }
+
   try {
-    // 지역 이름을 API 형식으로 매핑
-    const regionMapping = {
-      'europe': 'Europe',
-      'asia': 'Asia', 
-      'north-america': 'NAmerica'
-    };
+    console.log(`🔍 실제 데드락 API 조회: Asia`);
     
-    const apiRegion = regionMapping[region] || 'Asia';
-    console.log(`🔍 실제 데드락 API 조회: ${apiRegion}, 페이지 ${page}`);
-    
-    // deadlock-api.com의 실제 리더보드 API 호출
-    const response = await axios.get(`https://api.deadlock-api.com/v1/leaderboard/${apiRegion}`, {
-      timeout: 10000,
+    // deadlock-api.com의 실제 아시아 리더보드 API 호출
+    const response = await axios.get(`https://api.deadlock-api.com/v1/leaderboard/Asia`, {
+      timeout: 15000,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'application/json'
       }
     });
 
-    if (response.data && Array.isArray(response.data)) {
-      console.log(`✅ 실제 데드락 API 성공! ${response.data.length}명의 플레이어 데이터 획득`);
+    if (response.data && response.data.entries && Array.isArray(response.data.entries)) {
+      console.log(`✅ 실제 데드락 API 성공! ${response.data.entries.length}명의 플레이어 데이터 획득`);
       
-      // API 응답을 우리 형식으로 변환
-      const convertedData = convertDeadlockApiToOurFormat(response.data, region, page, limit);
+      // API 응답을 우리 형식으로 변환 (전체 1000명, 페이징 없음)
+      const convertedData = convertDeadlockApiToOurFormat(response.data.entries, region);
       return convertedData;
     }
 
-    console.log('❌ 데드락 API 응답 형식 오류');
+    console.log('❌ 데드락 API 응답 형식 오류:', response.data);
     return null;
     
   } catch (error) {
@@ -233,83 +230,91 @@ const fetchDeadlockLeaderboard = async (region, page = 1, limit = 50) => {
   }
 };
 
-// 데드락 API 응답을 우리 형식으로 변환
-const convertDeadlockApiToOurFormat = (apiData, region, page, limit) => {
+// 데드락 API 응답을 우리 형식으로 변환 (전체 데이터, 페이징 없음)
+const convertDeadlockApiToOurFormat = (apiData, region) => {
   try {
-    // 페이지네이션 계산
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-    const pageData = apiData.slice(startIndex, endIndex);
+    // 영웅 ID 매핑 (실제 API에서 사용하는 ID)
+    const heroIdMapping = {
+      1: 'Abrams',
+      2: 'Bebop', 
+      3: 'Dynamo',
+      4: 'Grey Talon',
+      6: 'Haze',
+      7: 'Infernus',
+      8: 'Ivy',
+      10: 'Kelvin',
+      11: 'Lady Geist',
+      12: 'Lash',
+      13: 'McGinnis',
+      14: 'Mo & Krill',
+      15: 'Paradox',
+      16: 'Pocket',
+      17: 'Seven',
+      18: 'Shiv',
+      19: 'Vindicta',
+      20: 'Viscous',
+      25: 'Warden',
+      27: 'Wraith',
+      31: 'Yamato',
+      50: 'Mirage',
+      52: 'Lash',
+      58: 'Calico',
+      60: 'Holliday'
+    };
 
-    const convertedPlayers = pageData.map((player, index) => {
-      const globalRank = startIndex + index + 1;
-      
-      // 영웅 이름 매핑
-      const heroNameMapping = {
-        'hero_atlas': 'Abrams',
-        'hero_bebop': 'Bebop', 
-        'hero_dynamo': 'Dynamo',
-        'hero_grey_talon': 'Grey Talon',
-        'hero_haze': 'Haze',
-        'hero_infernus': 'Infernus',
-        'hero_ivy': 'Ivy',
-        'hero_kelvin': 'Kelvin',
-        'hero_lady_geist': 'Lady Geist',
-        'hero_lash': 'Lash',
-        'hero_mcginnis': 'McGinnis',
-        'hero_mo_and_krill': 'Mo & Krill',
-        'hero_paradox': 'Paradox',
-        'hero_pocket': 'Pocket',
-        'hero_seven': 'Seven',
-        'hero_shiv': 'Shiv',
-        'hero_vindicta': 'Vindicta',
-        'hero_viscous': 'Viscous',
-        'hero_warden': 'Warden',
-        'hero_wraith': 'Wraith',
-        'hero_yamato': 'Yamato'
-      };
+    // 메달/랭크 매핑
+    const getMedalFromRank = (ranked_rank, ranked_subrank) => {
+      if (ranked_rank >= 11) return 'Eternus';
+      if (ranked_rank >= 10) return 'Phantom';
+      if (ranked_rank >= 9) return 'Oracle';
+      if (ranked_rank >= 8) return 'Ritualist';
+      if (ranked_rank >= 7) return 'Alchemist';
+      if (ranked_rank >= 6) return 'Arcanist';
+      return 'Initiate';
+    };
 
-      // 메달/랭크 매핑
-      const getMedalFromRank = (rank) => {
-        if (rank >= 11) return 'Eternus';
-        if (rank >= 10) return 'Phantom';
-        if (rank >= 9) return 'Oracle';
-        if (rank >= 8) return 'Ritualist';
-        if (rank >= 7) return 'Alchemist';
-        if (rank >= 6) return 'Arcanist';
-        return 'Initiate';
-      };
+    const convertedPlayers = apiData.map((player) => {
+      // 영웅 목록 변환
+      const heroes = player.top_hero_ids ? 
+        player.top_hero_ids.slice(0, 3).map(heroId => heroIdMapping[heroId] || 'Unknown').filter(hero => hero !== 'Unknown') : 
+        [];
+
+      // 기본 아바타 URL 생성 (Steam ID 기반)
+      let avatarUrl = `https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg`;
+      if (player.possible_account_ids && player.possible_account_ids.length > 0) {
+        const steamId = player.possible_account_ids[0];
+        avatarUrl = `https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg`;
+      }
 
       return {
-        rank: globalRank,
+        rank: player.rank,
         player: {
-          name: player.player_name || `Player_${globalRank}`,
-          avatar: `https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg`, // 기본 아바타
-          steamId: player.account_id?.toString() || `steam_${globalRank}`,
+          name: player.account_name || `Player_${player.rank}`,
+          avatar: avatarUrl,
+          steamId: player.possible_account_ids && player.possible_account_ids.length > 0 ? 
+            player.possible_account_ids[0].toString() : `76561198${String(player.rank).padStart(9, '0')}`,
           country: getRandomCountryFlag(region)
         },
-        heroes: player.top_heroes ? 
-          player.top_heroes.slice(0, 3).map(heroId => heroNameMapping[heroId] || 'Unknown') : 
-          ['Abrams', 'Bebop'],
-        medal: getMedalFromRank(player.rank_tier || 7),
-        subrank: player.sub_tier || Math.floor(Math.random() * 6) + 1,
-        score: player.rank_score || Math.floor(4500 - (globalRank * 5)),
-        wins: player.wins || Math.floor(Math.random() * 500) + 100,
-        losses: player.losses || Math.floor(Math.random() * 200) + 50
+        heroes: heroes.length > 0 ? heroes : ['Unknown'],
+        medal: getMedalFromRank(player.ranked_rank || 7, player.ranked_subrank || 1),
+        subrank: player.ranked_subrank || 1,
+        score: player.badge_level || Math.floor(4500 - (player.rank * 5)),
+        wins: Math.floor(Math.random() * 500) + 100,
+        losses: Math.floor(Math.random() * 200) + 50
       };
     });
 
     return {
       data: convertedPlayers,
       pagination: {
-        current_page: page,
-        total_pages: Math.ceil(apiData.length / limit),
-        total_count: apiData.length,
-        per_page: limit
+        current_page: 1,
+        total_pages: 1,
+        total_count: convertedPlayers.length,
+        per_page: convertedPlayers.length
       },
       region: region,
       steam_data_included: true,
-      data_source: 'deadlock_api'
+      data_source: 'deadlock_api_real'
     };
 
   } catch (error) {

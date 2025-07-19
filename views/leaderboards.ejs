@@ -81,7 +81,7 @@
                 </tbody>
             </table>
             
-            <div class="pagination" id="pagination">
+            <div class="pagination" id="pagination" style="<%= region === 'asia' ? 'display: none;' : '' %>">
                 <button class="pagination-btn" id="prev-btn" disabled>이전</button>
                 <span class="pagination-info" id="pagination-info">1 / 10</span>
                 <button class="pagination-btn" id="next-btn">다음</button>
@@ -171,6 +171,13 @@ function updatePaginationInfo(pagination) {
     const paginationInfo = document.getElementById('pagination-info');
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
+    const paginationDiv = document.getElementById('pagination');
+    
+    // 아시아 지역이면 페이징 숨기기
+    if (currentFilters.region === 'asia') {
+        paginationDiv.style.display = 'none';
+        return;
+    }
     
     totalPages = pagination.total_pages;
     currentPage = pagination.current_page;
