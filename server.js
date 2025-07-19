@@ -29,7 +29,8 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: process.env.NODE_ENV === 'production' && process.env.RAILWAY_ENVIRONMENT, // Only secure in production
+    secure: false, // Temporarily disable for debugging
+    httpOnly: true,
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
@@ -41,7 +42,7 @@ app.use(passport.session());
 // Check if Steam API key is configured
 const steamApiKey = process.env.STEAM_API_KEY;
 const isProduction = process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT;
-const baseUrl = isProduction ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN || 'deadlock-new-production.up.railway.app'}` : 'http://localhost:3000';
+const baseUrl = isProduction ? 'https://deadlock-new-production.up.railway.app' : 'http://localhost:3000';
 
 console.log('🔧 Environment check:');
 console.log('- NODE_ENV:', process.env.NODE_ENV);
