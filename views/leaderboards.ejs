@@ -168,7 +168,7 @@ function updateLeaderboardTable(data) {
     // 영웅 이미지 매핑 - deadlock.coach CDN 사용
     const getHeroImage = (heroName) => {
         const heroImageMap = {
-            'Abrams': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/atlas_card.webp',
+            'Abrams': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp',
             'Bebop': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp',
             'Dynamo': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/dynamo_card.webp',
             'Grey Talon': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/archer_card.webp',
@@ -194,7 +194,7 @@ function updateLeaderboardTable(data) {
             'Holliday': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/hornet_card.webp'
         };
         
-        return heroImageMap[heroName] || 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/atlas_card.webp';
+        return heroImageMap[heroName] || 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp';
     };
     
     tbody.innerHTML = data.map(player => 
