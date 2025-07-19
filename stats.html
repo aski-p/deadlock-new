@@ -123,98 +123,156 @@
         }
         
         .section-title {
-            font-size: 2.5rem;
+            font-size: 2.75rem;
             text-align: center;
-            margin-bottom: 3rem;
-            color: #8b5cf6;
+            margin-bottom: 4rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
         }
         
         .stat-card {
-            background: rgba(255,255,255,0.1);
-            padding: 2rem;
-            border-radius: 15px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            padding: 2.5rem;
+            border-radius: 16px;
             text-align: center;
-            transition: transform 0.3s ease;
-            border: 2px solid rgba(139, 92, 246, 0.3);
+            transition: all 0.3s ease;
+            border: 1px solid #333;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
         .stat-card:hover {
-            transform: translateY(-5px);
-            border-color: #8b5cf6;
+            transform: translateY(-8px);
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+            border-color: #ff6b35;
+        }
+        
+        .stat-card:hover::before {
+            opacity: 1;
         }
         
         .stat-icon {
-            font-size: 3rem;
-            margin-bottom: 1rem;
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
         }
         
         .stat-title {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: #4fc3f7;
+            font-size: 1.6rem;
+            margin-bottom: 1.25rem;
+            color: #ffffff;
+            font-weight: 600;
         }
         
         .stat-value {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #8b5cf6;
-            margin-bottom: 0.5rem;
+            font-size: 2.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
         }
         
         .stat-description {
             opacity: 0.8;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            color: #b3b3b3;
+            line-height: 1.6;
         }
         
         .leaderboard {
-            background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            padding: 2rem;
-            margin-top: 2rem;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border-radius: 16px;
+            padding: 3rem;
+            margin-top: 3rem;
+            border: 1px solid #333;
         }
         
         .leaderboard-header {
             text-align: center;
-            margin-bottom: 2rem;
+            margin-bottom: 3rem;
         }
         
         .leaderboard-title {
-            font-size: 2rem;
-            color: #8b5cf6;
+            font-size: 2.25rem;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             margin-bottom: 1rem;
+            font-weight: 700;
         }
         
         .leaderboard-list {
             display: grid;
-            gap: 1rem;
+            gap: 1.5rem;
         }
         
         .leaderboard-item {
-            background: rgba(0,0,0,0.3);
-            padding: 1rem;
-            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 1.5rem;
+            border-radius: 12px;
             display: flex;
             align-items: center;
-            transition: transform 0.2s ease;
+            transition: all 0.3s ease;
+            border: 1px solid #333;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .leaderboard-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
         .leaderboard-item:hover {
-            transform: translateX(5px);
+            transform: translateX(8px);
+            border-color: #ff6b35;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .leaderboard-item:hover::before {
+            opacity: 1;
         }
         
         .rank {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #f59e0b;
-            margin-right: 1rem;
-            width: 50px;
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-right: 1.5rem;
+            width: 60px;
         }
         
         .hero-info {
@@ -224,20 +282,22 @@
         }
         
         .hero-avatar {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 1rem;
-            font-size: 1.2rem;
+            margin-right: 1.5rem;
+            font-size: 1.4rem;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
         }
         
         .hero-name {
-            font-size: 1.2rem;
-            color: #4fc3f7;
+            font-size: 1.3rem;
+            color: #ffffff;
+            font-weight: 600;
         }
         
         .hero-stats {
