@@ -1,152 +1,39 @@
-<div class="hero-section">
-    <div class="hero-container">
-        <h1 class="hero-title">Deadlock Coach</h1>
-        <p class="hero-subtitle">데드락 게임의 최고 코칭 플랫폼</p>
-        
-        <div class="hero-stats">
-            <div class="stat-card">
-                <div class="stat-number">50,000+</div>
-                <div class="stat-label">등록된 플레이어</div>
+<main class="main-container">
+    <section class="hero-section">
+        <h1 class="hero-title">데드락 코치는 데드락을 더 재밌게 플레이할 수 있게 해줍니다!</h1>
+        <p class="hero-subtitle">점점 커지는 데드락 코치 커뮤니티에 합류해서 게임에 대해 더 배우고 실력을 키워보세요. 저희 컨텐츠는 최신 빌드 기반으로 계속 업데이트되고 있어요.</p>
+    </section>
+
+    <section class="wiki-section">
+        <div class="hero-image">
+            <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='500' viewBox='0 0 400 500'%3E%3Cdefs%3E%3ClinearGradient id='grad1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:rgb(0,255,200);stop-opacity:0.8' /%3E%3Cstop offset='100%25' style='stop-color:rgb(0,150,255);stop-opacity:0.8' /%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M200 50 Q350 150 300 250 Q250 350 200 450 Q150 350 100 250 Q50 150 200 50' fill='url(%23grad1)' opacity='0.3'/%3E%3Cpath d='M200 100 L250 200 L200 400 L150 200 Z' fill='url(%23grad1)'/%3E%3C/svg%3E" alt="Hero Character">
+        </div>
+        <div class="wiki-content">
+            <h2>데드락 위키는 스텟과 프로 컨텐츠로 운영됩니다</h2>
+            <p>우리 <a href="/ko/wiki" class="wiki-link">위키백과</a>에서 게임, 영웅, 아이템 등에 대한 정보를 확인할 수 있어.</p>
+        </div>
+    </section>
+
+    <section class="app-section">
+        <h2>윈도우 앱</h2>
+        <div class="app-features">
+            <p>우리 인게임 앱은 데드락과 연동되어 플레이어, 영웅, 매치 정보에 따라 실시간 정보를 제공해.</p>
+            <p>앱은 밸브 공식 API를 통해 게임과 통신하고 오버울프 기술을 활용하고 있지.</p>
+            <p>오버울프 앱 스토어에서 우리 앱을 다운받아봐.</p>
+        </div>
+        <div class="app-partners">
+            <span class="overwolf-logo">overwolf</span>
+            <span class="valve-logo">VALVE</span>
+        </div>
+        <div class="app-stats">
+            <div class="stat-item">
+                <span class="stat-icon">📥</span>
+                <span>3,756 다운로드</span>
             </div>
-            <div class="stat-card">
-                <div class="stat-number">1,000+</div>
-                <div class="stat-label">게임 분석</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">24/7</div>
-                <div class="stat-label">실시간 업데이트</div>
+            <div class="stat-item">
+                <span class="stat-icon">✅</span>
+                <span>밸브 서비스 약관을 완벽히 준수함</span>
             </div>
         </div>
-
-        <% if (!user) { %>
-        <div class="hero-cta">
-            <a href="/auth/steam" class="cta-button">
-                <img src="/images/steam-icon.png" alt="Steam" class="steam-icon">
-                Steam으로 시작하기
-            </a>
-        </div>
-        <% } else { %>
-        <div class="hero-cta">
-            <a href="/ko/leaderboards/europe" class="cta-button">
-                리더보드 보기
-            </a>
-        </div>
-        <% } %>
-    </div>
-</div>
-
-<div class="features-section">
-    <div class="features-container">
-        <h2 class="section-title">주요 기능</h2>
-        
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">🏆</div>
-                <h3 class="feature-title">리더보드</h3>
-                <p class="feature-description">실시간 글로벌 및 지역별 랭킹을 확인하세요</p>
-                <a href="/ko/leaderboards/europe" class="feature-link">보러가기</a>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">🎮</div>
-                <h3 class="feature-title">플레이어 통계</h3>
-                <p class="feature-description">상세한 개인 통계와 게임 히스토리를 분석하세요</p>
-                <a href="/ko/stats" class="feature-link">보러가기</a>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">📚</div>
-                <h3 class="feature-title">게임 가이드</h3>
-                <p class="feature-description">영웅별 가이드와 아이템 빌드를 학습하세요</p>
-                <a href="/ko/heroes" class="feature-link">보러가기</a>
-            </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">⚔️</div>
-                <h3 class="feature-title">매치 분석</h3>
-                <p class="feature-description">게임 리플레이와 상세 분석을 제공합니다</p>
-                <a href="/ko/matches" class="feature-link">보러가기</a>
-            </div>
-        </div>
-    </div>
-</div>
-
-<% if (user) { %>
-<div class="user-dashboard">
-    <div class="dashboard-container">
-        <h2 class="section-title">안녕하세요, <%= user.username %>님!</h2>
-        
-        <div class="dashboard-grid">
-            <div class="dashboard-card">
-                <h3>최근 게임</h3>
-                <div id="recent-games">
-                    <p>최근 게임을 불러오는 중...</p>
-                </div>
-            </div>
-            
-            <div class="dashboard-card">
-                <h3>통계 요약</h3>
-                <div id="stats-summary">
-                    <p>통계를 불러오는 중...</p>
-                </div>
-            </div>
-            
-            <div class="dashboard-card">
-                <h3>순위</h3>
-                <div id="rank-info">
-                    <p>순위 정보를 불러오는 중...</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-// Load user data if logged in
-async function loadUserData() {
-    try {
-        // Load recent games
-        const recentResponse = await fetch('/api/player/<%= user.steamId %>/recent');
-        const recentData = await recentResponse.json();
-        
-        // Load stats
-        const statsResponse = await fetch('/api/player/<%= user.steamId %>/stats');
-        const statsData = await statsResponse.json();
-        
-        // Update UI with data
-        updateRecentGames(recentData);
-        updateStats(statsData);
-        
-    } catch (error) {
-        console.error('Error loading user data:', error);
-    }
-}
-
-function updateRecentGames(data) {
-    const container = document.getElementById('recent-games');
-    if (data && data.response && data.response.games) {
-        const games = data.response.games.slice(0, 3);
-        container.innerHTML = games.map(game => 
-            '<div class="recent-game">' +
-            '<span class="game-name">' + game.name + '</span>' +
-            '<span class="playtime">' + Math.round(game.playtime_2weeks / 60) + '시간</span>' +
-            '</div>'
-        ).join('');
-    } else {
-        container.innerHTML = '<p>최근 게임 데이터가 없습니다.</p>';
-    }
-}
-
-function updateStats(data) {
-    const container = document.getElementById('stats-summary');
-    if (data && data.playerstats) {
-        container.innerHTML = '<p>게임 통계가 업데이트되었습니다.</p>';
-    } else {
-        container.innerHTML = '<p>통계 데이터를 불러올 수 없습니다.</p>';
-    }
-}
-
-// Load data when page loads
-document.addEventListener('DOMContentLoaded', loadUserData);
-</script>
-<% } %>
+    </section>
+</main>
