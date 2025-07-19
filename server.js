@@ -194,7 +194,7 @@ app.get('/logout', (req, res) => {
   });
 });
 
-// Steam 친구 목록에서 실제 플레이어 데이터 생성
+// 지역 및 페이지별 고유한 플레이어 데이터 생성
 const generateRealPlayerData = async (region, page = 1, limit = 50) => {
   const regions = {
     'europe': ['🇩🇪', '🇬🇧', '🇫🇷', '🇪🇸', '🇮🇹', '🇵🇱', '🇷🇺', '🇸🇪', '🇳🇴', '🇩🇰'],
@@ -209,82 +209,111 @@ const generateRealPlayerData = async (region, page = 1, limit = 50) => {
   const startRank = (page - 1) * limit + 1;
   const regionFlags = regions[region] || regions['asia'];
 
-  // 샘플 실제 Steam ID들 (공개 프로필)
-  const sampleSteamIds = [
-    '76561198123456789', '76561198234567890', '76561198345678901', 
-    '76561198456789012', '76561198567890123', '76561198678901234',
-    '76561198789012345', '76561198890123456', '76561198901234567',
-    '76561199012345678'
-  ];
+  // 지역별 고유한 플레이어 이름 생성
+  const generateRegionPlayerNames = (region, count) => {
+    const regionNames = {
+      'europe': ['EliteGamer_EU', 'ProPlayer_DE', 'TopSkill_UK', 'Champion_FR', 'MasterGamer_ES', 'ProShooter_IT', 'SkillMaster_PL', 'ElitePlayer_RU', 'TopGamer_SE', 'ProSkill_NO'],
+      'asia': ['박근형', 'ProGamer_KR', 'SkillMaster_JP', 'ElitePlayer_CN', 'TopGamer_TW', 'Champion_TH', 'ProShooter_VN', 'MasterPlayer_SG', 'SkillGamer_MY', 'EliteSkill_PH'],
+      'north-america': ['ProPlayer_US', 'EliteGamer_CA', 'TopSkill_MX', 'Champion_USA', 'MasterGamer_CAN', 'ProShooter_US', 'SkillMaster_CA', 'ElitePlayer_MX', 'TopGamer_USA', 'ProSkill_CAN']
+    };
+    return regionNames[region] || regionNames['asia'];
+  };
+
+  // 페이지와 지역 기반으로 고유한 Steam ID 생성
+  const generateUniqueSteamId = (region, page, index) => {
+    const regionCode = { 'europe': '100', 'asia': '200', 'north-america': '300' }[region] || '200';
+    const pageCode = String(page).padStart(3, '0');
+    const indexCode = String(index).padStart(3, '0');
+    return `76561198${regionCode}${pageCode}${indexCode}`;
+  };
+
+  // 지역별 아바타 풀
+  const getRegionAvatars = (region) => {
+    const avatarPools = {
+      'europe': [
+        'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
+        'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg',
+        'https://avatars.steamstatic.com/c5d56249ee5d28a07db4ac9f7f60af961fab5426_full.jpg'
+      ],
+      'asia': [
+        'https://avatars.steamstatic.com/fee5d0d1e4e3f654dd690c4c8b9ee508a9e4ce61_full.jpg',
+        'https://avatars.steamstatic.com/b40b5206f877ce94ad8a68b51fa07e2dcb15a8c5_full.jpg',
+        'https://avatars.steamstatic.com/a1b2c3d4e5f6789012345678901234567890abcd_full.jpg'
+      ],
+      'north-america': [
+        'https://avatars.steamstatic.com/1234567890abcdef1234567890abcdef12345678_full.jpg',
+        'https://avatars.steamstatic.com/abcdef1234567890abcdef1234567890abcdef12_full.jpg',
+        'https://avatars.steamstatic.com/567890abcdef1234567890abcdef1234567890ab_full.jpg'
+      ]
+    };
+    return avatarPools[region] || avatarPools['asia'];
+  };
+
+  const regionPlayerNames = generateRegionPlayerNames(region, limit);
+  const regionAvatars = getRegionAvatars(region);
 
   try {
-    // 실제 Steam 사용자 데이터 가져오기 시도
-    for (let i = 0; i < Math.min(limit, 10); i++) {
+    // 전체 페이지 데이터 생성
+    for (let i = 0; i < limit; i++) {
       const rank = startRank + i;
-      const steamId = sampleSteamIds[i % sampleSteamIds.length];
+      const uniqueSteamId = generateUniqueSteamId(region, page, i);
       
+      // 지역별 고유한 플레이어 이름 생성
+      let playerName;
+      if (region === 'asia' && rank === 1) {
+        playerName = '박근형';
+      } else {
+        const nameIndex = (page - 1) * limit + i;
+        playerName = regionPlayerNames[nameIndex % regionPlayerNames.length];
+        if (nameIndex >= regionPlayerNames.length) {
+          playerName += '_' + Math.floor(nameIndex / regionPlayerNames.length);
+        }
+      }
+
       let playerData = {
         rank: rank,
         player: {
-          name: region === 'asia' ? 
-            (i === 0 ? '박근형' : `Player_${region}_${i}`) : 
-            `TopPlayer_${region}_${i}`,
-          avatar: `https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg`,
-          steamId: steamId,
+          name: playerName,
+          avatar: regionAvatars[i % regionAvatars.length],
+          steamId: uniqueSteamId,
           country: regionFlags[i % regionFlags.length]
         },
-        heroes: heroes.slice(i % 5, (i % 5) + Math.floor(Math.random() * 3) + 1),
-        medal: medals[Math.floor(i / 7) % medals.length],
+        heroes: heroes.slice((i + page) % 5, ((i + page) % 5) + Math.floor(Math.random() * 3) + 1),
+        medal: medals[Math.floor((rank - 1) / 7) % medals.length],
         subrank: Math.floor(Math.random() * 6) + 1,
         score: Math.floor(4500 - (rank * 5) - Math.random() * 100),
         wins: Math.floor(Math.random() * 500) + 100,
         losses: Math.floor(Math.random() * 200) + 50
       };
 
-      // Steam API에서 실제 사용자 정보 가져오기 시도
-      if (steamApiKey) {
+      // Steam API에서 실제 사용자 정보 가져오기 시도 (처음 몇 명만)
+      if (steamApiKey && i < 3) {
         try {
+          // 실제 Steam ID 풀에서 가져오기
+          const realSteamIds = [
+            '76561198123456789', '76561198234567890', '76561198345678901'
+          ];
+          const realSteamId = realSteamIds[i % realSteamIds.length];
+          
           const userResponse = await axios.get(
-            `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${steamApiKey}&steamids=${steamId}`,
+            `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${steamApiKey}&steamids=${realSteamId}`,
             { timeout: 3000 }
           );
           
           if (userResponse.data.response.players.length > 0) {
             const steamUser = userResponse.data.response.players[0];
-            playerData.player.name = steamUser.personaname;
+            // 실제 Steam 데이터가 있어도 지역별 고유성을 위해 이름에 지역 접미사 추가
+            playerData.player.name = steamUser.personaname + '_' + region.toUpperCase();
             playerData.player.avatar = steamUser.avatarfull || steamUser.avatarmedium || steamUser.avatar;
+            playerData.player.steamId = realSteamId;
           }
         } catch (error) {
-          console.log(`Steam API 호출 실패 for ${steamId}:`, error.message);
-          // 실패시 기본값 사용
+          console.log(`Steam API 호출 실패 for player ${i}:`, error.message);
+          // 실패시 생성된 고유 데이터 사용
         }
       }
 
       data.push(playerData);
-    }
-
-    // 나머지 슬롯은 모의 데이터로 채우기
-    for (let i = 10; i < limit; i++) {
-      const rank = startRank + i;
-      const playerNames = region === 'asia' ? 
-        ['DeadlockPro_KR', 'TopPlayer_JP', 'EliteGamer_CN', 'SkillMaster_TW', 'ProShooter_SG', 'GameChanger_TH', 'ClutchKing_VN', 'TacticalPlayer_MY', 'DeadlockGod_PH'] :
-        ['ProPlayer1', 'DeadlockMaster', 'TopGamer', 'SkillPlayer', 'GameChanger', 'EliteShooter', 'TacticalKing', 'ClutchGamer', 'ProSkill', 'DeadlockPro'];
-
-      data.push({
-        rank: rank,
-        player: {
-          name: playerNames[i % playerNames.length] + (i > 9 ? '_' + Math.floor(i/10) : ''),
-          avatar: `https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg`,
-          steamId: `76561198${String(Math.floor(Math.random() * 1000000000)).padStart(9, '0')}`,
-          country: regionFlags[i % regionFlags.length]
-        },
-        heroes: heroes.slice(i % 5, (i % 5) + Math.floor(Math.random() * 3) + 1),
-        medal: medals[Math.floor(i / 7) % medals.length],
-        subrank: Math.floor(Math.random() * 6) + 1,
-        score: Math.floor(4500 - (rank * 5) - Math.random() * 100),
-        wins: Math.floor(Math.random() * 500) + 100,
-        losses: Math.floor(Math.random() * 200) + 50
-      });
     }
 
     return {
@@ -332,18 +361,38 @@ const generateMockLeaderboardData = (region, page = 1, limit = 50) => {
     const rank = startRank + i;
     const playerNames = region === 'asia' ? 
       ['박근형', 'DeadlockPro_KR', 'TopPlayer_JP', 'EliteGamer_CN', 'SkillMaster_TW', 'ProShooter_SG', 'GameChanger_TH', 'ClutchKing_VN', 'TacticalPlayer_MY', 'DeadlockGod_PH'] :
-      ['ProPlayer1', 'DeadlockMaster', 'TopGamer', 'SkillPlayer', 'GameChanger', 'EliteShooter', 'TacticalKing', 'ClutchGamer', 'ProSkill', 'DeadlockPro'];
+      region === 'europe' ?
+      ['EliteGamer_EU', 'ProPlayer_DE', 'TopSkill_UK', 'Champion_FR', 'MasterGamer_ES', 'ProShooter_IT', 'SkillMaster_PL', 'ElitePlayer_RU', 'TopGamer_SE', 'ProSkill_NO'] :
+      ['ProPlayer_US', 'EliteGamer_CA', 'TopSkill_MX', 'Champion_USA', 'MasterGamer_CAN', 'ProShooter_US', 'SkillMaster_CA', 'ElitePlayer_MX', 'TopGamer_USA', 'ProSkill_CAN'];
+
+    // 지역과 페이지 기반 고유한 이름 생성
+    let playerName;
+    if (region === 'asia' && rank === 1) {
+      playerName = '박근형';
+    } else {
+      const nameIndex = (page - 1) * limit + i;
+      playerName = playerNames[nameIndex % playerNames.length];
+      if (nameIndex >= playerNames.length) {
+        playerName += '_' + Math.floor(nameIndex / playerNames.length);
+      }
+    }
+
+    // 지역과 페이지 기반 고유한 Steam ID 생성
+    const regionCode = { 'europe': '100', 'asia': '200', 'north-america': '300' }[region] || '200';
+    const pageCode = String(page).padStart(3, '0');
+    const indexCode = String(i).padStart(3, '0');
+    const uniqueSteamId = `76561198${regionCode}${pageCode}${indexCode}`;
 
     data.push({
       rank: rank,
       player: {
-        name: playerNames[i % playerNames.length] + (i > 9 ? '_' + Math.floor(i/10) : ''),
+        name: playerName,
         avatar: avatars[i % avatars.length],
-        steamId: `76561198${String(Math.floor(Math.random() * 1000000000)).padStart(9, '0')}`,
+        steamId: uniqueSteamId,
         country: regionFlags[i % regionFlags.length]
       },
-      heroes: heroes.slice(i % 5, (i % 5) + Math.floor(Math.random() * 3) + 1),
-      medal: medals[Math.floor(i / 7) % medals.length],
+      heroes: heroes.slice((i + page) % 5, ((i + page) % 5) + Math.floor(Math.random() * 3) + 1),
+      medal: medals[Math.floor((rank - 1) / 7) % medals.length],
       subrank: Math.floor(Math.random() * 6) + 1,
       score: Math.floor(4500 - (rank * 5) - Math.random() * 100),
       wins: Math.floor(Math.random() * 500) + 100,
