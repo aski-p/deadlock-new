@@ -140,6 +140,22 @@ app.get('/ko/leaderboards/europe', (req, res) => {
   });
 });
 
+app.get('/ko/leaderboards/asia', (req, res) => {
+  res.render('leaderboards', { 
+    user: req.user,
+    region: 'asia',
+    title: 'Asian Leaderboards - 박근형의 데드락'
+  });
+});
+
+app.get('/ko/leaderboards/north-america', (req, res) => {
+  res.render('leaderboards', { 
+    user: req.user,
+    region: 'north-america',
+    title: 'North American Leaderboards - 박근형의 데드락'
+  });
+});
+
 // Steam Auth Routes (only if Steam is configured)
 if (steamApiKey) {
   app.get('/auth/steam',

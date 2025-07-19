@@ -561,3 +561,379 @@ footer {
         gap: 15px;
     }
 }
+
+/* 리더보드 페이지 스타일 */
+.leaderboards-section {
+    padding: 120px 0 60px;
+    min-height: 100vh;
+}
+
+.leaderboards-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+.leaderboards-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.page-title {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 40px;
+    color: #ffffff;
+}
+
+.region-selector {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.region-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.region-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.region-btn.active {
+    background: #5865F2;
+    border-color: #5865F2;
+    color: white;
+}
+
+.filters-section {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-group label {
+    color: #cccccc;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.filter-select {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #ffffff;
+    padding: 10px 16px;
+    font-size: 14px;
+    min-width: 150px;
+    transition: all 0.3s;
+}
+
+.filter-select:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #5865F2;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.filter-select option {
+    background: #000000;
+    color: #ffffff;
+}
+
+.leaderboard-table-container {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.table-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: #cccccc;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top: 3px solid #5865F2;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.leaderboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #ffffff;
+}
+
+.leaderboard-table th {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 16px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.leaderboard-table th:first-child {
+    border-radius: 8px 0 0 0;
+}
+
+.leaderboard-table th:last-child {
+    border-radius: 0 8px 0 0;
+}
+
+.leaderboard-row {
+    transition: all 0.3s;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.leaderboard-row:hover {
+    background: rgba(88, 101, 242, 0.1);
+}
+
+.leaderboard-table td {
+    padding: 16px;
+    vertical-align: middle;
+}
+
+.rank-cell {
+    width: 80px;
+    text-align: center;
+}
+
+.rank-number {
+    font-weight: 700;
+    font-size: 18px;
+    color: #5865F2;
+}
+
+.player-cell {
+    min-width: 200px;
+}
+
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.player-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.player-name {
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.heroes-cell {
+    min-width: 200px;
+}
+
+.heroes-list {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.hero-tag {
+    background: rgba(88, 101, 242, 0.2);
+    color: #ffffff;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid rgba(88, 101, 242, 0.3);
+}
+
+.medal-cell {
+    width: 120px;
+}
+
+.medal-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.medal-eternus {
+    background: linear-gradient(135deg, #FF6B35, #F7931E);
+    color: #ffffff;
+}
+
+.medal-phantom {
+    background: linear-gradient(135deg, #8B5CF6, #A855F7);
+    color: #ffffff;
+}
+
+.medal-oracle {
+    background: linear-gradient(135deg, #06B6D4, #0891B2);
+    color: #ffffff;
+}
+
+.medal-ritualist {
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: #ffffff;
+}
+
+.medal-alchemist {
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    color: #ffffff;
+}
+
+.medal-arcanist {
+    background: linear-gradient(135deg, #EC4899, #DB2777);
+    color: #ffffff;
+}
+
+.medal-initiate {
+    background: linear-gradient(135deg, #6B7280, #4B5563);
+    color: #ffffff;
+}
+
+.score-cell {
+    width: 100px;
+    text-align: right;
+}
+
+.score-number {
+    font-weight: 700;
+    font-size: 16px;
+    color: #00ffcc;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.pagination-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-info {
+    color: #cccccc;
+    font-weight: 500;
+    min-width: 80px;
+    text-align: center;
+}
+
+/* 반응형 리더보드 */
+@media (max-width: 768px) {
+    .leaderboards-container {
+        padding: 0 20px;
+    }
+    
+    .page-title {
+        font-size: 32px;
+    }
+    
+    .region-selector {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .region-btn {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+    
+    .filters-section {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .leaderboard-table-container {
+        padding: 15px;
+        overflow-x: auto;
+    }
+    
+    .leaderboard-table {
+        min-width: 600px;
+    }
+    
+    .leaderboard-table th,
+    .leaderboard-table td {
+        padding: 12px 8px;
+    }
+    
+    .player-info {
+        gap: 8px;
+    }
+    
+    .player-avatar {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .heroes-list {
+        gap: 4px;
+    }
+    
+    .hero-tag {
+        padding: 2px 6px;
+        font-size: 11px;
+    }
+}

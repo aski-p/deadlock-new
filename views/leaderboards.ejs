@@ -100,11 +100,16 @@ let currentFilters = {
 
 // Mock leaderboard data (실제로는 API에서 가져와야 함)
 const mockLeaderboardData = [
-    { rank: 1, player: { name: 'ProPlayer1', avatar: 'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', steamId: '76561198000000001' }, heroes: ['Abrams', 'Haze'], medal: 'Eternus', score: 3420 },
-    { rank: 2, player: { name: 'TopGamer', avatar: 'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', steamId: '76561198000000002' }, heroes: ['Vindicta', 'Wraith'], medal: 'Eternus', score: 3380 },
-    { rank: 3, player: { name: 'DeadlockMaster', avatar: 'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', steamId: '76561198000000003' }, heroes: ['Bebop', 'Seven'], medal: 'Phantom', score: 3250 },
-    { rank: 4, player: { name: 'SkillPlayer', avatar: 'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', steamId: '76561198000000004' }, heroes: ['Paradox'], medal: 'Phantom', score: 3180 },
-    { rank: 5, player: { name: 'GameChanger', avatar: 'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', steamId: '76561198000000005' }, heroes: ['Ivy', 'Kelvin'], medal: 'Oracle', score: 3050 }
+    { rank: 1, player: { name: '박근형', avatar: 'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', steamId: '76561198000000001' }, heroes: ['Haze', 'Wraith'], medal: 'Eternus', score: 4250 },
+    { rank: 2, player: { name: 'DeadlockPro', avatar: 'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg', steamId: '76561198000000002' }, heroes: ['Abrams', 'Seven'], medal: 'Eternus', score: 4180 },
+    { rank: 3, player: { name: 'TopPlayer_KR', avatar: 'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', steamId: '76561198000000003' }, heroes: ['Vindicta', 'Bebop'], medal: 'Eternus', score: 4120 },
+    { rank: 4, player: { name: 'DeadlockMaster', avatar: 'https://avatars.steamstatic.com/c5d56249ee5d28a07db4ac9f7f60af961fab5426_full.jpg', steamId: '76561198000000004' }, heroes: ['Paradox', 'Ivy'], medal: 'Phantom', score: 3950 },
+    { rank: 5, player: { name: 'SkillMachine', avatar: 'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', steamId: '76561198000000005' }, heroes: ['Kelvin', 'McGinnis'], medal: 'Phantom', score: 3850 },
+    { rank: 6, player: { name: 'GameChanger', avatar: 'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg', steamId: '76561198000000006' }, heroes: ['Lash', 'Yamato'], medal: 'Phantom', score: 3720 },
+    { rank: 7, player: { name: 'EliteGamer', avatar: 'https://avatars.steamstatic.com/c5d56249ee5d28a07db4ac9f7f60af961fab5426_full.jpg', steamId: '76561198000000007' }, heroes: ['Pocket', 'Viscous'], medal: 'Oracle', score: 3650 },
+    { rank: 8, player: { name: 'ProShooter', avatar: 'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', steamId: '76561198000000008' }, heroes: ['Grey Talon', 'Infernus'], medal: 'Oracle', score: 3580 },
+    { rank: 9, player: { name: 'TacticalPlayer', avatar: 'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg', steamId: '76561198000000009' }, heroes: ['Lady Geist', 'Shiv'], medal: 'Oracle', score: 3420 },
+    { rank: 10, player: { name: 'ClutchKing', avatar: 'https://avatars.steamstatic.com/c5d56249ee5d28a07db4ac9f7f60af961fab5426_full.jpg', steamId: '76561198000000010' }, heroes: ['Warden', 'Dynamo'], medal: 'Ritualist', score: 3350 }
 ];
 
 function loadLeaderboardData() {
