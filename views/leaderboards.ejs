@@ -137,16 +137,21 @@ function updateLeaderboardTable(data) {
     
     // 메달 이미지 매핑
     const getMedalImage = (medal, subrank) => {
-        const medalMap = {
-            'eternus': 'https://cdn.deadlock-api.com/vpk/panorama/images/ranked/badges/rank11/badge_sm_subrank' + subrank + '.webp',
-            'phantom': 'https://cdn.deadlock-api.com/vpk/panorama/images/ranked/badges/rank10/badge_sm_subrank' + subrank + '.webp',
-            'oracle': 'https://cdn.deadlock-api.com/vpk/panorama/images/ranked/badges/rank9/badge_sm_subrank' + subrank + '.webp',
-            'ritualist': 'https://cdn.deadlock-api.com/vpk/panorama/images/ranked/badges/rank8/badge_sm_subrank' + subrank + '.webp',
-            'alchemist': 'https://cdn.deadlock-api.com/vpk/panorama/images/ranked/badges/rank7/badge_sm_subrank' + subrank + '.webp',
-            'arcanist': 'https://cdn.deadlock-api.com/vpk/panorama/images/ranked/badges/rank6/badge_sm_subrank' + subrank + '.webp',
-            'initiate': 'https://cdn.deadlock-api.com/vpk/panorama/images/ranked/badges/rank5/badge_sm_subrank' + subrank + '.webp'
+        const medalRankMap = {
+            'eternus': 11,
+            'phantom': 10,
+            'oracle': 9,
+            'ritualist': 8,
+            'alchemist': 7,
+            'arcanist': 6,
+            'initiate': 5
         };
-        return medalMap[medal.toLowerCase()] || medalMap['initiate'];
+        
+        const rankNumber = medalRankMap[medal.toLowerCase()] || 5;
+        const subrankFormatted = subrank || 1;
+        
+        // Deadlock API CDN 메달 이미지 URL 구조
+        return `https://cdn.deadlock-api.com/vpk/panorama/images/ranked/badges/rank${rankNumber}/badge_sm_subrank${subrankFormatted}.webp`;
     };
 
     // 영웅 이미지 매핑
@@ -173,7 +178,9 @@ function updateLeaderboardTable(data) {
             'Warden': 'https://cdn.deadlock-api.com/vpk/panorama/images/heroes/warden_card.webp',
             'Wraith': 'https://cdn.deadlock-api.com/vpk/panorama/images/heroes/wraith_card.webp',
             'Yamato': 'https://cdn.deadlock-api.com/vpk/panorama/images/heroes/yamato_card.webp',
-            'Mirage': 'https://cdn.deadlock-api.com/vpk/panorama/images/heroes/mirage_card.webp'
+            'Mirage': 'https://cdn.deadlock-api.com/vpk/panorama/images/heroes/mirage_card.webp',
+            'Calico': 'https://cdn.deadlock-api.com/vpk/panorama/images/heroes/calico_card.webp',
+            'Holliday': 'https://cdn.deadlock-api.com/vpk/panorama/images/heroes/hornet_card.webp'
         };
         return heroImageMap[heroName] || 'https://cdn.deadlock-api.com/vpk/panorama/images/heroes/atlas_card.webp';
     };
@@ -185,7 +192,7 @@ function updateLeaderboardTable(data) {
         '</td>' +
         '<td class="player-cell">' +
             '<div class="player-info">' +
-                '<img src="' + player.player.avatar + '" alt="' + player.player.name + '" class="player-avatar">' +
+                '<img src="' + player.player.avatar + '" alt="' + player.player.name + '" class="player-avatar" onerror="this.src=\'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg\'">' +
                 '<span class="player-name">' + player.player.name + '</span>' +
             '</div>' +
         '</td>' +
@@ -196,14 +203,14 @@ function updateLeaderboardTable(data) {
             '<div class="heroes-list">' +
                 player.heroes.map(hero => 
                     '<div class="hero-item">' +
-                        '<img src="' + getHeroImage(hero) + '" alt="' + hero + '" class="hero-image" title="' + hero + '">' +
+                        '<img src="' + getHeroImage(hero) + '" alt="' + hero + '" class="hero-image" title="' + hero + '" onerror="this.src=\'https://cdn.deadlock-api.com/vpk/panorama/images/heroes/atlas_card.webp\'">' +
                     '</div>'
                 ).join('') +
             '</div>' +
         '</td>' +
         '<td class="medal-cell">' +
             '<div class="medal-badge">' +
-                '<img src="' + getMedalImage(player.medal, player.subrank) + '" alt="' + player.medal + ' ' + player.subrank + '" class="medal-image" title="' + player.medal + ' ' + player.subrank + '">' +
+                '<img src="' + getMedalImage(player.medal, player.subrank) + '" alt="' + player.medal + ' ' + player.subrank + '" class="medal-image" title="' + player.medal + ' ' + player.subrank + '" onerror="this.src=\'https://cdn.deadlock-api.com/vpk/panorama/images/ranked/badges/rank5/badge_sm_subrank1.webp\'">' +
             '</div>' +
         '</td>' +
         '<td class="score-cell">' +

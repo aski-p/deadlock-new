@@ -276,12 +276,15 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
     // 먼저 기본 플레이어 데이터 생성
     const convertedPlayers = apiData.map((player) => {
       const heroes = player.top_hero_ids ? 
-        player.top_hero_ids.slice(0, 3).map(heroId => heroIdMapping[heroId] || 'Unknown').filter(hero => hero !== 'Unknown') : 
+        player.top_hero_ids.slice(0, 3).map(heroId => heroIdMapping[heroId] || null).filter(hero => hero !== null) : 
         [];
 
       const steamId = player.possible_account_ids && player.possible_account_ids.length > 0 ? 
         player.possible_account_ids[0].toString() : 
         `76561198${String(player.rank).padStart(9, '0')}`;
+
+      // 기본 영웅이 없으면 랜덤 영웅 할당
+      const finalHeroes = heroes.length > 0 ? heroes : [Object.values(heroIdMapping)[Math.floor(Math.random() * Object.values(heroIdMapping).length)]];
 
       return {
         rank: player.rank,
@@ -291,7 +294,7 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
           steamId: steamId,
           country: getRandomCountryFlag(region)
         },
-        heroes: heroes.length > 0 ? heroes : ['Unknown'],
+        heroes: finalHeroes,
         medal: getMedalFromRank(player.ranked_rank || 7, player.ranked_subrank || 1),
         subrank: player.ranked_subrank || 1,
         score: player.badge_level || Math.floor(4500 - (player.rank * 5)),
@@ -300,57 +303,67 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       };
     });
 
-    // Steam API로 실제 아바타 가져오기 (배치 처리, 상위 200명만)
+    // Steam API로 실제 아바타 가져오기 (배치 처리, 상위 100명만)
     if (steamApiKey) {
       try {
-        const topPlayers = convertedPlayers.slice(0, 200); // 상위 200명만 처리
+        const topPlayers = convertedPlayers.slice(0, 200); // 상위 200명 처리 (더 많은 실제 아바타)
         const steamIds = topPlayers
-          .filter(p => p.player.steamId && !p.player.steamId.startsWith('76561198000'))
+          .filter(p => p.player.steamId && !p.player.steamId.startsWith('76561198000') && p.player.steamId.length >= 8)
           .map(p => p.player.steamId);
 
         if (steamIds.length > 0) {
-          // Steam API는 최대 100개 ID까지 한번에 처리 가능
-          const chunks = [];
-          for (let i = 0; i < steamIds.length; i += 100) {
-            chunks.push(steamIds.slice(i, i + 100));
+          console.log(`🎮 Steam API 아바타 조회 시작: ${steamIds.length}명의 플레이어`);
+
+          // Steam API 배치 처리 (최대 100개씩)
+          const batchSize = 100;
+          const batches = [];
+          for (let i = 0; i < steamIds.length; i += batchSize) {
+            batches.push(steamIds.slice(i, i + batchSize));
           }
 
-          console.log(`🎮 Steam API 아바타 조회: ${steamIds.length}명의 플레이어 (${chunks.length}개 배치)`);
-
-          for (const chunk of chunks) {
+          for (const batch of batches) {
             try {
               const steamResponse = await axios.get(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/`, {
                 params: {
                   key: steamApiKey,
-                  steamids: chunk.join(',')
+                  steamids: batch.join(',')
                 },
                 timeout: 10000
               });
 
               if (steamResponse.data && steamResponse.data.response && steamResponse.data.response.players) {
                 const steamUsers = steamResponse.data.response.players;
+                console.log(`✅ Steam API 배치 응답: ${steamUsers.length}명의 유저 데이터 수신`);
                 
                 // 각 Steam 유저 데이터를 매칭해서 아바타 업데이트
                 steamUsers.forEach(steamUser => {
                   const playerIndex = convertedPlayers.findIndex(p => p.player.steamId === steamUser.steamid);
                   if (playerIndex !== -1) {
-                    convertedPlayers[playerIndex].player.avatar = steamUser.avatarfull || steamUser.avatarmedium || steamUser.avatar;
+                    const avatarUrl = steamUser.avatarfull || steamUser.avatarmedium || steamUser.avatar;
+                    if (avatarUrl && avatarUrl !== '' && !avatarUrl.includes('b5bd56c1aa4644a474a2e4972be27ef9e82e517e')) {
+                      convertedPlayers[playerIndex].player.avatar = avatarUrl;
+                      convertedPlayers[playerIndex].player.name = steamUser.personaname || convertedPlayers[playerIndex].player.name;
+                    }
                   }
                 });
               }
-
-              // API 요청 제한을 위한 딜레이
-              await new Promise(resolve => setTimeout(resolve, 100));
             } catch (error) {
-              console.log(`Steam API 배치 조회 실패:`, error.message);
+              console.log(`❌ Steam API 배치 호출 실패:`, error.message);
             }
+            
+            // 배치 간 짧은 지연
+            await new Promise(resolve => setTimeout(resolve, 100));
           }
-
-          console.log(`✅ Steam API 아바타 조회 완료`);
+          
+          console.log(`✅ Steam API 아바타 업데이트 완료`);
+        } else {
+          console.log(`⚠️ 유효한 Steam ID가 없습니다`);
         }
       } catch (error) {
-        console.log(`Steam API 아바타 처리 전체 실패:`, error.message);
+        console.log(`❌ Steam API 아바타 처리 전체 실패:`, error.message);
       }
+    } else {
+      console.log(`⚠️ Steam API 키가 설정되지 않았습니다`);
     }
 
     // 2000등까지만 표시
