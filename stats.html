@@ -3,1352 +3,799 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>영웅 통계 - Deadlock API</title>
+    <title>Deadlock 통계 - 개선된 버전</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0d1117;
-            color: #f0f6fc;
-            line-height: 1.6;
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
         }
-        
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
         }
-        
-        /* 헤더 */
+
         header {
-            background: #161b22;
-            border-bottom: 1px solid #30363d;
-            padding: 1rem 0;
+            text-align: center;
+            margin-bottom: 40px;
         }
-        
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
-        
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: #58a6ff;
-            text-decoration: none;
+
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.8;
+            margin-bottom: 20px;
         }
-        
-        .nav-links {
-            display: flex;
-            gap: 2rem;
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-title {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #ffd700;
+        }
+
+        .ranking-list {
             list-style: none;
         }
-        
-        .nav-links a {
-            color: #8b949e;
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-        
-        .nav-links a:hover {
-            color: #f0f6fc;
-        }
-        
-        /* 메인 */
-        main {
-            padding: 2rem 0;
-        }
-        
-        .page-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
-        .page-title {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: #f0f6fc;
-        }
-        
-        .filters {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-        
-        .rank-select {
-            background: #21262d;
-            border: 1px solid #30363d;
-            color: #f0f6fc;
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-            min-width: 150px;
-        }
-        
-        .rank-select:hover {
-            border-color: #58a6ff;
-        }
-        
-        .rank-select:focus {
-            outline: none;
-            border-color: #58a6ff;
-            box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.3);
-        }
-        
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        
-        .filter-label {
-            font-size: 12px;
-            color: #8b949e;
-            font-weight: 500;
-        }
-        
-        .date-range {
+
+        .ranking-item {
             display: flex;
             align-items: center;
-            gap: 8px;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
-        .patch-label {
-            background: #da3633;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        /* 탭 */
-        .tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 2rem;
-            background: #161b22;
-            padding: 8px;
-            border-radius: 8px;
-            border: 1px solid #30363d;
-        }
-        
-        .tab {
-            background: transparent;
-            border: none;
-            color: #8b949e;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-        
-        .tab:hover {
-            background: #21262d;
-            color: #f0f6fc;
-        }
-        
-        .tab.active {
-            background: #58a6ff;
-            color: white;
-        }
-        
-        /* 테이블 */
-        .stats-table {
-            width: 100%;
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 8px;
-            overflow: hidden;
-            border-collapse: collapse;
-        }
-        
-        .stats-table th {
-            background: #21262d;
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 14px;
-            color: #8b949e;
-            border-bottom: 1px solid #30363d;
-        }
-        
-        .stats-table td {
-            padding: 12px;
-            border-bottom: 1px solid #30363d;
-        }
-        
-        .stats-table tr:last-child td {
+
+        .ranking-item:last-child {
             border-bottom: none;
         }
-        
-        .stats-table tr:hover {
-            background: #21262d;
+
+        .rank-number {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ffd700;
+            min-width: 30px;
         }
-        
-        /* 영웅 정보 */
-        .hero-info {
+
+        .item-info {
             display: flex;
             align-items: center;
-            gap: 12px;
+            flex: 1;
+            margin-left: 15px;
         }
-        
-        .hero-icon {
-            width: 40px;
-            height: 40px;
+
+        .item-image {
+            width: 32px;
+            height: 32px;
             border-radius: 6px;
-            overflow: hidden;
+            margin-right: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
-        .hero-icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            background: #30363d;
-        }
-        
-        .hero-icon::before {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: #30363d;
+        .item-image.error {
+            background: linear-gradient(45deg, #ffd700, #ff8c00);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            color: #8b949e;
-        }
-        
-        .hero-name {
-            font-weight: 500;
-            color: #f0f6fc;
-        }
-        
-        .hero-role {
-            font-size: 12px;
-            color: #8b949e;
-        }
-        
-        /* 통계 바 */
-        .stat-bar {
-            position: relative;
-            width: 120px;
-            height: 20px;
-            background: #21262d;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .stat-fill {
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            border-radius: 10px;
-            transition: width 0.3s ease;
-        }
-        
-        .win-rate-fill {
-            background: linear-gradient(90deg, #238636, #2ea043);
-        }
-        
-        .pick-rate-fill {
-            background: linear-gradient(90deg, #1f6feb, #388bfd);
-        }
-        
-        .stat-text {
-            position: absolute;
-            width: 100%;
-            text-align: center;
-            line-height: 20px;
-            font-size: 12px;
-            font-weight: 600;
             color: white;
-            z-index: 1;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .hero-image {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
         }
         
-        /* KDA */
-        .kda {
+        .hero-image.error {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
             display: flex;
-            gap: 4px;
-            font-weight: 500;
-            font-size: 14px;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
         }
-        
-        .kills { color: #2ea043; }
-        .deaths { color: #da3633; }
-        .assists { color: #fd7e14; }
-        
-        /* 매치 수 */
-        .total-matches {
-            font-weight: 500;
-            text-align: right;
-            color: #8b949e;
+
+        .character-name, .item-name {
+            font-size: 1.1em;
         }
-        
-        /* 랭킹 */
-        .rank {
-            font-weight: 600;
-            color: #8b949e;
+
+        .stat-value {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .loading {
             text-align: center;
+            padding: 40px;
+            font-size: 1.2em;
+            opacity: 0.7;
+            animation: pulse 2s infinite;
         }
-        
-        /* 반응형 */
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-            }
-            
-            .filters {
-                flex-direction: column;
-                gap: 8px;
-            }
-            
-            .tabs {
-                flex-wrap: wrap;
-            }
-            
-            .stats-table {
-                font-size: 14px;
-            }
-            
-            .hero-info {
-                flex-direction: column;
-                text-align: center;
-                gap: 8px;
-            }
-            
-            .stat-bar {
-                width: 80px;
-            }
+
+        .last-update {
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-size: 0.9em;
+            opacity: 0.8;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 20px;
+            color: #ff6b6b;
+            background: rgba(255, 107, 107, 0.1);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 107, 107, 0.3);
+        }
+
+        .retry-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .retry-button:hover {
+            background: #45a049;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* 네비게이션 링크 추가 */
+        .nav-links {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .nav-links a.active {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffd700;
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <div class="header-content">
-                <a href="/" class="logo">Deadlock API</a>
-                <nav>
-                    <ul class="nav-links">
-                        <li><a href="/">Home</a></li>
-                        <li><a href="/heroes">Heroes</a></li>
-                        <li><a href="/items">Items</a></li>
-                        <li><a href="/stats">Stats</a></li>
-                    </ul>
-                </nav>
-            </div>
+    <div class="container">
+        <div class="nav-links">
+            <a href="/">홈</a>
+            <a href="/heroes">영웅</a>
+            <a href="/items">아이템</a>
+            <a href="/stats" class="active">통계</a>
         </div>
-    </header>
 
-    <main>
-        <div class="container">
-            <div class="page-header">
-                <h1 class="page-title">영웅 통계</h1>
-                <div class="filters">
-                    <div class="filter-group">
-                        <label class="filter-label">최소 랭크</label>
-                        <select id="minRank" class="rank-select">
-                            <option value="0">모든 랭크</option>
-                            <option value="1">컨버젠트 1</option>
-                            <option value="2">컨버젠트 2</option>
-                            <option value="3">컨버젠트 3</option>
-                            <option value="4">컨버젠트 4</option>
-                            <option value="5">컨버젠트 5</option>
-                            <option value="6">컨버젠트 6</option>
-                            <option value="7">아센던트 1</option>
-                            <option value="8">아센던트 2</option>
-                            <option value="9">아센던트 3</option>
-                            <option value="10">아센던트 4</option>
-                            <option value="11">아센던트 5</option>
-                            <option value="12">아센던트 6</option>
-                            <option value="13" selected>팬텀 1</option>
-                            <option value="14">팬텀 2</option>
-                            <option value="15">팬텀 3</option>
-                            <option value="16">팬텀 4</option>
-                            <option value="17">팬텀 5</option>
-                            <option value="18">팬텀 6</option>
-                            <option value="19">오라클 1</option>
-                            <option value="20">오라클 2</option>
-                            <option value="21">오라클 3</option>
-                            <option value="22">오라클 4</option>
-                            <option value="23">오라클 5</option>
-                            <option value="24">오라클 6</option>
-                            <option value="25">이터너스 1</option>
-                            <option value="26">이터너스 2</option>
-                            <option value="27">이터너스 3</option>
-                            <option value="28">이터너스 4</option>
-                            <option value="29">이터너스 5</option>
-                            <option value="30">이터너스 6</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label class="filter-label">최대 랭크</label>
-                        <select id="maxRank" class="rank-select">
-                            <option value="0">컨버젠트 1</option>
-                            <option value="1">컨버젠트 1</option>
-                            <option value="2">컨버젠트 2</option>
-                            <option value="3">컨버젠트 3</option>
-                            <option value="4">컨버젠트 4</option>
-                            <option value="5">컨버젠트 5</option>
-                            <option value="6">컨버젠트 6</option>
-                            <option value="7">아센던트 1</option>
-                            <option value="8">아센던트 2</option>
-                            <option value="9">아센던트 3</option>
-                            <option value="10">아센던트 4</option>
-                            <option value="11">아센던트 5</option>
-                            <option value="12">아센던트 6</option>
-                            <option value="13">팬텀 1</option>
-                            <option value="14">팬텀 2</option>
-                            <option value="15">팬텀 3</option>
-                            <option value="16">팬텀 4</option>
-                            <option value="17">팬텀 5</option>
-                            <option value="18">팬텀 6</option>
-                            <option value="19">오라클 1</option>
-                            <option value="20">오라클 2</option>
-                            <option value="21">오라클 3</option>
-                            <option value="22">오라클 4</option>
-                            <option value="23">오라클 5</option>
-                            <option value="24">오라클 6</option>
-                            <option value="25">이터너스 1</option>
-                            <option value="26">이터너스 2</option>
-                            <option value="27">이터너스 3</option>
-                            <option value="28">이터너스 4</option>
-                            <option value="29">이터너스 5</option>
-                            <option value="30" selected>이터너스 6</option>
-                        </select>
-                    </div>
-                    <div class="date-range">
-                        <span class="patch-label">패치</span>
-                        <span>최근 패치 (2025-07-04)</span>
-                    </div>
+        <header>
+            <h1>🎮 Deadlock 통계</h1>
+            <p class="subtitle">캐릭터 & 아이템 랭킹 (최근 7일)</p>
+            <div id="last-update" class="last-update">
+                <span>📅 마지막 업데이트: 로딩 중...</span>
+            </div>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h2 class="card-title">🏆 최고 플레이 캐릭터</h2>
+                <div id="most-played-section">
+                    <div class="loading">데이터를 불러오는 중...</div>
                 </div>
             </div>
 
-            <div class="tabs">
-                <button class="tab active">전체 통계</button>
-                <button class="tab">시간대별 통계</button>
-                <button class="tab">매치업</button>
-                <button class="tab">영웅 조합</button>
-                <button class="tab">매치업 상세</button>
+            <div class="stat-card">
+                <h2 class="card-title">🥇 최고 승률 캐릭터</h2>
+                <div id="win-rate-section">
+                    <div class="loading">데이터를 불러오는 중...</div>
+                </div>
             </div>
 
-            <table class="stats-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>영웅</th>
-                        <th>승률</th>
-                        <th>픽률</th>
-                        <th>킬/데스/어시스트</th>
-                        <th>총 매치</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr data-rank="25" data-hero="seven">
-                        <td class="rank">1</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/seven_mm.webp" alt="Seven" data-hero="seven" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'12\' fill=\'%23f0f6fc\'%3ESev%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Seven</div>
-                                    <div class="hero-role">Carry</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 62.3%"></div>
-                                <span class="stat-text">62.3%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 45.2%"></div>
-                                <span class="stat-text">45.2%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">14.2</span> /
-                                <span class="deaths">8.1</span> /
-                                <span class="assists">16.5</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">148,523</td>
-                    </tr>
-                    <tr data-rank="24" data-hero="mcginnis">
-                        <td class="rank">2</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/mcginnis_mm.webp" alt="McGinnis" data-hero="mcginnis" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'10\' fill=\'%23f0f6fc\'%3EMcG%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">McGinnis</div>
-                                    <div class="hero-role">Support</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 59.8%"></div>
-                                <span class="stat-text">59.8%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 32.1%"></div>
-                                <span class="stat-text">32.1%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">9.8</span> /
-                                <span class="deaths">7.2</span> /
-                                <span class="assists">21.3</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">105,489</td>
-                    </tr>
-                    <tr data-rank="23" data-hero="abrams">
-                        <td class="rank">3</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/abrams_mm.webp" alt="Abrams" data-hero="abrams" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'11\' fill=\'%23f0f6fc\'%3EAbr%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Abrams</div>
-                                    <div class="hero-role">Tank</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 57.4%"></div>
-                                <span class="stat-text">57.4%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 38.9%"></div>
-                                <span class="stat-text">38.9%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">11.5</span> /
-                                <span class="deaths">9.8</span> /
-                                <span class="assists">18.2</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">127,856</td>
-                    </tr>
-                    <tr data-rank="22" data-hero="dynamo">
-                        <td class="rank">4</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/dynamo_mm.webp" alt="Dynamo" data-hero="dynamo" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'11\' fill=\'%23f0f6fc\'%3EDyn%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Dynamo</div>
-                                    <div class="hero-role">Support</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 56.1%"></div>
-                                <span class="stat-text">56.1%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 29.7%"></div>
-                                <span class="stat-text">29.7%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">8.3</span> /
-                                <span class="deaths">6.9</span> /
-                                <span class="assists">22.8</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">97,523</td>
-                    </tr>
-                    <tr data-rank="21" data-hero="vindicta">
-                        <td class="rank">5</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/vindicta_mm.webp" alt="Vindicta" data-hero="vindicta" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'11\' fill=\'%23f0f6fc\'%3EVin%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Vindicta</div>
-                                    <div class="hero-role">Carry</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 55.3%"></div>
-                                <span class="stat-text">55.3%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 41.8%"></div>
-                                <span class="stat-text">41.8%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">15.7</span> /
-                                <span class="deaths">8.4</span> /
-                                <span class="assists">12.9</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">137,291</td>
-                    </tr>
-                    <tr data-rank="20" data-hero="ivy">
-                        <td class="rank">6</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/ivy_mm.webp" alt="Ivy" data-hero="ivy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'12\' fill=\'%23f0f6fc\'%3EIvy%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Ivy</div>
-                                    <div class="hero-role">Support</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 54.7%"></div>
-                                <span class="stat-text">54.7%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 26.4%"></div>
-                                <span class="stat-text">26.4%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">9.2</span> /
-                                <span class="deaths">7.1</span> /
-                                <span class="assists">19.6</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">86,752</td>
-                    </tr>
-                    <tr data-rank="19" data-hero="wraith">
-                        <td class="rank">7</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/wraith_mm.webp" alt="Wraith" data-hero="wraith" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'10\' fill=\'%23f0f6fc\'%3EWra%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Wraith</div>
-                                    <div class="hero-role">Carry</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 53.9%"></div>
-                                <span class="stat-text">53.9%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 35.2%"></div>
-                                <span class="stat-text">35.2%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">13.8</span> /
-                                <span class="deaths">8.7</span> /
-                                <span class="assists">14.3</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">115,683</td>
-                    </tr>
-                    <tr data-rank="18" data-hero="yamato">
-                        <td class="rank">8</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/yamato_mm.webp" alt="Yamato" data-hero="yamato" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'10\' fill=\'%23f0f6fc\'%3EYam%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Yamato</div>
-                                    <div class="hero-role">Assassin</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 52.8%"></div>
-                                <span class="stat-text">52.8%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 28.9%"></div>
-                                <span class="stat-text">28.9%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">16.4</span> /
-                                <span class="deaths">10.2</span> /
-                                <span class="assists">11.7</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">94,875</td>
-                    </tr>
-                    <tr data-rank="17" data-hero="warden">
-                        <td class="rank">9</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/warden_mm.webp" alt="Warden" data-hero="warden" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'10\' fill=\'%23f0f6fc\'%3EWar%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Warden</div>
-                                    <div class="hero-role">Support</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 51.6%"></div>
-                                <span class="stat-text">51.6%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 24.7%"></div>
-                                <span class="stat-text">24.7%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">10.1</span> /
-                                <span class="deaths">8.5</span> /
-                                <span class="assists">17.9</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">81,234</td>
-                    </tr>
-                    <tr data-rank="16" data-hero="mo_krill">
-                        <td class="rank">10</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/mo_krill_mm.webp" alt="Mo & Krill" data-hero="mo_krill" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'22\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'8\' fill=\'%23f0f6fc\'%3EMo%26K%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Mo & Krill</div>
-                                    <div class="hero-role">Tank</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 50.3%"></div>
-                                <span class="stat-text">50.3%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 19.8%"></div>
-                                <span class="stat-text">19.8%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">12.3</span> /
-                                <span class="deaths">9.7</span> /
-                                <span class="assists">15.2</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">65,087</td>
-                    </tr>
-                    <tr data-rank="15" data-hero="bebop">
-                        <td class="rank">11</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/bebop_mm.webp" alt="Bebop" data-hero="bebop" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'10\' fill=\'%23f0f6fc\'%3EBeb%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Bebop</div>
-                                    <div class="hero-role">Support</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 49.7%"></div>
-                                <span class="stat-text">49.7%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 27.3%"></div>
-                                <span class="stat-text">27.3%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">11.8</span> /
-                                <span class="deaths">9.2</span> /
-                                <span class="assists">16.4</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">89,765</td>
-                    </tr>
-                    <tr data-rank="14" data-hero="kelvin">
-                        <td class="rank">12</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/kelvin_mm.webp" alt="Kelvin" data-hero="kelvin" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'10\' fill=\'%23f0f6fc\'%3EKel%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Kelvin</div>
-                                    <div class="hero-role">Tank</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 48.9%"></div>
-                                <span class="stat-text">48.9%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 22.1%"></div>
-                                <span class="stat-text">22.1%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">9.5</span> /
-                                <span class="deaths">8.8</span> /
-                                <span class="assists">18.7</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">72,698</td>
-                    </tr>
-                    <tr data-rank="13" data-hero="lash">
-                        <td class="rank">13</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/lash_mm.webp" alt="Lash" data-hero="lash" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'11\' fill=\'%23f0f6fc\'%3ELas%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Lash</div>
-                                    <div class="hero-role">Assassin</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 47.8%"></div>
-                                <span class="stat-text">47.8%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 33.4%"></div>
-                                <span class="stat-text">33.4%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">14.9</span> /
-                                <span class="deaths">10.8</span> /
-                                <span class="assists">13.6</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">109,876</td>
-                    </tr>
-                    <tr data-rank="12" data-hero="infernus">
-                        <td class="rank">14</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/infernus_mm.webp" alt="Infernus" data-hero="infernus" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'10\' fill=\'%23f0f6fc\'%3EInf%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Infernus</div>
-                                    <div class="hero-role">Carry</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 46.5%"></div>
-                                <span class="stat-text">46.5%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 29.7%"></div>
-                                <span class="stat-text">29.7%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">13.2</span> /
-                                <span class="deaths">9.9</span> /
-                                <span class="assists">14.8</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">97,543</td>
-                    </tr>
-                    <tr data-rank="11" data-hero="haze">
-                        <td class="rank">15</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/haze_mm.webp" alt="Haze" data-hero="haze" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'11\' fill=\'%23f0f6fc\'%3EHaz%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Haze</div>
-                                    <div class="hero-role">Assassin</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 45.3%"></div>
-                                <span class="stat-text">45.3%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 31.9%"></div>
-                                <span class="stat-text">31.9%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">17.3</span> /
-                                <span class="deaths">11.7</span> /
-                                <span class="assists">10.2</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">104,892</td>
-                    </tr>
-                    <tr data-rank="10" data-hero="grey_talon">
-                        <td class="rank">16</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/grey_talon_mm.webp" alt="Grey Talon" data-hero="grey_talon" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'9\' fill=\'%23f0f6fc\'%3EGrey%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Grey Talon</div>
-                                    <div class="hero-role">Carry</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 44.8%"></div>
-                                <span class="stat-text">44.8%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 23.6%"></div>
-                                <span class="stat-text">23.6%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">14.6</span> /
-                                <span class="deaths">10.1</span> /
-                                <span class="assists">12.4</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">77,654</td>
-                    </tr>
-                    <tr data-rank="9" data-hero="lady_geist">
-                        <td class="rank">17</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/lady_geist_mm.webp" alt="Lady Geist" data-hero="lady_geist" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'9\' fill=\'%23f0f6fc\'%3EGeist%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Lady Geist</div>
-                                    <div class="hero-role">Support</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 43.7%"></div>
-                                <span class="stat-text">43.7%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 18.9%"></div>
-                                <span class="stat-text">18.9%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">10.7</span> /
-                                <span class="deaths">9.3</span> /
-                                <span class="assists">16.8</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">62,143</td>
-                    </tr>
-                    <tr data-rank="8" data-hero="paradox">
-                        <td class="rank">18</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/paradox_mm.webp" alt="Paradox" data-hero="paradox" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'9\' fill=\'%23f0f6fc\'%3EPara%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Paradox</div>
-                                    <div class="hero-role">Carry</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 42.9%"></div>
-                                <span class="stat-text">42.9%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 25.4%"></div>
-                                <span class="stat-text">25.4%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">12.8</span> /
-                                <span class="deaths">10.5</span> /
-                                <span class="assists">15.1</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">83,567</td>
-                    </tr>
-                    <tr data-rank="7" data-hero="pocket">
-                        <td class="rank">19</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/pocket_mm.webp" alt="Pocket" data-hero="pocket" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'10\' fill=\'%23f0f6fc\'%3EPoc%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Pocket</div>
-                                    <div class="hero-role">Support</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 41.6%"></div>
-                                <span class="stat-text">41.6%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 21.7%"></div>
-                                <span class="stat-text">21.7%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">9.4</span> /
-                                <span class="deaths">8.9</span> /
-                                <span class="assists">19.3</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">71,289</td>
-                    </tr>
-                    <tr data-rank="6" data-hero="shiv">
-                        <td class="rank">20</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/shiv_mm.webp" alt="Shiv" data-hero="shiv" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'11\' fill=\'%23f0f6fc\'%3EShiv%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Shiv</div>
-                                    <div class="hero-role">Assassin</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 40.2%"></div>
-                                <span class="stat-text">40.2%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 26.8%"></div>
-                                <span class="stat-text">26.8%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">16.8</span> /
-                                <span class="deaths">12.4</span> /
-                                <span class="assists">9.7</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">88,145</td>
-                    </tr>
-                    <tr data-rank="5" data-hero="viscous">
-                        <td class="rank">21</td>
-                        <td>
-                            <div class="hero-info">
-                                <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/viscous_mm.webp" alt="Viscous" data-hero="viscous" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'10\' fill=\'%23f0f6fc\'%3EVis%3C/text%3E%3C/svg%3E'" />
-                                </div>
-                                <div>
-                                    <div class="hero-name">Viscous</div>
-                                    <div class="hero-role">Tank</div>
-                                </div>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill win-rate-fill" style="width: 38.9%"></div>
-                                <span class="stat-text">38.9%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="stat-bar">
-                                <div class="stat-fill pick-rate-fill" style="width: 15.3%"></div>
-                                <span class="stat-text">15.3%</span>
-                            </div>
-                        </td>
-                        <td>
-                            <div class="kda">
-                                <span class="kills">8.7</span> /
-                                <span class="deaths">9.8</span> /
-                                <span class="assists">17.4</span>
-                            </div>
-                        </td>
-                        <td class="total-matches">50,329</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="stat-card">
+                <h2 class="card-title">⚔️ 최다 사용 아이템</h2>
+                <div id="items-section">
+                    <div class="loading">데이터를 불러오는 중...</div>
+                </div>
+            </div>
         </div>
-    </main>
+    </div>
 
     <script>
-        console.log('영웅 통계 페이지 로드 완료');
+        console.log('=== Deadlock 통계 개선된 버전 ===');
         
-        // 탭 기능
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                console.log('탭 변경:', this.textContent);
-            });
-        });
+        // 캐릭터 ID별 한글 이름 매핑 (정확한 매핑)
+        const heroNames = {
+            1: '인페르누스',     // Infernus
+            2: '세븐',          // Seven
+            3: '빈딕타',        // Vindicta
+            4: '레이디 가이스트', // Lady Geist
+            6: '아브람스',       // Abrams
+            7: '레이스',        // Wraith
+            8: '맥기니스',       // McGinnis
+            10: '패러독스',      // Paradox
+            11: '다이나모',      // Dynamo
+            12: '켈빈',         // Kelvin
+            13: '헤이즈',       // Haze
+            14: '홀리데이',      // Holliday
+            15: '비밥',         // Bebop
+            16: '칼리코',       // Calico
+            17: '그레이 탈론',   // Grey Talon
+            18: '모 & 크릴',    // Mo & Krill
+            19: '시브',         // Shiv
+            20: '아이비',       // Ivy
+            21: '칼리',         // Kali
+            25: '워든',         // Warden
+            27: '야마토',       // Yamato
+            31: '래시',         // Lash
+            35: '비스커스',      // Viscous
+            38: '건슬링거',      // Gunslinger
+            39: '보스',         // The Boss
+            47: '토카막',       // Tokamak
+            48: '레커',         // Wrecker
+            49: '루트거',       // Rutger
+            50: '포켓',         // Pocket
+            51: '썸퍼',         // Thumper
+            52: '미라지',       // Mirage
+            53: '패덤',         // Fathom
+            54: '카덴스',       // Cadence
+            56: '보머',         // Bomber
+            57: '실드 가이',     // Shield Guy
+            58: '바이퍼',       // Vyper
+            59: '밴달',         // Vandal
+            60: '싱클레어',      // Sinclair
+            61: '트래퍼',       // Trapper
+            62: '레이븐',       // Raven
+            63: '뱀파이어박쥐',   // VampireBat
+            64: '드리프터',      // Drifter
+            65: '프리스트',      // Priest
+            66: '프랭크',       // Frank
+            67: '북웜',         // Bookworm
+            68: '보호',         // Boho
+            69: '도어맨',       // Doorman
+            70: '스카이러너',     // Skyrunner
+            71: '스완',         // Swan
+            72: '펑크고트'       // Punkgoat
+        };
         
-        // API에서 영웅 데이터 가져오기
-        async function fetchHeroData() {
-            const minRank = parseInt(document.getElementById('minRank').value);
-            const maxRank = parseInt(document.getElementById('maxRank').value);
-            
-            console.log('API 호출 시작 - 최소:', minRank, '최대:', maxRank);
+        // 주요 아이템 ID별 한글 이름 (직접 매핑)
+        const itemNames = {};
+        const itemImages = {};
+        const heroImages = {};
+        
+        // 로컬 스토리지 캐시
+        const CACHE_KEYS = {
+            HERO_STATS: 'deadlock_hero_stats',
+            ITEM_STATS: 'deadlock_item_stats',
+            HERO_IMAGES: 'deadlock_hero_images',
+            ITEM_MAPPINGS: 'deadlock_item_mappings',
+            LAST_UPDATE: 'deadlock_last_update'
+        };
+        
+        const CACHE_DURATION = 30 * 60 * 1000; // 30분
+        
+        // 캐시에서 데이터 가져오기
+        function getCachedData(key) {
+            try {
+                const cached = localStorage.getItem(key);
+                if (!cached) return null;
+                
+                const data = JSON.parse(cached);
+                const now = Date.now();
+                
+                if (now - data.timestamp > CACHE_DURATION) {
+                    localStorage.removeItem(key);
+                    return null;
+                }
+                
+                return data.value;
+            } catch (error) {
+                console.error('캐시 읽기 실패:', error);
+                return null;
+            }
+        }
+        
+        // 캐시에 데이터 저장
+        function setCachedData(key, value) {
+            try {
+                const data = {
+                    value: value,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem(key, JSON.stringify(data));
+            } catch (error) {
+                console.error('캐시 저장 실패:', error);
+            }
+        }
+        
+        // 로딩 상태 업데이트 함수
+        function updateLoadingStatus(section, message) {
+            const element = document.getElementById(section);
+            if (element) {
+                element.innerHTML = `<div class="loading">${message}</div>`;
+            }
+        }
+
+        // 에러 상태 표시 함수
+        function showError(section, message) {
+            const element = document.getElementById(section);
+            if (element) {
+                element.innerHTML = `<div class="error-message">❌ ${message}</div>`;
+            }
+        }
+
+        // 타임아웃이 있는 fetch 함수
+        async function fetchWithTimeout(url, timeout = 10000) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
             
             try {
-                // API URL 구성
-                let apiUrl = 'https://deadlock-api.com/heroes';
-                if (minRank > 0 && maxRank > 0) {
-                    apiUrl += `?min_rank=${minRank}&max_rank=${maxRank}`;
-                }
+                const response = await fetch(url, {
+                    signal: controller.signal,
+                    headers: {
+                        'Cache-Control': 'no-cache'
+                    }
+                });
+                clearTimeout(timeoutId);
                 
-                console.log('API URL:', apiUrl);
-                
-                const response = await fetch(apiUrl);
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
                 
-                const data = await response.json();
-                console.log('API 데이터 수신:', data);
-                
-                updateTable(data);
+                return response;
             } catch (error) {
-                console.error('API 호출 실패:', error);
-                // 에러 발생 시 기존 필터링 방식 사용
-                filterHeroes();
-            }
-        }
-        
-        // 테이블 업데이트
-        function updateTable(heroData) {
-            const tbody = document.querySelector('.stats-table tbody');
-            
-            if (!heroData || !Array.isArray(heroData)) {
-                console.error('잘못된 데이터 형식:', heroData);
-                return;
-            }
-            
-            // 기존 데이터 제거
-            tbody.innerHTML = '';
-            
-            heroData.forEach((hero, index) => {
-                const row = createHeroRow(hero, index + 1);
-                tbody.appendChild(row);
-            });
-            
-            console.log(`테이블 업데이트 완료: ${heroData.length}개 영웅`);
-        }
-        
-        // 영웅 행 생성
-        function createHeroRow(hero, rank) {
-            const tr = document.createElement('tr');
-            tr.setAttribute('data-rank', hero.rank || rank);
-            tr.setAttribute('data-hero', hero.name ? hero.name.toLowerCase().replace(/\s+/g, '_') : `hero_${rank}`);
-            
-            const heroImageName = hero.name ? hero.name.toLowerCase().replace(/\s+/g, '_').replace('&', '').replace(/[^a-z0-9_]/g, '') : `hero_${rank}`;
-            const heroImageSrc = `https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/${heroImageName}_mm.webp`;
-            
-            tr.innerHTML = `
-                <td class="rank">${rank}</td>
-                <td>
-                    <div class="hero-info">
-                        <div class="hero-icon">
-                            <img src="${heroImageSrc}" alt="${hero.name || `Hero ${rank}`}" data-hero="${heroImageName}" 
-                                 onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\' viewBox=\'0 0 40 40\'%3E%3Crect width=\'40\' height=\'40\' fill=\'%2330363d\'/%3E%3Ctext x=\'20\' y=\'25\' text-anchor=\'middle\' font-family=\'Arial\' font-size=\'10\' fill=\'%23f0f6fc\'%3E${(hero.name || 'Hero').substring(0, 3)}%3C/text%3E%3C/svg%3E'" />
-                        </div>
-                        <div>
-                            <div class="hero-name">${hero.name || `Hero ${rank}`}</div>
-                            <div class="hero-role">${hero.role || 'Unknown'}</div>
-                        </div>
-                    </div>
-                </td>
-                <td>
-                    <div class="stat-bar">
-                        <div class="stat-fill win-rate-fill" style="width: ${hero.win_rate || 50}%"></div>
-                        <span class="stat-text">${hero.win_rate || '50.0'}%</span>
-                    </div>
-                </td>
-                <td>
-                    <div class="stat-bar">
-                        <div class="stat-fill pick-rate-fill" style="width: ${hero.pick_rate || 25}%"></div>
-                        <span class="stat-text">${hero.pick_rate || '25.0'}%</span>
-                    </div>
-                </td>
-                <td>
-                    <div class="kda">
-                        <span class="kills">${hero.avg_kills || '10.0'}</span> /
-                        <span class="deaths">${hero.avg_deaths || '8.0'}</span> /
-                        <span class="assists">${hero.avg_assists || '15.0'}</span>
-                    </div>
-                </td>
-                <td class="total-matches">${hero.total_matches ? hero.total_matches.toLocaleString() : '1,000'}</td>
-            `;
-            
-            return tr;
-        }
-        
-        // 백업 필터링 기능 (API 실패 시 사용)
-        function filterHeroes() {
-            const minRank = parseInt(document.getElementById('minRank').value);
-            const maxRank = parseInt(document.getElementById('maxRank').value);
-            const rows = document.querySelectorAll('.stats-table tbody tr');
-            
-            console.log('로컬 필터링 시작 - 최소:', minRank, '최대:', maxRank);
-            
-            rows.forEach(row => {
-                const heroRank = parseInt(row.getAttribute('data-rank'));
-                
-                // 모든 랭크를 선택한 경우 (0) 또는 범위 내에 있는 경우
-                if (minRank === 0 || (heroRank >= minRank && heroRank <= maxRank)) {
-                    row.style.display = '';
-                } else {
-                    row.style.display = 'none';
+                clearTimeout(timeoutId);
+                if (error.name === 'AbortError') {
+                    throw new Error('요청 시간이 초과되었습니다');
                 }
-            });
-            
-            // 표시되는 데이터 개수 카운트
-            const visibleRows = document.querySelectorAll('.stats-table tbody tr[style=""]').length;
-            const totalRows = document.querySelectorAll('.stats-table tbody tr').length;
-            console.log(`표시되는 영웅: ${visibleRows}/${totalRows}`);
+                throw error;
+            }
+        }
+
+        // 캐릭터 이미지 데이터 로드
+        async function loadHeroImages() {
+            try {
+                // 캐시에서 먼저 확인
+                const cachedImages = getCachedData(CACHE_KEYS.HERO_IMAGES);
+                if (cachedImages) {
+                    Object.assign(heroImages, cachedImages);
+                    console.log('캐릭터 이미지 캐시 로드 완료:', Object.keys(heroImages).length, '개');
+                    return;
+                }
+                
+                const response = await fetchWithTimeout('https://assets.deadlock-api.com/v2/heroes', 10000);
+                const heroes = await response.json();
+                
+                heroes.forEach(hero => {
+                    if (hero.images && hero.images.icon_image_small) {
+                        heroImages[hero.id] = hero.images.icon_image_small;
+                    }
+                });
+                
+                // 캐시에 저장
+                setCachedData(CACHE_KEYS.HERO_IMAGES, heroImages);
+                
+                console.log('캐릭터 이미지 로드 완료:', Object.keys(heroImages).length, '개');
+            } catch (error) {
+                console.error('캐릭터 이미지 로드 실패:', error);
+                // 캐시에서 이전 데이터 사용 시도
+                const cachedImages = getCachedData(CACHE_KEYS.HERO_IMAGES);
+                if (cachedImages) {
+                    Object.assign(heroImages, cachedImages);
+                    console.log('캐릭터 이미지 캐시 사용 (이전 데이터)');
+                }
+            }
         }
         
-        // 랭크 선택 이벤트
-        document.getElementById('minRank').addEventListener('change', function() {
-            const minRank = parseInt(this.value);
-            const maxRankSelect = document.getElementById('maxRank');
-            const maxRank = parseInt(maxRankSelect.value);
-            
-            // 최소 랭크가 최대 랭크보다 높으면 최대 랭크를 자동 조정
-            if (minRank > maxRank && minRank !== 0) {
-                maxRankSelect.value = minRank;
+        // 아이템 데이터를 먼저 로드하고 매핑 생성
+        async function loadItemMappings() {
+            try {
+                // 캐시에서 먼저 확인
+                const cachedMappings = getCachedData(CACHE_KEYS.ITEM_MAPPINGS);
+                if (cachedMappings) {
+                    Object.assign(itemNames, cachedMappings.names);
+                    Object.assign(itemImages, cachedMappings.images);
+                    console.log('아이템 매핑 캐시 로드 완료:', Object.keys(itemNames).length, '개');
+                    return true;
+                }
+                
+                const response = await fetchWithTimeout('https://assets.deadlock-api.com/v2/items', 10000);
+                const items = await response.json();
+                
+                // 주요 아이템들에 대한 한글 매핑
+                const koreanNames = {
+                    // 상위 아이템들 (자주 사용되는 것들)
+                    'Superior Cooldown': '상급 쿨다운 감소',
+                    'Extra Regen': '추가 재생',
+                    'Compress Cooldown': '압축 쿨다운',
+                    'Extra Spirit': '추가 정신력',
+                    'Fortitude': '불굴',
+                    'Extra Stamina': '추가 스태미나',
+                    'Extra Health': '추가 체력',
+                    'Improved Spirit': '개선된 정신력',
+                    'Quicksilver Reload': '수은 재장전',
+                    'Mystic Burst': '신비 점사',
+                    'Enchanter\'s Emblem': '마법사 엠블럼',
+                    'Rapid Rounds': '빠른 탄환',
+                    'Extra Charge': '추가 충전',
+                    'Extended Magazine': '확장 탄창',
+                    'Titanic Magazine': '타이타닉 탄창',
+                    
+                    // 기타 주요 아이템들
+                    'Improved Cooldown': '개선된 쿨다운 감소',
+                    'Melee Charge': '근접 돌격',
+                    'Basic Magazine': '기본 탄창',
+                    'Bullet Armor': '총알 방어구',
+                    'Spirit Armor': '정신 방어구',
+                    'Healing Rite': '치유 의식',
+                    'Sprint Boots': '질주 부츠',
+                    'Enduring Speed': '지속 속도',
+                    'Monster Rounds': '몬스터 탄환',
+                    'High-Velocity Mag': '고속 탄창',
+                    'Headshot Booster': '헤드샷 부스터',
+                    'Kinetic Dash': '운동 돌진',
+                    'Combat Barrier': '전투 방벽',
+                    'Debuff Reducer': '디버프 감소',
+                    'Divine Barrier': '신성 방벽',
+                    'Healing Booster': '치유 부스터',
+                    'Mystic Vulnerability': '신비 취약점',
+                    'Return Fire': '반격 사격',
+                    'Reactive Barrier': '반응형 방벽',
+                    'Restorative Shot': '회복 사격',
+                    'Soul Shredder Bullets': '영혼 파쇄 탄환',
+                    'Explosive Rounds': '폭발 탄환',
+                    'Toxic Bullets': '독성 탄환',
+                    'Slowing Bullets': '둔화 탄환',
+                    'Tesla Bullets': '테슬라 탄환',
+                    'Hollow Point Ward': '중공탄 방어',
+                    'Burst Fire': '점사',
+                    'Close Quarters': '근접 전투',
+                    'Long Range': '장거리',
+                    'Pristine Emblem': '완벽한 엠블럼',
+                    'Vitality Booster': '생명력 부스터',
+                    'Spirit Power': '정신력',
+                    'Weapon Damage': '무기 데미지',
+                    'Ammo Scavenger': '탄약 수집가',
+                    'Bullet Lifesteal': '총알 생명력 흡수',
+                    'Spirit Lifesteal': '정신 생명력 흡수',
+                    'Melee Lifesteal': '근접 생명력 흡수'
+                };
+                
+                // 모든 아이템에 대해 매핑 생성
+                items.forEach(item => {
+                    if (item.name && koreanNames[item.name]) {
+                        itemNames[item.id] = koreanNames[item.name];
+                    } else if (item.name) {
+                        itemNames[item.id] = item.name;
+                    } else {
+                        itemNames[item.id] = item.class_name || `아이템 ${item.id}`;
+                    }
+                    
+                    // 아이템 이미지 저장 (shop_image 우선, 없으면 image 사용)
+                    if (item.shop_image) {
+                        itemImages[item.id] = item.shop_image;
+                    } else if (item.image) {
+                        itemImages[item.id] = item.image;
+                    }
+                });
+                
+                // 캐시에 저장
+                setCachedData(CACHE_KEYS.ITEM_MAPPINGS, {
+                    names: itemNames,
+                    images: itemImages
+                });
+                
+                console.log('아이템 매핑 완료:', Object.keys(itemNames).length, '개');
+                return true;
+            } catch (error) {
+                console.error('아이템 매핑 실패:', error);
+                // 캐시에서 이전 데이터 사용 시도
+                const cachedMappings = getCachedData(CACHE_KEYS.ITEM_MAPPINGS);
+                if (cachedMappings) {
+                    Object.assign(itemNames, cachedMappings.names);
+                    Object.assign(itemImages, cachedMappings.images);
+                    console.log('아이템 매핑 캐시 사용 (이전 데이터)');
+                    return true;
+                }
+                return false;
             }
-            
-            // API에서 데이터 다시 가져오기
-            fetchHeroData();
-        });
+        }
         
-        document.getElementById('maxRank').addEventListener('change', function() {
-            const maxRank = parseInt(this.value);
-            const minRankSelect = document.getElementById('minRank');
-            const minRank = parseInt(minRankSelect.value);
-            
-            // 최대 랭크가 최소 랭크보다 낮으면 최소 랭크를 자동 조정
-            if (maxRank < minRank && minRank !== 0) {
-                minRankSelect.value = maxRank;
+        function createHeroRankingHTML(items, valueUnit = '') {
+            return items.map((item, index) => `
+                <div class="ranking-item">
+                    <span class="rank-number">${index + 1}</span>
+                    <div class="item-info">
+                        <div class="hero-image ${item.image ? '' : 'error'}" ${item.image ? `style="background-image: url('${item.image}'); background-size: cover;"` : ''}>
+                            ${item.image ? '' : item.name.charAt(0)}
+                        </div>
+                        <span class="character-name">${item.name}</span>
+                    </div>
+                    <span class="stat-value">${item.value}${valueUnit}</span>
+                </div>
+            `).join('');
+        }
+        
+        function createItemRankingHTML(items, valueUnit = '') {
+            return items.map((item, index) => `
+                <div class="ranking-item">
+                    <span class="rank-number">${index + 1}</span>
+                    <div class="item-info">
+                        <div class="item-image ${item.image ? '' : 'error'}" ${item.image ? `style="background-image: url('${item.image}'); background-size: cover;"` : ''}>
+                            ${item.image ? '' : '💎'}
+                        </div>
+                        <span class="item-name">${item.name}</span>
+                    </div>
+                    <span class="stat-value">${item.value}${valueUnit}</span>
+                </div>
+            `).join('');
+        }
+        
+        async function loadAndDisplayData() {
+            try {
+                console.log('1. 이미지 및 매핑 로드 중...');
+                updateLoadingStatus('most-played-section', '캐릭터 이미지 로드 중...');
+                updateLoadingStatus('win-rate-section', '아이템 데이터 로드 중...');
+                updateLoadingStatus('items-section', '통계 데이터 준비 중...');
+                
+                const [mappingSuccess] = await Promise.all([
+                    loadItemMappings(),
+                    loadHeroImages()
+                ]);
+                
+                console.log('2. API 데이터 로드 중...');
+                
+                // 캐시된 데이터 확인
+                const cachedHeroStats = getCachedData(CACHE_KEYS.HERO_STATS);
+                const cachedItemStats = getCachedData(CACHE_KEYS.ITEM_STATS);
+                
+                let heroStats, itemStats;
+                
+                if (cachedHeroStats && cachedItemStats) {
+                    console.log('캐시된 통계 데이터 사용');
+                    heroStats = cachedHeroStats;
+                    itemStats = cachedItemStats;
+                    
+                    updateLoadingStatus('most-played-section', '캐시 데이터 로드 중...');
+                    updateLoadingStatus('win-rate-section', '캐시 데이터 로드 중...');
+                    updateLoadingStatus('items-section', '캐시 데이터 로드 중...');
+                } else {
+                    updateLoadingStatus('most-played-section', '플레이 통계 로드 중...');
+                    updateLoadingStatus('win-rate-section', '승률 데이터 로드 중...');
+                    updateLoadingStatus('items-section', '아이템 통계 로드 중...');
+                    
+                    // 7일 전 타임스탬프 계산
+                    const sevenDaysAgo = Math.floor(Date.now() / 1000) - (7 * 24 * 60 * 60);
+                    
+                    const [heroResponse, itemResponse] = await Promise.all([
+                        fetchWithTimeout(`https://api.deadlock-api.com/v1/analytics/hero-stats?min_unix_timestamp=${sevenDaysAgo}`, 15000),
+                        fetchWithTimeout(`https://api.deadlock-api.com/v1/analytics/item-stats?min_unix_timestamp=${sevenDaysAgo}`, 15000)
+                    ]);
+                    
+                    heroStats = await heroResponse.json();
+                    itemStats = await itemResponse.json();
+                    
+                    // 캐시에 저장
+                    setCachedData(CACHE_KEYS.HERO_STATS, heroStats);
+                    setCachedData(CACHE_KEYS.ITEM_STATS, itemStats);
+                }
+                
+                console.log('3. 데이터 처리 중...');
+                
+                // 캐릭터 데이터 처리
+                const heroData = heroStats.map(hero => ({
+                    id: hero.hero_id,
+                    name: heroNames[hero.hero_id] || `캐릭터 ${hero.hero_id}`,
+                    matches: hero.matches || 0,
+                    winRate: hero.matches > 0 ? ((hero.wins / hero.matches) * 100).toFixed(1) : '0.0',
+                    image: heroImages[hero.hero_id] || ''
+                }));
+                
+                // 최고 플레이 캐릭터
+                const mostPlayed = heroData
+                    .sort((a, b) => b.matches - a.matches)
+                    .slice(0, 8)
+                    .map(hero => ({ 
+                        name: hero.name, 
+                        value: hero.matches.toLocaleString(),
+                        image: hero.image
+                    }));
+                
+                // 최고 승률 캐릭터
+                const bestWinRate = heroData
+                    .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate))
+                    .slice(0, 8)
+                    .map(hero => ({ 
+                        name: hero.name, 
+                        value: hero.winRate,
+                        image: hero.image
+                    }));
+                
+                // 아이템 데이터 처리
+                const maxMatches = Math.max(...itemStats.map(item => item.matches || 0));
+                const topItems = itemStats
+                    .sort((a, b) => (b.matches || 0) - (a.matches || 0))
+                    .slice(0, 8)
+                    .map(item => ({
+                        name: itemNames[item.item_id] || `아이템 ${item.item_id}`,
+                        value: maxMatches > 0 ? ((item.matches / maxMatches) * 100).toFixed(1) : '0.0',
+                        image: itemImages[item.item_id] || ''
+                    }));
+                
+                console.log('4. UI 업데이트 중...');
+                
+                // UI 업데이트
+                document.getElementById('most-played-section').innerHTML = 
+                    '<ul class="ranking-list">' + createHeroRankingHTML(mostPlayed) + '</ul>';
+                    
+                document.getElementById('win-rate-section').innerHTML = 
+                    '<ul class="ranking-list">' + createHeroRankingHTML(bestWinRate, '%') + '</ul>';
+                    
+                document.getElementById('items-section').innerHTML = 
+                    '<ul class="ranking-list">' + createItemRankingHTML(topItems, '%') + '</ul>';
+                
+                // 업데이트 시간 표시
+                const now = new Date();
+                const updateTime = now.toLocaleString('ko-KR', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    timeZone: 'Asia/Seoul'
+                });
+                
+                document.getElementById('last-update').innerHTML = 
+                    `<span>📅 마지막 업데이트: ${updateTime} (KST)</span>`;
+                
+                console.log('✅ 모든 데이터 로딩 완료!');
+                
+            } catch (error) {
+                console.error('❌ 데이터 로딩 실패:', error);
+                
+                // 캐시된 데이터로 폴백 시도
+                const cachedHeroStats = getCachedData(CACHE_KEYS.HERO_STATS);
+                const cachedItemStats = getCachedData(CACHE_KEYS.ITEM_STATS);
+                
+                if (cachedHeroStats && cachedItemStats) {
+                    console.log('🔄 캐시된 데이터로 폴백');
+                    
+                    try {
+                        // 캐시된 데이터로 UI 업데이트 시도
+                        const heroData = cachedHeroStats.map(hero => ({
+                            id: hero.hero_id,
+                            name: heroNames[hero.hero_id] || `캐릭터 ${hero.hero_id}`,
+                            matches: hero.matches || 0,
+                            winRate: hero.matches > 0 ? ((hero.wins / hero.matches) * 100).toFixed(1) : '0.0',
+                            image: heroImages[hero.hero_id] || ''
+                        }));
+                        
+                        const mostPlayed = heroData
+                            .sort((a, b) => b.matches - a.matches)
+                            .slice(0, 8)
+                            .map(hero => ({ 
+                                name: hero.name, 
+                                value: hero.matches.toLocaleString(),
+                                image: hero.image
+                            }));
+                        
+                        const bestWinRate = heroData
+                            .sort((a, b) => parseFloat(b.winRate) - parseFloat(a.winRate))
+                            .slice(0, 8)
+                            .map(hero => ({ 
+                                name: hero.name, 
+                                value: hero.winRate,
+                                image: hero.image
+                            }));
+                        
+                        const maxMatches = Math.max(...cachedItemStats.map(item => item.matches || 0));
+                        const topItems = cachedItemStats
+                            .sort((a, b) => (b.matches || 0) - (a.matches || 0))
+                            .slice(0, 8)
+                            .map(item => ({
+                                name: itemNames[item.item_id] || `아이템 ${item.item_id}`,
+                                value: maxMatches > 0 ? ((item.matches / maxMatches) * 100).toFixed(1) : '0.0',
+                                image: itemImages[item.item_id] || ''
+                            }));
+                        
+                        document.getElementById('most-played-section').innerHTML = 
+                            '<ul class="ranking-list">' + createHeroRankingHTML(mostPlayed) + '</ul>';
+                            
+                        document.getElementById('win-rate-section').innerHTML = 
+                            '<ul class="ranking-list">' + createHeroRankingHTML(bestWinRate, '%') + '</ul>';
+                            
+                        document.getElementById('items-section').innerHTML = 
+                            '<ul class="ranking-list">' + createItemRankingHTML(topItems, '%') + '</ul>';
+                        
+                        document.getElementById('last-update').innerHTML = 
+                            `<span>⚠️ 네트워크 오류 - 캐시된 데이터 표시 중</span>`;
+                        
+                        return; // 캐시 데이터로 성공적으로 표시했으므로 여기서 종료
+                    } catch (cacheError) {
+                        console.error('캐시 데이터 처리 실패:', cacheError);
+                    }
+                }
+                
+                // 캐시도 실패한 경우 에러 메시지 표시
+                showError('most-played-section', `데이터 로드 실패: ${error.message}`);
+                showError('win-rate-section', `데이터 로드 실패: ${error.message}`);
+                showError('items-section', `데이터 로드 실패: ${error.message}`);
+                
+                document.getElementById('last-update').innerHTML = 
+                    `<span>❌ 업데이트 실패: ${error.message}</span>`;
+                
+                // 재시도 버튼 추가
+                setTimeout(() => {
+                    document.getElementById('last-update').innerHTML += 
+                        '<br><button onclick="loadAndDisplayData()" class="retry-button">🔄 다시 시도</button>';
+                }, 1000);
             }
-            
-            // API에서 데이터 다시 가져오기
-            fetchHeroData();
-        });
+        }
         
-        // 초기 데이터 로드
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('페이지 로드 완료, API 데이터 가져오기 시작');
-            fetchHeroData();
-        });
+        // 페이지 로드 시 실행
+        window.addEventListener('load', loadAndDisplayData);
     </script>
 </body>
 </html>
