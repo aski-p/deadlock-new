@@ -1022,6 +1022,24 @@ app.get('/ko/players/:accountId', (req, res) => {
   });
 });
 
+// 개인 프로필 페이지 라우트 (로그인 필요)
+app.get('/ko/profile', (req, res) => {
+  if (!req.user) {
+    return res.redirect('/auth/steam');
+  }
+  
+  // Steam ID를 32-bit account ID로 변환
+  const accountId = req.user.steamId ? 
+    (BigInt(req.user.steamId) - BigInt('76561197960265728')).toString() : 
+    req.user.accountId;
+  
+  res.render('my-profile', { 
+    user: req.user,
+    accountId: accountId,
+    title: `내 프로필 - 박근형의 데드락`
+  });
+});
+
 // Health check
 app.get('/health', (req, res) => {
   res.json({ 

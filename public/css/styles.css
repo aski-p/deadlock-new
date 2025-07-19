@@ -392,6 +392,26 @@ footer {
     box-shadow: 0 4px 16px rgba(88, 101, 242, 0.4);
 }
 
+.profile-btn {
+    background: #5865F2;
+    color: #ffffff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 13px;
+    transition: all 0.3s;
+    border: 1px solid #5865F2;
+    cursor: pointer;
+}
+
+.profile-btn:hover {
+    background: #4752C4;
+    border-color: #4752C4;
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
 .logout-btn {
     background: rgba(255, 255, 255, 0.1);
     color: #ffffff;
