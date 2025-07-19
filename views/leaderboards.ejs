@@ -1,0 +1,206 @@
+<% 
+const body = `
+<div class="leaderboards-section">
+    <div class="leaderboards-container">
+        <div class="leaderboards-header">
+            <h1 class="page-title">리더보드 - ${region === 'europe' ? '유럽' : region === 'asia' ? '아시아' : '북미'}</h1>
+            
+            <div class="region-selector">
+                <a href="/ko/leaderboards/europe" class="region-btn ${region === 'europe' ? 'active' : ''}">
+                    유럽
+                </a>
+                <a href="/ko/leaderboards/asia" class="region-btn ${region === 'asia' ? 'active' : ''}">
+                    아시아
+                </a>
+                <a href="/ko/leaderboards/north-america" class="region-btn ${region === 'north-america' ? 'active' : ''}">
+                    북미
+                </a>
+            </div>
+        </div>
+
+        <div class="filters-section">
+            <div class="filter-group">
+                <label for="hero-filter">영웅 필터:</label>
+                <select id="hero-filter" class="filter-select">
+                    <option value="all">모든 영웅</option>
+                    <option value="abrams">Abrams</option>
+                    <option value="bebop">Bebop</option>
+                    <option value="dynamo">Dynamo</option>
+                    <option value="grey-talon">Grey Talon</option>
+                    <option value="haze">Haze</option>
+                    <option value="infernus">Infernus</option>
+                    <option value="ivy">Ivy</option>
+                    <option value="kelvin">Kelvin</option>
+                    <option value="lady-geist">Lady Geist</option>
+                    <option value="lash">Lash</option>
+                    <option value="mcginnis">McGinnis</option>
+                    <option value="mo-krill">Mo & Krill</option>
+                    <option value="paradox">Paradox</option>
+                    <option value="pocket">Pocket</option>
+                    <option value="seven">Seven</option>
+                    <option value="shiv">Shiv</option>
+                    <option value="vindicta">Vindicta</option>
+                    <option value="viscous">Viscous</option>
+                    <option value="warden">Warden</option>
+                    <option value="wraith">Wraith</option>
+                    <option value="yamato">Yamato</option>
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <label for="medal-filter">메달 필터:</label>
+                <select id="medal-filter" class="filter-select">
+                    <option value="all">모든 메달</option>
+                    <option value="eternus">Eternus</option>
+                    <option value="phantom">Phantom</option>
+                    <option value="oracle">Oracle</option>
+                    <option value="ritualist">Ritualist</option>
+                    <option value="alchemist">Alchemist</option>
+                    <option value="arcanist">Arcanist</option>
+                    <option value="initiate">Initiate</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="leaderboard-table-container">
+            <div class="table-loading" id="table-loading">
+                <div class="loading-spinner"></div>
+                <p>리더보드 데이터를 불러오는 중...</p>
+            </div>
+            
+            <table class="leaderboard-table" id="leaderboard-table" style="display: none;">
+                <thead>
+                    <tr>
+                        <th class="rank-column">순위</th>
+                        <th class="player-column">플레이어</th>
+                        <th class="heroes-column">영웅</th>
+                        <th class="medal-column">메달</th>
+                        <th class="score-column">점수</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-tbody">
+                </tbody>
+            </table>
+            
+            <div class="pagination" id="pagination">
+                <button class="pagination-btn" id="prev-btn" disabled>이전</button>
+                <span class="pagination-info" id="pagination-info">1 / 10</span>
+                <button class="pagination-btn" id="next-btn">다음</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentPage = 1;
+let totalPages = 10;
+let currentFilters = {
+    region: '${region}',
+    hero: 'all',
+    medal: 'all'
+};
+
+// Mock leaderboard data (실제로는 API에서 가져와야 함)
+const mockLeaderboardData = [
+    { rank: 1, player: { name: 'ProPlayer1', avatar: 'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', steamId: '76561198000000001' }, heroes: ['Abrams', 'Haze'], medal: 'Eternus', score: 3420 },
+    { rank: 2, player: { name: 'TopGamer', avatar: 'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', steamId: '76561198000000002' }, heroes: ['Vindicta', 'Wraith'], medal: 'Eternus', score: 3380 },
+    { rank: 3, player: { name: 'DeadlockMaster', avatar: 'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', steamId: '76561198000000003' }, heroes: ['Bebop', 'Seven'], medal: 'Phantom', score: 3250 },
+    { rank: 4, player: { name: 'SkillPlayer', avatar: 'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', steamId: '76561198000000004' }, heroes: ['Paradox'], medal: 'Phantom', score: 3180 },
+    { rank: 5, player: { name: 'GameChanger', avatar: 'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', steamId: '76561198000000005' }, heroes: ['Ivy', 'Kelvin'], medal: 'Oracle', score: 3050 }
+];
+
+function loadLeaderboardData() {
+    const loading = document.getElementById('table-loading');
+    const table = document.getElementById('leaderboard-table');
+    
+    loading.style.display = 'flex';
+    table.style.display = 'none';
+    
+    // Simulate API call delay
+    setTimeout(() => {
+        updateLeaderboardTable(mockLeaderboardData);
+        loading.style.display = 'none';
+        table.style.display = 'table';
+    }, 1000);
+}
+
+function updateLeaderboardTable(data) {
+    const tbody = document.getElementById('leaderboard-tbody');
+    
+    tbody.innerHTML = data.map(player => 
+        '<tr class="leaderboard-row">' +
+        '<td class="rank-cell">' +
+            '<span class="rank-number">' + player.rank + '</span>' +
+        '</td>' +
+        '<td class="player-cell">' +
+            '<div class="player-info">' +
+                '<img src="' + player.player.avatar + '" alt="' + player.player.name + '" class="player-avatar">' +
+                '<span class="player-name">' + player.player.name + '</span>' +
+            '</div>' +
+        '</td>' +
+        '<td class="heroes-cell">' +
+            '<div class="heroes-list">' +
+                player.heroes.map(hero => '<span class="hero-tag">' + hero + '</span>').join('') +
+            '</div>' +
+        '</td>' +
+        '<td class="medal-cell">' +
+            '<div class="medal-badge medal-' + player.medal.toLowerCase() + '">' +
+                player.medal +
+            '</div>' +
+        '</td>' +
+        '<td class="score-cell">' +
+            '<span class="score-number">' + player.score.toLocaleString() + '</span>' +
+        '</td>' +
+        '</tr>'
+    ).join('');
+}
+
+function updatePagination() {
+    const paginationInfo = document.getElementById('pagination-info');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    
+    paginationInfo.textContent = currentPage + ' / ' + totalPages;
+    prevBtn.disabled = currentPage === 1;
+    nextBtn.disabled = currentPage === totalPages;
+}
+
+// Event listeners
+document.getElementById('hero-filter').addEventListener('change', (e) => {
+    currentFilters.hero = e.target.value;
+    currentPage = 1;
+    loadLeaderboardData();
+});
+
+document.getElementById('medal-filter').addEventListener('change', (e) => {
+    currentFilters.medal = e.target.value;
+    currentPage = 1;
+    loadLeaderboardData();
+});
+
+document.getElementById('prev-btn').addEventListener('click', () => {
+    if (currentPage > 1) {
+        currentPage--;
+        loadLeaderboardData();
+        updatePagination();
+    }
+});
+
+document.getElementById('next-btn').addEventListener('click', () => {
+    if (currentPage < totalPages) {
+        currentPage++;
+        loadLeaderboardData();
+        updatePagination();
+    }
+});
+
+// Initialize
+document.addEventListener('DOMContentLoaded', () => {
+    loadLeaderboardData();
+    updatePagination();
+});
+</script>
+`;
+%>
+
+<%- include('layout', { body: body, title: title, user: user }) %>

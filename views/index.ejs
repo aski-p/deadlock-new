@@ -1,0 +1,158 @@
+<% 
+const body = `
+<div class="hero-section">
+    <div class="hero-container">
+        <h1 class="hero-title">Deadlock Coach</h1>
+        <p class="hero-subtitle">데드락 게임의 최고 코칭 플랫폼</p>
+        
+        <div class="hero-stats">
+            <div class="stat-card">
+                <div class="stat-number">50,000+</div>
+                <div class="stat-label">등록된 플레이어</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">1,000+</div>
+                <div class="stat-label">게임 분석</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">실시간 업데이트</div>
+            </div>
+        </div>
+
+        ${!user ? `
+        <div class="hero-cta">
+            <a href="/auth/steam" class="cta-button">
+                <img src="/images/steam-icon.png" alt="Steam" class="steam-icon">
+                Steam으로 시작하기
+            </a>
+        </div>
+        ` : `
+        <div class="hero-cta">
+            <a href="/ko/leaderboards/europe" class="cta-button">
+                리더보드 보기
+            </a>
+        </div>
+        `}
+    </div>
+</div>
+
+<div class="features-section">
+    <div class="features-container">
+        <h2 class="section-title">주요 기능</h2>
+        
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🏆</div>
+                <h3 class="feature-title">리더보드</h3>
+                <p class="feature-description">실시간 글로벌 및 지역별 랭킹을 확인하세요</p>
+                <a href="/ko/leaderboards/europe" class="feature-link">보러가기</a>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🎮</div>
+                <h3 class="feature-title">플레이어 통계</h3>
+                <p class="feature-description">상세한 개인 통계와 게임 히스토리를 분석하세요</p>
+                <a href="/ko/stats" class="feature-link">보러가기</a>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h3 class="feature-title">게임 가이드</h3>
+                <p class="feature-description">영웅별 가이드와 아이템 빌드를 학습하세요</p>
+                <a href="/ko/heroes" class="feature-link">보러가기</a>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⚔️</div>
+                <h3 class="feature-title">매치 분석</h3>
+                <p class="feature-description">게임 리플레이와 상세 분석을 제공합니다</p>
+                <a href="/ko/matches" class="feature-link">보러가기</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+${user ? `
+<div class="user-dashboard">
+    <div class="dashboard-container">
+        <h2 class="section-title">안녕하세요, ${user.username}님!</h2>
+        
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <h3>최근 게임</h3>
+                <div id="recent-games">
+                    <p>최근 게임을 불러오는 중...</p>
+                </div>
+            </div>
+            
+            <div class="dashboard-card">
+                <h3>통계 요약</h3>
+                <div id="stats-summary">
+                    <p>통계를 불러오는 중...</p>
+                </div>
+            </div>
+            
+            <div class="dashboard-card">
+                <h3>순위</h3>
+                <div id="rank-info">
+                    <p>순위 정보를 불러오는 중...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Load user data if logged in
+async function loadUserData() {
+    try {
+        // Load recent games
+        const recentResponse = await fetch('/api/player/${user.steamId}/recent');
+        const recentData = await recentResponse.json();
+        
+        // Load stats
+        const statsResponse = await fetch('/api/player/${user.steamId}/stats');
+        const statsData = await statsResponse.json();
+        
+        // Update UI with data
+        updateRecentGames(recentData);
+        updateStats(statsData);
+        
+    } catch (error) {
+        console.error('Error loading user data:', error);
+    }
+}
+
+function updateRecentGames(data) {
+    const container = document.getElementById('recent-games');
+    if (data && data.response && data.response.games) {
+        const games = data.response.games.slice(0, 3);
+        container.innerHTML = games.map(game => 
+            '<div class="recent-game">' +
+            '<span class="game-name">' + game.name + '</span>' +
+            '<span class="playtime">' + Math.round(game.playtime_2weeks / 60) + '시간</span>' +
+            '</div>'
+        ).join('');
+    } else {
+        container.innerHTML = '<p>최근 게임 데이터가 없습니다.</p>';
+    }
+}
+
+function updateStats(data) {
+    const container = document.getElementById('stats-summary');
+    if (data && data.playerstats) {
+        container.innerHTML = '<p>게임 통계가 업데이트되었습니다.</p>';
+    } else {
+        container.innerHTML = '<p>통계 데이터를 불러올 수 없습니다.</p>';
+    }
+}
+
+// Load data when page loads
+document.addEventListener('DOMContentLoaded', loadUserData);
+</script>
+` : ''}
+`;
+%>
+
+<%- include('layout', { body: body, title: title, user: user }) %>

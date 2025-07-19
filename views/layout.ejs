@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    <meta name="description" content="Deadlock Coach - 데드락 게임 코칭 플랫폼">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <a href="/ko" class="logo">
+                    <img src="/images/logo.png" alt="Deadlock Coach" class="logo-image">
+                    <span class="logo-text">Deadlock Coach</span>
+                </a>
+                
+                <div class="nav-menu">
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link">Wiki</a>
+                        <div class="dropdown-content">
+                            <a href="/ko/heroes">Heroes</a>
+                            <a href="/ko/items">Items</a>
+                            <a href="/ko/guides">Guides</a>
+                        </div>
+                    </div>
+                    
+                    <div class="nav-item dropdown">
+                        <a href="#" class="nav-link">Leaderboards</a>
+                        <div class="dropdown-content">
+                            <a href="/ko/leaderboards/europe">Europe</a>
+                            <a href="/ko/leaderboards/asia">Asia</a>
+                            <a href="/ko/leaderboards/north-america">North America</a>
+                        </div>
+                    </div>
+                    
+                    <div class="nav-item">
+                        <a href="/ko/stats" class="nav-link">Stats</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nav-right">
+                <% if (user) { %>
+                    <div class="user-menu">
+                        <img src="<%= user.avatar %>" alt="<%= user.username %>" class="user-avatar">
+                        <span class="username"><%= user.username %></span>
+                        <a href="/logout" class="logout-btn">로그아웃</a>
+                    </div>
+                <% } else { %>
+                    <a href="/auth/steam" class="steam-login-btn">
+                        <img src="/images/steam-login.png" alt="Steam으로 로그인">
+                    </a>
+                <% } %>
+            </div>
+        </div>
+    </nav>
+
+    <main class="main-content">
+        <%- body %>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <p>&copy; 2024 Deadlock Coach. All rights reserved.</p>
+            <p>게임 데이터는 Steam API를 통해 제공됩니다.</p>
+        </div>
+    </footer>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
