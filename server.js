@@ -20,11 +20,11 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Session configuration
 app.use(session({
-  secret: process.env.SESSION_SECRET,
+  secret: process.env.SESSION_SECRET || 'fallback-secret-key-for-development',
   resave: false,
   saveUninitialized: false,
   cookie: {
-    secure: false, // Set to true in production with HTTPS
+    secure: process.env.NODE_ENV === 'production' && process.env.RAILWAY_ENVIRONMENT, // Only secure in production
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
@@ -33,12 +33,24 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Steam Strategy
-passport.use(new SteamStrategy({
-    returnURL: process.env.STEAM_RETURN_URL,
-    realm: process.env.STEAM_REALM,
-    apiKey: process.env.STEAM_API_KEY
-  },
+// Check if Steam API key is configured
+const steamApiKey = process.env.STEAM_API_KEY;
+const isProduction = process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT;
+const baseUrl = isProduction ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN || 'deadlock-new-production.up.railway.app'}` : 'http://localhost:3000';
+
+console.log('🔧 Environment check:');
+console.log('- NODE_ENV:', process.env.NODE_ENV);
+console.log('- RAILWAY_ENVIRONMENT:', process.env.RAILWAY_ENVIRONMENT);
+console.log('- Steam API Key:', steamApiKey ? 'Configured' : 'Missing');
+console.log('- Base URL:', baseUrl);
+
+// Steam Strategy (only if API key is available)
+if (steamApiKey) {
+  passport.use(new SteamStrategy({
+      returnURL: `${baseUrl}/auth/steam/return`,
+      realm: baseUrl,
+      apiKey: steamApiKey
+    },
   async (identifier, profile, done) => {
     try {
       // Extract Steam ID from identifier
@@ -65,13 +77,16 @@ passport.use(new SteamStrategy({
   }
 ));
 
-passport.serializeUser((user, done) => {
-  done(null, user);
-});
+  passport.serializeUser((user, done) => {
+    done(null, user);
+  });
 
-passport.deserializeUser((user, done) => {
-  done(null, user);
-});
+  passport.deserializeUser((user, done) => {
+    done(null, user);
+  });
+} else {
+  console.log('⚠️ Steam API key not configured - Steam authentication disabled');
+}
 
 // Steam API utility functions
 const steamAPI = {
@@ -119,20 +134,34 @@ app.get('/ko/leaderboards/europe', (req, res) => {
   });
 });
 
-// Steam Auth Routes
-app.get('/auth/steam',
-  passport.authenticate('steam', { failureRedirect: '/' }),
-  (req, res) => {
-    res.redirect('/');
-  }
-);
+// Steam Auth Routes (only if Steam is configured)
+if (steamApiKey) {
+  app.get('/auth/steam',
+    passport.authenticate('steam', { failureRedirect: '/' }),
+    (req, res) => {
+      res.redirect('/');
+    }
+  );
 
-app.get('/auth/steam/return',
-  passport.authenticate('steam', { failureRedirect: '/' }),
-  (req, res) => {
-    res.redirect('/');
-  }
-);
+  app.get('/auth/steam/return',
+    passport.authenticate('steam', { failureRedirect: '/' }),
+    (req, res) => {
+      res.redirect('/');
+    }
+  );
+} else {
+  // Fallback routes when Steam is not configured
+  app.get('/auth/steam', (req, res) => {
+    res.status(503).json({ 
+      error: 'Steam authentication not configured',
+      message: 'Please set STEAM_API_KEY environment variable'
+    });
+  });
+
+  app.get('/auth/steam/return', (req, res) => {
+    res.redirect('/?error=steam_not_configured');
+  });
+}
 
 app.get('/logout', (req, res) => {
   req.logout((err) => {
@@ -188,7 +217,12 @@ app.get('/health', (req, res) => {
   res.json({ 
     status: 'OK', 
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    environment: {
+      nodeEnv: process.env.NODE_ENV,
+      railway: !!process.env.RAILWAY_ENVIRONMENT,
+      steamConfigured: !!steamApiKey
+    }
   });
 });
 
@@ -208,6 +242,8 @@ app.use((req, res) => {
 
 app.listen(PORT, () => {
   console.log(`🚀 Deadlock Coach server running on port ${PORT}`);
-  console.log(`🔗 Local: http://localhost:${PORT}`);
-  console.log(`🎮 Steam API Key: ${process.env.STEAM_API_KEY ? 'Configured' : 'Missing'}`);
+  console.log(`🔗 URL: ${baseUrl}`);
+  console.log(`🎮 Steam API: ${steamApiKey ? 'Configured' : 'Missing (authentication disabled)'}`);
+  console.log(`🌐 Environment: ${isProduction ? 'Production' : 'Development'}`);
+  console.log(`📊 Health check: ${baseUrl}/health`);
 });
