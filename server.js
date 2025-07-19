@@ -217,7 +217,7 @@ const fetchDeadlockLeaderboard = async (region, page = 1, limit = 50) => {
       console.log(`✅ 실제 데드락 API 성공! ${response.data.entries.length}명의 플레이어 데이터 획득`);
       
       // API 응답을 우리 형식으로 변환 (전체 1000명, 페이징 없음)
-      const convertedData = convertDeadlockApiToOurFormat(response.data.entries, region);
+      const convertedData = await convertDeadlockApiToOurFormat(response.data.entries, region);
       return convertedData;
     }
 
@@ -231,7 +231,7 @@ const fetchDeadlockLeaderboard = async (region, page = 1, limit = 50) => {
 };
 
 // 데드락 API 응답을 우리 형식으로 변환 (전체 데이터, 페이징 없음)
-const convertDeadlockApiToOurFormat = (apiData, region) => {
+const convertDeadlockApiToOurFormat = async (apiData, region) => {
   try {
     // 영웅 ID 매핑 (실제 API에서 사용하는 ID)
     const heroIdMapping = {
