@@ -121,14 +121,14 @@ const steamAPI = {
 app.get('/', (req, res) => {
   res.render('index', { 
     user: req.user,
-    title: 'Deadlock Coach - Korean'
+    title: '박근형의 데드락'
   });
 });
 
 app.get('/ko', (req, res) => {
   res.render('index', { 
     user: req.user,
-    title: 'Deadlock Coach - Korean'
+    title: '박근형의 데드락'
   });
 });
 
@@ -136,7 +136,7 @@ app.get('/ko/leaderboards/europe', (req, res) => {
   res.render('leaderboards', { 
     user: req.user,
     region: 'europe',
-    title: 'European Leaderboards - Deadlock Coach'
+    title: 'European Leaderboards - 박근형의 데드락'
   });
 });
 
@@ -242,12 +242,12 @@ app.use((err, req, res, next) => {
 app.use((req, res) => {
   res.status(404).render('404', { 
     user: req.user,
-    title: 'Page Not Found'
+    title: 'Page Not Found - 박근형의 데드락'
   });
 });
 
 app.listen(PORT, () => {
-  console.log(`🚀 Deadlock Coach server running on port ${PORT}`);
+  console.log(`🚀 박근형의 데드락 server running on port ${PORT}`);
   console.log(`🔗 URL: ${baseUrl}`);
   console.log(`🎮 Steam API: ${steamApiKey ? 'Configured' : 'Missing (authentication disabled)'}`);
   console.log(`🌐 Environment: ${isProduction ? 'Production' : 'Development'}`);
