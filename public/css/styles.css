@@ -762,9 +762,20 @@ footer {
     border: 2px solid rgba(255, 255, 255, 0.2);
 }
 
+.player-name-link {
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s;
+}
+
+.player-name-link:hover {
+    color: #63a2e2;
+}
+
 .player-name {
     font-weight: 500;
     color: #ffffff;
+    transition: all 0.3s;
 }
 
 .country-cell {

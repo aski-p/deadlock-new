@@ -371,6 +371,7 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
           name: player.account_name || `Player_${player.rank}`,
           avatar: `https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg`, // 기본 아바타
           steamId: steamId,
+          accountId: player.possible_account_ids && player.possible_account_ids.length > 0 ? player.possible_account_ids[0] : player.rank,
           country: getRandomCountryFlag(region)
         },
         heroes: finalHeroes,
@@ -414,7 +415,7 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
                 const steamUsers = steamResponse.data.response.players;
                 console.log(`✅ Steam API 배치 응답: ${steamUsers.length}명의 유저 데이터 수신`);
                 
-                // 각 Steam 유저 데이터를 매칭해서 아바타 업데이트
+                // 각 Steam 유저 데이터를 매칭해서 아바타 및 국가 정보 업데이트
                 steamUsers.forEach(steamUser => {
                   const playerIndex = convertedPlayers.findIndex(p => p.player.steamId === steamUser.steamid);
                   if (playerIndex !== -1) {
@@ -444,6 +445,14 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
                       } else {
                         console.log(`⚪ 기본 아바타 스킵: ${steamUser.personaname}`);
                       }
+                    }
+                    
+                    // 국가 정보 업데이트
+                    if (steamUser.loccountrycode) {
+                      const countryFlag = getCountryFlag(steamUser.loccountrycode);
+                      convertedPlayers[playerIndex].player.country = countryFlag;
+                      convertedPlayers[playerIndex].player.countryCode = steamUser.loccountrycode;
+                      console.log(`🌍 국가 업데이트: ${steamUser.personaname} -> ${steamUser.loccountrycode} ${countryFlag}`);
                     }
                   }
                 });
@@ -489,7 +498,47 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
   }
 };
 
-// 지역별 랜덤 국가 플래그 반환
+// Steam 플레이어 국가 정보 가져오기
+const getPlayerCountryFromSteam = async (steamId) => {
+  if (!steamApiKey || !steamId || !isValidSteamId64(steamId)) {
+    return null;
+  }
+
+  try {
+    const response = await axios.get(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/`, {
+      params: {
+        key: steamApiKey,
+        steamids: steamId
+      },
+      timeout: 5000
+    });
+
+    if (response.data && response.data.response && response.data.response.players && response.data.response.players.length > 0) {
+      const player = response.data.response.players[0];
+      return player.loccountrycode; // ISO 국가 코드 (예: "CN", "KR", "US")
+    }
+  } catch (error) {
+    console.log(`❌ Steam 국가 정보 조회 실패 (${steamId}):`, error.message);
+  }
+  
+  return null;
+};
+
+// 국가 코드를 플래그 이모지로 변환
+const getCountryFlag = (countryCode) => {
+  const countryToFlag = {
+    'CN': '🇨🇳', 'KR': '🇰🇷', 'JP': '🇯🇵', 'TW': '🇹🇼', 'TH': '🇹🇭', 'VN': '🇻🇳',
+    'SG': '🇸🇬', 'MY': '🇲🇾', 'PH': '🇵🇭', 'ID': '🇮🇩', 'IN': '🇮🇳', 'AU': '🇦🇺', 'NZ': '🇳🇿',
+    'US': '🇺🇸', 'CA': '🇨🇦', 'MX': '🇲🇽',
+    'DE': '🇩🇪', 'GB': '🇬🇧', 'FR': '🇫🇷', 'ES': '🇪🇸', 'IT': '🇮🇹', 'PL': '🇵🇱', 'RU': '🇷🇺',
+    'SE': '🇸🇪', 'NO': '🇳🇴', 'DK': '🇩🇰', 'NL': '🇳🇱', 'BE': '🇧🇪', 'AT': '🇦🇹', 'CH': '🇨🇭', 'FI': '🇫🇮',
+    'BR': '🇧🇷', 'AR': '🇦🇷', 'CL': '🇨🇱', 'CO': '🇨🇴', 'PE': '🇵🇪', 'UY': '🇺🇾', 'EC': '🇪🇨', 'VE': '🇻🇪'
+  };
+  
+  return countryToFlag[countryCode] || '🌍';
+};
+
+// 지역별 랜덤 국가 플래그 반환 (fallback)
 const getRandomCountryFlag = (region) => {
   const regionFlags = {
     'europe': ['🇩🇪', '🇬🇧', '🇫🇷', '🇪🇸', '🇮🇹', '🇵🇱', '🇷🇺', '🇸🇪', '🇳🇴', '🇩🇰', '🇳🇱', '🇧🇪', '🇦🇹', '🇨🇭', '🇫🇮'],
@@ -839,6 +888,110 @@ app.get('/api/v1/leaderboards/:region', async (req, res) => {
   }
 });
 
+// 플레이어 상세 정보 API
+app.get('/api/v1/players/:accountId', async (req, res) => {
+  try {
+    const { accountId } = req.params;
+    console.log(`🔍 플레이어 상세 정보 요청: ${accountId}`);
+    
+    // Account ID를 Steam ID로 변환
+    const steamId = convertToSteamId64(accountId);
+    if (!steamId || !isValidSteamId64(steamId)) {
+      return res.status(400).json({ error: 'Invalid account ID' });
+    }
+
+    // Steam API에서 기본 정보 가져오기
+    let playerInfo = {
+      accountId: accountId,
+      steamId: steamId,
+      name: `Player_${accountId}`,
+      avatar: 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
+      country: '🌍',
+      countryCode: null,
+      stats: {
+        matches: Math.floor(Math.random() * 500) + 50,
+        winRate: Math.floor(Math.random() * 40) + 50,
+        laneWinRate: Math.floor(Math.random() * 40) + 50,
+        kda: (Math.random() * 5 + 1).toFixed(1),
+        headshotPercent: Math.floor(Math.random() * 30) + 10,
+        soulsPerMin: Math.floor(Math.random() * 200) + 300,
+        damagePerMin: Math.floor(Math.random() * 1000) + 2000,
+        healingPerMin: Math.floor(Math.random() * 500) + 100
+      },
+      rank: {
+        medal: 'Oracle',
+        subrank: Math.floor(Math.random() * 6) + 1,
+        score: Math.floor(Math.random() * 2000) + 3000
+      },
+      heroes: [
+        { name: 'Abrams', matches: Math.floor(Math.random() * 50) + 10, winRate: Math.floor(Math.random() * 40) + 50 },
+        { name: 'Bebop', matches: Math.floor(Math.random() * 30) + 5, winRate: Math.floor(Math.random() * 40) + 50 },
+        { name: 'Haze', matches: Math.floor(Math.random() * 25) + 5, winRate: Math.floor(Math.random() * 40) + 50 }
+      ],
+      recentMatches: generateRecentMatches()
+    };
+
+    // Steam API로 실제 정보 가져오기
+    if (steamApiKey) {
+      try {
+        const steamResponse = await axios.get(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/`, {
+          params: {
+            key: steamApiKey,
+            steamids: steamId
+          },
+          timeout: 5000
+        });
+
+        if (steamResponse.data && steamResponse.data.response && steamResponse.data.response.players && steamResponse.data.response.players.length > 0) {
+          const steamUser = steamResponse.data.response.players[0];
+          
+          playerInfo.name = steamUser.personaname || playerInfo.name;
+          if (steamUser.avatarfull) {
+            playerInfo.avatar = steamUser.avatarfull.replace('avatars.steamstatic.com', 'avatars.cloudflare.steamstatic.com');
+          }
+          if (steamUser.loccountrycode) {
+            playerInfo.country = getCountryFlag(steamUser.loccountrycode);
+            playerInfo.countryCode = steamUser.loccountrycode;
+          }
+          
+          console.log(`✅ Steam 정보 업데이트: ${playerInfo.name} (${playerInfo.countryCode})`);
+        }
+      } catch (error) {
+        console.log(`❌ Steam API 호출 실패:`, error.message);
+      }
+    }
+
+    res.json(playerInfo);
+  } catch (error) {
+    console.error('Player detail API error:', error);
+    res.status(500).json({ error: 'Failed to fetch player details' });
+  }
+});
+
+// 플레이어 최근 매치 생성
+const generateRecentMatches = () => {
+  const heroes = ['Abrams', 'Bebop', 'Haze', 'Infernus', 'Ivy', 'Dynamo'];
+  const results = ['승리', '패배'];
+  
+  const matches = [];
+  for (let i = 0; i < 10; i++) {
+    matches.push({
+      id: Date.now() - (i * 3600000), // 1시간씩 빼기
+      result: results[Math.floor(Math.random() * results.length)],
+      hero: heroes[Math.floor(Math.random() * heroes.length)],
+      kills: Math.floor(Math.random() * 20),
+      deaths: Math.floor(Math.random() * 10),
+      assists: Math.floor(Math.random() * 25),
+      damage: Math.floor(Math.random() * 50000) + 20000,
+      healing: Math.floor(Math.random() * 10000) + 2000,
+      duration: Math.floor(Math.random() * 20) + 25, // 25-45분
+      teamRank: Math.floor(Math.random() * 6) + 1
+    });
+  }
+  
+  return matches;
+};
+
 app.get('/api/player/:steamId/stats', async (req, res) => {
   try {
     const { steamId } = req.params;
@@ -857,6 +1010,16 @@ app.get('/api/player/:steamId/recent', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch recent games' });
   }
+});
+
+// 플레이어 상세 페이지 라우트
+app.get('/ko/players/:accountId', (req, res) => {
+  const { accountId } = req.params;
+  res.render('player-detail', { 
+    user: req.user,
+    accountId: accountId,
+    title: `플레이어 정보 - 박근형의 데드락`
+  });
 });
 
 // Health check
