@@ -85,19 +85,38 @@
             flex-wrap: wrap;
         }
         
-        .rank-filter {
+        .rank-select {
             background: #21262d;
             border: 1px solid #30363d;
             color: #f0f6fc;
-            padding: 8px 16px;
+            padding: 8px 12px;
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
             transition: all 0.2s;
+            min-width: 150px;
         }
         
-        .rank-filter:hover {
+        .rank-select:hover {
             border-color: #58a6ff;
+        }
+        
+        .rank-select:focus {
+            outline: none;
+            border-color: #58a6ff;
+            box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.3);
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .filter-label {
+            font-size: 12px;
+            color: #8b949e;
+            font-weight: 500;
         }
         
         .date-range {
@@ -198,6 +217,20 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            background: #30363d;
+        }
+        
+        .hero-icon::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #30363d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #8b949e;
         }
         
         .hero-name {
@@ -327,8 +360,78 @@
             <div class="page-header">
                 <h1 class="page-title">영웅 통계</h1>
                 <div class="filters">
-                    <button class="rank-filter">최소 랭크: <span>팬텀 1</span></button>
-                    <button class="rank-filter">최대 랭크: <span>이터너스 6</span></button>
+                    <div class="filter-group">
+                        <label class="filter-label">최소 랭크</label>
+                        <select id="minRank" class="rank-select">
+                            <option value="0">모든 랭크</option>
+                            <option value="1">컨버젠트 1</option>
+                            <option value="2">컨버젠트 2</option>
+                            <option value="3">컨버젠트 3</option>
+                            <option value="4">컨버젠트 4</option>
+                            <option value="5">컨버젠트 5</option>
+                            <option value="6">컨버젠트 6</option>
+                            <option value="7">아센던트 1</option>
+                            <option value="8">아센던트 2</option>
+                            <option value="9">아센던트 3</option>
+                            <option value="10">아센던트 4</option>
+                            <option value="11">아센던트 5</option>
+                            <option value="12">아센던트 6</option>
+                            <option value="13" selected>팬텀 1</option>
+                            <option value="14">팬텀 2</option>
+                            <option value="15">팬텀 3</option>
+                            <option value="16">팬텀 4</option>
+                            <option value="17">팬텀 5</option>
+                            <option value="18">팬텀 6</option>
+                            <option value="19">오라클 1</option>
+                            <option value="20">오라클 2</option>
+                            <option value="21">오라클 3</option>
+                            <option value="22">오라클 4</option>
+                            <option value="23">오라클 5</option>
+                            <option value="24">오라클 6</option>
+                            <option value="25">이터너스 1</option>
+                            <option value="26">이터너스 2</option>
+                            <option value="27">이터너스 3</option>
+                            <option value="28">이터너스 4</option>
+                            <option value="29">이터너스 5</option>
+                            <option value="30">이터너스 6</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">최대 랭크</label>
+                        <select id="maxRank" class="rank-select">
+                            <option value="0">컨버젠트 1</option>
+                            <option value="1">컨버젠트 1</option>
+                            <option value="2">컨버젠트 2</option>
+                            <option value="3">컨버젠트 3</option>
+                            <option value="4">컨버젠트 4</option>
+                            <option value="5">컨버젠트 5</option>
+                            <option value="6">컨버젠트 6</option>
+                            <option value="7">아센던트 1</option>
+                            <option value="8">아센던트 2</option>
+                            <option value="9">아센던트 3</option>
+                            <option value="10">아센던트 4</option>
+                            <option value="11">아센던트 5</option>
+                            <option value="12">아센던트 6</option>
+                            <option value="13">팬텀 1</option>
+                            <option value="14">팬텀 2</option>
+                            <option value="15">팬텀 3</option>
+                            <option value="16">팬텀 4</option>
+                            <option value="17">팬텀 5</option>
+                            <option value="18">팬텀 6</option>
+                            <option value="19">오라클 1</option>
+                            <option value="20">오라클 2</option>
+                            <option value="21">오라클 3</option>
+                            <option value="22">오라클 4</option>
+                            <option value="23">오라클 5</option>
+                            <option value="24">오라클 6</option>
+                            <option value="25">이터너스 1</option>
+                            <option value="26">이터너스 2</option>
+                            <option value="27">이터너스 3</option>
+                            <option value="28">이터너스 4</option>
+                            <option value="29">이터너스 5</option>
+                            <option value="30" selected>이터너스 6</option>
+                        </select>
+                    </div>
                     <div class="date-range">
                         <span class="patch-label">패치</span>
                         <span>최근 패치 (2025-07-04)</span>
@@ -356,12 +459,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
+                    <tr data-rank="25" data-hero="seven">
                         <td class="rank">1</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/seven_mm.webp" alt="Seven" onerror="this.src='https://deadlock-api.com/images/heroes/seven.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='12' fill='%23f0f6fc'%3ESev%3C/text%3E%3C/svg%3E" alt="Seven" data-hero="seven" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Seven</div>
@@ -390,12 +493,12 @@
                         </td>
                         <td class="total-matches">148,523</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="24" data-hero="mcginnis">
                         <td class="rank">2</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/mcginnis_mm.webp" alt="McGinnis" onerror="this.src='https://deadlock-api.com/images/heroes/mcginnis.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='10' fill='%23f0f6fc'%3EMcG%3C/text%3E%3C/svg%3E" alt="McGinnis" data-hero="mcginnis" />
                                 </div>
                                 <div>
                                     <div class="hero-name">McGinnis</div>
@@ -424,12 +527,12 @@
                         </td>
                         <td class="total-matches">105,489</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="23" data-hero="abrams">
                         <td class="rank">3</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/abrams_mm.webp" alt="Abrams" onerror="this.src='https://deadlock-api.com/images/heroes/abrams.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='11' fill='%23f0f6fc'%3EAbr%3C/text%3E%3C/svg%3E" alt="Abrams" data-hero="abrams" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Abrams</div>
@@ -458,12 +561,12 @@
                         </td>
                         <td class="total-matches">127,856</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="22" data-hero="dynamo">
                         <td class="rank">4</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/dynamo_mm.webp" alt="Dynamo" onerror="this.src='https://deadlock-api.com/images/heroes/dynamo.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='11' fill='%23f0f6fc'%3EDyn%3C/text%3E%3C/svg%3E" alt="Dynamo" data-hero="dynamo" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Dynamo</div>
@@ -492,12 +595,12 @@
                         </td>
                         <td class="total-matches">97,523</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="21" data-hero="vindicta">
                         <td class="rank">5</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/vindicta_mm.webp" alt="Vindicta" onerror="this.src='https://deadlock-api.com/images/heroes/vindicta.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='11' fill='%23f0f6fc'%3EVin%3C/text%3E%3C/svg%3E" alt="Vindicta" data-hero="vindicta" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Vindicta</div>
@@ -526,12 +629,12 @@
                         </td>
                         <td class="total-matches">137,291</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="20" data-hero="ivy">
                         <td class="rank">6</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/ivy_mm.webp" alt="Ivy" onerror="this.src='https://deadlock-api.com/images/heroes/ivy.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='12' fill='%23f0f6fc'%3EIvy%3C/text%3E%3C/svg%3E" alt="Ivy" data-hero="ivy" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Ivy</div>
@@ -560,12 +663,12 @@
                         </td>
                         <td class="total-matches">86,752</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="19" data-hero="wraith">
                         <td class="rank">7</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/wraith_mm.webp" alt="Wraith" onerror="this.src='https://deadlock-api.com/images/heroes/wraith.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='10' fill='%23f0f6fc'%3EWra%3C/text%3E%3C/svg%3E" alt="Wraith" data-hero="wraith" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Wraith</div>
@@ -594,12 +697,12 @@
                         </td>
                         <td class="total-matches">115,683</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="18" data-hero="yamato">
                         <td class="rank">8</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/yamato_mm.webp" alt="Yamato" onerror="this.src='https://deadlock-api.com/images/heroes/yamato.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='10' fill='%23f0f6fc'%3EYam%3C/text%3E%3C/svg%3E" alt="Yamato" data-hero="yamato" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Yamato</div>
@@ -628,12 +731,12 @@
                         </td>
                         <td class="total-matches">94,875</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="17" data-hero="warden">
                         <td class="rank">9</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/warden_mm.webp" alt="Warden" onerror="this.src='https://deadlock-api.com/images/heroes/warden.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='10' fill='%23f0f6fc'%3EWar%3C/text%3E%3C/svg%3E" alt="Warden" data-hero="warden" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Warden</div>
@@ -662,12 +765,12 @@
                         </td>
                         <td class="total-matches">81,234</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="16" data-hero="mo_krill">
                         <td class="rank">10</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/mo_krill_mm.webp" alt="Mo & Krill" onerror="this.src='https://deadlock-api.com/images/heroes/mo_krill.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='22' text-anchor='middle' font-family='Arial' font-size='8' fill='%23f0f6fc'%3EMo%26K%3C/text%3E%3C/svg%3E" alt="Mo & Krill" data-hero="mo_krill" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Mo & Krill</div>
@@ -696,12 +799,12 @@
                         </td>
                         <td class="total-matches">65,087</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="15" data-hero="bebop">
                         <td class="rank">11</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/bebop_mm.webp" alt="Bebop" onerror="this.src='https://deadlock-api.com/images/heroes/bebop.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='10' fill='%23f0f6fc'%3EBeb%3C/text%3E%3C/svg%3E" alt="Bebop" data-hero="bebop" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Bebop</div>
@@ -730,12 +833,12 @@
                         </td>
                         <td class="total-matches">89,765</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="14" data-hero="kelvin">
                         <td class="rank">12</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/kelvin_mm.webp" alt="Kelvin" onerror="this.src='https://deadlock-api.com/images/heroes/kelvin.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='10' fill='%23f0f6fc'%3EKel%3C/text%3E%3C/svg%3E" alt="Kelvin" data-hero="kelvin" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Kelvin</div>
@@ -764,12 +867,12 @@
                         </td>
                         <td class="total-matches">72,698</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="13" data-hero="lash">
                         <td class="rank">13</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/lash_mm.webp" alt="Lash" onerror="this.src='https://deadlock-api.com/images/heroes/lash.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='11' fill='%23f0f6fc'%3ELas%3C/text%3E%3C/svg%3E" alt="Lash" data-hero="lash" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Lash</div>
@@ -798,12 +901,12 @@
                         </td>
                         <td class="total-matches">109,876</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="12" data-hero="infernus">
                         <td class="rank">14</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/infernus_mm.webp" alt="Infernus" onerror="this.src='https://deadlock-api.com/images/heroes/infernus.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='10' fill='%23f0f6fc'%3EInf%3C/text%3E%3C/svg%3E" alt="Infernus" data-hero="infernus" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Infernus</div>
@@ -832,12 +935,12 @@
                         </td>
                         <td class="total-matches">97,543</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="11" data-hero="haze">
                         <td class="rank">15</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/haze_mm.webp" alt="Haze" onerror="this.src='https://deadlock-api.com/images/heroes/haze.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='11' fill='%23f0f6fc'%3EHaz%3C/text%3E%3C/svg%3E" alt="Haze" data-hero="haze" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Haze</div>
@@ -866,12 +969,12 @@
                         </td>
                         <td class="total-matches">104,892</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="10" data-hero="grey_talon">
                         <td class="rank">16</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/grey_talon_mm.webp" alt="Grey Talon" onerror="this.src='https://deadlock-api.com/images/heroes/grey_talon.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='9' fill='%23f0f6fc'%3EGrey%3C/text%3E%3C/svg%3E" alt="Grey Talon" data-hero="grey_talon" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Grey Talon</div>
@@ -900,12 +1003,12 @@
                         </td>
                         <td class="total-matches">77,654</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="9" data-hero="lady_geist">
                         <td class="rank">17</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/lady_geist_mm.webp" alt="Lady Geist" onerror="this.src='https://deadlock-api.com/images/heroes/lady_geist.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='9' fill='%23f0f6fc'%3EGeist%3C/text%3E%3C/svg%3E" alt="Lady Geist" data-hero="lady_geist" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Lady Geist</div>
@@ -934,12 +1037,12 @@
                         </td>
                         <td class="total-matches">62,143</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="8" data-hero="paradox">
                         <td class="rank">18</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/paradox_mm.webp" alt="Paradox" onerror="this.src='https://deadlock-api.com/images/heroes/paradox.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='9' fill='%23f0f6fc'%3EPara%3C/text%3E%3C/svg%3E" alt="Paradox" data-hero="paradox" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Paradox</div>
@@ -968,12 +1071,12 @@
                         </td>
                         <td class="total-matches">83,567</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="7" data-hero="pocket">
                         <td class="rank">19</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/pocket_mm.webp" alt="Pocket" onerror="this.src='https://deadlock-api.com/images/heroes/pocket.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='10' fill='%23f0f6fc'%3EPoc%3C/text%3E%3C/svg%3E" alt="Pocket" data-hero="pocket" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Pocket</div>
@@ -1002,12 +1105,12 @@
                         </td>
                         <td class="total-matches">71,289</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="6" data-hero="shiv">
                         <td class="rank">20</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/shiv_mm.webp" alt="Shiv" onerror="this.src='https://deadlock-api.com/images/heroes/shiv.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='11' fill='%23f0f6fc'%3EShiv%3C/text%3E%3C/svg%3E" alt="Shiv" data-hero="shiv" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Shiv</div>
@@ -1036,12 +1139,12 @@
                         </td>
                         <td class="total-matches">88,145</td>
                     </tr>
-                    <tr>
+                    <tr data-rank="5" data-hero="viscous">
                         <td class="rank">21</td>
                         <td>
                             <div class="hero-info">
                                 <div class="hero-icon">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/viscous_mm.webp" alt="Viscous" onerror="this.src='https://deadlock-api.com/images/heroes/viscous.webp'" />
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%2330363d'/%3E%3Ctext x='20' y='25' text-anchor='middle' font-family='Arial' font-size='10' fill='%23f0f6fc'%3EVis%3C/text%3E%3C/svg%3E" alt="Viscous" data-hero="viscous" />
                                 </div>
                                 <div>
                                     <div class="hero-name">Viscous</div>
@@ -1087,12 +1190,61 @@
             });
         });
         
-        // 필터 기능
-        document.querySelectorAll('.rank-filter').forEach(filter => {
-            filter.addEventListener('click', function() {
-                console.log('필터 클릭:', this.textContent);
-                // 여기에 필터 로직 추가
+        // 랭크 필터링 기능
+        function filterHeroes() {
+            const minRank = parseInt(document.getElementById('minRank').value);
+            const maxRank = parseInt(document.getElementById('maxRank').value);
+            const rows = document.querySelectorAll('.stats-table tbody tr');
+            
+            console.log('필터링 시작 - 최소:', minRank, '최대:', maxRank);
+            
+            rows.forEach(row => {
+                const heroRank = parseInt(row.getAttribute('data-rank'));
+                
+                // 모든 랭크를 선택한 경우 (0) 또는 범위 내에 있는 경우
+                if (minRank === 0 || (heroRank >= minRank && heroRank <= maxRank)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
             });
+            
+            // 표시되는 데이터 개수 카운트
+            const visibleRows = document.querySelectorAll('.stats-table tbody tr[style=""]').length;
+            const totalRows = document.querySelectorAll('.stats-table tbody tr').length;
+            console.log(`표시되는 영웅: ${visibleRows}/${totalRows}`);
+        }
+        
+        // 랭크 선택 이벤트
+        document.getElementById('minRank').addEventListener('change', function() {
+            const minRank = parseInt(this.value);
+            const maxRankSelect = document.getElementById('maxRank');
+            const maxRank = parseInt(maxRankSelect.value);
+            
+            // 최소 랭크가 최대 랭크보다 높으면 최대 랭크를 자동 조정
+            if (minRank > maxRank && minRank !== 0) {
+                maxRankSelect.value = minRank;
+            }
+            
+            filterHeroes();
+        });
+        
+        document.getElementById('maxRank').addEventListener('change', function() {
+            const maxRank = parseInt(this.value);
+            const minRankSelect = document.getElementById('minRank');
+            const minRank = parseInt(minRankSelect.value);
+            
+            // 최대 랭크가 최소 랭크보다 낮으면 최소 랭크를 자동 조정
+            if (maxRank < minRank && minRank !== 0) {
+                minRankSelect.value = maxRank;
+            }
+            
+            filterHeroes();
+        });
+        
+        // 초기 필터링 실행
+        document.addEventListener('DOMContentLoaded', function() {
+            filterHeroes();
         });
     </script>
 </body>
