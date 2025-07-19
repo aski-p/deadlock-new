@@ -764,6 +764,16 @@ footer {
     color: #ffffff;
 }
 
+.country-cell {
+    width: 80px;
+    text-align: center;
+}
+
+.country-flag {
+    font-size: 24px;
+    display: inline-block;
+}
+
 .heroes-cell {
     min-width: 200px;
 }
@@ -789,13 +799,23 @@ footer {
 }
 
 .medal-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     padding: 6px 12px;
     border-radius: 6px;
     font-size: 12px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+.subrank {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    padding: 2px 4px;
+    font-size: 10px;
+    margin-left: 4px;
 }
 
 .medal-eternus {

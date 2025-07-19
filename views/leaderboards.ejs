@@ -71,6 +71,7 @@
                     <tr>
                         <th class="rank-column">순위</th>
                         <th class="player-column">플레이어</th>
+                        <th class="country-column">국가</th>
                         <th class="heroes-column">영웅</th>
                         <th class="medal-column">메달</th>
                         <th class="score-column">점수</th>
@@ -91,40 +92,44 @@
 
 <script>
 let currentPage = 1;
-let totalPages = 10;
+let totalPages = 20;
 let currentFilters = {
     region: '<%= region %>',
     hero: 'all',
     medal: 'all'
 };
 
-// Mock leaderboard data (실제로는 API에서 가져와야 함)
-const mockLeaderboardData = [
-    { rank: 1, player: { name: '박근형', avatar: 'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', steamId: '76561198000000001' }, heroes: ['Haze', 'Wraith'], medal: 'Eternus', score: 4250 },
-    { rank: 2, player: { name: 'DeadlockPro', avatar: 'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg', steamId: '76561198000000002' }, heroes: ['Abrams', 'Seven'], medal: 'Eternus', score: 4180 },
-    { rank: 3, player: { name: 'TopPlayer_KR', avatar: 'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', steamId: '76561198000000003' }, heroes: ['Vindicta', 'Bebop'], medal: 'Eternus', score: 4120 },
-    { rank: 4, player: { name: 'DeadlockMaster', avatar: 'https://avatars.steamstatic.com/c5d56249ee5d28a07db4ac9f7f60af961fab5426_full.jpg', steamId: '76561198000000004' }, heroes: ['Paradox', 'Ivy'], medal: 'Phantom', score: 3950 },
-    { rank: 5, player: { name: 'SkillMachine', avatar: 'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', steamId: '76561198000000005' }, heroes: ['Kelvin', 'McGinnis'], medal: 'Phantom', score: 3850 },
-    { rank: 6, player: { name: 'GameChanger', avatar: 'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg', steamId: '76561198000000006' }, heroes: ['Lash', 'Yamato'], medal: 'Phantom', score: 3720 },
-    { rank: 7, player: { name: 'EliteGamer', avatar: 'https://avatars.steamstatic.com/c5d56249ee5d28a07db4ac9f7f60af961fab5426_full.jpg', steamId: '76561198000000007' }, heroes: ['Pocket', 'Viscous'], medal: 'Oracle', score: 3650 },
-    { rank: 8, player: { name: 'ProShooter', avatar: 'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', steamId: '76561198000000008' }, heroes: ['Grey Talon', 'Infernus'], medal: 'Oracle', score: 3580 },
-    { rank: 9, player: { name: 'TacticalPlayer', avatar: 'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg', steamId: '76561198000000009' }, heroes: ['Lady Geist', 'Shiv'], medal: 'Oracle', score: 3420 },
-    { rank: 10, player: { name: 'ClutchKing', avatar: 'https://avatars.steamstatic.com/c5d56249ee5d28a07db4ac9f7f60af961fab5426_full.jpg', steamId: '76561198000000010' }, heroes: ['Warden', 'Dynamo'], medal: 'Ritualist', score: 3350 }
-];
-
-function loadLeaderboardData() {
+async function loadLeaderboardData() {
     const loading = document.getElementById('table-loading');
     const table = document.getElementById('leaderboard-table');
     
     loading.style.display = 'flex';
     table.style.display = 'none';
     
-    // Simulate API call delay
-    setTimeout(() => {
-        updateLeaderboardTable(mockLeaderboardData);
+    try {
+        const params = new URLSearchParams({
+            page: currentPage,
+            limit: 50,
+            hero: currentFilters.hero,
+            medal: currentFilters.medal
+        });
+        
+        const response = await fetch(`/api/v1/leaderboards/${currentFilters.region}?${params}`);
+        const data = await response.json();
+        
+        if (data.error) {
+            throw new Error(data.error);
+        }
+        
+        updateLeaderboardTable(data.data);
+        updatePaginationInfo(data.pagination);
         loading.style.display = 'none';
         table.style.display = 'table';
-    }, 1000);
+        
+    } catch (error) {
+        console.error('Failed to load leaderboard data:', error);
+        loading.innerHTML = '<p style="color: #ff6b6b;">리더보드 데이터를 불러오는데 실패했습니다.</p>';
+    }
 }
 
 function updateLeaderboardTable(data) {
@@ -141,6 +146,9 @@ function updateLeaderboardTable(data) {
                 '<span class="player-name">' + player.player.name + '</span>' +
             '</div>' +
         '</td>' +
+        '<td class="country-cell">' +
+            '<span class="country-flag">' + player.player.country + '</span>' +
+        '</td>' +
         '<td class="heroes-cell">' +
             '<div class="heroes-list">' +
                 player.heroes.map(hero => '<span class="hero-tag">' + hero + '</span>').join('') +
@@ -149,6 +157,7 @@ function updateLeaderboardTable(data) {
         '<td class="medal-cell">' +
             '<div class="medal-badge medal-' + player.medal.toLowerCase() + '">' +
                 player.medal +
+                (player.subrank ? '<span class="subrank">' + player.subrank + '</span>' : '') +
             '</div>' +
         '</td>' +
         '<td class="score-cell">' +
@@ -158,10 +167,13 @@ function updateLeaderboardTable(data) {
     ).join('');
 }
 
-function updatePagination() {
+function updatePaginationInfo(pagination) {
     const paginationInfo = document.getElementById('pagination-info');
     const prevBtn = document.getElementById('prev-btn');
     const nextBtn = document.getElementById('next-btn');
+    
+    totalPages = pagination.total_pages;
+    currentPage = pagination.current_page;
     
     paginationInfo.textContent = currentPage + ' / ' + totalPages;
     prevBtn.disabled = currentPage === 1;
@@ -185,7 +197,6 @@ document.getElementById('prev-btn').addEventListener('click', () => {
     if (currentPage > 1) {
         currentPage--;
         loadLeaderboardData();
-        updatePagination();
     }
 });
 
@@ -193,13 +204,11 @@ document.getElementById('next-btn').addEventListener('click', () => {
     if (currentPage < totalPages) {
         currentPage++;
         loadLeaderboardData();
-        updatePagination();
     }
 });
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
     loadLeaderboardData();
-    updatePagination();
 });
 </script>

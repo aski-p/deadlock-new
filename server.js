@@ -194,6 +194,63 @@ app.get('/logout', (req, res) => {
   });
 });
 
+// Mock Deadlock API data (실제 API가 없을 때 사용)
+const generateLeaderboardData = (region, page = 1, limit = 50) => {
+  const regions = {
+    'europe': ['🇩🇪', '🇬🇧', '🇫🇷', '🇪🇸', '🇮🇹', '🇵🇱', '🇷🇺', '🇸🇪', '🇳🇴', '🇩🇰'],
+    'asia': ['🇰🇷', '🇯🇵', '🇨🇳', '🇹🇼', '🇹🇭', '🇻🇳', '🇸🇬', '🇲🇾', '🇵🇭', '🇮🇩'],
+    'north-america': ['🇺🇸', '🇨🇦', '🇲🇽', '🇺🇸', '🇨🇦', '🇺🇸', '🇨🇦', '🇺🇸', '🇲🇽', '🇺🇸']
+  };
+
+  const heroes = ['Abrams', 'Bebop', 'Dynamo', 'Grey Talon', 'Haze', 'Infernus', 'Ivy', 'Kelvin', 'Lady Geist', 'Lash', 'McGinnis', 'Mo & Krill', 'Paradox', 'Pocket', 'Seven', 'Shiv', 'Vindicta', 'Viscous', 'Warden', 'Wraith', 'Yamato'];
+  const medals = ['Eternus', 'Phantom', 'Oracle', 'Ritualist', 'Alchemist', 'Arcanist', 'Initiate'];
+  const avatars = [
+    'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
+    'https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg',
+    'https://avatars.steamstatic.com/c5d56249ee5d28a07db4ac9f7f60af961fab5426_full.jpg',
+    'https://avatars.steamstatic.com/fee5d0d1e4e3f654dd690c4c8b9ee508a9e4ce61_full.jpg',
+    'https://avatars.steamstatic.com/b40b5206f877ce94ad8a68b51fa07e2dcb15a8c5_full.jpg'
+  ];
+
+  const data = [];
+  const startRank = (page - 1) * limit + 1;
+  const regionFlags = regions[region] || regions['asia'];
+
+  for (let i = 0; i < limit; i++) {
+    const rank = startRank + i;
+    const playerNames = region === 'asia' ? 
+      ['박근형', 'DeadlockPro_KR', 'TopPlayer_JP', 'EliteGamer_CN', 'SkillMaster_TW', 'ProShooter_SG', 'GameChanger_TH', 'ClutchKing_VN', 'TacticalPlayer_MY', 'DeadlockGod_PH'] :
+      ['ProPlayer1', 'DeadlockMaster', 'TopGamer', 'SkillPlayer', 'GameChanger', 'EliteShooter', 'TacticalKing', 'ClutchGamer', 'ProSkill', 'DeadlockPro'];
+
+    data.push({
+      rank: rank,
+      player: {
+        name: playerNames[i % playerNames.length] + (i > 9 ? '_' + Math.floor(i/10) : ''),
+        avatar: avatars[i % avatars.length],
+        steamId: `76561198${String(Math.floor(Math.random() * 1000000000)).padStart(9, '0')}`,
+        country: regionFlags[i % regionFlags.length]
+      },
+      heroes: heroes.slice(i % 5, (i % 5) + Math.floor(Math.random() * 3) + 1),
+      medal: medals[Math.floor(i / 7) % medals.length],
+      subrank: Math.floor(Math.random() * 6) + 1,
+      score: Math.floor(4500 - (rank * 5) - Math.random() * 100),
+      wins: Math.floor(Math.random() * 500) + 100,
+      losses: Math.floor(Math.random() * 200) + 50
+    });
+  }
+
+  return {
+    data: data,
+    pagination: {
+      current_page: page,
+      total_pages: Math.ceil(1000 / limit),
+      total_count: 1000,
+      per_page: limit
+    },
+    region: region
+  };
+};
+
 // API Routes
 app.get('/api/v1/auth/login/ko', (req, res) => {
   if (req.user) {
@@ -211,6 +268,41 @@ app.get('/api/v1/auth/login/ko', (req, res) => {
       success: false,
       message: 'Not authenticated'
     });
+  }
+});
+
+// Leaderboard API endpoint
+app.get('/api/v1/leaderboards/:region', (req, res) => {
+  try {
+    const { region } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    const hero = req.query.hero || 'all';
+    const medal = req.query.medal || 'all';
+
+    if (!['europe', 'asia', 'north-america'].includes(region)) {
+      return res.status(400).json({ error: 'Invalid region' });
+    }
+
+    let leaderboardData = generateLeaderboardData(region, page, limit);
+
+    // Apply filters
+    if (hero !== 'all') {
+      leaderboardData.data = leaderboardData.data.filter(player => 
+        player.heroes.some(h => h.toLowerCase().replace(/[^a-z]/g, '') === hero.toLowerCase().replace(/[^a-z]/g, ''))
+      );
+    }
+
+    if (medal !== 'all') {
+      leaderboardData.data = leaderboardData.data.filter(player => 
+        player.medal.toLowerCase() === medal.toLowerCase()
+      );
+    }
+
+    res.json(leaderboardData);
+  } catch (error) {
+    console.error('Leaderboard API error:', error);
+    res.status(500).json({ error: 'Failed to fetch leaderboard data' });
   }
 });
 
