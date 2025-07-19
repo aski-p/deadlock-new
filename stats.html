@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>통계 분석 - Deadlock API</title>
+    <title>영웅 통계 - Deadlock API</title>
     <style>
         * {
             margin: 0;
@@ -12,1086 +12,1086 @@
         }
         
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a0a;
-            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #f0f6fc;
             line-height: 1.6;
-            font-size: 16px;
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 0 24px;
+            padding: 0 20px;
         }
         
         /* 헤더 */
         header {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            padding: 4rem 0;
-            text-align: center;
-            border-bottom: 1px solid #333;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 1rem 0;
         }
         
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: none;
-        }
-        
-        .hero-subtitle {
-            font-size: 1.25rem;
-            opacity: 0.8;
-            margin-bottom: 2.5rem;
-            color: #b3b3b3;
-        }
-        
-        .btn {
-            display: inline-block;
-            padding: 14px 32px;
-            margin: 0 8px;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            border: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
-        }
-        
-        /* 네비게이션 */
-        nav {
-            background: rgba(10, 10, 10, 0.95);
-            padding: 1.5rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid #333;
-        }
-        
-        .nav-container {
+        .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
         .logo {
-            font-size: 1.75rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #58a6ff;
+            text-decoration: none;
         }
         
         .nav-links {
             display: flex;
+            gap: 2rem;
             list-style: none;
-            gap: 2.5rem;
         }
         
         .nav-links a {
-            color: #b3b3b3;
+            color: #8b949e;
             text-decoration: none;
-            transition: color 0.3s ease;
-            font-weight: 500;
+            transition: color 0.2s;
         }
         
         .nav-links a:hover {
-            color: #ff6b35;
+            color: #f0f6fc;
         }
         
-        /* 메인 컨텐츠 */
+        /* 메인 */
         main {
-            padding: 4rem 0;
+            padding: 2rem 0;
         }
         
-        .section {
-            margin-bottom: 4rem;
-        }
-        
-        .section-title {
-            font-size: 2.75rem;
+        .page-header {
             text-align: center;
-            margin-bottom: 4rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 2.5rem;
-            margin-top: 3rem;
-        }
-        
-        .stat-card {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            padding: 2.5rem;
-            border-radius: 16px;
-            text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid #333;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
-            border-color: #ff6b35;
-        }
-        
-        .stat-card:hover::before {
-            opacity: 1;
-        }
-        
-        .stat-icon {
-            font-size: 3.5rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .stat-title {
-            font-size: 1.6rem;
-            margin-bottom: 1.25rem;
-            color: #ffffff;
-            font-weight: 600;
-        }
-        
-        .stat-value {
-            font-size: 2.75rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 0.75rem;
-        }
-        
-        .stat-description {
-            opacity: 0.8;
-            font-size: 0.95rem;
-            color: #b3b3b3;
-            line-height: 1.6;
-        }
-        
-        .leaderboard {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            border-radius: 16px;
-            padding: 3rem;
-            margin-top: 3rem;
-            border: 1px solid #333;
-        }
-        
-        .leaderboard-header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-        
-        .leaderboard-title {
-            font-size: 2.25rem;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 1rem;
-            font-weight: 700;
-        }
-        
-        .leaderboard-list {
-            display: grid;
-            gap: 1.5rem;
-        }
-        
-        .leaderboard-item {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 1.5rem;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            transition: all 0.3s ease;
-            border: 1px solid #333;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .leaderboard-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 4px;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        
-        .leaderboard-item:hover {
-            transform: translateX(8px);
-            border-color: #ff6b35;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-        
-        .leaderboard-item:hover::before {
-            opacity: 1;
-        }
-        
-        .rank {
-            font-size: 1.75rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-right: 1.5rem;
-            width: 60px;
-        }
-        
-        .hero-info {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-        }
-        
-        .hero-avatar {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 1.5rem;
-            font-size: 1.4rem;
-            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
-        }
-        
-        .hero-name {
-            font-size: 1.3rem;
-            color: #ffffff;
-            font-weight: 600;
-        }
-        
-        .hero-stats {
-            display: flex;
-            gap: 2rem;
-            margin-left: auto;
-        }
-        
-        .hero-stat {
-            text-align: center;
-        }
-        
-        .hero-stat-value {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #10b981;
-        }
-        
-        .hero-stat-label {
-            font-size: 0.8rem;
-            opacity: 0.7;
-        }
-        
-        .chart-container {
-            background: rgba(255,255,255,0.1);
-            padding: 2rem;
-            border-radius: 15px;
-            margin-top: 2rem;
-        }
-        
-        .chart-title {
-            font-size: 1.5rem;
-            color: #8b5cf6;
             margin-bottom: 2rem;
-            text-align: center;
         }
         
-        .chart-bar {
+        .page-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #f0f6fc;
+        }
+        
+        .filters {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .rank-filter {
+            background: #21262d;
+            border: 1px solid #30363d;
+            color: #f0f6fc;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        
+        .rank-filter:hover {
+            border-color: #58a6ff;
+        }
+        
+        .date-range {
             display: flex;
             align-items: center;
-            margin-bottom: 1rem;
+            gap: 8px;
         }
         
-        .chart-label {
-            width: 120px;
-            font-size: 0.9rem;
-        }
-        
-        .chart-progress {
-            flex-grow: 1;
-            height: 20px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 0 1rem;
-        }
-        
-        .chart-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%);
-            transition: width 0.5s ease;
-        }
-        
-        .chart-value {
-            font-size: 0.9rem;
-            color: #4fc3f7;
-            font-weight: bold;
-        }
-        
-        .api-section {
-            background: rgba(0,0,0,0.3);
-            padding: 3rem 0;
-            border-radius: 20px;
-            margin-top: 3rem;
-        }
-        
-        .api-endpoint {
-            background: rgba(255,255,255,0.1);
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin: 1rem 0;
-            border-left: 4px solid #8b5cf6;
-        }
-        
-        .method-tag {
-            display: inline-block;
-            background: #10b981;
+        .patch-label {
+            background: #da3633;
             color: white;
             padding: 4px 8px;
             border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-right: 1rem;
+            font-size: 12px;
+            font-weight: 600;
         }
         
-        .endpoint-path {
-            font-family: 'Courier New', monospace;
-            color: #4fc3f7;
-            font-size: 1.1rem;
+        /* 탭 */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 2rem;
+            background: #161b22;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #30363d;
         }
         
-        .endpoint-description {
-            margin-top: 0.5rem;
-            opacity: 0.8;
+        .tab {
+            background: transparent;
+            border: none;
+            color: #8b949e;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
         }
         
-        .code-example {
-            background: #1a1a1a;
-            padding: 1.5rem;
+        .tab:hover {
+            background: #21262d;
+            color: #f0f6fc;
+        }
+        
+        .tab.active {
+            background: #58a6ff;
+            color: white;
+        }
+        
+        /* 테이블 */
+        .stats-table {
+            width: 100%;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            overflow: hidden;
+            border-collapse: collapse;
+        }
+        
+        .stats-table th {
+            background: #21262d;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            color: #8b949e;
+            border-bottom: 1px solid #30363d;
+        }
+        
+        .stats-table td {
+            padding: 12px;
+            border-bottom: 1px solid #30363d;
+        }
+        
+        .stats-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .stats-table tr:hover {
+            background: #21262d;
+        }
+        
+        /* 영웅 정보 */
+        .hero-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .hero-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .hero-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .hero-name {
+            font-weight: 500;
+            color: #f0f6fc;
+        }
+        
+        .hero-role {
+            font-size: 12px;
+            color: #8b949e;
+        }
+        
+        /* 통계 바 */
+        .stat-bar {
+            position: relative;
+            width: 120px;
+            height: 20px;
+            background: #21262d;
             border-radius: 10px;
-            overflow-x: auto;
-            margin: 2rem 0;
+            overflow: hidden;
         }
         
-        .code-example pre {
-            font-family: 'Courier New', monospace;
-            color: #4fc3f7;
-            line-height: 1.5;
+        .stat-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
         }
         
-        /* 푸터 */
-        footer {
-            background: #0f0f0f;
-            padding: 2rem 0;
+        .win-rate-fill {
+            background: linear-gradient(90deg, #238636, #2ea043);
+        }
+        
+        .pick-rate-fill {
+            background: linear-gradient(90deg, #1f6feb, #388bfd);
+        }
+        
+        .stat-text {
+            position: absolute;
+            width: 100%;
             text-align: center;
-            margin-top: 4rem;
+            line-height: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            z-index: 1;
         }
         
-        .footer-content {
-            opacity: 0.7;
+        /* KDA */
+        .kda {
+            display: flex;
+            gap: 4px;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .kills { color: #2ea043; }
+        .deaths { color: #da3633; }
+        .assists { color: #fd7e14; }
+        
+        /* 매치 수 */
+        .total-matches {
+            font-weight: 500;
+            text-align: right;
+            color: #8b949e;
+        }
+        
+        /* 랭킹 */
+        .rank {
+            font-weight: 600;
+            color: #8b949e;
+            text-align: center;
         }
         
         /* 반응형 */
         @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2rem;
-            }
-            
             .nav-links {
                 display: none;
             }
             
-            .stats-grid {
-                grid-template-columns: 1fr;
+            .filters {
+                flex-direction: column;
+                gap: 8px;
             }
             
-            .hero-stats {
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .stats-table {
+                font-size: 14px;
+            }
+            
+            .hero-info {
                 flex-direction: column;
-                gap: 1rem;
+                text-align: center;
+                gap: 8px;
+            }
+            
+            .stat-bar {
+                width: 80px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- 헤더 -->
     <header>
         <div class="container">
-            <h1 class="hero-title">📊 통계 분석</h1>
-            <p class="hero-subtitle">Deadlock의 게임 메타와 통계 데이터를 확인하세요</p>
-            <div>
-                <a href="/" class="btn">홈으로</a>
-                <a href="/heroes" class="btn">영웅 데이터</a>
+            <div class="header-content">
+                <a href="/" class="logo">Deadlock API</a>
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/heroes">Heroes</a></li>
+                        <li><a href="/items">Items</a></li>
+                        <li><a href="/stats">Stats</a></li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </header>
 
-    <!-- 네비게이션 -->
-    <nav>
-        <div class="container">
-            <div class="nav-container">
-                <div class="logo">Deadlock API</div>
-                <ul class="nav-links">
-                    <li><a href="/">홈</a></li>
-                    <li><a href="/heroes">영웅</a></li>
-                    <li><a href="/items">아이템</a></li>
-                    <li><a href="/stats">통계</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- 메인 컨텐츠 -->
     <main>
         <div class="container">
-            <!-- 주요 통계 -->
-            <section class="section">
-                <h2 class="section-title">주요 통계</h2>
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon">🎮</div>
-                        <h3 class="stat-title">총 매치 수</h3>
-                        <div class="stat-value">2,847,392</div>
-                        <div class="stat-description">지난 30일간 플레이된 매치</div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">👥</div>
-                        <h3 class="stat-title">활성 플레이어</h3>
-                        <div class="stat-value">186,532</div>
-                        <div class="stat-description">일일 평균 활성 플레이어</div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">⏱️</div>
-                        <h3 class="stat-title">평균 매치 시간</h3>
-                        <div class="stat-value">31.2분</div>
-                        <div class="stat-description">모든 매치의 평균 소요 시간</div>
-                    </div>
-                    
-                    <div class="stat-card">
-                        <div class="stat-icon">🏆</div>
-                        <h3 class="stat-title">승률 균형</h3>
-                        <div class="stat-value">49.8%</div>
-                        <div class="stat-description">전체 팀의 평균 승률</div>
+            <div class="page-header">
+                <h1 class="page-title">영웅 통계</h1>
+                <div class="filters">
+                    <button class="rank-filter">최소 랭크: <span>팬텀 1</span></button>
+                    <button class="rank-filter">최대 랭크: <span>이터너스 6</span></button>
+                    <div class="date-range">
+                        <span class="patch-label">패치</span>
+                        <span>최근 패치 (2025-07-04)</span>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            <!-- 영웅 순위 -->
-            <section class="section">
-                <div class="leaderboard">
-                    <div class="leaderboard-header">
-                        <h2 class="leaderboard-title">영웅 순위 (승률 기준)</h2>
-                        <p>지난 7일간 데이터 기준</p>
-                    </div>
-                    <div class="leaderboard-list">
-                        <div class="leaderboard-item">
-                            <div class="rank">#1</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/vindicta.png" alt="빈딕타" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='👩‍🎯';">
-                                </div>
-                                <div class="hero-name">빈딕타 (Vindicta)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">64.2%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">23.8%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">8.2</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#2</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/infernus.png" alt="인페르누스" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='👨‍🔥';">
-                                </div>
-                                <div class="hero-name">인페르누스 (Infernus)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">61.7%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">31.2%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">7.9</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#3</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/haze.png" alt="헤이즈" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='👩‍🌫️';">
-                                </div>
-                                <div class="hero-name">헤이즈 (Haze)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">58.9%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">19.4%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">6.8</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#4</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/lash.png" alt="래시" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='⚡';">
-                                </div>
-                                <div class="hero-name">래시 (Lash)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">56.3%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">27.6%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">5.4</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#5</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/seven.png" alt="세븐" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='⚡';">
-                                </div>
-                                <div class="hero-name">세븐 (Seven)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">54.8%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">15.9%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">9.1</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#6</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/wraith.png" alt="레이스" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='👻';">
-                                </div>
-                                <div class="hero-name">레이스 (Wraith)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">53.4%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">22.1%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">7.6</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#7</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/grey_talon.png" alt="그레이 탈론" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🦅';">
-                                </div>
-                                <div class="hero-name">그레이 탈론 (Grey Talon)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">52.1%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">18.7%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">6.9</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#8</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/paradox.png" alt="패러독스" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🌀';">
-                                </div>
-                                <div class="hero-name">패러독스 (Paradox)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">51.6%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">14.3%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">6.2</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#9</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/abrams.png" alt="애브람스" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🛡️';">
-                                </div>
-                                <div class="hero-name">애브람스 (Abrams)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">50.9%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">26.5%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">5.8</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#10</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/shiv.png" alt="시브" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🗡️';">
-                                </div>
-                                <div class="hero-name">시브 (Shiv)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">50.2%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">20.8%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">7.1</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#11</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/yamato.png" alt="야마토" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='⚔️';">
-                                </div>
-                                <div class="hero-name">야마토 (Yamato)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">49.7%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">17.2%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">6.5</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#12</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/ivy.png" alt="아이비" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🌿';">
-                                </div>
-                                <div class="hero-name">아이비 (Ivy)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">49.1%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">13.6%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">5.9</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#13</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/pocket.png" alt="포켓" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🎩';">
-                                </div>
-                                <div class="hero-name">포켓 (Pocket)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">48.6%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">19.4%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">6.7</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#14</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/warden.png" alt="워든" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🛡️';">
-                                </div>
-                                <div class="hero-name">워든 (Warden)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">48.2%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">16.7%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">5.4</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#15</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/bebop.png" alt="비밥" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🤖';">
-                                </div>
-                                <div class="hero-name">비밥 (Bebop)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">47.8%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">21.3%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">5.1</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#16</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/mcginnis.png" alt="맥기니스" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🔧';">
-                                </div>
-                                <div class="hero-name">맥기니스 (McGinnis)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">47.3%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">12.8%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">4.9</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#17</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/lady_geist.png" alt="레이디 가이스트" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='👻';">
-                                </div>
-                                <div class="hero-name">레이디 가이스트 (Lady Geist)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">46.9%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">15.2%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">5.6</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#18</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/kelvin.png" alt="켈빈" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='❄️';">
-                                </div>
-                                <div class="hero-name">켈빈 (Kelvin)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">46.4%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">18.9%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">4.7</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#19</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/dynamo.png" alt="다이나모" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='⚡';">
-                                </div>
-                                <div class="hero-name">다이나모 (Dynamo)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">45.8%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">14.6%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">4.3</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#20</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/viscous.png" alt="비스커스" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🌊';">
-                                </div>
-                                <div class="hero-name">비스커스 (Viscous)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">45.2%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">11.7%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">4.1</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="leaderboard-item">
-                            <div class="rank">#21</div>
-                            <div class="hero-info">
-                                <div class="hero-avatar">
-                                    <img src="https://deadlock-api.com/images/heroes/mo_krill.png" alt="모 크릴" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🦀';">
-                                </div>
-                                <div class="hero-name">모 크릴 (Mo & Krill)</div>
-                            </div>
-                            <div class="hero-stats">
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">44.6%</div>
-                                    <div class="hero-stat-label">승률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">9.3%</div>
-                                    <div class="hero-stat-label">픽률</div>
-                                </div>
-                                <div class="hero-stat">
-                                    <div class="hero-stat-value">3.8</div>
-                                    <div class="hero-stat-label">평균 KDA</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
+            <div class="tabs">
+                <button class="tab active">전체 통계</button>
+                <button class="tab">시간대별 통계</button>
+                <button class="tab">매치업</button>
+                <button class="tab">영웅 조합</button>
+                <button class="tab">매치업 상세</button>
+            </div>
 
-            <!-- 메타 분석 -->
-            <section class="section">
-                <div class="chart-container">
-                    <h2 class="chart-title">현재 메타 분석</h2>
-                    <div class="chart-bar">
-                        <div class="chart-label">캐리 영웅</div>
-                        <div class="chart-progress">
-                            <div class="chart-fill" style="width: 78%"></div>
-                        </div>
-                        <div class="chart-value">78%</div>
-                    </div>
-                    <div class="chart-bar">
-                        <div class="chart-label">탱커 영웅</div>
-                        <div class="chart-progress">
-                            <div class="chart-fill" style="width: 65%"></div>
-                        </div>
-                        <div class="chart-value">65%</div>
-                    </div>
-                    <div class="chart-bar">
-                        <div class="chart-label">지원 영웅</div>
-                        <div class="chart-progress">
-                            <div class="chart-fill" style="width: 52%"></div>
-                        </div>
-                        <div class="chart-value">52%</div>
-                    </div>
-                    <div class="chart-bar">
-                        <div class="chart-label">암살자 영웅</div>
-                        <div class="chart-progress">
-                            <div class="chart-fill" style="width: 43%"></div>
-                        </div>
-                        <div class="chart-value">43%</div>
-                    </div>
-                </div>
-            </section>
-
+            <table class="stats-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>영웅</th>
+                        <th>승률</th>
+                        <th>픽률</th>
+                        <th>킬/데스/어시스트</th>
+                        <th>총 매치</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="rank">1</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/seven_mm.webp" alt="Seven" onerror="this.src='https://deadlock-api.com/images/heroes/seven.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Seven</div>
+                                    <div class="hero-role">Carry</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 62.3%"></div>
+                                <span class="stat-text">62.3%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 45.2%"></div>
+                                <span class="stat-text">45.2%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">14.2</span> /
+                                <span class="deaths">8.1</span> /
+                                <span class="assists">16.5</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">148,523</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">2</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/mcginnis_mm.webp" alt="McGinnis" onerror="this.src='https://deadlock-api.com/images/heroes/mcginnis.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">McGinnis</div>
+                                    <div class="hero-role">Support</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 59.8%"></div>
+                                <span class="stat-text">59.8%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 32.1%"></div>
+                                <span class="stat-text">32.1%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">9.8</span> /
+                                <span class="deaths">7.2</span> /
+                                <span class="assists">21.3</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">105,489</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">3</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/abrams_mm.webp" alt="Abrams" onerror="this.src='https://deadlock-api.com/images/heroes/abrams.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Abrams</div>
+                                    <div class="hero-role">Tank</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 57.4%"></div>
+                                <span class="stat-text">57.4%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 38.9%"></div>
+                                <span class="stat-text">38.9%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">11.5</span> /
+                                <span class="deaths">9.8</span> /
+                                <span class="assists">18.2</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">127,856</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">4</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/dynamo_mm.webp" alt="Dynamo" onerror="this.src='https://deadlock-api.com/images/heroes/dynamo.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Dynamo</div>
+                                    <div class="hero-role">Support</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 56.1%"></div>
+                                <span class="stat-text">56.1%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 29.7%"></div>
+                                <span class="stat-text">29.7%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">8.3</span> /
+                                <span class="deaths">6.9</span> /
+                                <span class="assists">22.8</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">97,523</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">5</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/vindicta_mm.webp" alt="Vindicta" onerror="this.src='https://deadlock-api.com/images/heroes/vindicta.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Vindicta</div>
+                                    <div class="hero-role">Carry</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 55.3%"></div>
+                                <span class="stat-text">55.3%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 41.8%"></div>
+                                <span class="stat-text">41.8%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">15.7</span> /
+                                <span class="deaths">8.4</span> /
+                                <span class="assists">12.9</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">137,291</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">6</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/ivy_mm.webp" alt="Ivy" onerror="this.src='https://deadlock-api.com/images/heroes/ivy.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Ivy</div>
+                                    <div class="hero-role">Support</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 54.7%"></div>
+                                <span class="stat-text">54.7%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 26.4%"></div>
+                                <span class="stat-text">26.4%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">9.2</span> /
+                                <span class="deaths">7.1</span> /
+                                <span class="assists">19.6</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">86,752</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">7</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/wraith_mm.webp" alt="Wraith" onerror="this.src='https://deadlock-api.com/images/heroes/wraith.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Wraith</div>
+                                    <div class="hero-role">Carry</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 53.9%"></div>
+                                <span class="stat-text">53.9%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 35.2%"></div>
+                                <span class="stat-text">35.2%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">13.8</span> /
+                                <span class="deaths">8.7</span> /
+                                <span class="assists">14.3</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">115,683</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">8</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/yamato_mm.webp" alt="Yamato" onerror="this.src='https://deadlock-api.com/images/heroes/yamato.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Yamato</div>
+                                    <div class="hero-role">Assassin</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 52.8%"></div>
+                                <span class="stat-text">52.8%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 28.9%"></div>
+                                <span class="stat-text">28.9%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">16.4</span> /
+                                <span class="deaths">10.2</span> /
+                                <span class="assists">11.7</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">94,875</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">9</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/warden_mm.webp" alt="Warden" onerror="this.src='https://deadlock-api.com/images/heroes/warden.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Warden</div>
+                                    <div class="hero-role">Support</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 51.6%"></div>
+                                <span class="stat-text">51.6%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 24.7%"></div>
+                                <span class="stat-text">24.7%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">10.1</span> /
+                                <span class="deaths">8.5</span> /
+                                <span class="assists">17.9</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">81,234</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">10</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/mo_krill_mm.webp" alt="Mo & Krill" onerror="this.src='https://deadlock-api.com/images/heroes/mo_krill.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Mo & Krill</div>
+                                    <div class="hero-role">Tank</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 50.3%"></div>
+                                <span class="stat-text">50.3%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 19.8%"></div>
+                                <span class="stat-text">19.8%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">12.3</span> /
+                                <span class="deaths">9.7</span> /
+                                <span class="assists">15.2</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">65,087</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">11</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/bebop_mm.webp" alt="Bebop" onerror="this.src='https://deadlock-api.com/images/heroes/bebop.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Bebop</div>
+                                    <div class="hero-role">Support</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 49.7%"></div>
+                                <span class="stat-text">49.7%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 27.3%"></div>
+                                <span class="stat-text">27.3%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">11.8</span> /
+                                <span class="deaths">9.2</span> /
+                                <span class="assists">16.4</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">89,765</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">12</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/kelvin_mm.webp" alt="Kelvin" onerror="this.src='https://deadlock-api.com/images/heroes/kelvin.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Kelvin</div>
+                                    <div class="hero-role">Tank</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 48.9%"></div>
+                                <span class="stat-text">48.9%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 22.1%"></div>
+                                <span class="stat-text">22.1%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">9.5</span> /
+                                <span class="deaths">8.8</span> /
+                                <span class="assists">18.7</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">72,698</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">13</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/lash_mm.webp" alt="Lash" onerror="this.src='https://deadlock-api.com/images/heroes/lash.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Lash</div>
+                                    <div class="hero-role">Assassin</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 47.8%"></div>
+                                <span class="stat-text">47.8%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 33.4%"></div>
+                                <span class="stat-text">33.4%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">14.9</span> /
+                                <span class="deaths">10.8</span> /
+                                <span class="assists">13.6</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">109,876</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">14</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/infernus_mm.webp" alt="Infernus" onerror="this.src='https://deadlock-api.com/images/heroes/infernus.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Infernus</div>
+                                    <div class="hero-role">Carry</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 46.5%"></div>
+                                <span class="stat-text">46.5%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 29.7%"></div>
+                                <span class="stat-text">29.7%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">13.2</span> /
+                                <span class="deaths">9.9</span> /
+                                <span class="assists">14.8</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">97,543</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">15</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/haze_mm.webp" alt="Haze" onerror="this.src='https://deadlock-api.com/images/heroes/haze.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Haze</div>
+                                    <div class="hero-role">Assassin</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 45.3%"></div>
+                                <span class="stat-text">45.3%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 31.9%"></div>
+                                <span class="stat-text">31.9%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">17.3</span> /
+                                <span class="deaths">11.7</span> /
+                                <span class="assists">10.2</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">104,892</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">16</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/grey_talon_mm.webp" alt="Grey Talon" onerror="this.src='https://deadlock-api.com/images/heroes/grey_talon.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Grey Talon</div>
+                                    <div class="hero-role">Carry</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 44.8%"></div>
+                                <span class="stat-text">44.8%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 23.6%"></div>
+                                <span class="stat-text">23.6%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">14.6</span> /
+                                <span class="deaths">10.1</span> /
+                                <span class="assists">12.4</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">77,654</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">17</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/lady_geist_mm.webp" alt="Lady Geist" onerror="this.src='https://deadlock-api.com/images/heroes/lady_geist.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Lady Geist</div>
+                                    <div class="hero-role">Support</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 43.7%"></div>
+                                <span class="stat-text">43.7%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 18.9%"></div>
+                                <span class="stat-text">18.9%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">10.7</span> /
+                                <span class="deaths">9.3</span> /
+                                <span class="assists">16.8</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">62,143</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">18</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/paradox_mm.webp" alt="Paradox" onerror="this.src='https://deadlock-api.com/images/heroes/paradox.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Paradox</div>
+                                    <div class="hero-role">Carry</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 42.9%"></div>
+                                <span class="stat-text">42.9%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 25.4%"></div>
+                                <span class="stat-text">25.4%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">12.8</span> /
+                                <span class="deaths">10.5</span> /
+                                <span class="assists">15.1</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">83,567</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">19</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/pocket_mm.webp" alt="Pocket" onerror="this.src='https://deadlock-api.com/images/heroes/pocket.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Pocket</div>
+                                    <div class="hero-role">Support</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 41.6%"></div>
+                                <span class="stat-text">41.6%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 21.7%"></div>
+                                <span class="stat-text">21.7%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">9.4</span> /
+                                <span class="deaths">8.9</span> /
+                                <span class="assists">19.3</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">71,289</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">20</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/shiv_mm.webp" alt="Shiv" onerror="this.src='https://deadlock-api.com/images/heroes/shiv.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Shiv</div>
+                                    <div class="hero-role">Assassin</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 40.2%"></div>
+                                <span class="stat-text">40.2%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 26.8%"></div>
+                                <span class="stat-text">26.8%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">16.8</span> /
+                                <span class="deaths">12.4</span> /
+                                <span class="assists">9.7</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">88,145</td>
+                    </tr>
+                    <tr>
+                        <td class="rank">21</td>
+                        <td>
+                            <div class="hero-info">
+                                <div class="hero-icon">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/viscous_mm.webp" alt="Viscous" onerror="this.src='https://deadlock-api.com/images/heroes/viscous.webp'" />
+                                </div>
+                                <div>
+                                    <div class="hero-name">Viscous</div>
+                                    <div class="hero-role">Tank</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill win-rate-fill" style="width: 38.9%"></div>
+                                <span class="stat-text">38.9%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="stat-bar">
+                                <div class="stat-fill pick-rate-fill" style="width: 15.3%"></div>
+                                <span class="stat-text">15.3%</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="kda">
+                                <span class="kills">8.7</span> /
+                                <span class="deaths">9.8</span> /
+                                <span class="assists">17.4</span>
+                            </div>
+                        </td>
+                        <td class="total-matches">50,329</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </main>
 
-    <!-- 푸터 -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <p>&copy; 2024 Deadlock API Korean. 모든 권리 보유.</p>
-                <p>통계 데이터는 매일 업데이트됩니다.</p>
-            </div>
-        </div>
-    </footer>
-
     <script>
-        console.log('통계 페이지 로드 완료');
+        console.log('영웅 통계 페이지 로드 완료');
         
-        // 부드러운 스크롤
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                }
+        // 탭 기능
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                console.log('탭 변경:', this.textContent);
+            });
+        });
+        
+        // 필터 기능
+        document.querySelectorAll('.rank-filter').forEach(filter => {
+            filter.addEventListener('click', function() {
+                console.log('필터 클릭:', this.textContent);
+                // 여기에 필터 로직 추가
             });
         });
     </script>

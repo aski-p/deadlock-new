@@ -12,106 +12,95 @@
         }
         
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a0a;
-            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #f0f6fc;
             line-height: 1.6;
-            font-size: 16px;
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 0 24px;
+            padding: 0 20px;
         }
         
         /* 헤더 */
         header {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 1rem 0;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .main-header {
+            background: linear-gradient(135deg, #161b22 0%, #21262d 100%);
             padding: 4rem 0;
             text-align: center;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid #30363d;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #58a6ff;
+            text-decoration: none;
         }
         
         .hero-title {
             font-size: 3.5rem;
             font-weight: 800;
             margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: none;
+            color: #f0f6fc;
         }
         
         .hero-subtitle {
             font-size: 1.25rem;
             opacity: 0.8;
             margin-bottom: 2.5rem;
-            color: #b3b3b3;
+            color: #8b949e;
         }
         
         .btn {
             display: inline-block;
             padding: 14px 32px;
             margin: 0 8px;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            background: #238636;
             color: white;
             text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
+            border-radius: 6px;
+            transition: all 0.2s ease;
             border: none;
             font-weight: 600;
             font-size: 0.95rem;
         }
         
         .btn:hover {
+            background: #2ea043;
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
         }
         
         /* 네비게이션 */
-        nav {
-            background: rgba(10, 10, 10, 0.95);
-            padding: 1.5rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid #333;
-        }
-        
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .logo {
-            font-size: 1.75rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
         .nav-links {
             display: flex;
+            gap: 2rem;
             list-style: none;
-            gap: 2.5rem;
         }
         
         .nav-links a {
-            color: #b3b3b3;
+            color: #8b949e;
             text-decoration: none;
-            transition: color 0.3s ease;
-            font-weight: 500;
+            transition: color 0.2s;
         }
         
         .nav-links a:hover {
-            color: #ff6b35;
+            color: #f0f6fc;
         }
+        
         
         /* 메인 컨텐츠 */
         main {
@@ -123,14 +112,11 @@
         }
         
         .section-title {
-            font-size: 2.75rem;
+            font-size: 2rem;
             text-align: center;
-            margin-bottom: 4rem;
+            margin-bottom: 2rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: #f0f6fc;
         }
         
         .features {
@@ -141,12 +127,12 @@
         }
         
         .feature-card {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            padding: 2.5rem;
-            border-radius: 16px;
+            background: #161b22;
+            padding: 2rem;
+            border-radius: 8px;
             text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid #333;
+            transition: all 0.2s ease;
+            border: 1px solid #30363d;
             position: relative;
             overflow: hidden;
         }
@@ -157,16 +143,16 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 4px;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            height: 3px;
+            background: #58a6ff;
             opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: opacity 0.2s ease;
         }
         
         .feature-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
-            border-color: #ff6b35;
+            transform: translateY(-5px);
+            background: #21262d;
+            border-color: #58a6ff;
         }
         
         .feature-card:hover::before {
@@ -179,16 +165,16 @@
         }
         
         .feature-title {
-            font-size: 1.6rem;
-            margin-bottom: 1.25rem;
-            color: #ffffff;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #f0f6fc;
             font-weight: 600;
         }
         
         .feature-description {
             opacity: 0.8;
-            color: #b3b3b3;
-            line-height: 1.7;
+            color: #8b949e;
+            line-height: 1.6;
         }
         
         /* API 섹션 */
@@ -278,8 +264,24 @@
     </style>
 </head>
 <body>
-    <!-- 헤더 -->
     <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo">Deadlock API</a>
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/heroes">Heroes</a></li>
+                        <li><a href="/items">Items</a></li>
+                        <li><a href="/stats">Stats</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- 메인 헤더 -->
+    <div class="main-header">
         <div class="container">
             <h1 class="hero-title">🎮 Deadlock API</h1>
             <p class="hero-subtitle">게임 데이터, 이미지, 통계를 제공하는 한국어 API</p>
@@ -288,21 +290,7 @@
                 <a href="/stats" class="btn">통계 보기</a>
             </div>
         </div>
-    </header>
-
-    <!-- 네비게이션 -->
-    <nav>
-        <div class="container">
-            <div class="nav-container">
-                <div class="logo">Deadlock API</div>
-                <ul class="nav-links">
-                    <li><a href="/heroes">영웅</a></li>
-                    <li><a href="/items">아이템</a></li>
-                    <li><a href="/stats">통계</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    </div>
 
     <!-- 메인 컨텐츠 -->
     <main>
