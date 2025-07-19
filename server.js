@@ -262,6 +262,39 @@ const fetchDeadlockLeaderboard = async (region, page = 1, limit = 50) => {
   }
 };
 
+// Steam ID 변환 헬퍼 함수들
+const convertToSteamId64 = (accountId) => {
+  try {
+    // accountId가 이미 64-bit Steam ID인 경우
+    if (accountId && accountId.toString().startsWith('76561198')) {
+      return accountId.toString();
+    }
+    
+    // 32-bit account ID를 64-bit Steam ID로 변환
+    if (accountId && !isNaN(accountId)) {
+      const steamId64 = BigInt('76561197960265728') + BigInt(accountId);
+      return steamId64.toString();
+    }
+    
+    return null;
+  } catch (error) {
+    return null;
+  }
+};
+
+const isValidSteamId64 = (steamId) => {
+  try {
+    // Steam ID는 76561197960265728 이상이어야 함
+    const id = BigInt(steamId);
+    const minSteamId = BigInt('76561197960265728');
+    const maxSteamId = BigInt('76561202255233023'); // 현실적인 최대값
+    
+    return id >= minSteamId && id <= maxSteamId;
+  } catch (error) {
+    return false;
+  }
+};
+
 // 데드락 API 응답을 우리 형식으로 변환 (전체 데이터, 페이징 없음)
 const convertDeadlockApiToOurFormat = async (apiData, region) => {
   try {
@@ -311,9 +344,23 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
         player.top_hero_ids.slice(0, 3).map(heroId => heroIdMapping[heroId] || null).filter(hero => hero !== null) : 
         [];
 
-      const steamId = player.possible_account_ids && player.possible_account_ids.length > 0 ? 
-        player.possible_account_ids[0].toString() : 
-        `76561198${String(player.rank).padStart(9, '0')}`;
+      // Steam ID 변환 로직 개선
+      let steamId = null;
+      if (player.possible_account_ids && player.possible_account_ids.length > 0) {
+        // 각 possible_account_id를 확인하여 유효한 Steam ID 찾기
+        for (const accountId of player.possible_account_ids) {
+          const steamId64 = convertToSteamId64(accountId);
+          if (steamId64 && isValidSteamId64(steamId64)) {
+            steamId = steamId64;
+            break;
+          }
+        }
+      }
+      
+      // 유효한 Steam ID가 없으면 기본값 사용
+      if (!steamId) {
+        steamId = `76561198${String(player.rank).padStart(9, '0')}`;
+      }
 
       // 기본 영웅이 없으면 랜덤 영웅 할당
       const finalHeroes = heroes.length > 0 ? heroes : [Object.values(heroIdMapping)[Math.floor(Math.random() * Object.values(heroIdMapping).length)]];
@@ -340,11 +387,11 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       try {
         const topPlayers = convertedPlayers.slice(0, 300); // 상위 300명 처리 (더 많은 실제 아바타)
         const steamIds = topPlayers
-          .filter(p => p.player.steamId && p.player.steamId.length >= 8 && p.player.steamId !== 'undefined')
+          .filter(p => p.player.steamId && isValidSteamId64(p.player.steamId))
           .map(p => p.player.steamId);
 
         if (steamIds.length > 0) {
-          console.log(`🎮 Steam API 아바타 조회 시작: ${steamIds.length}명의 플레이어`);
+          console.log(`🎮 Steam API 아바타 조회 시작: ${steamIds.length}명의 유효한 Steam ID (총 ${topPlayers.length}명 중)`);
 
           // Steam API 배치 처리 (최대 100개씩)
           const batchSize = 100;
@@ -375,9 +422,16 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
                     
                     // Steam 아바타 URL을 Cloudflare CDN으로 변환
                     if (avatarUrl && avatarUrl !== '') {
-                      // 기본 아바타인지 확인 (기본 아바타는 업데이트하지 않음)
-                      const isDefaultAvatar = avatarUrl.includes('b5bd56c1aa4644a474a2e4972be27ef9e82e517e') || 
-                                             avatarUrl.includes('fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb');
+                      // 기본 아바타인지 확인 (다양한 기본 아바타 패턴)
+                      const defaultAvatarPatterns = [
+                        'b5bd56c1aa4644a474a2e4972be27ef9e82e517e', // Steam 기본 아바타 1
+                        'fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb', // Steam 기본 아바타 2
+                        'c5d56249ee5d28a07db4ac9f7f60af961fab5426', // Steam 기본 아바타 3
+                        'fe6d8d616d1f31b2c2e8b7e7e9c0d4b7e5d8e4f7', // Steam 기본 아바타 4
+                        '38ea4b5e76b9330b9acc2ae14f7b1a46f0d8bb99'  // Steam 기본 아바타 5
+                      ];
+                      
+                      const isDefaultAvatar = defaultAvatarPatterns.some(pattern => avatarUrl.includes(pattern));
                       
                       if (!isDefaultAvatar) {
                         // avatars.steamstatic.com을 avatars.cloudflare.steamstatic.com으로 변경
