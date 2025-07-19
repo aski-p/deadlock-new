@@ -338,9 +338,9 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
     // Steam API로 실제 아바타 가져오기 (배치 처리, 상위 100명만)
     if (steamApiKey) {
       try {
-        const topPlayers = convertedPlayers.slice(0, 200); // 상위 200명 처리 (더 많은 실제 아바타)
+        const topPlayers = convertedPlayers.slice(0, 300); // 상위 300명 처리 (더 많은 실제 아바타)
         const steamIds = topPlayers
-          .filter(p => p.player.steamId && !p.player.steamId.startsWith('76561198000') && p.player.steamId.length >= 8)
+          .filter(p => p.player.steamId && p.player.steamId.length >= 8 && p.player.steamId !== 'undefined')
           .map(p => p.player.steamId);
 
         if (steamIds.length > 0) {
@@ -374,14 +374,22 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
                     let avatarUrl = steamUser.avatarfull || steamUser.avatarmedium || steamUser.avatar;
                     
                     // Steam 아바타 URL을 Cloudflare CDN으로 변환
-                    if (avatarUrl && avatarUrl !== '' && !avatarUrl.includes('b5bd56c1aa4644a474a2e4972be27ef9e82e517e')) {
-                      // avatars.steamstatic.com을 avatars.cloudflare.steamstatic.com으로 변경
-                      avatarUrl = avatarUrl.replace('avatars.steamstatic.com', 'avatars.cloudflare.steamstatic.com');
+                    if (avatarUrl && avatarUrl !== '') {
+                      // 기본 아바타인지 확인 (기본 아바타는 업데이트하지 않음)
+                      const isDefaultAvatar = avatarUrl.includes('b5bd56c1aa4644a474a2e4972be27ef9e82e517e') || 
+                                             avatarUrl.includes('fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb');
                       
-                      convertedPlayers[playerIndex].player.avatar = avatarUrl;
-                      convertedPlayers[playerIndex].player.name = steamUser.personaname || convertedPlayers[playerIndex].player.name;
-                      
-                      console.log(`🖼️ 아바타 업데이트: ${steamUser.personaname} -> ${avatarUrl}`);
+                      if (!isDefaultAvatar) {
+                        // avatars.steamstatic.com을 avatars.cloudflare.steamstatic.com으로 변경
+                        avatarUrl = avatarUrl.replace('avatars.steamstatic.com', 'avatars.cloudflare.steamstatic.com');
+                        
+                        convertedPlayers[playerIndex].player.avatar = avatarUrl;
+                        convertedPlayers[playerIndex].player.name = steamUser.personaname || convertedPlayers[playerIndex].player.name;
+                        
+                        console.log(`🖼️ 아바타 업데이트: ${steamUser.personaname} -> ${avatarUrl}`);
+                      } else {
+                        console.log(`⚪ 기본 아바타 스킵: ${steamUser.personaname}`);
+                      }
                     }
                   }
                 });

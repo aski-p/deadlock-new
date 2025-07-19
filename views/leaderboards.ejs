@@ -147,52 +147,57 @@ async function loadLeaderboardData() {
 function updateLeaderboardTable(data) {
     const tbody = document.getElementById('leaderboard-tbody');
     
-    // 메달 이미지 매핑 - 실제 작동하는 deadlock.gg CDN 사용
+    // 메달 이미지 매핑 - 간단한 색상 배지로 대체
     const getMedalImage = (medal, subrank) => {
-        // 간단한 메달 아이콘으로 대체 (이모지 사용)
-        const medalEmojis = {
-            'eternus': '🏆',
-            'phantom': '🥈', 
-            'oracle': '🥉',
-            'ritualist': '🥊',
-            'alchemist': '🏅',
-            'arcanist': '💫',
-            'initiate': '⚫'
+        const medalColors = {
+            'eternus': '#FFD700',    // 금색
+            'phantom': '#8A2BE2',    // 보라색
+            'oracle': '#00CED1',     // 청록색
+            'ritualist': '#32CD32',  // 녹색
+            'alchemist': '#FF8C00',  // 주황색
+            'arcanist': '#FF1493',   // 분홍색
+            'initiate': '#808080'    // 회색
         };
         
-        return 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><rect width="40" height="40" fill="%23333"/><text x="20" y="28" text-anchor="middle" font-size="20">' + (medalEmojis[medal.toLowerCase()] || '⚫') + '</text></svg>';
+        const color = medalColors[medal.toLowerCase()] || '#808080';
+        const medalText = medal.charAt(0).toUpperCase() + subrank;
+        
+        return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="${color}" stroke="%23fff" stroke-width="2"/><text x="20" y="26" text-anchor="middle" font-size="12" font-weight="bold" fill="%23fff">${medalText}</text></svg>`;
     };
 
-    // 영웅 이미지 매핑 - 실제 작동하는 deadlock.gg CDN 사용
+    // 영웅 이미지 매핑 - 간단한 색상 아이콘으로 대체
     const getHeroImage = (heroName) => {
-        // deadlock.gg의 실제 이미지 URL 구조
-        const heroImageMap = {
-            'Abrams': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fabrams.webp&w=64&q=75',
-            'Bebop': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fbebop.webp&w=64&q=75',
-            'Dynamo': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fdynamo.webp&w=64&q=75',
-            'Grey Talon': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fgrey-talon.webp&w=64&q=75',
-            'Haze': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fhaze.webp&w=64&q=75',
-            'Infernus': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Finfernus.webp&w=64&q=75',
-            'Ivy': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fivy.webp&w=64&q=75',
-            'Kelvin': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fkelvin.webp&w=64&q=75',
-            'Lady Geist': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Flady-geist.webp&w=64&q=75',
-            'Lash': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Flash.webp&w=64&q=75',
-            'McGinnis': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fmcginnis.webp&w=64&q=75',
-            'Mo & Krill': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fmo-and-krill.webp&w=64&q=75',
-            'Paradox': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fparadox.webp&w=64&q=75',
-            'Pocket': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fpocket.webp&w=64&q=75',
-            'Seven': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fseven.webp&w=64&q=75',
-            'Shiv': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fshiv.webp&w=64&q=75',
-            'Vindicta': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fvindicta.webp&w=64&q=75',
-            'Viscous': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fviscous.webp&w=64&q=75',
-            'Warden': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fwarden.webp&w=64&q=75',
-            'Wraith': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fwraith.webp&w=64&q=75',
-            'Yamato': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fyamato.webp&w=64&q=75',
-            'Mirage': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fmirage.webp&w=64&q=75',
-            'Calico': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fcalico.webp&w=64&q=75',
-            'Holliday': 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fholliday.webp&w=64&q=75'
+        const heroColors = {
+            'Abrams': '#FF6B47',     // 주황색
+            'Bebop': '#4CAF50',      // 녹색
+            'Dynamo': '#2196F3',     // 파란색
+            'Grey Talon': '#9E9E9E', // 회색
+            'Haze': '#9C27B0',       // 보라색
+            'Infernus': '#F44336',   // 빨간색
+            'Ivy': '#4CAF50',        // 녹색
+            'Kelvin': '#00BCD4',     // 청록색
+            'Lady Geist': '#795548', // 갈색
+            'Lash': '#FF9800',       // 주황색
+            'McGinnis': '#607D8B',   // 청회색
+            'Mo & Krill': '#8BC34A', // 연녹색
+            'Paradox': '#673AB7',    // 담보라
+            'Pocket': '#FFC107',     // 황색
+            'Seven': '#3F51B5',      // 남색
+            'Shiv': '#E91E63',       // 분홍색
+            'Vindicta': '#9C27B0',   // 보라색
+            'Viscous': '#00E676',    // 녹색
+            'Warden': '#795548',     // 갈색
+            'Wraith': '#424242',     // 진회색
+            'Yamato': '#F44336',     // 빨간색
+            'Mirage': '#00BCD4',     // 청록색
+            'Calico': '#FF5722',     // 주황색
+            'Holliday': '#4CAF50'    // 녹색
         };
-        return heroImageMap[heroName] || 'https://deadlock.gg/_next/image?url=https%3A%2F%2Fcdn.deadlock.gg%2Fheroes%2Fabrams.webp&w=64&q=75';
+        
+        const color = heroColors[heroName] || '#9E9E9E';
+        const initials = heroName.split(' ').map(word => word.charAt(0)).join('').substring(0, 2);
+        
+        return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" fill="${color}" rx="4"/><text x="16" y="20" text-anchor="middle" font-size="10" font-weight="bold" fill="%23fff">${initials}</text></svg>`;
     };
     
     tbody.innerHTML = data.map(player => 
@@ -202,7 +207,7 @@ function updateLeaderboardTable(data) {
         '</td>' +
         '<td class="player-cell">' +
             '<div class="player-info">' +
-                '<img src="' + player.player.avatar + '" alt="' + player.player.name + '" class="player-avatar" onerror="this.src=\'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg\'">' +
+                '<img src="' + player.player.avatar + '" alt="' + player.player.name + '" class="player-avatar" onerror="this.src=\'data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"40\" height=\"40\" viewBox=\"0 0 40 40\"><circle cx=\"20\" cy=\"20\" r=\"18\" fill=\"%23666\" stroke=\"%23fff\" stroke-width=\"2\"/><text x=\"20\" y=\"26\" text-anchor=\"middle\" font-size=\"20\" fill=\"%23fff\">👤</text></svg>\'">' +
                 '<span class="player-name">' + player.player.name + '</span>' +
             '</div>' +
         '</td>' +
