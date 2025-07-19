@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>영웅 데이터 - Deadlock API</title>
+    <title>Heroes - Deadlock API</title>
     <style>
         * {
             margin: 0;
@@ -12,285 +12,146 @@
         }
         
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #0a0a0a;
-            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0d1117;
+            color: #f0f6fc;
             line-height: 1.6;
-            font-size: 16px;
         }
         
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 0 24px;
+            padding: 0 20px;
         }
         
         /* 헤더 */
         header {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            padding: 4rem 0;
-            text-align: center;
-            border-bottom: 1px solid #333;
+            background: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 1rem 0;
         }
         
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: none;
-        }
-        
-        .hero-subtitle {
-            font-size: 1.25rem;
-            opacity: 0.8;
-            margin-bottom: 2.5rem;
-            color: #b3b3b3;
-        }
-        
-        .btn {
-            display: inline-block;
-            padding: 14px 32px;
-            margin: 0 8px;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            border: none;
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
-        }
-        
-        /* 네비게이션 */
-        nav {
-            background: rgba(10, 10, 10, 0.95);
-            padding: 1.5rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid #333;
-        }
-        
-        .nav-container {
+        .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
         
         .logo {
-            font-size: 1.75rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #58a6ff;
+            text-decoration: none;
         }
         
         .nav-links {
             display: flex;
+            gap: 2rem;
             list-style: none;
-            gap: 2.5rem;
         }
         
         .nav-links a {
-            color: #b3b3b3;
+            color: #8b949e;
             text-decoration: none;
-            transition: color 0.3s ease;
-            font-weight: 500;
+            transition: color 0.2s;
         }
         
         .nav-links a:hover {
-            color: #ff6b35;
+            color: #f0f6fc;
         }
         
-        /* 메인 컨텐츠 */
+        /* 메인 */
         main {
-            padding: 5rem 0;
+            padding: 2rem 0;
         }
         
-        .section {
-            margin-bottom: 5rem;
-        }
-        
-        .section-title {
-            font-size: 2.75rem;
-            text-align: center;
-            margin-bottom: 4rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            color: #f0f6fc;
         }
         
         .heroes-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 2.5rem;
-            margin-top: 3rem;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
         }
         
         .hero-card {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
-            padding: 2.5rem;
-            border-radius: 16px;
-            text-align: center;
-            transition: all 0.3s ease;
-            border: 1px solid #333;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .hero-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            background: #21262d;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.2s ease;
         }
         
         .hero-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
-            border-color: #ff6b35;
+            border-color: #58a6ff;
+            transform: translateY(-2px);
         }
         
-        .hero-card:hover::before {
-            opacity: 1;
+        .hero-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
         }
         
-        .hero-avatar {
-            width: 100px;
-            height: 100px;
-            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
-            border-radius: 50%;
-            margin: 0 auto 1.5rem;
+        .hero-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            margin-right: 1rem;
+            background: #30363d;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
-            box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+            font-size: 1.5rem;
         }
         
         .hero-name {
-            font-size: 1.6rem;
-            margin-bottom: 0.75rem;
-            color: #ffffff;
+            font-size: 1.25rem;
             font-weight: 600;
+            color: #f0f6fc;
         }
         
         .hero-role {
-            color: #ff6b35;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            font-size: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            color: #58a6ff;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .hero-description {
+            color: #8b949e;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
         }
         
         .hero-stats {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 0.75rem;
-            margin-top: 1.5rem;
-            font-size: 0.9rem;
+            gap: 0.5rem;
         }
         
-        .stat-item {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 0.75rem;
-            border-radius: 8px;
-            border: 1px solid #333;
-            transition: border-color 0.3s ease;
-        }
-        
-        .stat-item:hover {
-            border-color: #ff6b35;
-        }
-        
-        .api-section {
-            background: rgba(0,0,0,0.3);
-            padding: 3rem 0;
-            border-radius: 20px;
-            margin-top: 3rem;
-        }
-        
-        .api-endpoint {
-            background: rgba(255,255,255,0.1);
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin: 1rem 0;
-            border-left: 4px solid #10b981;
-        }
-        
-        .method-tag {
-            display: inline-block;
-            background: #10b981;
-            color: white;
-            padding: 4px 8px;
+        .stat {
+            background: #161b22;
+            padding: 0.5rem;
             border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin-right: 1rem;
-        }
-        
-        .endpoint-path {
-            font-family: 'Courier New', monospace;
-            color: #4fc3f7;
-            font-size: 1.1rem;
-        }
-        
-        .endpoint-description {
-            margin-top: 0.5rem;
-            opacity: 0.8;
-        }
-        
-        .code-example {
-            background: #1a1a1a;
-            padding: 1.5rem;
-            border-radius: 10px;
-            overflow-x: auto;
-            margin: 2rem 0;
-        }
-        
-        .code-example pre {
-            font-family: 'Courier New', monospace;
-            color: #4fc3f7;
-            line-height: 1.5;
-        }
-        
-        /* 푸터 */
-        footer {
-            background: #0f0f0f;
-            padding: 2rem 0;
+            font-size: 0.75rem;
             text-align: center;
-            margin-top: 4rem;
         }
         
-        .footer-content {
-            opacity: 0.7;
+        .stat-label {
+            color: #8b949e;
+            display: block;
+        }
+        
+        .stat-value {
+            color: #f0f6fc;
+            font-weight: 600;
         }
         
         /* 반응형 */
         @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2rem;
-            }
-            
             .nav-links {
                 display: none;
             }
@@ -302,385 +163,678 @@
     </style>
 </head>
 <body>
-    <!-- 헤더 -->
     <header>
         <div class="container">
-            <h1 class="hero-title">🦸‍♂️ 영웅 데이터</h1>
-            <p class="hero-subtitle">Deadlock의 모든 영웅 정보와 능력을 확인하세요</p>
-            <div>
-                <a href="/" class="btn">홈으로</a>
-                <a href="/items" class="btn">아이템 정보</a>
+            <div class="header-content">
+                <a href="/" class="logo">Deadlock API</a>
+                <nav>
+                    <ul class="nav-links">
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/heroes">Heroes</a></li>
+                        <li><a href="/items">Items</a></li>
+                        <li><a href="/stats">Stats</a></li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </header>
 
-    <!-- 네비게이션 -->
-    <nav>
-        <div class="container">
-            <div class="nav-container">
-                <div class="logo">Deadlock API</div>
-                <ul class="nav-links">
-                    <li><a href="/">홈</a></li>
-                    <li><a href="/heroes">영웅</a></li>
-                    <li><a href="/items">아이템</a></li>
-                    <li><a href="/stats">통계</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- 메인 컨텐츠 -->
     <main>
         <div class="container">
-            <!-- 영웅 목록 -->
-            <section class="section">
-                <h2 class="section-title">영웅 목록</h2>
-                <div class="heroes-grid">
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/abrams.png" alt="애브람스" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🛡️';">
-                        </div>
-                        <h3 class="hero-name">애브람스 (Abrams)</h3>
-                        <div class="hero-role">탱커</div>
-                        <p>강력한 방어력과 근접 전투 능력을 가진 탱커입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 800</div>
-                            <div class="stat-item">DPS: 70</div>
-                            <div class="stat-item">속도: 6.0</div>
-                            <div class="stat-item">사거리: 15</div>
+            <h1>Heroes</h1>
+            <div class="heroes-grid">
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">🚂</div>
+                        <div>
+                            <div class="hero-name">Abrams</div>
+                            <div class="hero-role">Tank</div>
                         </div>
                     </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/bebop.png" alt="비밥" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🤖';">
-                        </div>
-                        <h3 class="hero-name">비밥 (Bebop)</h3>
-                        <div class="hero-role">지원</div>
-                        <p>강력한 후크와 폭발 능력을 가진 지원 캐릭터입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 650</div>
-                            <div class="stat-item">DPS: 65</div>
-                            <div class="stat-item">속도: 6.5</div>
-                            <div class="stat-item">사거리: 22</div>
-                        </div>
+                    <div class="hero-description">
+                        A close-ranged brawler who can dish out a lot of damage when close to enemies.
                     </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/dynamo.png" alt="다이나모" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='⚡';">
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">650</span>
                         </div>
-                        <h3 class="hero-name">다이나모 (Dynamo)</h3>
-                        <div class="hero-role">지원</div>
-                        <p>전기 기반 능력으로 팀을 지원하는 캐릭터입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 600</div>
-                            <div class="stat-item">DPS: 60</div>
-                            <div class="stat-item">속도: 7.0</div>
-                            <div class="stat-item">사거리: 24</div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">74</span>
                         </div>
-                    </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/grey_talon.png" alt="그레이 탈론" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🦅';">
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">6.3</span>
                         </div>
-                        <h3 class="hero-name">그레이 탈론 (Grey Talon)</h3>
-                        <div class="hero-role">캐리</div>
-                        <p>정확한 저격과 트랩을 활용한 원거리 딜러입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 500</div>
-                            <div class="stat-item">DPS: 88</div>
-                            <div class="stat-item">속도: 7.5</div>
-                            <div class="stat-item">사거리: 30</div>
-                        </div>
-                    </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/haze.png" alt="헤이즈" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='👩‍🌫️';">
-                        </div>
-                        <h3 class="hero-name">헤이즈 (Haze)</h3>
-                        <div class="hero-role">암살자</div>
-                        <p>은신과 높은 기동력으로 적을 제거하는 암살자입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 450</div>
-                            <div class="stat-item">DPS: 92</div>
-                            <div class="stat-item">속도: 8.5</div>
-                            <div class="stat-item">사거리: 20</div>
-                        </div>
-                    </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/infernus.png" alt="인페르누스" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='👨‍🔥';">
-                        </div>
-                        <h3 class="hero-name">인페르누스 (Infernus)</h3>
-                        <div class="hero-role">캐리</div>
-                        <p>화염 기반 원거리 딜러로 강력한 DPS를 자랑합니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 550</div>
-                            <div class="stat-item">DPS: 85</div>
-                            <div class="stat-item">속도: 7.3</div>
-                            <div class="stat-item">사거리: 25</div>
-                        </div>
-                    </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/ivy.png" alt="아이비" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🌿';">
-                        </div>
-                        <h3 class="hero-name">아이비 (Ivy)</h3>
-                        <div class="hero-role">지원</div>
-                        <p>자연의 힘을 활용하여 팀을 지원하는 캐릭터입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 580</div>
-                            <div class="stat-item">DPS: 62</div>
-                            <div class="stat-item">속도: 7.2</div>
-                            <div class="stat-item">사거리: 23</div>
-                        </div>
-                    </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/kelvin.png" alt="켈빈" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='❄️';">
-                        </div>
-                        <h3 class="hero-name">켈빈 (Kelvin)</h3>
-                        <div class="hero-role">탱커</div>
-                        <p>얼음 기반 능력으로 적을 제어하는 탱커입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 750</div>
-                            <div class="stat-item">DPS: 68</div>
-                            <div class="stat-item">속도: 6.2</div>
-                            <div class="stat-item">사거리: 18</div>
-                        </div>
-                    </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/lady_geist.png" alt="레이디 가이스트" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='👻';">
-                        </div>
-                        <h3 class="hero-name">레이디 가이스트 (Lady Geist)</h3>
-                        <div class="hero-role">지원</div>
-                        <p>생명력 조작과 영혼 능력을 가진 지원 캐릭터입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 620</div>
-                            <div class="stat-item">DPS: 67</div>
-                            <div class="stat-item">속도: 6.8</div>
-                            <div class="stat-item">사거리: 22</div>
-                        </div>
-                    </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/lash.png" alt="래시" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='⚡';">
-                        </div>
-                        <h3 class="hero-name">래시 (Lash)</h3>
-                        <div class="hero-role">암살자</div>
-                        <p>전기 채찍과 기동력을 활용한 암살자입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 480</div>
-                            <div class="stat-item">DPS: 89</div>
-                            <div class="stat-item">속도: 8.2</div>
-                            <div class="stat-item">사거리: 19</div>
-                        </div>
-                    </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/mcginnis.png" alt="맥기니스" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🔧';">
-                        </div>
-                        <h3 class="hero-name">맥기니스 (McGinnis)</h3>
-                        <div class="hero-role">지원</div>
-                        <p>터렛과 벽을 설치하여 지역을 통제하는 엔지니어입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 590</div>
-                            <div class="stat-item">DPS: 64</div>
-                            <div class="stat-item">속도: 6.7</div>
-                            <div class="stat-item">사거리: 25</div>
-                        </div>
-                    </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/mo_krill.png" alt="모 크릴" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🦀';">
-                        </div>
-                        <h3 class="hero-name">모 크릴 (Mo & Krill)</h3>
-                        <div class="hero-role">탱커</div>
-                        <p>두 생명체가 합쳐진 강력한 탱커입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 820</div>
-                            <div class="stat-item">DPS: 72</div>
-                            <div class="stat-item">속도: 5.8</div>
-                            <div class="stat-item">사거리: 16</div>
-                        </div>
-                    </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/paradox.png" alt="패러독스" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🌀';">
-                        </div>
-                        <h3 class="hero-name">패러독스 (Paradox)</h3>
-                        <div class="hero-role">캐리</div>
-                        <p>시간 조작 능력을 가진 독특한 캐릭터입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 520</div>
-                            <div class="stat-item">DPS: 81</div>
-                            <div class="stat-item">속도: 7.6</div>
-                            <div class="stat-item">사거리: 26</div>
-                        </div>
-                    </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/pocket.png" alt="포켓" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🎩';">
-                        </div>
-                        <h3 class="hero-name">포켓 (Pocket)</h3>
-                        <div class="hero-role">지원</div>
-                        <p>마법과 텔레포트를 활용한 지원 캐릭터입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 560</div>
-                            <div class="stat-item">DPS: 69</div>
-                            <div class="stat-item">속도: 7.4</div>
-                            <div class="stat-item">사거리: 24</div>
-                        </div>
-                    </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/seven.png" alt="세븐" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='⚡';">
-                        </div>
-                        <h3 class="hero-name">세븐 (Seven)</h3>
-                        <div class="hero-role">캐리</div>
-                        <p>전기 기반 능력과 강력한 궁극기를 가진 캐릭터입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 540</div>
-                            <div class="stat-item">DPS: 83</div>
-                            <div class="stat-item">속도: 7.1</div>
-                            <div class="stat-item">사거리: 27</div>
-                        </div>
-                    </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/shiv.png" alt="시브" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🗡️';">
-                        </div>
-                        <h3 class="hero-name">시브 (Shiv)</h3>
-                        <div class="hero-role">암살자</div>
-                        <p>칼날과 출혈 능력을 가진 근접 암살자입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 470</div>
-                            <div class="stat-item">DPS: 94</div>
-                            <div class="stat-item">속도: 8.3</div>
-                            <div class="stat-item">사거리: 17</div>
-                        </div>
-                    </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/vindicta.png" alt="빈딕타" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='👩‍🎯';">
-                        </div>
-                        <h3 class="hero-name">빈딕타 (Vindicta)</h3>
-                        <div class="hero-role">캐리</div>
-                        <p>정확한 저격과 높은 기동력을 가진 원거리 딜러입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 490</div>
-                            <div class="stat-item">DPS: 91</div>
-                            <div class="stat-item">속도: 8.0</div>
-                            <div class="stat-item">사거리: 32</div>
-                        </div>
-                    </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/viscous.png" alt="비스커스" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🌊';">
-                        </div>
-                        <h3 class="hero-name">비스커스 (Viscous)</h3>
-                        <div class="hero-role">탱커</div>
-                        <p>액체 능력과 강한 생존력을 가진 탱커입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 780</div>
-                            <div class="stat-item">DPS: 66</div>
-                            <div class="stat-item">속도: 6.3</div>
-                            <div class="stat-item">사거리: 20</div>
-                        </div>
-                    </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/warden.png" alt="워든" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🛡️';">
-                        </div>
-                        <h3 class="hero-name">워든 (Warden)</h3>
-                        <div class="hero-role">지원</div>
-                        <p>강력한 생존력과 팀 지원 능력을 가진 캐릭터입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 680</div>
-                            <div class="stat-item">DPS: 71</div>
-                            <div class="stat-item">속도: 6.9</div>
-                            <div class="stat-item">사거리: 21</div>
-                        </div>
-                    </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/wraith.png" alt="레이스" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='👻';">
-                        </div>
-                        <h3 class="hero-name">레이스 (Wraith)</h3>
-                        <div class="hero-role">캐리</div>
-                        <p>텔레포트와 정확한 사격을 가진 원거리 딜러입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 510</div>
-                            <div class="stat-item">DPS: 87</div>
-                            <div class="stat-item">속도: 7.7</div>
-                            <div class="stat-item">사거리: 28</div>
-                        </div>
-                    </div>
-                    
-                    <div class="hero-card">
-                        <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/yamato.png" alt="야마토" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='⚔️';">
-                        </div>
-                        <h3 class="hero-name">야마토 (Yamato)</h3>
-                        <div class="hero-role">암살자</div>
-                        <p>검술과 그림자 능력을 가진 근접 암살자입니다.</p>
-                        <div class="hero-stats">
-                            <div class="stat-item">HP: 460</div>
-                            <div class="stat-item">DPS: 96</div>
-                            <div class="stat-item">속도: 8.6</div>
-                            <div class="stat-item">사거리: 16</div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">15m</span>
                         </div>
                     </div>
                 </div>
-            </section>
 
-        </div>
-    </main>
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">🤖</div>
+                        <div>
+                            <div class="hero-name">Bebop</div>
+                            <div class="hero-role">Support</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        A hook-based support character with explosive abilities and crowd control.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">650</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">65</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">6.5</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">22m</span>
+                        </div>
+                    </div>
+                </div>
 
-    <!-- 푸터 -->
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <p>&copy; 2024 Deadlock API Korean. 모든 권리 보유.</p>
-                <p>영웅 데이터는 실시간으로 업데이트됩니다.</p>
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">⚡</div>
+                        <div>
+                            <div class="hero-name">Dynamo</div>
+                            <div class="hero-role">Support</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        One of the strongest support characters with some of the best utility in the game.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">600</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">60</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">7.0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">24m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">🦅</div>
+                        <div>
+                            <div class="hero-name">Grey Talon</div>
+                            <div class="hero-role">Carry</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        A precise sniper with trap abilities for long-range elimination.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">500</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">88</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">7.5</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">30m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">👤</div>
+                        <div>
+                            <div class="hero-name">Haze</div>
+                            <div class="hero-role">Assassin</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        A stealth assassin with high mobility for eliminating key targets.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">450</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">92</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">8.5</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">20m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">🔥</div>
+                        <div>
+                            <div class="hero-name">Infernus</div>
+                            <div class="hero-role">Carry</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        A fire-based ranged carry who has consistently proven deadly.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">550</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">85</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">7.3</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">25m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">🌿</div>
+                        <div>
+                            <div class="hero-name">Ivy</div>
+                            <div class="hero-role">Support</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        A nature-based support character with healing and utility abilities.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">580</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">62</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">7.2</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">23m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">❄️</div>
+                        <div>
+                            <div class="hero-name">Kelvin</div>
+                            <div class="hero-role">Tank</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        An ice-based tank with crowd control and area denial abilities.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">750</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">68</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">6.2</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">18m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">💀</div>
+                        <div>
+                            <div class="hero-name">Lady Geist</div>
+                            <div class="hero-role">Support</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        A soul-manipulating support with life drain and healing abilities.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">620</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">67</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">6.8</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">22m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">⚡</div>
+                        <div>
+                            <div class="hero-name">Lash</div>
+                            <div class="hero-role">Assassin</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        An electric whip assassin with high mobility and engage potential.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">480</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">89</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">8.2</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">19m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">🔧</div>
+                        <div>
+                            <div class="hero-name">McGinnis</div>
+                            <div class="hero-role">Support</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        An engineer who controls areas with turrets and defensive structures.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">590</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">64</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">6.7</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">25m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">🦀</div>
+                        <div>
+                            <div class="hero-name">Mo & Krill</div>
+                            <div class="hero-role">Tank</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        A dual-entity tank with burrow abilities and high survivability.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">820</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">72</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">5.8</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">16m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">🌀</div>
+                        <div>
+                            <div class="hero-name">Paradox</div>
+                            <div class="hero-role">Carry</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        A time-manipulation carry with unique temporal abilities.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">520</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">81</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">7.6</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">26m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">🎩</div>
+                        <div>
+                            <div class="hero-name">Pocket</div>
+                            <div class="hero-role">Support</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        A magical support with teleportation and utility spells.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">560</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">69</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">7.4</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">24m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">⚡</div>
+                        <div>
+                            <div class="hero-name">Seven</div>
+                            <div class="hero-role">Carry</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        An electric-based carry who has consistently proven deadly.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">540</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">83</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">7.1</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">27m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">🗡️</div>
+                        <div>
+                            <div class="hero-name">Shiv</div>
+                            <div class="hero-role">Assassin</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        A melee assassin with blade abilities and bleeding effects.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">470</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">94</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">8.3</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">17m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">🎯</div>
+                        <div>
+                            <div class="hero-name">Vindicta</div>
+                            <div class="hero-role">Carry</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        A precise sniper with high mobility and long-range capabilities.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">490</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">91</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">8.0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">32m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">🌊</div>
+                        <div>
+                            <div class="hero-name">Viscous</div>
+                            <div class="hero-role">Tank</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        A liquid-based tank with strong survivability and area control.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">780</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">66</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">6.3</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">20m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">🛡️</div>
+                        <div>
+                            <div class="hero-name">Warden</div>
+                            <div class="hero-role">Support</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        A defensive support with strong survivability and team utility.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">680</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">71</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">6.9</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">21m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">👻</div>
+                        <div>
+                            <div class="hero-name">Wraith</div>
+                            <div class="hero-role">Carry</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        A relatively straightforward kit with good mobility making her simple to play.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">510</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">87</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">7.7</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">28m</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hero-card">
+                    <div class="hero-header">
+                        <div class="hero-icon">⚔️</div>
+                        <div>
+                            <div class="hero-name">Yamato</div>
+                            <div class="hero-role">Assassin</div>
+                        </div>
+                    </div>
+                    <div class="hero-description">
+                        A highly mechanical hero with sword abilities and shadow techniques.
+                    </div>
+                    <div class="hero-stats">
+                        <div class="stat">
+                            <span class="stat-label">Health</span>
+                            <span class="stat-value">460</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">DPS</span>
+                            <span class="stat-value">96</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Move Speed</span>
+                            <span class="stat-value">8.6</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Range</span>
+                            <span class="stat-value">16m</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </footer>
-
-    <script>
-        console.log('영웅 페이지 로드 완료');
-        
-        // 부드러운 스크롤
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-    </script>
+    </main>
 </body>
 </html>
