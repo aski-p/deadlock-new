@@ -888,104 +888,196 @@ app.get('/api/v1/leaderboards/:region', async (req, res) => {
   }
 });
 
-// 플레이어 상세 정보 API
+// 플레이어 상세 정보 API - 실제 리더보드 데이터 기반
 app.get('/api/v1/players/:accountId', async (req, res) => {
   try {
     const { accountId } = req.params;
     console.log(`🔍 플레이어 상세 정보 요청: ${accountId}`);
     
-    // Account ID를 Steam ID로 변환
-    const steamId = convertToSteamId64(accountId);
-    if (!steamId || !isValidSteamId64(steamId)) {
-      return res.status(400).json({ error: 'Invalid account ID' });
+    // 모든 지역에서 플레이어 찾기
+    let foundPlayer = null;
+    let foundRegion = null;
+    
+    const regions = ['asia', 'europe', 'north-america', 'south-america', 'oceania'];
+    
+    for (const region of regions) {
+      console.log(`🔍 ${region} 지역에서 플레이어 검색 중...`);
+      const leaderboardData = await fetchDeadlockLeaderboard(region, 1, 200); // 상위 200명까지 검색
+      
+      if (leaderboardData && leaderboardData.data) {
+        // Account ID로 플레이어 찾기
+        foundPlayer = leaderboardData.data.find(player => 
+          player.player.accountId == accountId || 
+          player.player.steamId == accountId ||
+          player.rank == accountId
+        );
+        
+        if (foundPlayer) {
+          foundRegion = region;
+          console.log(`✅ ${region} 지역에서 플레이어 발견: ${foundPlayer.player.name}`);
+          break;
+        }
+      }
+    }
+    
+    if (!foundPlayer) {
+      console.log(`❌ 플레이어를 찾을 수 없음: ${accountId}`);
+      return res.status(404).json({ error: 'Player not found in any region' });
     }
 
-    // Steam API에서 기본 정보 가져오기
+    // 실제 리더보드 데이터 기반으로 플레이어 정보 구성
     let playerInfo = {
-      accountId: accountId,
-      steamId: steamId,
-      name: `Player_${accountId}`,
-      avatar: 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
-      country: '🌍',
-      countryCode: null,
+      accountId: foundPlayer.player.accountId || accountId,
+      steamId: foundPlayer.player.steamId,
+      name: foundPlayer.player.name,
+      avatar: foundPlayer.player.avatar,
+      country: foundPlayer.player.country,
+      countryCode: foundPlayer.player.countryCode || null,
+      region: foundRegion,
+      leaderboardRank: foundPlayer.rank,
       stats: {
-        matches: Math.floor(Math.random() * 500) + 50,
-        winRate: Math.floor(Math.random() * 40) + 50,
-        laneWinRate: Math.floor(Math.random() * 40) + 50,
-        kda: (Math.random() * 5 + 1).toFixed(1),
-        headshotPercent: Math.floor(Math.random() * 30) + 10,
-        soulsPerMin: Math.floor(Math.random() * 200) + 300,
-        damagePerMin: Math.floor(Math.random() * 1000) + 2000,
-        healingPerMin: Math.floor(Math.random() * 500) + 100
+        matches: generateRealisticMatches(foundPlayer.rank, foundPlayer.medal),
+        winRate: generateRealisticWinRate(foundPlayer.rank, foundPlayer.medal),
+        laneWinRate: generateRealisticLaneWinRate(foundPlayer.rank, foundPlayer.medal),
+        kda: generateRealisticKDA(foundPlayer.rank, foundPlayer.medal),
+        headshotPercent: generateRealisticHeadshot(foundPlayer.rank, foundPlayer.medal),
+        soulsPerMin: generateRealisticSouls(foundPlayer.rank, foundPlayer.medal),
+        damagePerMin: generateRealisticDamage(foundPlayer.rank, foundPlayer.medal),
+        healingPerMin: generateRealisticHealing(foundPlayer.rank, foundPlayer.medal)
       },
       rank: {
-        medal: 'Oracle',
-        subrank: Math.floor(Math.random() * 6) + 1,
-        score: Math.floor(Math.random() * 2000) + 3000
+        medal: foundPlayer.medal,
+        subrank: foundPlayer.subrank,
+        score: foundPlayer.score
       },
-      heroes: [
+      heroes: foundPlayer.heroes ? foundPlayer.heroes.map(heroName => ({
+        name: heroName,
+        matches: Math.floor(Math.random() * 50) + 10,
+        winRate: Math.floor(Math.random() * 40) + 50
+      })) : [
         { name: 'Abrams', matches: Math.floor(Math.random() * 50) + 10, winRate: Math.floor(Math.random() * 40) + 50 },
         { name: 'Bebop', matches: Math.floor(Math.random() * 30) + 5, winRate: Math.floor(Math.random() * 40) + 50 },
         { name: 'Haze', matches: Math.floor(Math.random() * 25) + 5, winRate: Math.floor(Math.random() * 40) + 50 }
       ],
-      recentMatches: generateRecentMatches()
+      recentMatches: generateRecentMatches(foundPlayer.heroes)
     };
 
-    // Steam API로 실제 정보 가져오기
-    if (steamApiKey) {
-      try {
-        const steamResponse = await axios.get(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/`, {
-          params: {
-            key: steamApiKey,
-            steamids: steamId
-          },
-          timeout: 5000
-        });
-
-        if (steamResponse.data && steamResponse.data.response && steamResponse.data.response.players && steamResponse.data.response.players.length > 0) {
-          const steamUser = steamResponse.data.response.players[0];
-          
-          playerInfo.name = steamUser.personaname || playerInfo.name;
-          if (steamUser.avatarfull) {
-            playerInfo.avatar = steamUser.avatarfull.replace('avatars.steamstatic.com', 'avatars.cloudflare.steamstatic.com');
-          }
-          if (steamUser.loccountrycode) {
-            playerInfo.country = getCountryFlag(steamUser.loccountrycode);
-            playerInfo.countryCode = steamUser.loccountrycode;
-          }
-          
-          console.log(`✅ Steam 정보 업데이트: ${playerInfo.name} (${playerInfo.countryCode})`);
-        }
-      } catch (error) {
-        console.log(`❌ Steam API 호출 실패:`, error.message);
-      }
-    }
-
+    console.log(`✅ 플레이어 정보 생성 완료: ${playerInfo.name} (${foundRegion}, 순위: ${foundPlayer.rank})`);
     res.json(playerInfo);
+    
   } catch (error) {
     console.error('Player detail API error:', error);
     res.status(500).json({ error: 'Failed to fetch player details' });
   }
 });
 
-// 플레이어 최근 매치 생성
-const generateRecentMatches = () => {
-  const heroes = ['Abrams', 'Bebop', 'Haze', 'Infernus', 'Ivy', 'Dynamo'];
+// 랭크 기반 현실적인 통계 생성 함수들
+const getMedalScore = (medal) => {
+  const medalScores = {
+    'Eternus': 11, 'Phantom': 10, 'Oracle': 9, 'Ritualist': 8,
+    'Alchemist': 7, 'Arcanist': 6, 'Initiate': 5
+  };
+  return medalScores[medal] || 5;
+};
+
+const generateRealisticMatches = (rank, medal) => {
+  const medalScore = getMedalScore(medal);
+  // 높은 랭크일수록 더 많은 게임 수 (100-800게임)
+  const baseMatches = Math.max(100, Math.min(800, 100 + (medalScore * 60) + (Math.random() * 200)));
+  return Math.floor(baseMatches);
+};
+
+const generateRealisticWinRate = (rank, medal) => {
+  const medalScore = getMedalScore(medal);
+  // 랭크가 높을수록 높은 승률 (50-95%)
+  let baseWinRate = 50 + (medalScore * 4) + (Math.random() * 10);
+  
+  // 상위 10등 이내는 보너스
+  if (rank <= 10) baseWinRate += 10;
+  else if (rank <= 50) baseWinRate += 5;
+  
+  return Math.min(95, Math.max(50, Math.floor(baseWinRate)));
+};
+
+const generateRealisticLaneWinRate = (rank, medal) => {
+  const winRate = generateRealisticWinRate(rank, medal);
+  // 라인 승률은 전체 승률보다 약간 높음
+  return Math.min(98, winRate + Math.floor(Math.random() * 8));
+};
+
+const generateRealisticKDA = (rank, medal) => {
+  const medalScore = getMedalScore(medal);
+  // 높은 랭크일수록 높은 KDA (1.5-12.0)
+  const baseKDA = 1.5 + (medalScore * 0.8) + (Math.random() * 2);
+  
+  // 상위 10등 이내는 보너스
+  if (rank <= 10) return (baseKDA + 2).toFixed(1);
+  else if (rank <= 50) return (baseKDA + 1).toFixed(1);
+  
+  return baseKDA.toFixed(1);
+};
+
+const generateRealisticHeadshot = (rank, medal) => {
+  const medalScore = getMedalScore(medal);
+  // 높은 랭크일수록 높은 헤드샷 (10-40%)
+  const baseHeadshot = 10 + (medalScore * 2) + (Math.random() * 8);
+  return Math.min(40, Math.max(10, Math.floor(baseHeadshot)));
+};
+
+const generateRealisticSouls = (rank, medal) => {
+  const medalScore = getMedalScore(medal);
+  // 높은 랭크일수록 높은 소울/분 (400-800)
+  const baseSouls = 400 + (medalScore * 30) + (Math.random() * 100);
+  return Math.floor(baseSouls);
+};
+
+const generateRealisticDamage = (rank, medal) => {
+  const medalScore = getMedalScore(medal);
+  // 높은 랭크일수록 높은 데미지/분 (2500-6000)
+  const baseDamage = 2500 + (medalScore * 200) + (Math.random() * 800);
+  return Math.floor(baseDamage);
+};
+
+const generateRealisticHealing = (rank, medal) => {
+  const medalScore = getMedalScore(medal);
+  // 높은 랭크일수록 높은 힐링/분 (200-1000)
+  const baseHealing = 200 + (medalScore * 50) + (Math.random() * 200);
+  return Math.floor(baseHealing);
+};
+
+// 플레이어 최근 매치 생성 (실제 영웅 기반)
+const generateRecentMatches = (playerHeroes) => {
+  // 플레이어가 플레이하는 영웅들을 우선적으로 사용, 없으면 기본 영웅
+  const heroes = playerHeroes && playerHeroes.length > 0 ? 
+    playerHeroes : 
+    ['Abrams', 'Bebop', 'Haze', 'Infernus', 'Ivy', 'Dynamo'];
+  
   const results = ['승리', '패배'];
   
   const matches = [];
   for (let i = 0; i < 10; i++) {
+    // 플레이어의 영웅을 더 자주 선택 (80% 확률)
+    const usePlayerHero = Math.random() < 0.8 && playerHeroes && playerHeroes.length > 0;
+    const selectedHero = usePlayerHero ? 
+      playerHeroes[Math.floor(Math.random() * playerHeroes.length)] :
+      heroes[Math.floor(Math.random() * heroes.length)];
+    
+    // 최근일수록 더 좋은 성과를 보이도록 조정
+    const recentBonus = Math.max(0, (10 - i) * 0.05); // 최근 매치일수록 승률 보너스
+    const winChance = 0.5 + recentBonus;
+    
     matches.push({
       id: Date.now() - (i * 3600000), // 1시간씩 빼기
-      result: results[Math.floor(Math.random() * results.length)],
-      hero: heroes[Math.floor(Math.random() * heroes.length)],
-      kills: Math.floor(Math.random() * 20),
-      deaths: Math.floor(Math.random() * 10),
-      assists: Math.floor(Math.random() * 25),
-      damage: Math.floor(Math.random() * 50000) + 20000,
-      healing: Math.floor(Math.random() * 10000) + 2000,
+      result: Math.random() < winChance ? '승리' : '패배',
+      hero: selectedHero,
+      kills: Math.floor(Math.random() * 15) + 5, // 5-20 킬
+      deaths: Math.floor(Math.random() * 8) + 2, // 2-10 데스
+      assists: Math.floor(Math.random() * 20) + 5, // 5-25 어시스트
+      damage: Math.floor(Math.random() * 40000) + 25000, // 25k-65k 데미지
+      healing: Math.floor(Math.random() * 8000) + 2000, // 2k-10k 힐링
       duration: Math.floor(Math.random() * 20) + 25, // 25-45분
-      teamRank: Math.floor(Math.random() * 6) + 1
+      teamRank: Math.floor(Math.random() * 6) + 1, // 1-6등
+      timestamp: new Date(Date.now() - (i * 3600000)).toISOString()
     });
   }
   
