@@ -398,7 +398,7 @@
                     
                     <div class="hero-card">
                         <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/haze.png" alt="헤이즈" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='💨';">
+                            <img src="https://deadlock-api.com/images/heroes/haze.png" alt="헤이즈" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='👩‍🌫️';">
                         </div>
                         <h3 class="hero-name">헤이즈 (Haze)</h3>
                         <div class="hero-role">암살자</div>
@@ -413,7 +413,7 @@
                     
                     <div class="hero-card">
                         <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/infernus.png" alt="인페르누스" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🔥';">
+                            <img src="https://deadlock-api.com/images/heroes/infernus.png" alt="인페르누스" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='👨‍🔥';">
                         </div>
                         <h3 class="hero-name">인페르누스 (Infernus)</h3>
                         <div class="hero-role">캐리</div>
@@ -578,7 +578,7 @@
                     
                     <div class="hero-card">
                         <div class="hero-avatar">
-                            <img src="https://deadlock-api.com/images/heroes/vindicta.png" alt="빈딕타" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='🎯';">
+                            <img src="https://deadlock-api.com/images/heroes/vindicta.png" alt="빈딕타" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" onerror="this.style.display='none'; this.parentElement.innerHTML='👩‍🎯';">
                         </div>
                         <h3 class="hero-name">빈딕타 (Vindicta)</h3>
                         <div class="hero-role">캐리</div>
@@ -653,52 +653,6 @@
                 </div>
             </section>
 
-            <!-- API 엔드포인트 -->
-            <section class="api-section">
-                <div class="container">
-                    <h2 class="section-title">영웅 API 엔드포인트</h2>
-                    
-                    <div class="api-endpoint">
-                        <span class="method-tag">GET</span>
-                        <span class="endpoint-path">/api/heroes</span>
-                        <div class="endpoint-description">모든 영웅 목록을 조회합니다.</div>
-                    </div>
-                    
-                    <div class="api-endpoint">
-                        <span class="method-tag">GET</span>
-                        <span class="endpoint-path">/api/heroes/{id}</span>
-                        <div class="endpoint-description">특정 영웅의 상세 정보를 조회합니다.</div>
-                    </div>
-                    
-                    <div class="api-endpoint">
-                        <span class="method-tag">GET</span>
-                        <span class="endpoint-path">/api/heroes/{id}/abilities</span>
-                        <div class="endpoint-description">특정 영웅의 스킬 정보를 조회합니다.</div>
-                    </div>
-                    
-                    <div class="code-example">
-                        <pre>
-// JavaScript 예제
-fetch('https://deadlock-api.com/api/heroes')
-  .then(response => response.json())
-  .then(heroes => {
-    console.log('영웅 목록:', heroes);
-    heroes.forEach(hero => {
-      console.log(`${hero.name} (${hero.role})`);
-    });
-  });
-
-// 특정 영웅 정보 조회
-fetch('https://deadlock-api.com/api/heroes/1')
-  .then(response => response.json())
-  .then(hero => {
-    console.log('영웅 정보:', hero);
-    console.log('스킬 목록:', hero.abilities);
-  });
-                        </pre>
-                    </div>
-                </div>
-            </section>
         </div>
     </main>
 

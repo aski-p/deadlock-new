@@ -527,57 +527,6 @@
                 </div>
             </section>
 
-            <!-- API 엔드포인트 -->
-            <section class="api-section">
-                <div class="container">
-                    <h2 class="section-title">아이템 API 엔드포인트</h2>
-                    
-                    <div class="api-endpoint">
-                        <span class="method-tag">GET</span>
-                        <span class="endpoint-path">/api/items</span>
-                        <div class="endpoint-description">모든 아이템 목록을 조회합니다.</div>
-                    </div>
-                    
-                    <div class="api-endpoint">
-                        <span class="method-tag">GET</span>
-                        <span class="endpoint-path">/api/items/{id}</span>
-                        <div class="endpoint-description">특정 아이템의 상세 정보를 조회합니다.</div>
-                    </div>
-                    
-                    <div class="api-endpoint">
-                        <span class="method-tag">GET</span>
-                        <span class="endpoint-path">/api/items/categories</span>
-                        <div class="endpoint-description">아이템 카테고리 목록을 조회합니다.</div>
-                    </div>
-                    
-                    <div class="api-endpoint">
-                        <span class="method-tag">GET</span>
-                        <span class="endpoint-path">/api/items/builds</span>
-                        <div class="endpoint-description">추천 아이템 빌드를 조회합니다.</div>
-                    </div>
-                    
-                    <div class="code-example">
-                        <pre>
-// JavaScript 예제
-fetch('https://deadlock-api.com/api/items')
-  .then(response => response.json())
-  .then(items => {
-    console.log('아이템 목록:', items);
-    items.forEach(item => {
-      console.log(`${item.name} - ${item.cost}원`);
-    });
-  });
-
-// 카테고리별 아이템 조회
-fetch('https://deadlock-api.com/api/items/categories/weapon')
-  .then(response => response.json())
-  .then(weapons => {
-    console.log('무기 아이템:', weapons);
-  });
-                        </pre>
-                    </div>
-                </div>
-            </section>
         </div>
     </main>
 

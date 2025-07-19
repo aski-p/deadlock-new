@@ -284,8 +284,8 @@
             <h1 class="hero-title">🎮 Deadlock API</h1>
             <p class="hero-subtitle">게임 데이터, 이미지, 통계를 제공하는 한국어 API</p>
             <div>
-                <a href="#features" class="btn">기능 보기</a>
-                <a href="#api" class="btn">API 문서</a>
+                <a href="/heroes" class="btn">영웅 보기</a>
+                <a href="/stats" class="btn">통계 보기</a>
             </div>
         </div>
     </header>
@@ -296,10 +296,9 @@
             <div class="nav-container">
                 <div class="logo">Deadlock API</div>
                 <ul class="nav-links">
-                    <li><a href="#features">기능</a></li>
-                    <li><a href="#api">API</a></li>
-                    <li><a href="#examples">예제</a></li>
-                    <li><a href="#contact">문의</a></li>
+                    <li><a href="/heroes">영웅</a></li>
+                    <li><a href="/items">아이템</a></li>
+                    <li><a href="/stats">통계</a></li>
                 </ul>
             </div>
         </div>
@@ -343,85 +342,6 @@
                 </div>
             </section>
 
-            <!-- API 문서 -->
-            <section id="api" class="section">
-                <h2 class="section-title">API 엔드포인트</h2>
-                <div class="api-section">
-                    <div class="container">
-                        <div class="api-grid">
-                            <div class="api-card">
-                                <div class="api-method">GET</div>
-                                <div class="api-endpoint">/api/heroes</div>
-                                <div class="api-description">모든 영웅 목록 조회</div>
-                            </div>
-                            <div class="api-card">
-                                <div class="api-method">GET</div>
-                                <div class="api-endpoint">/api/heroes/{id}</div>
-                                <div class="api-description">특정 영웅 상세 정보</div>
-                            </div>
-                            <div class="api-card">
-                                <div class="api-method">GET</div>
-                                <div class="api-endpoint">/api/items</div>
-                                <div class="api-description">모든 아이템 목록 조회</div>
-                            </div>
-                            <div class="api-card">
-                                <div class="api-method">GET</div>
-                                <div class="api-endpoint">/api/matches</div>
-                                <div class="api-description">최근 매치 데이터 조회</div>
-                            </div>
-                            <div class="api-card">
-                                <div class="api-method">GET</div>
-                                <div class="api-endpoint">/api/stats</div>
-                                <div class="api-description">게임 통계 데이터</div>
-                            </div>
-                            <div class="api-card">
-                                <div class="api-method">GET</div>
-                                <div class="api-endpoint">/api/live</div>
-                                <div class="api-description">실시간 데이터</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 사용 예제 -->
-            <section id="examples" class="section">
-                <h2 class="section-title">사용 예제</h2>
-                <div class="code-example">
-                    <pre>
-// JavaScript 예제
-fetch('https://deadlock-api.com/api/heroes')
-  .then(response => response.json())
-  .then(data => {
-    console.log('영웅 데이터:', data);
-  });
-
-// 특정 영웅 정보 가져오기
-fetch('https://deadlock-api.com/api/heroes/1')
-  .then(response => response.json())
-  .then(hero => {
-    console.log('영웅 이름:', hero.name);
-  });
-                    </pre>
-                </div>
-                
-                <div class="code-example">
-                    <pre>
-# Python 예제
-import requests
-
-# 모든 영웅 조회
-response = requests.get('https://deadlock-api.com/api/heroes')
-heroes = response.json()
-print(f'영웅 수: {len(heroes)}')
-
-# 특정 영웅 조회
-hero_response = requests.get('https://deadlock-api.com/api/heroes/1')
-hero = hero_response.json()
-print(f'영웅 이름: {hero["name"]}')
-                    </pre>
-                </div>
-            </section>
         </div>
     </main>
 
