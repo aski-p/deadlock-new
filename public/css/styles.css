@@ -1,0 +1,563 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    background-color: #000000;
+    color: #ffffff;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* 배경 패턴 */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        repeating-linear-gradient(
+            0deg,
+            rgba(255,255,255,0.03) 0px,
+            transparent 1px,
+            transparent 2px,
+            rgba(255,255,255,0.03) 3px
+        );
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* 헤더 */
+header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1000;
+    padding: 15px 0;
+}
+
+nav {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    gap: 12px;
+}
+
+.logo img {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+}
+
+.logo span {
+    font-size: 20px;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 30px;
+    align-items: center;
+}
+
+.nav-links a {
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 15px;
+    transition: opacity 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-links a:hover {
+    opacity: 0.8;
+}
+
+.lang-selector {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    padding: 8px 16px;
+    color: #ffffff;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.lang-selector:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.discord-btn {
+    background: #5865F2;
+    color: white;
+    padding: 8px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.discord-btn:hover {
+    background: #4752C4;
+    transform: translateY(-2px);
+}
+
+/* 메인 컨텐츠 */
+.main-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 120px 40px 60px;
+    position: relative;
+    z-index: 10;
+}
+
+/* 히어로 섹션 */
+.hero-section {
+    text-align: center;
+    margin-bottom: 80px;
+}
+
+.hero-title {
+    font-size: 64px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 30px;
+    background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.hero-subtitle {
+    font-size: 20px;
+    color: #999999;
+    margin-bottom: 50px;
+    line-height: 1.6;
+}
+
+/* 위키 섹션 */
+.wiki-section {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 60px;
+    align-items: center;
+    margin-bottom: 120px;
+}
+
+.hero-image {
+    position: relative;
+}
+
+.hero-image img {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    filter: drop-shadow(0 0 60px rgba(0, 255, 200, 0.3));
+}
+
+.wiki-content h2 {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+
+.wiki-content p {
+    font-size: 18px;
+    color: #cccccc;
+    margin-bottom: 15px;
+}
+
+.wiki-link {
+    color: #5865F2;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.wiki-link:hover {
+    text-decoration: underline;
+}
+
+/* 윈도우 앱 섹션 */
+.app-section {
+    background: linear-gradient(135deg, rgba(88, 101, 242, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
+    border-radius: 24px;
+    padding: 80px;
+    margin-bottom: 80px;
+    border: 1px solid rgba(88, 101, 242, 0.2);
+}
+
+.app-section h2 {
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 30px;
+}
+
+.app-features {
+    font-size: 18px;
+    color: #cccccc;
+    line-height: 1.8;
+    margin-bottom: 40px;
+}
+
+.app-partners {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    margin-top: 40px;
+}
+
+.partner-logo {
+    height: 50px;
+    filter: brightness(0.8);
+    transition: filter 0.3s;
+}
+
+.partner-logo:hover {
+    filter: brightness(1);
+}
+
+.overwolf-logo {
+    background: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    color: #000;
+}
+
+.valve-logo {
+    background: #FF4545;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 700;
+    color: white;
+    font-size: 24px;
+    letter-spacing: 2px;
+}
+
+.app-stats {
+    display: flex;
+    gap: 40px;
+    margin-top: 30px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+}
+
+.stat-icon {
+    font-size: 24px;
+}
+
+/* 푸터 */
+footer {
+    margin-top: 120px;
+    padding: 40px;
+    text-align: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-content {
+    color: #666666;
+    font-size: 14px;
+    line-height: 1.8;
+}
+
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 20px auto 0;
+}
+
+.social-links {
+    display: flex;
+    gap: 20px;
+}
+
+.social-links a {
+    color: #666666;
+    font-size: 20px;
+    transition: color 0.3s;
+}
+
+.social-links a:hover {
+    color: #ffffff;
+}
+
+/* 사용자 메뉴 */
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(88, 101, 242, 0.15);
+    padding: 10px 18px;
+    border-radius: 12px;
+    border: 1px solid rgba(88, 101, 242, 0.3);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s;
+    box-shadow: 0 4px 20px rgba(88, 101, 242, 0.2);
+}
+
+.user-menu:hover {
+    background: rgba(88, 101, 242, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 30px rgba(88, 101, 242, 0.3);
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #ffffff;
+    transition: all 0.3s;
+    background: #ffffff;
+    padding: 2px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.user-avatar:hover {
+    transform: scale(1.1);
+    border-color: #00ffcc;
+    box-shadow: 0 4px 20px rgba(0, 255, 204, 0.3);
+}
+
+.username {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 15px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+    min-width: 80px;
+    letter-spacing: 0.3px;
+}
+
+.steam-login-btn {
+    background: #5865F2;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 2px 8px rgba(88, 101, 242, 0.3);
+}
+
+.steam-login-btn:hover {
+    background: #4752C4;
+    transform: translateY(-2px);
+    color: white;
+    box-shadow: 0 4px 16px rgba(88, 101, 242, 0.4);
+}
+
+.logout-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 13px;
+    transition: all 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+    color: #ffffff;
+}
+
+.steam-login-btn::before {
+    content: '🎮';
+    font-size: 16px;
+}
+
+/* CTA 버튼 */
+.hero-cta {
+    margin-top: 40px;
+}
+
+.cta-button {
+    display: inline-block;
+    background: #5865F2;
+    color: white;
+    padding: 15px 30px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+.cta-button:hover {
+    background: #4752C4;
+    transform: translateY(-3px);
+    color: white;
+}
+
+/* 사용자 대시보드 */
+.user-dashboard {
+    padding: 80px 0;
+    background: rgba(88, 101, 242, 0.05);
+    margin-top: 80px;
+}
+
+.dashboard-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+.section-title {
+    text-align: center;
+    font-size: 48px;
+    font-weight: 700;
+    margin-bottom: 60px;
+    color: #ffffff;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+}
+
+.dashboard-card {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 30px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-5px);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(88, 101, 242, 0.5);
+}
+
+.dashboard-card h3 {
+    color: #ffffff;
+    font-size: 20px;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.recent-game {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s;
+}
+
+.recent-game:last-child {
+    border-bottom: none;
+}
+
+.recent-game:hover {
+    background: rgba(88, 101, 242, 0.1);
+    margin: 0 -15px;
+    padding-left: 15px;
+    padding-right: 15px;
+    border-radius: 8px;
+}
+
+.game-name {
+    color: #ffffff;
+    font-weight: 500;
+}
+
+.playtime {
+    color: #cccccc;
+    font-size: 14px;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 36px;
+    }
+
+    .wiki-section {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .app-section {
+        padding: 40px 20px;
+    }
+
+    .nav-links {
+        display: none;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .user-menu {
+        padding: 6px 12px;
+        gap: 10px;
+    }
+    
+    .username {
+        font-size: 13px;
+        min-width: 60px;
+    }
+    
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .nav-right {
+        gap: 15px;
+    }
+}

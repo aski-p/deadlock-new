@@ -1,0 +1,24 @@
+# Image Placeholders
+
+이 디렉토리에는 다음 이미지들이 필요합니다:
+
+## 로고 및 브랜딩
+- logo.png - 메인 로고 (32x32px)
+- favicon.ico - 파비콘
+
+## Steam 로그인
+- steam-login.png - Steam 로그인 버튼 이미지
+- steam-icon.png - Steam 아이콘 (24x24px)
+
+## 플레이스홀더
+이미지가 없을 때는 CSS의 background-color와 text content로 대체됩니다.
+
+## 권장 크기
+- 로고: 32x32px PNG
+- Steam 로그인 버튼: 154x23px PNG  
+- Steam 아이콘: 24x24px PNG
+- 유저 아바타: 40x40px (Steam API에서 제공)
+
+## 이미지 소스
+Steam 관련 이미지는 Steam 공식 브랜드 가이드라인을 따라야 합니다:
+https://partner.steamgames.com/doc/marketing/branding
