@@ -589,19 +589,22 @@ footer {
 .region-selector {
     display: flex;
     justify-content: center;
-    gap: 20px;
+    gap: 15px;
     margin-bottom: 40px;
+    flex-wrap: wrap;
 }
 
 .region-btn {
     background: rgba(255, 255, 255, 0.1);
     color: #ffffff;
-    padding: 12px 24px;
+    padding: 10px 18px;
     border-radius: 8px;
     text-decoration: none;
     font-weight: 500;
     transition: all 0.3s;
     border: 1px solid rgba(255, 255, 255, 0.2);
+    font-size: 14px;
+    white-space: nowrap;
 }
 
 .region-btn:hover {
@@ -940,12 +943,14 @@ footer {
     
     .region-selector {
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 8px;
+        justify-content: center;
     }
     
     .region-btn {
-        padding: 8px 16px;
-        font-size: 14px;
+        padding: 8px 12px;
+        font-size: 12px;
+        min-width: auto;
     }
     
     .filters-section {

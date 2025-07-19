@@ -1,7 +1,13 @@
 <div class="leaderboards-section">
     <div class="leaderboards-container">
         <div class="leaderboards-header">
-            <h1 class="page-title">리더보드 - <%= region === 'europe' ? '유럽' : region === 'asia' ? '아시아' : '북미' %></h1>
+            <h1 class="page-title">리더보드 - <%= 
+                region === 'europe' ? '유럽' : 
+                region === 'asia' ? '아시아' : 
+                region === 'north-america' ? '북미' :
+                region === 'south-america' ? '남미' :
+                region === 'oceania' ? '오세아니아' : '지역'
+            %></h1>
             
             <div class="region-selector">
                 <a href="/ko/leaderboards/europe" class="region-btn <%= region === 'europe' ? 'active' : '' %>">
@@ -12,6 +18,12 @@
                 </a>
                 <a href="/ko/leaderboards/north-america" class="region-btn <%= region === 'north-america' ? 'active' : '' %>">
                     북미
+                </a>
+                <a href="/ko/leaderboards/south-america" class="region-btn <%= region === 'south-america' ? 'active' : '' %>">
+                    남미
+                </a>
+                <a href="/ko/leaderboards/oceania" class="region-btn <%= region === 'oceania' ? 'active' : '' %>">
+                    오세아니아
                 </a>
             </div>
         </div>
@@ -81,7 +93,7 @@
                 </tbody>
             </table>
             
-            <div class="pagination" id="pagination" style="<%= region === 'asia' ? 'display: none;' : '' %>">
+            <div class="pagination" id="pagination" style="display: none;">
                 <button class="pagination-btn" id="prev-btn" disabled>이전</button>
                 <span class="pagination-info" id="pagination-info">1 / 10</span>
                 <button class="pagination-btn" id="next-btn">다음</button>
@@ -226,11 +238,9 @@ function updatePaginationInfo(pagination) {
     const nextBtn = document.getElementById('next-btn');
     const paginationDiv = document.getElementById('pagination');
     
-    // 아시아 지역이면 페이징 숨기기
-    if (currentFilters.region === 'asia') {
-        paginationDiv.style.display = 'none';
-        return;
-    }
+    // 모든 지역에서 실제 API 사용하므로 페이징 숨기기
+    paginationDiv.style.display = 'none';
+    return;
     
     totalPages = pagination.total_pages;
     currentPage = pagination.current_page;

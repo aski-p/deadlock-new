@@ -156,6 +156,22 @@ app.get('/ko/leaderboards/north-america', (req, res) => {
   });
 });
 
+app.get('/ko/leaderboards/south-america', (req, res) => {
+  res.render('leaderboards', { 
+    user: req.user,
+    region: 'south-america',
+    title: 'South American Leaderboards - 박근형의 데드락'
+  });
+});
+
+app.get('/ko/leaderboards/oceania', (req, res) => {
+  res.render('leaderboards', { 
+    user: req.user,
+    region: 'oceania',
+    title: 'Oceania Leaderboards - 박근형의 데드락'
+  });
+});
+
 // Steam Auth Routes (only if Steam is configured)
 if (steamApiKey) {
   app.get('/auth/steam',
@@ -194,18 +210,28 @@ app.get('/logout', (req, res) => {
   });
 });
 
-// 실제 데드락 리더보드 API 호출 (아시아만)
+// 실제 데드락 리더보드 API 호출 (모든 지역)
 const fetchDeadlockLeaderboard = async (region, page = 1, limit = 50) => {
-  // 아시아 지역만 실제 API 사용
-  if (region !== 'asia') {
-    return null;
-  }
-
   try {
-    console.log(`🔍 실제 데드락 API 조회: Asia`);
+    console.log(`🔍 실제 데드락 API 조회: ${region}`);
     
-    // deadlock-api.com의 실제 아시아 리더보드 API 호출
-    const response = await axios.get(`https://api.deadlock-api.com/v1/leaderboard/Asia`, {
+    // 지역별 API 엔드포인트 매핑
+    const regionEndpoints = {
+      'asia': 'Asia',
+      'europe': 'Europe', 
+      'north-america': 'NAmerica',
+      'south-america': 'SAmerica',
+      'oceania': 'Oceania'
+    };
+    
+    const apiRegion = regionEndpoints[region];
+    if (!apiRegion) {
+      console.log(`❌ 지원하지 않는 지역: ${region}`);
+      return null;
+    }
+    
+    // deadlock-api.com의 실제 리더보드 API 호출
+    const response = await axios.get(`https://api.deadlock-api.com/v1/leaderboard/${apiRegion}`, {
       timeout: 15000,
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -391,9 +417,11 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
 // 지역별 랜덤 국가 플래그 반환
 const getRandomCountryFlag = (region) => {
   const regionFlags = {
-    'europe': ['🇩🇪', '🇬🇧', '🇫🇷', '🇪🇸', '🇮🇹', '🇵🇱', '🇷🇺', '🇸🇪', '🇳🇴', '🇩🇰'],
-    'asia': ['🇰🇷', '🇯🇵', '🇨🇳', '🇹🇼', '🇹🇭', '🇻🇳', '🇸🇬', '🇲🇾', '🇵🇭', '🇮🇩'],
-    'north-america': ['🇺🇸', '🇨🇦', '🇲🇽']
+    'europe': ['🇩🇪', '🇬🇧', '🇫🇷', '🇪🇸', '🇮🇹', '🇵🇱', '🇷🇺', '🇸🇪', '🇳🇴', '🇩🇰', '🇳🇱', '🇧🇪', '🇦🇹', '🇨🇭', '🇫🇮'],
+    'asia': ['🇰🇷', '🇯🇵', '🇨🇳', '🇹🇼', '🇹🇭', '🇻🇳', '🇸🇬', '🇲🇾', '🇵🇭', '🇮🇩', '🇮🇳', '🇦🇺', '🇳🇿'],
+    'north-america': ['🇺🇸', '🇨🇦', '🇲🇽'],
+    'south-america': ['🇧🇷', '🇦🇷', '🇨🇱', '🇨🇴', '🇵🇪', '🇺🇾', '🇪🇨', '🇻🇪', '🇧🇴', '🇵🇾'],
+    'oceania': ['🇦🇺', '🇳🇿', '🇫🇯', '🇵🇬', '🇳🇨', '🇻🇺', '🇸🇧', '🇹🇴', '🇼🇸', '🇰🇮']
   };
   
   const flags = regionFlags[region] || regionFlags['asia'];
@@ -697,7 +725,7 @@ app.get('/api/v1/leaderboards/:region', async (req, res) => {
     const hero = req.query.hero || 'all';
     const medal = req.query.medal || 'all';
 
-    if (!['europe', 'asia', 'north-america'].includes(region)) {
+    if (!['europe', 'asia', 'north-america', 'south-america', 'oceania'].includes(region)) {
       return res.status(400).json({ error: 'Invalid region' });
     }
 
