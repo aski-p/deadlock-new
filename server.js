@@ -1365,36 +1365,81 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
       
       console.log(`📡 파티 스탯 API 응답 상태: ${response.status}, 데이터 타입: ${typeof response.data}, 배열 여부: ${Array.isArray(response.data)}, 길이: ${response.data?.length}`);
       
-      // 실제 API 응답 구조 확인을 위한 로깅
+      // 실제 API 응답 구조 확인을 위한 상세 로깅
       if (response.data && Array.isArray(response.data) && response.data.length > 0) {
         console.log('🔍 파티 스탯 API 첫 번째 항목 구조:', JSON.stringify(response.data[0], null, 2));
+        console.log('🔍 사용 가능한 필드들:', Object.keys(response.data[0]));
+        
+        // 이름 관련 필드들 체크
+        const firstItem = response.data[0];
+        console.log('🔍 이름 관련 필드 확인:', {
+          account_id: firstItem.account_id,
+          account_name: firstItem.account_name,
+          player_name: firstItem.player_name,
+          name: firstItem.name,
+          username: firstItem.username,
+          persona_name: firstItem.persona_name,
+          steam_name: firstItem.steam_name
+        });
       }
       
       if (response.data && Array.isArray(response.data)) {
-        // 실제 API 데이터를 프론트엔드 형식으로 변환
-        const partyStats = response.data
+        // 실제 API 데이터를 프론트엔드 형식으로 변환 (이름 해결 포함)
+        const partyStatsPromises = response.data
           .filter(party => party.matches_played > 0) // 실제로 함께 플레이한 파티만
-          .map(party => {
+          .slice(0, 10) // 처리할 파티원 수 제한 (API 호출 부담 줄이기)
+          .map(async (party) => {
             const winRate = party.matches_played > 0 ? Math.round((party.wins / party.matches_played) * 100) : 0;
+            
+            // 이름 가져오기 (다양한 필드 시도)
+            let playerName = party.account_name || party.player_name || party.name || party.username || party.persona_name || party.steam_name;
+            
+            // 이름이 없거나 빈 값이면 Steam 프로필 API로 가져오기 시도
+            if (!playerName || playerName.trim() === '') {
+              try {
+                console.log(`🔍 파티원 ${party.account_id} Steam 프로필 정보 가져오기 시도...`);
+                const steamResponse = await axios.get(`https://api.deadlock-api.com/v1/players/${party.account_id}/steam`, {
+                  timeout: 3000
+                });
+                
+                if (steamResponse.data && (steamResponse.data.personaname || steamResponse.data.real_name)) {
+                  playerName = steamResponse.data.personaname || steamResponse.data.real_name;
+                  console.log(`✅ 파티원 ${party.account_id} 이름 획득: ${playerName}`);
+                }
+              } catch (steamError) {
+                console.log(`❌ 파티원 ${party.account_id} Steam 프로필 가져오기 실패: ${steamError.message}`);
+              }
+            }
+            
+            // 여전히 이름이 없으면 기본값 사용
+            if (!playerName || playerName.trim() === '') {
+              playerName = `Player_${party.account_id}`;
+            }
             
             return {
               accountId: party.account_id,
-              name: party.account_name || `Player_${party.account_id}`,
-              matches: party.matches_played,
-              wins: party.wins,
-              losses: party.matches_played - party.wins,
+              name: playerName,
+              matches: party.matches_played || party.matches || 0,
+              wins: party.wins || 0,
+              losses: (party.matches_played || party.matches || 0) - (party.wins || 0),
               winRate: winRate,
-              avgKills: (party.kills / party.matches_played).toFixed(1),
-              avgDeaths: (party.deaths / party.matches_played).toFixed(1),
-              avgAssists: (party.assists / party.matches_played).toFixed(1),
+              avgKills: party.matches_played > 0 ? (party.kills / party.matches_played).toFixed(1) : '0.0',
+              avgDeaths: party.matches_played > 0 ? (party.deaths / party.matches_played).toFixed(1) : '0.0',
+              avgAssists: party.matches_played > 0 ? (party.assists / party.matches_played).toFixed(1) : '0.0',
               avgKda: party.deaths > 0 ? ((party.kills + party.assists) / party.deaths).toFixed(1) : (party.kills + party.assists).toFixed(1),
               lastPlayedTogether: party.last_match_time ? new Date(party.last_match_time * 1000).toISOString() : null
             };
-          })
-          .sort((a, b) => b.matches - a.matches) // 많이 함께 플레이한 순으로 정렬
-          .slice(0, 10); // 상위 10명만
+          });
+        
+        // 모든 파티원 정보를 병렬로 처리
+        const partyStats = await Promise.all(partyStatsPromises);
+        
+        // 많이 함께 플레이한 순으로 정렬
+        partyStats.sort((a, b) => b.matches - a.matches);
         
         console.log(`✅ 실제 파티 스탯 API 변환 완료: ${partyStats.length}개 파티원`);
+        console.log(`🎯 첫 번째 파티원: ${partyStats[0]?.name} (${partyStats[0]?.matches}경기)`);
+        
         setCachedData(cacheKey, partyStats);
         return res.json(partyStats);
       }
