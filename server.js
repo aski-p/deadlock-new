@@ -1610,6 +1610,7 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
               console.log(`🔍 매치 ${match.match_id} 주요 필드:`, {
                 match_id: match.match_id,
                 match_result: match.match_result,
+                player_team: match.player_team,
                 team_assignment: match.team_assignment,
                 winning_team: match.winning_team,
                 team_position: match.team_position,
@@ -1647,11 +1648,12 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
               // win 필드로 판정
               isWin = match.win === true || match.win === 1;
               console.log(`🏆 매치 ${match.match_id}: win=${match.win}, isWin=${isWin}`);
-            } else if (match.match_result !== undefined) {
-              // match_result 값에 따른 판정 - deadlock.coach 기준으로 역산
-              // 38022449는 match_result=1이고 승리여야 하므로 1=승리
-              isWin = match.match_result === 1;
-              console.log(`🏆 매치 ${match.match_id}: match_result=${match.match_result}, isWin=${isWin} (1=승리로 수정)`);
+            } else if (match.match_result !== undefined && match.player_team !== undefined) {
+              // match_result는 어느 팀이 이겼는지 표시 (0=Team0 승리, 1=Team1 승리)
+              // player_team은 플레이어가 속한 팀 (0 또는 1)
+              // 플레이어가 이긴 경우: player_team === match_result
+              isWin = match.player_team === match.match_result;
+              console.log(`🏆 매치 ${match.match_id}: player_team=${match.player_team}, match_result=${match.match_result} (winning team), isWin=${isWin}`);
             } else {
               // 기본값
               isWin = false;
