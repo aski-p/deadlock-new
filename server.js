@@ -1421,16 +1421,9 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
           .slice(0, limit) // 요청된 수만큼만
           .map(match => {
             const heroName = heroIdMap[match.hero_id] || `Hero ${match.hero_id}`;
-            // match_result: 1 = 승리, 0 = 패배로 추정
+            // match_result: 1 = 무조건 승리, 0 = 무조건 패배
             const isWin = match.match_result === 1;
             const durationSeconds = match.match_duration_s || 0;
-            
-            // 디버깅을 위한 로그 - 모든 매치의 결과를 확인
-            console.log(`🔍 매치 ${match.match_id} 결과:`, {
-              match_result: match.match_result,
-              isWin: isWin,
-              resultText: isWin ? '승리' : '패배'
-            });
             const durationFormatted = `${Math.floor(durationSeconds / 60)}:${(durationSeconds % 60).toString().padStart(2, '0')}`;
             
             // KDA 계산
