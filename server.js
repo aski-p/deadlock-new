@@ -1341,8 +1341,9 @@ app.get('/api/v1/players/:accountId/hero-stats', async (req, res) => {
       console.log(`📡 API 응답 상태: ${response.status}, 데이터 타입: ${typeof response.data}, 배열 여부: ${Array.isArray(response.data)}, 길이: ${response.data?.length || 'N/A'}`);
 
       if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-        // 매치 히스토리에서 실제 영웅별 게임 수 확인 (검증용)
+        // 매치 히스토리에서 실제 영웅별 게임 수 및 승패 확인 (검증용)
         let matchHistoryHeroCounts = {};
+        let matchHistoryHeroWins = {};
         try {
           const matchHistoryResponse = await axios.get(`https://api.deadlock-api.com/v1/players/${accountId}/match-history`, {
             timeout: 5000,
@@ -1355,7 +1356,14 @@ app.get('/api/v1/players/:accountId/hero-stats', async (req, res) => {
             matchHistoryResponse.data.forEach(match => {
               const heroId = match.hero_id;
               if (heroId) {
+                // 게임 수 카운트
                 matchHistoryHeroCounts[heroId] = (matchHistoryHeroCounts[heroId] || 0) + 1;
+                
+                // 승리 여부 확인 (player_team === match_result면 승리)
+                const isWin = match.player_team === match.match_result;
+                if (isWin) {
+                  matchHistoryHeroWins[heroId] = (matchHistoryHeroWins[heroId] || 0) + 1;
+                }
               }
             });
             console.log(`📊 매치 히스토리 검증: 총 ${matchHistoryResponse.data.length}게임 분석`);
@@ -1368,16 +1376,19 @@ app.get('/api/v1/players/:accountId/hero-stats', async (req, res) => {
         const heroStats = response.data.map(hero => {
           const heroName = getHeroNameById(hero.hero_id);
           
-          // 매치 히스토리에서 실제 게임 수 확인 (더 정확할 가능성)
+          // 매치 히스토리에서 실제 게임 수 및 승수 확인 (더 정확할 가능성)
           const actualMatches = matchHistoryHeroCounts[hero.hero_id] || hero.matches_played;
-          const isDiscrepancy = actualMatches !== hero.matches_played;
+          const actualWins = matchHistoryHeroWins[hero.hero_id] || hero.wins;
+          const actualLosses = actualMatches - actualWins;
           
-          if (isDiscrepancy) {
-            console.log(`🔍 ${heroName} 게임 수 차이 발견: API=${hero.matches_played}, 실제=${actualMatches}`);
+          const isMatchDiscrepancy = actualMatches !== hero.matches_played;
+          const isWinDiscrepancy = actualWins !== hero.wins;
+          
+          if (isMatchDiscrepancy || isWinDiscrepancy) {
+            console.log(`🔍 ${heroName} 차이 발견: 게임수 API=${hero.matches_played}→실제=${actualMatches}, 승수 API=${hero.wins}→실제=${actualWins}`);
           }
           
-          const winRate = actualMatches > 0 ? ((hero.wins / actualMatches) * 100).toFixed(1) : 0;
-          const losses = actualMatches - hero.wins;
+          const winRate = actualMatches > 0 ? ((actualWins / actualMatches) * 100).toFixed(1) : 0;
           const kda = hero.deaths > 0 ? ((hero.kills + hero.assists) / hero.deaths).toFixed(2) : (hero.kills + hero.assists).toFixed(2);
           const avgMatchDuration = hero.time_played > 0 ? Math.round(hero.time_played / actualMatches) : 0;
           const durationFormatted = `${Math.floor(avgMatchDuration / 60)}:${(avgMatchDuration % 60).toString().padStart(2, '0')}`;
@@ -1386,8 +1397,8 @@ app.get('/api/v1/players/:accountId/hero-stats', async (req, res) => {
             hero: heroName,
             heroId: hero.hero_id,
             matches: actualMatches, // 매치 히스토리 기반 실제 게임 수 사용
-            wins: hero.wins,
-            losses: losses,
+            wins: actualWins, // 매치 히스토리 기반 실제 승수 사용
+            losses: actualLosses, // 매치 히스토리 기반 실제 패수 사용
             winRate: parseFloat(winRate),
             avgKills: actualMatches > 0 ? parseFloat((hero.kills / actualMatches).toFixed(1)) : 0,
             avgDeaths: actualMatches > 0 ? parseFloat((hero.deaths / actualMatches).toFixed(1)) : 0,
