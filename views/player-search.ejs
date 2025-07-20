@@ -1,0 +1,456 @@
+<div class="search-section">
+    <div class="search-container">
+        <h1 class="search-title">플레이어 검색</h1>
+        <p class="search-description">Steam ID, 플레이어 이름, 또는 Account ID로 검색하세요</p>
+        
+        <!-- Search Form -->
+        <div class="search-form">
+            <div class="search-tabs">
+                <button class="search-tab active" data-tab="steam-id">Steam ID</button>
+                <button class="search-tab" data-tab="player-name">플레이어 이름</button>
+                <button class="search-tab" data-tab="account-id">Account ID</button>
+            </div>
+            
+            <!-- Steam ID Search -->
+            <div class="search-content active" id="steam-id-search">
+                <div class="search-input-group">
+                    <input type="text" class="search-input" id="steam-id-input" placeholder="76561198015042012" maxlength="17">
+                    <button class="search-button" onclick="searchBySteamId()">검색</button>
+                </div>
+                <div class="search-example">
+                    예시: <a href="#" onclick="fillExample('steam-id-input', '76561198015042012')">76561198015042012</a>
+                </div>
+            </div>
+            
+            <!-- Player Name Search -->
+            <div class="search-content" id="player-name-search">
+                <div class="search-input-group">
+                    <input type="text" class="search-input" id="player-name-input" placeholder="aski">
+                    <button class="search-button" onclick="searchByPlayerName()">검색</button>
+                </div>
+                <div class="search-example">
+                    예시: <a href="#" onclick="fillExample('player-name-input', 'aski')">aski</a>, 
+                    <a href="#" onclick="fillExample('player-name-input', '박근형')">박근형</a>
+                </div>
+            </div>
+            
+            <!-- Account ID Search -->
+            <div class="search-content" id="account-id-search">
+                <div class="search-input-group">
+                    <input type="text" class="search-input" id="account-id-input" placeholder="54776284">
+                    <button class="search-button" onclick="searchByAccountId()">검색</button>
+                </div>
+                <div class="search-example">
+                    예시: <a href="#" onclick="fillExample('account-id-input', '54776284')">54776284</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Search Results -->
+        <div class="search-results" id="search-results" style="display: none;">
+            <h3 class="results-title">검색 결과</h3>
+            <div class="results-content" id="results-content">
+                <!-- Results will be populated by JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Loading State -->
+        <div class="search-loading" id="search-loading" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p>검색 중...</p>
+        </div>
+        
+        <!-- Error State -->
+        <div class="search-error" id="search-error" style="display: none;">
+            <h3>검색 결과 없음</h3>
+            <p id="error-message">플레이어를 찾을 수 없습니다.</p>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Search Page Styles */
+.search-section {
+    padding: 120px 0 60px;
+    min-height: 100vh;
+    background: #000000;
+}
+
+.search-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 40px;
+    color: #FFEFD7;
+}
+
+.search-title {
+    font-size: 48px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #FFEFD7;
+}
+
+.search-description {
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 50px;
+    color: #999;
+}
+
+.search-form {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 40px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 40px;
+}
+
+.search-tabs {
+    display: flex;
+    margin-bottom: 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.search-tab {
+    flex: 1;
+    padding: 15px 20px;
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s;
+}
+
+.search-tab.active {
+    color: #63a2e2;
+    border-bottom-color: #63a2e2;
+}
+
+.search-tab:hover {
+    color: #FFEFD7;
+}
+
+.search-content {
+    display: none;
+}
+
+.search-content.active {
+    display: block;
+}
+
+.search-input-group {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.search-input {
+    flex: 1;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #FFEFD7;
+    font-size: 16px;
+    transition: all 0.3s;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #63a2e2;
+    background: rgba(99, 162, 226, 0.1);
+}
+
+.search-input::placeholder {
+    color: #666;
+}
+
+.search-button {
+    padding: 15px 30px;
+    background: #63a2e2;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.search-button:hover {
+    background: #4f8bc9;
+    transform: translateY(-2px);
+}
+
+.search-button:active {
+    transform: translateY(0);
+}
+
+.search-example {
+    font-size: 14px;
+    color: #666;
+}
+
+.search-example a {
+    color: #63a2e2;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.search-example a:hover {
+    text-decoration: underline;
+}
+
+.search-results {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 40px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 40px;
+}
+
+.results-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #63a2e2;
+    padding-bottom: 10px;
+}
+
+.player-result {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s;
+    text-decoration: none;
+    color: inherit;
+}
+
+.player-result:hover {
+    background: rgba(99, 162, 226, 0.1);
+    border-color: #63a2e2;
+    transform: translateY(-2px);
+}
+
+.player-result-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid #63a2e2;
+}
+
+.player-result-info h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 5px 0;
+    color: #FFEFD7;
+}
+
+.player-result-meta {
+    font-size: 14px;
+    color: #999;
+}
+
+.search-loading {
+    text-align: center;
+    padding: 40px;
+    color: #FFEFD7;
+}
+
+.search-error {
+    text-align: center;
+    padding: 40px;
+    color: #FFEFD7;
+}
+
+.search-error h3 {
+    color: #EF4444;
+    margin-bottom: 15px;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(99, 162, 226, 0.3);
+    border-top: 4px solid #63a2e2;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .search-container {
+        padding: 0 20px;
+    }
+    
+    .search-title {
+        font-size: 36px;
+    }
+    
+    .search-tabs {
+        flex-direction: column;
+    }
+    
+    .search-input-group {
+        flex-direction: column;
+    }
+    
+    .search-button {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+// Tab switching
+document.querySelectorAll('.search-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        // Remove active class from all tabs and contents
+        document.querySelectorAll('.search-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.search-content').forEach(c => c.classList.remove('active'));
+        
+        // Add active class to clicked tab
+        tab.classList.add('active');
+        
+        // Show corresponding content
+        const tabId = tab.dataset.tab;
+        document.getElementById(`${tabId}-search`).classList.add('active');
+    });
+});
+
+// Search functions
+async function searchBySteamId() {
+    const steamId = document.getElementById('steam-id-input').value.trim();
+    if (!steamId) {
+        showError('Steam ID를 입력해주세요.');
+        return;
+    }
+    
+    if (!steamId.startsWith('76561198') || steamId.length !== 17) {
+        showError('올바른 Steam ID 형식을 입력해주세요 (76561198으로 시작하는 17자리).');
+        return;
+    }
+    
+    await performSearch('steam', steamId);
+}
+
+async function searchByPlayerName() {
+    const playerName = document.getElementById('player-name-input').value.trim();
+    if (!playerName) {
+        showError('플레이어 이름을 입력해주세요.');
+        return;
+    }
+    
+    await performSearch('name', playerName);
+}
+
+async function searchByAccountId() {
+    const accountId = document.getElementById('account-id-input').value.trim();
+    if (!accountId) {
+        showError('Account ID를 입력해주세요.');
+        return;
+    }
+    
+    if (!/^\d+$/.test(accountId)) {
+        showError('Account ID는 숫자만 입력해주세요.');
+        return;
+    }
+    
+    // Direct redirect for account ID
+    window.location.href = `/ko/players/${accountId}`;
+}
+
+async function performSearch(type, query) {
+    showLoading();
+    
+    try {
+        let url, redirectUrl;
+        
+        if (type === 'steam') {
+            // Convert Steam ID to Account ID
+            const accountId = (BigInt(query) - BigInt('76561197960265728')).toString();
+            redirectUrl = `/ko/players/${accountId}`;
+        } else if (type === 'name') {
+            url = `/api/v1/players/steam-search?query=${encodeURIComponent(query)}`;
+        }
+        
+        if (redirectUrl) {
+            window.location.href = redirectUrl;
+            return;
+        }
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.found) {
+            // Redirect to player detail page
+            window.location.href = `/ko/players/${data.player.accountId}`;
+        } else {
+            showError(data.message || '플레이어를 찾을 수 없습니다.', data.suggestions);
+        }
+        
+    } catch (error) {
+        console.error('Search error:', error);
+        showError('검색 중 오류가 발생했습니다. 다시 시도해주세요.');
+    }
+}
+
+function showLoading() {
+    document.getElementById('search-loading').style.display = 'block';
+    document.getElementById('search-results').style.display = 'none';
+    document.getElementById('search-error').style.display = 'none';
+}
+
+function showError(message, suggestions = []) {
+    document.getElementById('search-loading').style.display = 'none';
+    document.getElementById('search-results').style.display = 'none';
+    document.getElementById('search-error').style.display = 'block';
+    
+    let errorHtml = `<h3>검색 결과 없음</h3><p>${message}</p>`;
+    
+    if (suggestions && suggestions.length > 0) {
+        errorHtml += '<ul style="text-align: left; margin-top: 20px;">';
+        suggestions.forEach(suggestion => {
+            errorHtml += `<li style="margin-bottom: 10px;">${suggestion}</li>`;
+        });
+        errorHtml += '</ul>';
+    }
+    
+    document.getElementById('search-error').innerHTML = errorHtml;
+}
+
+function fillExample(inputId, value) {
+    document.getElementById(inputId).value = value;
+}
+
+// Enter key support
+document.querySelectorAll('.search-input').forEach(input => {
+    input.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const activeTab = document.querySelector('.search-tab.active').dataset.tab;
+            
+            if (activeTab === 'steam-id') {
+                searchBySteamId();
+            } else if (activeTab === 'player-name') {
+                searchByPlayerName();
+            } else if (activeTab === 'account-id') {
+                searchByAccountId();
+            }
+        }
+    });
+});
+</script>

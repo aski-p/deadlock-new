@@ -1233,43 +1233,9 @@ app.get('/api/v1/players/:accountId/hero-stats', async (req, res) => {
 
 // 빠른 매치 히스토리 생성 함수
 function generateFastMatchHistory(accountId, limit = 10) {
-  const heroNames = ['Abrams', 'Bebop', 'Dynamo', 'Haze', 'Infernus', 'Ivy', 'Kelvin', 'Lash'];
-  const seed = parseInt(accountId) || 12345;
-  
-  function seededRandom(seed) {
-    const x = Math.sin(seed) * 10000;
-    return x - Math.floor(x);
-  }
-  
-  const matches = [];
-  for (let i = 0; i < limit; i++) {
-    const matchSeed = seed + i * 100;
-    const isWin = seededRandom(matchSeed) > 0.45; // 55% 승률
-    const hero = heroNames[Math.floor(seededRandom(matchSeed + 1) * heroNames.length)];
-    const duration = Math.floor(seededRandom(matchSeed + 2) * 1200) + 900; // 15-35분
-    
-    const kills = Math.floor(seededRandom(matchSeed + 3) * 12) + (isWin ? 6 : 3);
-    const deaths = Math.floor(seededRandom(matchSeed + 4) * 6) + (isWin ? 2 : 4);
-    const assists = Math.floor(seededRandom(matchSeed + 5) * 15) + 8;
-    
-    matches.push({
-      matchId: `match_${accountId}_${i}`,
-      hero: hero,
-      result: isWin ? '승리' : '패배',
-      duration: duration,
-      durationFormatted: `${Math.floor(duration / 60)}:${(duration % 60).toString().padStart(2, '0')}`,
-      kills: kills,
-      deaths: deaths,
-      assists: assists,
-      souls: Math.floor(seededRandom(matchSeed + 6) * 4000) + (isWin ? 8000 : 6000),
-      damage: Math.floor(seededRandom(matchSeed + 7) * 8000) + (isWin ? 25000 : 18000),
-      healing: Math.floor(seededRandom(matchSeed + 8) * 2500) + 500,
-      kda: deaths > 0 ? ((kills + assists) / deaths).toFixed(1) : (kills + assists).toFixed(1),
-      playedAt: new Date(Date.now() - i * 3600000 - seededRandom(matchSeed + 9) * 1800000).toISOString()
-    });
-  }
-  
-  return matches;
+  // 더미 데이터 생성 비활성화 - 항상 빈 배열 반환
+  console.log('⚠️ generateFastMatchHistory 호출됨 - 빈 배열 반환');
+  return [];
 }
 
 // 전체 매치 데이터 분석 함수 - 정확한 통계 계산
@@ -1417,10 +1383,16 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
     const limit = Math.min(parseInt(req.query.limit) || 10, 20); // 최대 20개로 제한
     const cacheKey = `match-history-${accountId}-${limit}`;
     
-    // 캐시 확인
-    const cached = getCachedData(cacheKey);
-    if (cached) {
-      return res.json(cached);
+    // 강제 새로고침을 위해 캐시 건너뛰기 (임시)
+    const forceRefresh = req.query.refresh === 'true';
+    
+    // 캐시 확인 (강제 새로고침이 아닌 경우에만)
+    if (!forceRefresh) {
+      const cached = getCachedData(cacheKey);
+      if (cached) {
+        console.log(`📦 캐시된 매치 히스토리 반환: ${cached.length}개`);
+        return res.json(cached);
+      }
     }
     
     // 실제 API 호출 시도

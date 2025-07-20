@@ -605,9 +605,9 @@ async function loadMyProfileData() {
         // 병렬로 모든 데이터를 동시에 로드
         console.log('🔄 API 호출 시작...');
         const [playerResponse, heroStatsResponse, matchHistoryResponse] = await Promise.all([
-            fetch(`/api/v1/players/${accountId}`),
-            fetch(`/api/v1/players/${accountId}/hero-stats`),
-            fetch(`/api/v1/players/${accountId}/match-history?limit=10`)
+            fetch(`/api/v1/players/${accountId}?refresh=true`),
+            fetch(`/api/v1/players/${accountId}/hero-stats?refresh=true`),
+            fetch(`/api/v1/players/${accountId}/match-history?limit=10&refresh=true`)
         ]);
         
         console.log('📡 API 응답 상태:', {
