@@ -1572,8 +1572,30 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
           .slice(0, limit) // 요청된 수만큼만
           .map(match => {
             const heroName = heroIdMap[match.hero_id] || `Hero ${match.hero_id}`;
-            // match_result: 1 = 무조건 승리, 0 = 무조건 패배
-            const isWin = match.match_result === 1;
+            
+            // 승부 판정 로직 개선
+            let isWin = false;
+            
+            // 매치 38022449 특별 로깅
+            if (match.match_id === 38022449) {
+              console.log(`🔍 매치 38022449 전체 데이터:`, JSON.stringify(match, null, 2));
+            }
+            
+            // 다양한 방법으로 승부 판정 시도
+            if (match.team_assignment !== undefined && match.winning_team !== undefined) {
+              // team_assignment와 winning_team으로 판정
+              isWin = match.team_assignment === match.winning_team;
+              console.log(`🏆 매치 ${match.match_id}: team_assignment=${match.team_assignment}, winning_team=${match.winning_team}, isWin=${isWin}`);
+            } else if (match.match_result !== undefined) {
+              // match_result로 판정 (기존 방식)
+              isWin = match.match_result === 1;
+              console.log(`🏆 매치 ${match.match_id}: match_result=${match.match_result}, isWin=${isWin}`);
+            } else {
+              // 기본값
+              isWin = false;
+              console.log(`⚠️ 매치 ${match.match_id}: 승부 판정 데이터 없음`);
+            }
+            
             const durationSeconds = match.match_duration_s || 0;
             const durationFormatted = `${Math.floor(durationSeconds / 60)}:${(durationSeconds % 60).toString().padStart(2, '0')}`;
             
