@@ -1158,7 +1158,7 @@ const heroIdMap = {
   8: 'Kelvin', 10: 'Lash', 11: 'McGinnis', 13: 'Paradox', 
   14: 'Pocket', 15: 'Seven', 16: 'Calico', 18: 'Viscous', 19: 'Warden', 
   20: 'Shiv', 25: 'Vindicta', 27: 'Dynamo', 31: 'Lash', 35: 'Wraith', 
-  50: 'Vindicta', 52: 'Shiv', 58: 'Wraith', 60: 'Yamato'
+  50: 'Vindicta', 52: 'Shiv', 58: 'Vyper', 60: 'Yamato'
 };
 
 // 영웅별 스탯 API - 실제 API 데이터 변환
@@ -1373,7 +1373,7 @@ const getHeroNameById = (heroId) => {
     8: 'Kelvin', 10: 'Lash', 11: 'McGinnis', 13: 'Paradox', 
     14: 'Pocket', 15: 'Seven', 16: 'Calico', 18: 'Viscous', 19: 'Warden', 
     20: 'Shiv', 25: 'Vindicta', 27: 'Dynamo', 31: 'Lash', 35: 'Wraith', 
-    50: 'Vindicta', 52: 'Shiv', 58: 'Wraith', 60: 'Yamato'
+    50: 'Vindicta', 52: 'Shiv', 58: 'Vyper', 60: 'Yamato'
   };
   return heroMap[heroId] || `Hero_${heroId}`;
 };
