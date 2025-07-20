@@ -94,6 +94,14 @@
                     <!-- Matches will be populated by JavaScript -->
                 </div>
             </div>
+
+            <!-- Party Stats -->
+            <div class="player-section">
+                <h2 class="section-title">파티 통계 (함께 플레이한 팀원)</h2>
+                <div class="party-stats-list" id="party-stats-list">
+                    <!-- Party stats will be populated by JavaScript -->
+                </div>
+            </div>
         </div>
 
         <!-- Error State -->
@@ -493,6 +501,81 @@
     text-align: right;
 }
 
+/* 파티 스탯 스타일 */
+.party-stats-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.party-member {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s;
+}
+
+.party-member:hover {
+    background: rgba(99, 162, 226, 0.1);
+    border-color: #63a2e2;
+    transform: translateY(-2px);
+}
+
+.party-member-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+}
+
+.party-member-name {
+    font-weight: 600;
+    color: #FFEFD7;
+    font-size: 16px;
+    margin-bottom: 4px;
+}
+
+.party-member-id {
+    font-size: 12px;
+    color: #999;
+    font-family: monospace;
+}
+
+.party-stats {
+    display: flex;
+    gap: 25px;
+    flex: 1;
+}
+
+.party-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.party-stat-label {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 4px;
+}
+
+.party-stat-value {
+    font-weight: 600;
+    color: #63a2e2;
+    font-size: 14px;
+}
+
+.party-last-played {
+    font-size: 12px;
+    color: #999;
+    min-width: 100px;
+    text-align: right;
+}
+
 /* 에러 및 로딩 스타일 */
 .profile-error {
     text-align: center;
@@ -586,6 +669,27 @@
         text-align: center;
         min-width: auto;
     }
+    
+    .party-member {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .party-member-info {
+        min-width: auto;
+    }
+    
+    .party-stats {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .party-last-played {
+        text-align: center;
+        min-width: auto;
+    }
 }
 </style>
 
@@ -610,33 +714,37 @@ async function loadMyProfileData() {
         
         // 병렬로 모든 데이터를 동시에 로드
         console.log('🔄 API 호출 시작...');
-        const [playerResponse, heroStatsResponse, matchHistoryResponse] = await Promise.all([
+        const [playerResponse, heroStatsResponse, matchHistoryResponse, partyStatsResponse] = await Promise.all([
             fetch(`/api/v1/players/${accountId}?refresh=true`),
             fetch(`/api/v1/players/${accountId}/hero-stats?refresh=true`),
-            fetch(`/api/v1/players/${accountId}/match-history?limit=10&refresh=true`)
+            fetch(`/api/v1/players/${accountId}/match-history?limit=10&refresh=true`),
+            fetch(`/api/v1/players/${accountId}/party-stats?refresh=true`)
         ]);
         
         console.log('📡 API 응답 상태:', {
             player: playerResponse.status,
             heroStats: heroStatsResponse.status,
-            matchHistory: matchHistoryResponse.status
+            matchHistory: matchHistoryResponse.status,
+            partyStats: partyStatsResponse.status
         });
         
-        const [playerData, heroStats, matchHistory] = await Promise.all([
+        const [playerData, heroStats, matchHistory, partyStats] = await Promise.all([
             playerResponse.json(),
             heroStatsResponse.json(),
-            matchHistoryResponse.json()
+            matchHistoryResponse.json(),
+            partyStatsResponse.json()
         ]);
         
         console.log('📊 받은 데이터:', {
             player: !!playerData,
             heroStats: heroStats?.length || 0,
-            matchHistory: matchHistory?.length || 0
+            matchHistory: matchHistory?.length || 0,
+            partyStats: partyStats?.length || 0
         });
         
         if (playerResponse.ok && playerData) {
             // 빠른 UI 업데이트
-            updatePlayerUIFast(playerData, heroStats, matchHistory);
+            updatePlayerUIFast(playerData, heroStats, matchHistory, partyStats);
             loading.style.display = 'none';
             content.style.display = 'block';
             console.log('✅ 프로필 데이터 로딩 완료');
@@ -657,7 +765,7 @@ async function loadMyProfileData() {
 }
 
 // 빠른 UI 업데이트 - 모든 데이터를 한 번에 처리
-function updatePlayerUIFast(player, heroStats, matchHistory) {
+function updatePlayerUIFast(player, heroStats, matchHistory, partyStats) {
     console.log('🎨 UI 업데이트 시작, 플레이어 데이터:', player);
     
     try {
@@ -725,6 +833,14 @@ function updatePlayerUIFast(player, heroStats, matchHistory) {
         } else {
             console.log('⚠️ 매치 히스토리 없음');
             document.getElementById('matches-list').innerHTML = '<p style="color: #999; text-align: center;">최근 매치 데이터가 없습니다.</p>';
+        }
+        
+        if (partyStats && Array.isArray(partyStats) && partyStats.length > 0) {
+            console.log('👥 파티 스탯 표시:', partyStats.length, '개');
+            displayPartyStats(partyStats);
+        } else {
+            console.log('⚠️ 파티 스탯 없음');
+            document.getElementById('party-stats-list').innerHTML = '<p style="color: #999; text-align: center;">파티 데이터가 없습니다.</p>';
         }
         
         console.log('🎉 모든 UI 업데이트 완료');
@@ -1019,6 +1135,116 @@ function displayMatchHistory(matches) {
     } catch (error) {
         console.error('❌ 매치 히스토리 표시 오류:', error);
         matchesList.innerHTML = '<p style="color: #ff6b6b; text-align: center;">매치 데이터 표시 중 오류가 발생했습니다.</p>';
+    }
+}
+
+// 파티 스탯 표시
+function displayPartyStats(partyStats) {
+    const partyStatsList = document.getElementById('party-stats-list');
+    
+    try {
+        console.log('👥 파티 스탯 표시 시작:', partyStats);
+        
+        if (!Array.isArray(partyStats) || partyStats.length === 0) {
+            partyStatsList.innerHTML = '<p style="color: #999; text-align: center;">파티 데이터가 없습니다.</p>';
+            return;
+        }
+        
+        const formatDate = (dateString) => {
+            try {
+                if (!dateString) return '알 수 없음';
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return '알 수 없음';
+                
+                const now = new Date();
+                const diffHours = Math.floor((now - date) / (1000 * 60 * 60));
+                
+                if (diffHours < 1) return '방금 전';
+                if (diffHours < 24) return `${diffHours}시간 전`;
+                const diffDays = Math.floor(diffHours / 24);
+                if (diffDays < 7) return `${diffDays}일 전`;
+                return date.toLocaleDateString('ko-KR');
+            } catch (error) {
+                return '알 수 없음';
+            }
+        };
+        
+        const partyCards = partyStats.map((member, index) => {
+            try {
+                // 안전한 데이터 추출
+                const accountId = member?.accountId || 'Unknown';
+                const name = member?.name || 'Unknown Player';
+                const matches = parseInt(member?.matches) || 0;
+                const wins = parseInt(member?.wins) || 0;
+                const losses = parseInt(member?.losses) || 0;
+                const winRate = parseInt(member?.winRate) || 0;
+                const avgKda = member?.avgKda || '0.0';
+                const lastPlayed = member?.lastPlayedTogether || null;
+                
+                return `
+                    <div class="party-member" data-account-id="${accountId}">
+                        <div class="party-member-info">
+                            <div class="party-member-name">${name}</div>
+                            <div class="party-member-id">ID: ${accountId}</div>
+                        </div>
+                        <div class="party-stats">
+                            <div class="party-stat">
+                                <div class="party-stat-label">매치</div>
+                                <div class="party-stat-value">${matches}</div>
+                            </div>
+                            <div class="party-stat">
+                                <div class="party-stat-label">승률</div>
+                                <div class="party-stat-value">${winRate}%</div>
+                            </div>
+                            <div class="party-stat">
+                                <div class="party-stat-label">승리</div>
+                                <div class="party-stat-value">${wins}</div>
+                            </div>
+                            <div class="party-stat">
+                                <div class="party-stat-label">패배</div>
+                                <div class="party-stat-value">${losses}</div>
+                            </div>
+                            <div class="party-stat">
+                                <div class="party-stat-label">평균 KDA</div>
+                                <div class="party-stat-value">${avgKda}</div>
+                            </div>
+                        </div>
+                        <div class="party-last-played">
+                            ${formatDate(lastPlayed)}
+                        </div>
+                    </div>
+                `;
+            } catch (memberError) {
+                console.error('파티 멤버 카드 생성 오류:', memberError, member);
+                return `
+                    <div class="party-member">
+                        <div class="party-member-info">
+                            <div class="party-member-name">Unknown Player</div>
+                            <div class="party-member-id">데이터 오류</div>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+        
+        partyStatsList.innerHTML = partyCards.join('');
+        
+        // 파티원 클릭 시 프로필 이동 기능 추가
+        partyStatsList.addEventListener('click', (e) => {
+            const partyMember = e.target.closest('.party-member');
+            if (partyMember) {
+                const accountId = partyMember.dataset.accountId;
+                if (accountId && accountId !== 'Unknown') {
+                    window.location.href = `/ko/profile?accountId=${accountId}`;
+                }
+            }
+        });
+        
+        console.log('✅ 파티 스탯 표시 완료');
+        
+    } catch (error) {
+        console.error('❌ 파티 스탯 표시 오류:', error);
+        partyStatsList.innerHTML = '<p style="color: #ff6b6b; text-align: center;">파티 데이터 표시 중 오류가 발생했습니다.</p>';
     }
 }
 

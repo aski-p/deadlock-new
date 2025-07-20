@@ -1240,6 +1240,80 @@ app.get('/api/v1/players/:accountId/hero-stats', async (req, res) => {
   }
 });
 
+// 파티 스탯 API - 실제 API 데이터 변환
+app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
+  try {
+    const { accountId } = req.params;
+    const cacheKey = `party-stats-${accountId}`;
+    
+    // 강제 새로고침을 위해 캐시 건너뛰기 (임시)
+    const forceRefresh = req.query.refresh === 'true';
+    
+    // 캐시 확인 (강제 새로고침이 아닌 경우에만)
+    if (!forceRefresh) {
+      const cached = getCachedData(cacheKey);
+      if (cached) {
+        console.log(`📦 캐시된 파티 스탯 반환: ${cached.length}개`);
+        return res.json(cached);
+      }
+    }
+    
+    // 실제 API 호출 시도
+    try {
+      console.log(`🌐 파티 스탯 API 호출 시작: https://api.deadlock-api.com/v1/players/${accountId}/party-stats`);
+      const response = await axios.get(`https://api.deadlock-api.com/v1/players/${accountId}/party-stats`, {
+        timeout: 10000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+      });
+      
+      console.log(`📡 파티 스탯 API 응답 상태: ${response.status}, 데이터 타입: ${typeof response.data}, 배열 여부: ${Array.isArray(response.data)}, 길이: ${response.data?.length}`);
+      
+      if (response.data && Array.isArray(response.data)) {
+        // 실제 API 데이터를 프론트엔드 형식으로 변환
+        const partyStats = response.data
+          .filter(party => party.matches_played > 0) // 실제로 함께 플레이한 파티만
+          .map(party => {
+            const winRate = party.matches_played > 0 ? Math.round((party.wins / party.matches_played) * 100) : 0;
+            
+            return {
+              accountId: party.account_id,
+              name: party.account_name || `Player_${party.account_id}`,
+              matches: party.matches_played,
+              wins: party.wins,
+              losses: party.matches_played - party.wins,
+              winRate: winRate,
+              avgKills: (party.kills / party.matches_played).toFixed(1),
+              avgDeaths: (party.deaths / party.matches_played).toFixed(1),
+              avgAssists: (party.assists / party.matches_played).toFixed(1),
+              avgKda: party.deaths > 0 ? ((party.kills + party.assists) / party.deaths).toFixed(1) : (party.kills + party.assists).toFixed(1),
+              lastPlayedTogether: party.last_match_time ? new Date(party.last_match_time * 1000).toISOString() : null
+            };
+          })
+          .sort((a, b) => b.matches - a.matches) // 많이 함께 플레이한 순으로 정렬
+          .slice(0, 10); // 상위 10명만
+        
+        console.log(`✅ 실제 파티 스탯 API 변환 완료: ${partyStats.length}개 파티원`);
+        setCachedData(cacheKey, partyStats);
+        return res.json(partyStats);
+      }
+    } catch (error) {
+      console.log(`❌ 실제 파티 스탯 API 실패: ${error.message}`);
+    }
+    
+    // 실제 API 데이터가 없으면 빈 배열 반환
+    console.log('⚠️ 실제 파티 스탯 API 실패 - 빈 배열 반환');
+    const emptyStats = [];
+    setCachedData(cacheKey, emptyStats);
+    res.json(emptyStats);
+    
+  } catch (error) {
+    console.error('Party stats API error:', error);
+    res.status(500).json({ error: 'Failed to fetch party stats' });
+  }
+});
+
 // 빠른 매치 히스토리 생성 함수
 function generateFastMatchHistory(accountId, limit = 10) {
   // 더미 데이터 생성 비활성화 - 항상 빈 배열 반환
