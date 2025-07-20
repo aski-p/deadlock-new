@@ -1032,6 +1032,35 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
         recentMatches: generateRecentMatches(['Abrams', 'Bebop', 'Haze'])
       };
 
+      // Deadlock API로 Steam 프로필 정보 가져오기
+      try {
+        console.log(`🔍 Deadlock API로 Steam 프로필 정보 가져오기: ${accountId}`);
+        const steamProfileResponse = await axios.get(`https://api.deadlock-api.com/v1/players/${accountId}/steam`, {
+          timeout: 5000
+        });
+        
+        if (steamProfileResponse.data) {
+          const steamProfile = steamProfileResponse.data;
+          defaultPlayerInfo.name = steamProfile.personaname || steamProfile.real_name || defaultPlayerInfo.name;
+          
+          // 아바타 URL 처리
+          if (steamProfile.avatarfull || steamProfile.avatar) {
+            const avatarUrl = steamProfile.avatarfull || steamProfile.avatar;
+            defaultPlayerInfo.avatar = avatarUrl.replace('avatars.steamstatic.com', 'avatars.cloudflare.steamstatic.com');
+          }
+          
+          // 국가 코드 처리
+          if (steamProfile.loccountrycode) {
+            defaultPlayerInfo.country = getCountryFlag(steamProfile.loccountrycode);
+            defaultPlayerInfo.countryCode = steamProfile.loccountrycode;
+          }
+          
+          console.log(`✅ Deadlock API로 Steam 프로필 정보 획득: ${defaultPlayerInfo.name}`);
+        }
+      } catch (error) {
+        console.log(`❌ Deadlock API Steam 프로필 호출 실패:`, error.message);
+      }
+
       // 전체 매치 분석 시도
       console.log(`🔍 실제 매치 데이터 분석 시작: ${accountId}`);
       const matchAnalysis = await fetchAndAnalyzeAllMatches(accountId);
@@ -1055,7 +1084,7 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
         console.log(`✅ 실제 매치 데이터 적용: ${matchAnalysis.totalMatches}경기, 승률 ${matchAnalysis.winRate}%`);
       }
 
-      // Steam API로 실제 정보 가져오기 시도
+      // 기존 Steam API로 실제 정보 가져오기 시도 (백업)
       if (steamApiKey && steamId && isValidSteamId64(steamId)) {
         try {
           const steamResponse = await axios.get(`https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/`, {
