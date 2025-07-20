@@ -1313,66 +1313,71 @@ const heroIdMap = {
   50: 'Pocket', 52: 'Shiv', 58: 'Vyper', 60: 'Yamato'
 };
 
-// 영웅별 스탯 API - 실제 API 데이터 변환
+
+// 플레이어 영웅 스탯 API - 실제 hero-stats 데이터 기반 (캐싱 적용)
 app.get('/api/v1/players/:accountId/hero-stats', async (req, res) => {
   try {
     const { accountId } = req.params;
     const cacheKey = `hero-stats-${accountId}`;
     
-    // 강제 새로고침을 위해 캐시 건너뛰기 (임시)
-    const forceRefresh = req.query.refresh === 'true';
-    
-    // 캐시 확인 (강제 새로고침이 아닌 경우에만)
-    if (!forceRefresh) {
-      const cached = getCachedData(cacheKey);
-      if (cached) {
-        console.log(`📦 캐시된 영웅 스탯 반환: ${cached.length}개`);
-        return res.json(cached);
-      }
+    // 캐시 확인
+    const cachedData = getCachedData(cacheKey);
+    if (cachedData) {
+      console.log('📦 캐시된 영웅 스탯 반환');
+      return res.json(cachedData);
     }
+
+    console.log(`🌐 API 호출 시작: https://api.deadlock-api.com/v1/players/${accountId}/hero-stats`);
     
-    // 실제 API 호출 시도
     try {
-      console.log(`🌐 영웅 스탯 API 호출 시작: https://api.deadlock-api.com/v1/players/${accountId}/hero-stats`);
+      // 실제 Deadlock API에서 영웅 스탯 가져오기
       const response = await axios.get(`https://api.deadlock-api.com/v1/players/${accountId}/hero-stats`, {
-        timeout: 10000, // 타임아웃 증가
+        timeout: 10000,
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
       });
-      
-      console.log(`📡 영웅 스탯 API 응답 상태: ${response.status}, 데이터 타입: ${typeof response.data}, 배열 여부: ${Array.isArray(response.data)}, 길이: ${response.data?.length}`);
-      
-      if (response.data && Array.isArray(response.data)) {
-        // 실제 API 데이터를 프론트엔드 형식으로 변환
-        const heroStats = response.data
-          .filter(hero => hero.matches_played > 0) // 플레이한 영웅만
-          .map(hero => {
-            const heroName = heroIdMap[hero.hero_id] || `Hero ${hero.hero_id}`;
-            const winRate = hero.matches_played > 0 ? Math.round((hero.wins / hero.matches_played) * 100) : 0;
-            const avgKda = hero.deaths_per_min > 0 ? 
-              ((hero.kills_per_min + hero.assists_per_min) / hero.deaths_per_min).toFixed(1) : 
-              (hero.kills_per_min + hero.assists_per_min).toFixed(1);
-            
-            return {
-              hero: heroName,
-              name: heroName,
-              matches: hero.matches_played,
-              wins: hero.wins,
-              winRate: winRate,
-              avgKills: (hero.kills_per_min * (hero.time_played / 60000)).toFixed(1),
-              avgDeaths: (hero.deaths_per_min * (hero.time_played / 60000)).toFixed(1),
-              avgAssists: (hero.assists_per_min * (hero.time_played / 60000)).toFixed(1),
-              avgKda: avgKda,
-              avgSouls: Math.round(hero.networth_per_min || 0),
-              avgDamage: Math.round(hero.damage_per_min || 0),
-              avgHealing: Math.round(hero.damage_mitigated_per_min || 0)
-            };
-          })
-          .sort((a, b) => b.matches - a.matches) // 많이 플레이한 순으로 정렬
-          .slice(0, 10); // 상위 10개만
-        
+
+      console.log(`📡 API 응답 상태: ${response.status}, 데이터 타입: ${typeof response.data}, 배열 여부: ${Array.isArray(response.data)}, 길이: ${response.data?.length || 'N/A'}`);
+
+      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+        // 영웅 스탯 데이터 변환
+        const heroStats = response.data.map(hero => {
+          const heroName = getHeroNameById(hero.hero_id);
+          const winRate = hero.matches_played > 0 ? ((hero.wins / hero.matches_played) * 100).toFixed(1) : 0;
+          const losses = hero.matches_played - hero.wins;
+          const kda = hero.deaths > 0 ? ((hero.kills + hero.assists) / hero.deaths).toFixed(2) : (hero.kills + hero.assists).toFixed(2);
+          const avgMatchDuration = hero.time_played > 0 ? Math.round(hero.time_played / hero.matches_played) : 0;
+          const durationFormatted = `${Math.floor(avgMatchDuration / 60)}:${(avgMatchDuration % 60).toString().padStart(2, '0')}`;
+          
+          return {
+            hero: heroName,
+            heroId: hero.hero_id,
+            matches: hero.matches_played,
+            wins: hero.wins,
+            losses: losses,
+            winRate: parseFloat(winRate),
+            avgKills: hero.matches_played > 0 ? parseFloat((hero.kills / hero.matches_played).toFixed(1)) : 0,
+            avgDeaths: hero.matches_played > 0 ? parseFloat((hero.deaths / hero.matches_played).toFixed(1)) : 0,
+            avgAssists: hero.matches_played > 0 ? parseFloat((hero.assists / hero.matches_played).toFixed(1)) : 0,
+            kda: parseFloat(kda),
+            avgSoulsPerMin: Math.round(hero.networth_per_min || 0),
+            avgDamagePerMin: Math.round(hero.damage_per_min || 0),
+            avgHealingPerMin: Math.round((hero.damage_per_min || 0) * 0.1), // 추정치
+            avgMatchDuration: avgMatchDuration,
+            avgMatchDurationFormatted: durationFormatted,
+            accuracy: hero.accuracy ? (hero.accuracy * 100).toFixed(1) : 0,
+            critShotRate: hero.crit_shot_rate ? (hero.crit_shot_rate * 100).toFixed(1) : 0,
+            timePlayedTotal: hero.time_played,
+            avgLevel: parseFloat(hero.ending_level?.toFixed(1)) || 0
+          };
+        })
+        .filter(hero => hero.matches > 0) // 0게임 영웅 제외
+        .sort((a, b) => b.matches - a.matches); // 게임 수 기준 정렬
+
         console.log(`✅ 실제 영웅 스탯 API 변환 완료: ${heroStats.length}개 영웅`);
+        console.log(`🎯 가장 많이 플레이한 영웅: ${heroStats[0]?.hero} (${heroStats[0]?.matches}경기)`);
+        
         setCachedData(cacheKey, heroStats);
         return res.json(heroStats);
       }
@@ -1392,7 +1397,7 @@ app.get('/api/v1/players/:accountId/hero-stats', async (req, res) => {
   }
 });
 
-// 파티 스탯 API - 실제 API 데이터 변환
+// 파티 스탯 API - 실제 API 데이터 변환 (Steam ID 프로필 조회 개선)
 app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
   try {
     const { accountId } = req.params;
@@ -1479,13 +1484,35 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
             if (!playerName || playerName.trim() === '') {
               try {
                 console.log(`🔍 파티원 ${party.account_id} Steam 프로필 정보 가져오기 시도...`);
+                
+                // 먼저 Deadlock API로 Steam 정보 시도
                 const steamResponse = await axios.get(`https://api.deadlock-api.com/v1/players/${party.account_id}/steam`, {
                   timeout: 3000
                 });
                 
                 if (steamResponse.data && (steamResponse.data.personaname || steamResponse.data.real_name)) {
                   playerName = steamResponse.data.personaname || steamResponse.data.real_name;
-                  console.log(`✅ 파티원 ${party.account_id} 이름 획득: ${playerName}`);
+                  console.log(`✅ 파티원 ${party.account_id} Deadlock API에서 이름 획득: ${playerName}`);
+                } else {
+                  // Account ID를 Steam ID로 변환하여 Steam API 직접 호출
+                  if (steamApiKey) {
+                    try {
+                      const steamId64 = (BigInt(party.account_id) + BigInt('76561197960265728')).toString();
+                      console.log(`🔄 Account ID ${party.account_id} → Steam ID ${steamId64} 변환 시도`);
+                      
+                      const steamDirectResponse = await axios.get(`http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${steamApiKey}&steamids=${steamId64}`, {
+                        timeout: 3000
+                      });
+                      
+                      if (steamDirectResponse.data?.response?.players?.length > 0) {
+                        const steamProfile = steamDirectResponse.data.response.players[0];
+                        playerName = steamProfile.personaname || steamProfile.realname;
+                        console.log(`✅ 파티원 ${party.account_id} Steam API에서 이름 획득: ${playerName}`);
+                      }
+                    } catch (steamDirectError) {
+                      console.log(`❌ 파티원 ${party.account_id} Steam API 직접 호출 실패: ${steamDirectError.message}`);
+                    }
+                  }
                 }
               } catch (steamError) {
                 console.log(`❌ 파티원 ${party.account_id} Steam 프로필 가져오기 실패: ${steamError.message}`);
