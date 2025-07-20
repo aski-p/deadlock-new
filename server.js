@@ -1156,7 +1156,7 @@ function generateFastHeroStats(accountId) {
 const heroIdMap = {
   1: 'Abrams', 2: 'Bebop', 4: 'Grey Talon', 6: 'Infernus', 7: 'Ivy', 
   8: 'Kelvin', 10: 'Lash', 11: 'McGinnis', 13: 'Paradox', 
-  14: 'Pocket', 15: 'Seven', 16: 'Calico', 18: 'Viscous', 19: 'Warden', 
+  14: 'Pocket', 15: 'Seven', 16: 'Calico', 18: 'Viscous', 19: 'Shiv', 
   20: 'Shiv', 25: 'Vindicta', 27: 'Dynamo', 31: 'Lash', 35: 'Wraith', 
   50: 'Vindicta', 52: 'Shiv', 58: 'Vyper', 60: 'Yamato'
 };
@@ -1371,7 +1371,7 @@ const getHeroNameById = (heroId) => {
   const heroMap = {
     1: 'Abrams', 2: 'Bebop', 4: 'Grey Talon', 6: 'Infernus', 7: 'Ivy', 
     8: 'Kelvin', 10: 'Lash', 11: 'McGinnis', 13: 'Paradox', 
-    14: 'Pocket', 15: 'Seven', 16: 'Calico', 18: 'Viscous', 19: 'Warden', 
+    14: 'Pocket', 15: 'Seven', 16: 'Calico', 18: 'Viscous', 19: 'Shiv', 
     20: 'Shiv', 25: 'Vindicta', 27: 'Dynamo', 31: 'Lash', 35: 'Wraith', 
     50: 'Vindicta', 52: 'Shiv', 58: 'Vyper', 60: 'Yamato'
   };
