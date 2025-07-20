@@ -894,14 +894,78 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
     const { accountId } = req.params;
     const cacheKey = `player-${accountId}`;
     
-    // 캐시 확인
-    const cached = getCachedData(cacheKey);
-    if (cached) {
-      console.log(`💾 캐시된 플레이어 데이터 사용: ${accountId}`);
-      return res.json(cached);
+    // 강제 새로고침을 위해 캐시 건너뛰기 (임시)
+    const forceRefresh = req.query.refresh === 'true';
+    
+    // 캐시 확인 (강제 새로고침이 아닌 경우에만)
+    if (!forceRefresh) {
+      const cached = getCachedData(cacheKey);
+      if (cached) {
+        console.log(`💾 캐시된 플레이어 데이터 사용: ${accountId}`);
+        return res.json(cached);
+      }
     }
     
     console.log(`🔍 플레이어 상세 정보 요청: ${accountId}`);
+    
+    // 실제 플레이어 카드 API 호출 시도
+    try {
+      console.log(`🌐 플레이어 카드 API 호출: https://api.deadlock-api.com/v1/players/${accountId}/card`);
+      const cardResponse = await axios.get(`https://api.deadlock-api.com/v1/players/${accountId}/card`, {
+        timeout: 10000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+      });
+      
+      console.log(`📡 플레이어 카드 API 응답 상태: ${cardResponse.status}, 데이터:`, cardResponse.data);
+      
+      if (cardResponse.data) {
+        // 실제 API 데이터를 프론트엔드 형식으로 변환
+        const playerCard = cardResponse.data;
+        
+        // 배지 레벨을 메달로 변환하는 함수
+        const getMedalFromBadgeLevel = (badgeLevel) => {
+          if (badgeLevel >= 77) return 'Eternus';
+          if (badgeLevel >= 70) return 'Phantom';
+          if (badgeLevel >= 63) return 'Oracle';
+          if (badgeLevel >= 56) return 'Ritualist';
+          if (badgeLevel >= 49) return 'Alchemist';
+          if (badgeLevel >= 42) return 'Arcanist';
+          return 'Initiate';
+        };
+
+        const playerData = {
+          accountId: accountId,
+          name: playerCard.account_name || `Player_${accountId}`,
+          avatar: playerCard.avatar_url || 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
+          country: '🌍', // API에서 제공되지 않는 경우 기본값
+          rank: {
+            medal: getMedalFromBadgeLevel(playerCard.badge_level || 7),
+            subrank: ((playerCard.badge_level % 7) + 1) || 1,
+            score: playerCard.badge_level || 7
+          },
+          stats: {
+            matches: 0, // 매치 히스토리에서 계산
+            winRate: 0, // 매치 히스토리에서 계산
+            laneWinRate: 0, // 매치 히스토리에서 계산
+            kda: '0.0', // 매치 히스토리에서 계산
+            headshotPercent: 0, // 매치 히스토리에서 계산
+            soulsPerMin: 0, // 매치 히스토리에서 계산
+            damagePerMin: 0, // 매치 히스토리에서 계산
+            healingPerMin: 0 // 매치 히스토리에서 계산
+          }
+        };
+        
+        console.log(`✅ 실제 플레이어 카드 API 변환 완료:`, playerData);
+        setCachedData(cacheKey, playerData);
+        return res.json(playerData);
+      }
+    } catch (error) {
+      console.log(`❌ 실제 플레이어 카드 API 실패: ${error.message}`);
+    }
+    
+    console.log(`🔍 플레이어 상세 정보 요청: ${accountId} - 백업 로직 사용`);
     
     // 모든 지역에서 플레이어 찾기
     let foundPlayer = null;
@@ -1269,6 +1333,11 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
       });
       
       console.log(`📡 파티 스탯 API 응답 상태: ${response.status}, 데이터 타입: ${typeof response.data}, 배열 여부: ${Array.isArray(response.data)}, 길이: ${response.data?.length}`);
+      
+      // 실제 API 응답 구조 확인을 위한 로깅
+      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+        console.log('🔍 파티 스탯 API 첫 번째 항목 구조:', JSON.stringify(response.data[0], null, 2));
+      }
       
       if (response.data && Array.isArray(response.data)) {
         // 실제 API 데이터를 프론트엔드 형식으로 변환
