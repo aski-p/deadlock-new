@@ -1381,22 +1381,42 @@ app.get('/ko/profile', (req, res) => {
   // Steam ID를 32-bit account ID로 변환
   let accountId = null;
   
-  if (req.user.steamId) {
+  console.log(`🔍 프로필 요청 사용자 정보:`, {
+    steamId: req.user.steamId,
+    accountId: req.user.accountId,
+    username: req.user.username
+  });
+  
+  if (req.user.steamId && req.user.steamId !== 'undefined') {
     try {
       // Steam ID를 Account ID로 변환
       const steamIdBig = BigInt(req.user.steamId);
       const baseSteamId = BigInt('76561197960265728');
-      accountId = (steamIdBig - baseSteamId).toString();
-      console.log(`🔄 Steam ID 변환: ${req.user.steamId} → ${accountId}`);
+      const convertedAccountId = (steamIdBig - baseSteamId).toString();
+      
+      // 변환된 값이 유효한지 확인
+      if (convertedAccountId && convertedAccountId !== '0' && !convertedAccountId.includes('-')) {
+        accountId = convertedAccountId;
+        console.log(`✅ Steam ID 변환 성공: ${req.user.steamId} → ${accountId}`);
+      } else {
+        console.log(`⚠️ 변환된 Account ID가 유효하지 않음: ${convertedAccountId}`);
+        accountId = req.user.steamId; // fallback
+      }
     } catch (error) {
-      console.error('Steam ID 변환 오류:', error);
+      console.error('❌ Steam ID 변환 오류:', error);
       accountId = req.user.steamId; // fallback
     }
   } else {
-    accountId = req.user.accountId || req.user.steamId;
+    accountId = req.user.accountId || req.user.steamId || '12345678'; // 최종 fallback
   }
   
-  console.log(`👤 프로필 페이지 요청: ${req.user.username} (Account ID: ${accountId})`);
+  // accountId가 여전히 null이면 기본값 사용
+  if (!accountId || accountId === 'undefined' || accountId === 'null') {
+    console.log(`⚠️ Account ID가 없어서 기본값 사용`);
+    accountId = '12345678'; // 테스트용 기본값
+  }
+  
+  console.log(`👤 프로필 페이지 요청: ${req.user.username} (최종 Account ID: ${accountId})`);
   
   res.render('my-profile', { 
     user: req.user,

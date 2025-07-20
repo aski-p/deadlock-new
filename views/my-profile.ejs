@@ -594,12 +594,27 @@ async function loadMyProfileData() {
     error.style.display = 'none';
     
     try {
+        const accountId = '<%= accountId %>';
+        console.log('📋 프로필 데이터 로딩 시작, Account ID:', accountId);
+        
+        // accountId 유효성 검사
+        if (!accountId || accountId === 'null' || accountId === 'undefined') {
+            throw new Error('Account ID가 유효하지 않습니다. 다시 로그인해주세요.');
+        }
+        
         // 병렬로 모든 데이터를 동시에 로드
+        console.log('🔄 API 호출 시작...');
         const [playerResponse, heroStatsResponse, matchHistoryResponse] = await Promise.all([
-            fetch(`/api/v1/players/<%= accountId %>`),
-            fetch(`/api/v1/players/<%= accountId %>/hero-stats`),
-            fetch(`/api/v1/players/<%= accountId %>/match-history?limit=10`) // 20개에서 10개로 줄임
+            fetch(`/api/v1/players/${accountId}`),
+            fetch(`/api/v1/players/${accountId}/hero-stats`),
+            fetch(`/api/v1/players/${accountId}/match-history?limit=10`)
         ]);
+        
+        console.log('📡 API 응답 상태:', {
+            player: playerResponse.status,
+            heroStats: heroStatsResponse.status,
+            matchHistory: matchHistoryResponse.status
+        });
         
         const [playerData, heroStats, matchHistory] = await Promise.all([
             playerResponse.json(),
@@ -607,17 +622,24 @@ async function loadMyProfileData() {
             matchHistoryResponse.json()
         ]);
         
-        if (playerResponse.ok) {
+        console.log('📊 받은 데이터:', {
+            player: !!playerData,
+            heroStats: heroStats?.length || 0,
+            matchHistory: matchHistory?.length || 0
+        });
+        
+        if (playerResponse.ok && playerData) {
             // 빠른 UI 업데이트
             updatePlayerUIFast(playerData, heroStats, matchHistory);
             loading.style.display = 'none';
             content.style.display = 'block';
+            console.log('✅ 프로필 데이터 로딩 완료');
         } else {
-            throw new Error(playerData.error || 'Failed to load profile');
+            throw new Error(playerData?.error || `플레이어 데이터 로딩 실패 (상태: ${playerResponse.status})`);
         }
         
     } catch (err) {
-        console.error('Failed to load profile data:', err);
+        console.error('❌ 프로필 데이터 로딩 실패:', err);
         loading.style.display = 'none';
         error.style.display = 'block';
         
