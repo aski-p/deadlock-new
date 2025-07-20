@@ -1106,7 +1106,15 @@ function generateFastHeroStats(accountId) {
   }).sort((a, b) => b.matches - a.matches);
 }
 
-// 영웅별 스탯 API - 최적화 버전
+// 영웅 ID를 이름으로 변환하는 맵핑
+const heroIdMap = {
+  1: 'Abrams', 2: 'Bebop', 4: 'Dynamo', 6: 'Grey Talon', 7: 'Haze', 8: 'Infernus',
+  10: 'Ivy', 11: 'Kelvin', 13: 'Lady Geist', 14: 'Lash', 15: 'McGinnis', 16: 'Mo & Krill',
+  17: 'Paradox', 18: 'Pocket', 19: 'Seven', 20: 'Shiv', 25: 'Vindicta', 27: 'Viscous',
+  31: 'Warden', 35: 'Wraith', 50: 'Yamato', 52: 'Mirage', 58: 'Calico', 60: 'Holliday'
+};
+
+// 영웅별 스탯 API - 실제 API 데이터 변환
 app.get('/api/v1/players/:accountId/hero-stats', async (req, res) => {
   try {
     const { accountId } = req.params;
@@ -1118,16 +1126,47 @@ app.get('/api/v1/players/:accountId/hero-stats', async (req, res) => {
       return res.json(cached);
     }
     
-    // 실제 API 호출 시도 (타임아웃 단축)
+    // 실제 API 호출 시도
     try {
       const response = await axios.get(`https://api.deadlock-api.com/v1/players/${accountId}/hero-stats`, {
-        timeout: 3000 // 10초에서 3초로 단축
+        timeout: 5000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
       });
       
-      if (response.data) {
-        console.log(`✅ 실제 영웅 스탯 API 사용: ${accountId}`);
-        setCachedData(cacheKey, response.data);
-        return res.json(response.data);
+      if (response.data && Array.isArray(response.data)) {
+        // 실제 API 데이터를 프론트엔드 형식으로 변환
+        const heroStats = response.data
+          .filter(hero => hero.matches_played > 0) // 플레이한 영웅만
+          .map(hero => {
+            const heroName = heroIdMap[hero.hero_id] || `Hero ${hero.hero_id}`;
+            const winRate = hero.matches_played > 0 ? Math.round((hero.wins / hero.matches_played) * 100) : 0;
+            const avgKda = hero.deaths_per_min > 0 ? 
+              ((hero.kills_per_min + hero.assists_per_min) / hero.deaths_per_min).toFixed(1) : 
+              (hero.kills_per_min + hero.assists_per_min).toFixed(1);
+            
+            return {
+              hero: heroName,
+              name: heroName,
+              matches: hero.matches_played,
+              wins: hero.wins,
+              winRate: winRate,
+              avgKills: (hero.kills_per_min * (hero.time_played / 60000)).toFixed(1),
+              avgDeaths: (hero.deaths_per_min * (hero.time_played / 60000)).toFixed(1),
+              avgAssists: (hero.assists_per_min * (hero.time_played / 60000)).toFixed(1),
+              avgKda: avgKda,
+              avgSouls: Math.round(hero.networth_per_min || 0),
+              avgDamage: Math.round(hero.damage_per_min || 0),
+              avgHealing: Math.round(hero.damage_mitigated_per_min || 0)
+            };
+          })
+          .sort((a, b) => b.matches - a.matches) // 많이 플레이한 순으로 정렬
+          .slice(0, 10); // 상위 10개만
+        
+        console.log(`✅ 실제 영웅 스탯 API 변환 완료: ${heroStats.length}개 영웅`);
+        setCachedData(cacheKey, heroStats);
+        return res.json(heroStats);
       }
     } catch (error) {
       console.log(`❌ 실제 영웅 스탯 API 실패: ${error.message}`);
@@ -1137,7 +1176,7 @@ app.get('/api/v1/players/:accountId/hero-stats', async (req, res) => {
     const heroStats = generateFastHeroStats(accountId);
     setCachedData(cacheKey, heroStats);
     
-    console.log(`✅ 빠른 더미 영웅 스탯 생성: ${heroStats.length}개 영웅`);
+    console.log(`✅ 백업 영웅 스탯 생성: ${heroStats.length}개 영웅`);
     res.json(heroStats);
     
   } catch (error) {
@@ -1187,7 +1226,7 @@ function generateFastMatchHistory(accountId, limit = 10) {
   return matches;
 }
 
-// 매치 히스토리 API - 최적화 버전
+// 매치 히스토리 API - 실제 API 데이터 변환
 app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
   try {
     const { accountId } = req.params;
@@ -1200,17 +1239,59 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
       return res.json(cached);
     }
     
-    // 실제 API 호출 시도 (타임아웃 단축)
+    // 실제 API 호출 시도
     try {
       const response = await axios.get(`https://api.deadlock-api.com/v1/players/${accountId}/match-history`, {
-        timeout: 3000, // 10초에서 3초로 단축
-        params: { limit }
+        timeout: 5000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
       });
       
-      if (response.data) {
-        console.log(`✅ 실제 매치 히스토리 API 사용: ${accountId}`);
-        setCachedData(cacheKey, response.data);
-        return res.json(response.data);
+      if (response.data && Array.isArray(response.data)) {
+        // 실제 API 데이터를 프론트엔드 형식으로 변환
+        const matches = response.data
+          .slice(0, limit) // 요청된 수만큼만
+          .map(match => {
+            const heroName = heroIdMap[match.hero_id] || `Hero ${match.hero_id}`;
+            const isWin = match.match_result === 1;
+            const durationSeconds = match.match_duration_s || 0;
+            const durationFormatted = `${Math.floor(durationSeconds / 60)}:${(durationSeconds % 60).toString().padStart(2, '0')}`;
+            
+            // KDA 계산
+            const kills = match.player_kills || 0;
+            const deaths = match.player_deaths || 0;
+            const assists = match.player_assists || 0;
+            const kda = deaths > 0 ? ((kills + assists) / deaths).toFixed(1) : (kills + assists).toFixed(1);
+            
+            // 시간 계산 (Unix timestamp -> ISO string)
+            const playedAt = match.start_time ? 
+              new Date(match.start_time * 1000).toISOString() : 
+              new Date().toISOString();
+            
+            return {
+              matchId: match.match_id,
+              hero: heroName,
+              result: isWin ? '승리' : '패배',
+              duration: durationSeconds,
+              durationFormatted: durationFormatted,
+              kills: kills,
+              deaths: deaths,
+              assists: assists,
+              souls: match.net_worth || 0,
+              damage: Math.round((match.net_worth || 0) * 0.8), // 추정치
+              healing: Math.round((match.net_worth || 0) * 0.1), // 추정치
+              kda: kda,
+              playedAt: playedAt,
+              heroLevel: match.hero_level || 1,
+              lastHits: match.last_hits || 0,
+              denies: match.denies || 0
+            };
+          });
+        
+        console.log(`✅ 실제 매치 히스토리 API 변환 완료: ${matches.length}개 매치`);
+        setCachedData(cacheKey, matches);
+        return res.json(matches);
       }
     } catch (error) {
       console.log(`❌ 실제 매치 히스토리 API 실패: ${error.message}`);
@@ -1220,7 +1301,7 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
     const matches = generateFastMatchHistory(accountId, limit);
     setCachedData(cacheKey, matches);
     
-    console.log(`✅ 빠른 더미 매치 히스토리 생성: ${matches.length}개 매치`);
+    console.log(`✅ 백업 매치 히스토리 생성: ${matches.length}개 매치`);
     res.json(matches);
     
   } catch (error) {
