@@ -1341,25 +1341,57 @@ app.get('/api/v1/players/:accountId/hero-stats', async (req, res) => {
       console.log(`📡 API 응답 상태: ${response.status}, 데이터 타입: ${typeof response.data}, 배열 여부: ${Array.isArray(response.data)}, 길이: ${response.data?.length || 'N/A'}`);
 
       if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+        // 매치 히스토리에서 실제 영웅별 게임 수 확인 (검증용)
+        let matchHistoryHeroCounts = {};
+        try {
+          const matchHistoryResponse = await axios.get(`https://api.deadlock-api.com/v1/players/${accountId}/match-history`, {
+            timeout: 5000,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+          });
+          
+          if (matchHistoryResponse.data && Array.isArray(matchHistoryResponse.data)) {
+            matchHistoryResponse.data.forEach(match => {
+              const heroId = match.hero_id;
+              if (heroId) {
+                matchHistoryHeroCounts[heroId] = (matchHistoryHeroCounts[heroId] || 0) + 1;
+              }
+            });
+            console.log(`📊 매치 히스토리 검증: 총 ${matchHistoryResponse.data.length}게임 분석`);
+          }
+        } catch (matchError) {
+          console.log(`⚠️ 매치 히스토리 검증 실패: ${matchError.message}`);
+        }
+
         // 영웅 스탯 데이터 변환
         const heroStats = response.data.map(hero => {
           const heroName = getHeroNameById(hero.hero_id);
-          const winRate = hero.matches_played > 0 ? ((hero.wins / hero.matches_played) * 100).toFixed(1) : 0;
-          const losses = hero.matches_played - hero.wins;
+          
+          // 매치 히스토리에서 실제 게임 수 확인 (더 정확할 가능성)
+          const actualMatches = matchHistoryHeroCounts[hero.hero_id] || hero.matches_played;
+          const isDiscrepancy = actualMatches !== hero.matches_played;
+          
+          if (isDiscrepancy) {
+            console.log(`🔍 ${heroName} 게임 수 차이 발견: API=${hero.matches_played}, 실제=${actualMatches}`);
+          }
+          
+          const winRate = actualMatches > 0 ? ((hero.wins / actualMatches) * 100).toFixed(1) : 0;
+          const losses = actualMatches - hero.wins;
           const kda = hero.deaths > 0 ? ((hero.kills + hero.assists) / hero.deaths).toFixed(2) : (hero.kills + hero.assists).toFixed(2);
-          const avgMatchDuration = hero.time_played > 0 ? Math.round(hero.time_played / hero.matches_played) : 0;
+          const avgMatchDuration = hero.time_played > 0 ? Math.round(hero.time_played / actualMatches) : 0;
           const durationFormatted = `${Math.floor(avgMatchDuration / 60)}:${(avgMatchDuration % 60).toString().padStart(2, '0')}`;
           
           return {
             hero: heroName,
             heroId: hero.hero_id,
-            matches: hero.matches_played,
+            matches: actualMatches, // 매치 히스토리 기반 실제 게임 수 사용
             wins: hero.wins,
             losses: losses,
             winRate: parseFloat(winRate),
-            avgKills: hero.matches_played > 0 ? parseFloat((hero.kills / hero.matches_played).toFixed(1)) : 0,
-            avgDeaths: hero.matches_played > 0 ? parseFloat((hero.deaths / hero.matches_played).toFixed(1)) : 0,
-            avgAssists: hero.matches_played > 0 ? parseFloat((hero.assists / hero.matches_played).toFixed(1)) : 0,
+            avgKills: actualMatches > 0 ? parseFloat((hero.kills / actualMatches).toFixed(1)) : 0,
+            avgDeaths: actualMatches > 0 ? parseFloat((hero.deaths / actualMatches).toFixed(1)) : 0,
+            avgAssists: actualMatches > 0 ? parseFloat((hero.assists / actualMatches).toFixed(1)) : 0,
             kda: parseFloat(kda),
             avgSoulsPerMin: Math.round(hero.networth_per_min || 0),
             avgDamagePerMin: Math.round(hero.damage_per_min || 0),

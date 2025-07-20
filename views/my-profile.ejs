@@ -86,6 +86,11 @@
             <!-- Heroes Section (전체 게임 기반) -->
             <div class="player-section">
                 <h2 class="section-title">플레이한 영웅 (전체 게임)</h2>
+                <p class="section-note">
+                    <i class="fas fa-info-circle"></i>
+                    영웅 통계는 외부 API 데이터를 기반으로 하며, 실제 게임 내 데이터와 약간의 차이가 있을 수 있습니다. 
+                    데이터는 주기적으로 업데이트됩니다.
+                </p>
                 <div class="heroes-grid" id="heroes-grid">
                     <!-- Heroes will be populated by JavaScript -->
                 </div>
@@ -1107,13 +1112,12 @@ function displayHeroStats(heroStats) {
         
         const heroCards = heroStats.map((hero, index) => {
             try {
-                // 안전한 데이터 추출 (deadlock.coach 스타일)
+                // 새로운 hero-stats API 데이터 구조 사용
                 const matches = parseInt(hero?.matches) || 0;
                 const wins = parseInt(hero?.wins) || 0;
                 const losses = parseInt(hero?.losses) || (matches - wins);
                 const winRate = hero?.winRate || (matches > 0 ? Math.round((wins / matches) * 100) : 0);
-                const laneWinRate = hero?.laneWinRate || 0;
-                const kda = hero?.kda || hero?.avgKda || '0.0';
+                const kda = hero?.kda || '0.0';
                 const avgKills = hero?.avgKills || 0;
                 const avgDeaths = hero?.avgDeaths || 0;
                 const avgAssists = hero?.avgAssists || 0;
@@ -1121,9 +1125,13 @@ function displayHeroStats(heroStats) {
                 const avgDamagePerMin = hero?.avgDamagePerMin || 0;
                 const avgHealingPerMin = hero?.avgHealingPerMin || 0;
                 const avgMatchDuration = hero?.avgMatchDuration || 0;
-                const durationFormatted = avgMatchDuration > 0 ? 
-                    `${Math.floor(avgMatchDuration / 60)}:${(avgMatchDuration % 60).toString().padStart(2, '0')}` : '0:00';
+                const durationFormatted = hero?.avgMatchDurationFormatted || 
+                    (avgMatchDuration > 0 ? `${Math.floor(avgMatchDuration / 60)}:${(avgMatchDuration % 60).toString().padStart(2, '0')}` : '0:00');
                 const heroName = hero?.hero || hero?.name || `Hero${index + 1}`;
+                const accuracy = hero?.accuracy || 0;
+                const critShotRate = hero?.critShotRate || 0;
+                const avgLevel = hero?.avgLevel || 0;
+                const timePlayedHours = hero?.timePlayedTotal ? (hero.timePlayedTotal / 3600).toFixed(1) : 0;
                 
                 return `
                     <div class="hero-card detailed">
@@ -1140,14 +1148,26 @@ function displayHeroStats(heroStats) {
                                     <span class="hero-stat-value ${winRate >= 50 ? 'positive' : 'negative'}">${winRate}%</span>
                                 </div>
                                 <div class="hero-stat-row">
-                                    <span class="hero-stat-label">라인 승률:</span>
-                                    <span class="hero-stat-value ${laneWinRate >= 50 ? 'positive' : 'negative'}">${laneWinRate}%</span>
+                                    <span class="hero-stat-label">총 플레이 시간:</span>
+                                    <span class="hero-stat-value">${timePlayedHours}시간</span>
                                 </div>
                             </div>
                             <div class="hero-card-detailed-stats">
                                 <div class="hero-stat-row">
                                     <span class="hero-stat-label">KDA:</span>
                                     <span class="hero-stat-value">${avgKills}/${avgDeaths}/${avgAssists} (${kda})</span>
+                                </div>
+                                <div class="hero-stat-row">
+                                    <span class="hero-stat-label">평균 레벨:</span>
+                                    <span class="hero-stat-value">${avgLevel}</span>
+                                </div>
+                                <div class="hero-stat-row">
+                                    <span class="hero-stat-label">명중률:</span>
+                                    <span class="hero-stat-value">${accuracy}%</span>
+                                </div>
+                                <div class="hero-stat-row">
+                                    <span class="hero-stat-label">크리티컬율:</span>
+                                    <span class="hero-stat-value">${critShotRate}%</span>
                                 </div>
                                 <div class="hero-stat-row">
                                     <span class="hero-stat-label">소울/분:</span>
@@ -1158,14 +1178,9 @@ function displayHeroStats(heroStats) {
                                     <span class="hero-stat-value">${avgDamagePerMin.toLocaleString()}</span>
                                 </div>
                                 <div class="hero-stat-row">
-                                    <span class="hero-stat-label">힐링/분:</span>
-                                    <span class="hero-stat-value">${avgHealingPerMin.toLocaleString()}</span>
-                                </div>
-                                <div class="hero-stat-row">
                                     <span class="hero-stat-label">평균 시간:</span>
                                     <span class="hero-stat-value">${durationFormatted}</span>
                                 </div>
-                            </div>
                             </div>
                         </div>
                     </div>
