@@ -968,6 +968,29 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
         recentMatches: generateRecentMatches(['Abrams', 'Bebop', 'Haze'])
       };
 
+      // 전체 매치 분석 시도
+      console.log(`🔍 실제 매치 데이터 분석 시작: ${accountId}`);
+      const matchAnalysis = await fetchAndAnalyzeAllMatches(accountId);
+      
+      if (matchAnalysis) {
+        // 실제 매치 데이터가 있는 경우 정확한 통계 사용
+        defaultPlayerInfo.stats = {
+          matches: matchAnalysis.totalMatches,
+          winRate: parseFloat(matchAnalysis.winRate),
+          laneWinRate: Math.floor(Math.random() * 30) + 50, // 라인 승률은 별도 API 필요
+          kda: parseFloat(matchAnalysis.averageKDA.ratio),
+          headshotPercent: Math.floor(Math.random() * 20) + 15, // 헤드샷은 별도 API 필요
+          soulsPerMin: matchAnalysis.avgSoulsPerMin,
+          damagePerMin: matchAnalysis.avgDamagePerMin,
+          healingPerMin: Math.floor(Math.random() * 300) + 200 // 힐링은 별도 API 필요
+        };
+        defaultPlayerInfo.heroes = matchAnalysis.topHeroes;
+        defaultPlayerInfo.recentMatches = matchAnalysis.recentMatches;
+        defaultPlayerInfo.averageKDA = matchAnalysis.averageKDA;
+        
+        console.log(`✅ 실제 매치 데이터 적용: ${matchAnalysis.totalMatches}경기, 승률 ${matchAnalysis.winRate}%`);
+      }
+
       // Steam API로 실제 정보 가져오기 시도
       if (steamApiKey && steamId && isValidSteamId64(steamId)) {
         try {
@@ -991,7 +1014,7 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
               defaultPlayerInfo.countryCode = steamUser.loccountrycode;
             }
             
-            console.log(`✅ Steam API 기반 기본 프로필 생성: ${defaultPlayerInfo.name}`);
+            console.log(`✅ Steam API 기반 프로필 정보 업데이트: ${defaultPlayerInfo.name}`);
           }
         } catch (error) {
           console.log(`❌ Steam API 호출 실패:`, error.message);
@@ -1038,6 +1061,29 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
       ],
       recentMatches: generateRecentMatches(foundPlayer.heroes)
     };
+
+    // 리더보드에서 찾은 플레이어도 실제 매치 데이터로 분석
+    console.log(`🔍 리더보드 플레이어 ${playerInfo.name}의 실제 매치 데이터 분석 시작...`);
+    const matchAnalysis = await fetchAndAnalyzeAllMatches(accountId);
+    
+    if (matchAnalysis) {
+      // 실제 매치 데이터가 있는 경우 정확한 통계로 대체
+      playerInfo.stats = {
+        matches: matchAnalysis.totalMatches,
+        winRate: parseFloat(matchAnalysis.winRate),
+        laneWinRate: playerInfo.stats.laneWinRate, // 기존값 유지 (별도 API 필요)
+        kda: parseFloat(matchAnalysis.averageKDA.ratio),
+        headshotPercent: playerInfo.stats.headshotPercent, // 기존값 유지 (별도 API 필요)
+        soulsPerMin: matchAnalysis.avgSoulsPerMin,
+        damagePerMin: matchAnalysis.avgDamagePerMin,
+        healingPerMin: playerInfo.stats.healingPerMin // 기존값 유지 (별도 API 필요)
+      };
+      playerInfo.heroes = matchAnalysis.topHeroes;
+      playerInfo.recentMatches = matchAnalysis.recentMatches;
+      playerInfo.averageKDA = matchAnalysis.averageKDA;
+      
+      console.log(`✅ 리더보드 플레이어 실제 매치 데이터 적용: ${matchAnalysis.totalMatches}경기, 승률 ${matchAnalysis.winRate}%`);
+    }
 
     console.log(`✅ 플레이어 정보 생성 완료: ${playerInfo.name} (${foundRegion}, 순위: ${foundPlayer.rank})`);
     setCachedData(cacheKey, playerInfo, CACHE_TTL);
@@ -1225,6 +1271,144 @@ function generateFastMatchHistory(accountId, limit = 10) {
   
   return matches;
 }
+
+// 전체 매치 데이터 분석 함수 - 정확한 통계 계산
+const fetchAndAnalyzeAllMatches = async (accountId) => {
+  try {
+    console.log(`🔍 플레이어 ${accountId} 전체 매치 분석 시작...`);
+    
+    // 실제 Deadlock API에서 전체 매치 히스토리 가져오기
+    const response = await axios.get(`https://api.deadlock-api.com/v1/players/${accountId}/match-history`, {
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    });
+
+    if (!response.data || !Array.isArray(response.data)) {
+      console.log(`❌ 매치 데이터 없음: ${accountId}`);
+      return null;
+    }
+
+    const matches = response.data;
+    console.log(`📊 총 ${matches.length}경기 데이터 분석 중...`);
+
+    // 통계 계산
+    let totalMatches = matches.length;
+    let wins = 0;
+    let totalKills = 0;
+    let totalDeaths = 0;
+    let totalAssists = 0;
+    let totalSouls = 0;
+    let totalDamage = 0;
+    let heroStats = {};
+
+    matches.forEach(match => {
+      // 승리 카운트
+      if (match.win_loss === true || match.win_loss === 'win') {
+        wins++;
+      }
+      
+      // KDA 누적
+      totalKills += match.kills || 0;
+      totalDeaths += match.deaths || 0;
+      totalAssists += match.assists || 0;
+      
+      // 소울 및 데미지 누적
+      totalSouls += match.net_worth || 0;
+      totalDamage += match.player_damage || 0;
+      
+      // 영웅별 통계
+      const heroId = match.hero_id;
+      const heroName = getHeroNameById(heroId);
+      
+      if (!heroStats[heroName]) {
+        heroStats[heroName] = {
+          matches: 0,
+          wins: 0,
+          kills: 0,
+          deaths: 0,
+          assists: 0
+        };
+      }
+      
+      heroStats[heroName].matches++;
+      if (match.win_loss === true || match.win_loss === 'win') {
+        heroStats[heroName].wins++;
+      }
+      heroStats[heroName].kills += match.kills || 0;
+      heroStats[heroName].deaths += match.deaths || 0;
+      heroStats[heroName].assists += match.assists || 0;
+    });
+
+    // 통계 계산
+    const winRate = totalMatches > 0 ? ((wins / totalMatches) * 100).toFixed(1) : 0;
+    const avgKills = totalMatches > 0 ? (totalKills / totalMatches).toFixed(1) : 0;
+    const avgDeaths = totalMatches > 0 ? (totalDeaths / totalMatches).toFixed(1) : 0;
+    const avgAssists = totalMatches > 0 ? (totalAssists / totalMatches).toFixed(1) : 0;
+    const kdaRatio = totalDeaths > 0 ? ((totalKills + totalAssists) / totalDeaths).toFixed(2) : (totalKills + totalAssists).toFixed(2);
+    const avgSoulsPerMin = totalMatches > 0 ? Math.round(totalSouls / totalMatches) : 0;
+    const avgDamagePerMin = totalMatches > 0 ? Math.round(totalDamage / totalMatches) : 0;
+
+    // 상위 영웅 순서대로 정렬
+    const sortedHeroes = Object.entries(heroStats)
+      .map(([hero, stats]) => ({
+        name: hero,
+        matches: stats.matches,
+        winRate: stats.matches > 0 ? ((stats.wins / stats.matches) * 100).toFixed(1) : 0,
+        avgKills: stats.matches > 0 ? (stats.kills / stats.matches).toFixed(1) : 0,
+        avgDeaths: stats.matches > 0 ? (stats.deaths / stats.matches).toFixed(1) : 0,
+        avgAssists: stats.matches > 0 ? (stats.assists / stats.matches).toFixed(1) : 0
+      }))
+      .sort((a, b) => b.matches - a.matches);
+
+    const analysis = {
+      totalMatches,
+      wins,
+      winRate,
+      averageKDA: {
+        kills: avgKills,
+        deaths: avgDeaths,
+        assists: avgAssists,
+        ratio: kdaRatio
+      },
+      avgSoulsPerMin,
+      avgDamagePerMin,
+      topHeroes: sortedHeroes.slice(0, 10),
+      recentMatches: matches.slice(0, 10).map(match => ({
+        matchId: match.match_id || match.id,
+        hero: getHeroNameById(match.hero_id),
+        result: (match.win_loss === true || match.win_loss === 'win') ? '승리' : '패배',
+        duration: match.duration || 0,
+        kills: match.kills || 0,
+        deaths: match.deaths || 0,
+        assists: match.assists || 0,
+        souls: match.net_worth || 0,
+        damage: match.player_damage || 0,
+        kda: match.deaths > 0 ? ((match.kills + match.assists) / match.deaths).toFixed(1) : (match.kills + match.assists).toFixed(1),
+        playedAt: match.start_time || new Date().toISOString()
+      }))
+    };
+
+    console.log(`✅ 분석 완료: ${totalMatches}경기, 승률 ${winRate}%, 주력 영웅: ${sortedHeroes.slice(0, 3).map(h => `${h.name}(${h.matches}경기)`).join(', ')}`);
+    return analysis;
+    
+  } catch (error) {
+    console.error(`❌ 매치 분석 실패 (${accountId}):`, error.message);
+    return null;
+  }
+};
+
+// 영웅 ID를 이름으로 변환하는 함수
+const getHeroNameById = (heroId) => {
+  const heroMap = {
+    1: 'Abrams', 2: 'Bebop', 3: 'Dynamo', 4: 'Grey Talon', 5: 'Haze',
+    6: 'Infernus', 7: 'Ivy', 8: 'Kelvin', 9: 'Lady Geist', 10: 'Lash',
+    11: 'McGinnis', 12: 'Mo & Krill', 13: 'Paradox', 14: 'Pocket', 15: 'Seven',
+    16: 'Shiv', 17: 'Vindicta', 18: 'Viscous', 19: 'Warden', 20: 'Wraith', 21: 'Yamato'
+  };
+  return heroMap[heroId] || `Hero_${heroId}`;
+};
 
 // 매치 히스토리 API - 실제 API 데이터 변환
 app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
@@ -1443,6 +1627,80 @@ app.get('/api/player/:steamId/recent', async (req, res) => {
   }
 });
 
+// Steam ID 검색 API
+app.get('/api/v1/players/steam-search', async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) {
+      return res.status(400).json({ error: 'Search query required' });
+    }
+
+    console.log(`🔍 Steam 검색 요청: ${query}`);
+
+    // Steam ID 64 형태인지 확인
+    if (query.startsWith('76561198') && query.length === 17) {
+      // Steam ID 64를 Account ID로 변환
+      const accountId = (BigInt(query) - BigInt('76561197960265728')).toString();
+      console.log(`✅ Steam ID 변환: ${query} → ${accountId}`);
+      
+      // 변환된 Account ID로 플레이어 정보 가져오기
+      try {
+        const playerResponse = await axios.get(`http://localhost:${PORT}/api/v1/players/${accountId}`);
+        return res.json({
+          found: true,
+          player: playerResponse.data,
+          searchMethod: 'steam_id_conversion'
+        });
+      } catch (error) {
+        console.log(`❌ 변환된 Account ID로 플레이어 찾기 실패: ${accountId}`);
+      }
+    }
+
+    // Deadlock API steam-search 시도
+    try {
+      const response = await axios.get(`https://api.deadlock-api.com/v1/players/steam-search`, {
+        params: { query },
+        timeout: 5000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        }
+      });
+
+      if (response.data && response.data.length > 0) {
+        const foundPlayer = response.data[0];
+        console.log(`✅ Steam 검색 성공: ${foundPlayer.personaname || foundPlayer.name}`);
+        
+        return res.json({
+          found: true,
+          player: {
+            accountId: foundPlayer.account_id,
+            steamId: foundPlayer.steam_id,
+            name: foundPlayer.personaname || foundPlayer.name,
+            avatar: foundPlayer.avatar
+          },
+          searchMethod: 'deadlock_api_search'
+        });
+      }
+    } catch (error) {
+      console.log(`❌ Deadlock API Steam 검색 실패:`, error.message);
+    }
+
+    // 검색 결과 없음
+    res.json({
+      found: false,
+      message: 'Player not found',
+      suggestions: [
+        'Steam ID 64 형태로 검색해보세요 (76561198으로 시작하는 17자리)',
+        'Player ID나 이름으로 검색해보세요'
+      ]
+    });
+
+  } catch (error) {
+    console.error('Steam search API error:', error);
+    res.status(500).json({ error: 'Search failed' });
+  }
+});
+
 // 플레이어 상세 페이지 라우트
 app.get('/ko/players/:accountId', (req, res) => {
   const { accountId } = req.params;
@@ -1450,6 +1708,14 @@ app.get('/ko/players/:accountId', (req, res) => {
     user: req.user,
     accountId: accountId,
     title: `플레이어 정보 - 박근형의 데드락`
+  });
+});
+
+// 플레이어 검색 페이지 라우트
+app.get('/ko/search', (req, res) => {
+  res.render('player-search', {
+    user: req.user,
+    title: '플레이어 검색 - 박근형의 데드락'
   });
 });
 
