@@ -438,6 +438,12 @@
     color: #999;
 }
 
+.match-id {
+    font-size: 11px;
+    color: #666;
+    font-family: monospace;
+}
+
 .match-stats {
     display: flex;
     flex-direction: column;
@@ -959,6 +965,7 @@ function displayMatchHistory(matches) {
                 const souls = parseInt(match?.souls) || 0;
                 const damage = parseInt(match?.damage) || 0;
                 const playedAt = match?.playedAt || new Date().toISOString();
+                const matchId = match?.matchId || 'Unknown';
                 
                 return `
                     <div class="match-card ${isWin ? 'win' : 'loss'}">
@@ -969,6 +976,7 @@ function displayMatchHistory(matches) {
                         <div class="match-result">
                             <span class="result-text ${isWin ? 'win-text' : 'loss-text'}">${result}</span>
                             <span class="match-duration">${duration}</span>
+                            <span class="match-id">매치 #${matchId}</span>
                         </div>
                         <div class="match-stats">
                             <span class="kda">${kills}/${deaths}/${assists}</span>
