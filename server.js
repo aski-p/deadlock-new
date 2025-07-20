@@ -935,7 +935,7 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
           return 'Initiate';
         };
 
-        const playerData = {
+        let playerData = {
           accountId: accountId,
           name: playerCard.account_name || `Player_${accountId}`,
           avatar: playerCard.avatar_url || 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
@@ -957,7 +957,64 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
           }
         };
         
-        console.log(`✅ 실제 플레이어 카드 API 변환 완료:`, playerData);
+        console.log(`✅ 실제 플레이어 카드 API 기본 정보 완료, 매치 분석 시작...`);
+        
+        // 매치 분석으로 실제 통계 업데이트
+        try {
+          const matchAnalysis = await fetchAndAnalyzeAllMatches(accountId);
+          
+          if (matchAnalysis) {
+            // deadlock.coach 스타일 실제 매치 데이터 적용
+            playerData.stats = {
+              matches: matchAnalysis.totalMatches,
+              winRate: parseFloat(matchAnalysis.winRate),
+              laneWinRate: parseFloat(matchAnalysis.laneWinRate),
+              kda: parseFloat(matchAnalysis.averageKDA.ratio),
+              headshotPercent: parseInt(matchAnalysis.headshotPercent),
+              soulsPerMin: matchAnalysis.avgSoulsPerMin,
+              damagePerMin: matchAnalysis.avgDamagePerMin,
+              healingPerMin: matchAnalysis.avgHealingPerMin,
+              avgMatchDuration: matchAnalysis.avgMatchDuration
+            };
+            playerData.heroes = matchAnalysis.topHeroes;
+            playerData.recentMatches = matchAnalysis.recentMatches;
+            playerData.averageKDA = matchAnalysis.averageKDA;
+            
+            console.log(`✅ 플레이어 카드에서 매치 분석 완료: ${matchAnalysis.totalMatches}경기, 승률 ${matchAnalysis.winRate}%`);
+          }
+        } catch (matchError) {
+          console.log(`❌ 플레이어 카드에서 매치 분석 실패: ${matchError.message}`);
+        }
+        
+        // Steam 프로필 정보도 가져오기
+        try {
+          console.log(`🔍 Deadlock API로 Steam 프로필 정보 가져오기: ${accountId}`);
+          const steamProfileResponse = await axios.get(`https://api.deadlock-api.com/v1/players/${accountId}/steam`, {
+            timeout: 5000
+          });
+          
+          if (steamProfileResponse.data) {
+            const steamProfile = steamProfileResponse.data;
+            playerData.name = steamProfile.personaname || steamProfile.real_name || playerData.name;
+            
+            // 아바타 URL 처리
+            if (steamProfile.avatarfull || steamProfile.avatar) {
+              const avatarUrl = steamProfile.avatarfull || steamProfile.avatar;
+              playerData.avatar = avatarUrl.replace('avatars.steamstatic.com', 'avatars.cloudflare.steamstatic.com');
+            }
+            
+            // 국가 코드 처리
+            if (steamProfile.loccountrycode) {
+              playerData.country = getCountryFlag(steamProfile.loccountrycode);
+              playerData.countryCode = steamProfile.loccountrycode;
+            }
+            
+            console.log(`✅ 플레이어 카드에서 Steam 프로필 정보 획득: ${playerData.name}`);
+          }
+        } catch (steamError) {
+          console.log(`❌ 플레이어 카드에서 Steam 프로필 호출 실패: ${steamError.message}`);
+        }
+        
         setCachedData(cacheKey, playerData);
         return res.json(playerData);
       }
