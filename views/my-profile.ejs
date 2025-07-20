@@ -174,22 +174,217 @@
     padding: 0 40px;
 }
 
-/* 매치 카드 스타일 */
-.match-card {
+/* 플레이어 기본 스타일 */
+.player-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 12px;
+    padding: 40px;
+    border-radius: 16px;
+    margin-bottom: 40px;
     border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.player-basic-info {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
+}
+
+.player-detail-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid #63a2e2;
+}
+
+.player-main-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.player-name {
+    font-size: 32px;
+    font-weight: 700;
+    color: #FFEFD7;
+    margin: 0;
+}
+
+.player-meta {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 16px;
+    color: #999;
+}
+
+.player-country {
+    font-size: 24px;
+}
+
+.player-account-id {
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.player-rank {
+    text-align: center;
+}
+
+.rank-badge {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.rank-medal {
+    width: 64px;
+    height: 64px;
+}
+
+.rank-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.rank-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #63a2e2;
+}
+
+.rank-score {
+    font-size: 24px;
+    font-weight: 700;
+    color: #FFEFD7;
+}
+
+.player-stats {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 40px;
+    border-radius: 16px;
+    margin-bottom: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 30px;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s;
+}
+
+.stat-card:hover {
+    background: rgba(99, 162, 226, 0.1);
+    border-color: #63a2e2;
+    transform: translateY(-2px);
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #63a2e2;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.player-section {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 40px;
+    border-radius: 16px;
+    margin-bottom: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.section-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #FFEFD7;
+    margin-bottom: 30px;
+    border-bottom: 2px solid #63a2e2;
+    padding-bottom: 10px;
+}
+
+.heroes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.hero-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s;
+}
+
+.hero-card:hover {
+    background: rgba(99, 162, 226, 0.1);
+    border-color: #63a2e2;
+    transform: translateY(-2px);
+}
+
+.hero-card-image {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+}
+
+.hero-card-info h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #FFEFD7;
+    margin: 0 0 5px 0;
+}
+
+.hero-card-stats {
+    font-size: 14px;
+    color: #999;
+}
+
+/* 매치 리스트 스타일 */
+.matches-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.match-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.3s;
 }
 
 .match-card:hover {
-    background: rgba(255, 255, 255, 0.08);
-    transform: translateY(-2px);
+    background: rgba(99, 162, 226, 0.1);
+    border-color: #63a2e2;
 }
 
 .match-card.win {
@@ -203,15 +398,14 @@
 .match-hero {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 15px;
     min-width: 140px;
 }
 
 .match-hero-image {
-    width: 48px;
-    height: 48px;
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
 }
 
 .match-hero-name {
@@ -252,9 +446,9 @@
 }
 
 .kda {
-    font-weight: 600;
+    font-family: monospace;
+    font-size: 16px;
     color: #FFEFD7;
-    font-size: 14px;
 }
 
 .kda-ratio {
@@ -293,6 +487,51 @@
     text-align: right;
 }
 
+/* 에러 및 로딩 스타일 */
+.profile-error {
+    text-align: center;
+    padding: 100px 20px;
+    color: #FFEFD7;
+}
+
+.profile-error h2 {
+    font-size: 36px;
+    margin-bottom: 20px;
+    color: #EF4444;
+}
+
+.retry-btn {
+    background: #63a2e2;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.retry-btn:hover {
+    background: #5289c7;
+    transform: translateY(-2px);
+}
+
+.back-button {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.1);
+    color: #FFEFD7;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.back-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #FFEFD7;
+}
+
 /* 반응형 */
 @media (max-width: 768px) {
     .player-detail-container {
@@ -306,6 +545,21 @@
     .quick-actions {
         flex-direction: column;
         align-items: center;
+    }
+    
+    .player-header {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    .heroes-grid {
+        grid-template-columns: 1fr;
     }
     
     .match-card {
@@ -451,18 +705,27 @@ function displayHeroStats(heroStats) {
         return heroImageMap[heroName] || 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp';
     };
     
-    grid.innerHTML = heroStats.map(hero => `
-        <div class="hero-card">
-            <img src="${getHeroImage(hero.hero)}" alt="${hero.hero}" class="hero-card-image">
-            <div class="hero-card-info">
-                <h3>${hero.hero}</h3>
-                <div class="hero-card-stats">
-                    ${hero.matches}게임 · ${hero.winRate}% 승률<br>
-                    <small style="color: #999;">KDA: ${hero.avgKda} · 소울/분: ${hero.avgSouls}</small>
+    grid.innerHTML = heroStats.map(hero => {
+        // 데이터 검증
+        const matches = hero.matches || 0;
+        const winRate = hero.winRate || Math.round((hero.wins / hero.matches) * 100) || 0;
+        const avgKda = hero.avgKda || '0.0';
+        const avgSouls = hero.avgSouls || 0;
+        const heroName = hero.hero || hero.name || 'Unknown';
+        
+        return `
+            <div class="hero-card">
+                <img src="${getHeroImage(heroName)}" alt="${heroName}" class="hero-card-image">
+                <div class="hero-card-info">
+                    <h3>${heroName}</h3>
+                    <div class="hero-card-stats">
+                        ${matches}게임 · ${winRate}% 승률<br>
+                        <small style="color: #999;">KDA: ${avgKda} · 소울/분: ${avgSouls}</small>
+                    </div>
                 </div>
             </div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // 매치 히스토리 로드

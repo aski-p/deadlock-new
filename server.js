@@ -1068,21 +1068,29 @@ app.get('/api/v1/players/:accountId/hero-stats', async (req, res) => {
     // 플레이어가 주로 플레이하는 영웅 5-8개 생성
     const playedHeroes = heroNames.sort(() => 0.5 - Math.random()).slice(0, Math.floor(Math.random() * 4) + 5);
     
-    const heroStats = playedHeroes.map(heroName => ({
-      hero: heroName,
-      matches: Math.floor(Math.random() * 50) + 10,
-      wins: Math.floor(Math.random() * 35) + 5,
-      losses: Math.floor(Math.random() * 25) + 3,
-      winRate: Math.floor(Math.random() * 40) + 45, // 45-85%
-      avgKills: (Math.random() * 8 + 2).toFixed(1),
-      avgDeaths: (Math.random() * 6 + 2).toFixed(1),
-      avgAssists: (Math.random() * 12 + 8).toFixed(1),
-      avgKda: (Math.random() * 3 + 1.5).toFixed(1),
-      avgSouls: Math.floor(Math.random() * 200) + 350,
-      avgDamage: Math.floor(Math.random() * 1000) + 2000,
-      avgHealing: Math.floor(Math.random() * 500) + 100,
-      lastPlayed: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
-    }));
+    const heroStats = playedHeroes.map(heroName => {
+      const matches = Math.floor(Math.random() * 50) + 10;
+      const wins = Math.floor(Math.random() * 35) + 5;
+      const losses = matches - wins;
+      const winRate = Math.round((wins / matches) * 100);
+      
+      return {
+        hero: heroName,
+        name: heroName, // 호환성을 위해 추가
+        matches: matches,
+        wins: wins,
+        losses: losses,
+        winRate: winRate,
+        avgKills: (Math.random() * 8 + 2).toFixed(1),
+        avgDeaths: (Math.random() * 6 + 2).toFixed(1),
+        avgAssists: (Math.random() * 12 + 8).toFixed(1),
+        avgKda: (Math.random() * 3 + 1.5).toFixed(1),
+        avgSouls: Math.floor(Math.random() * 200) + 350,
+        avgDamage: Math.floor(Math.random() * 1000) + 2000,
+        avgHealing: Math.floor(Math.random() * 500) + 100,
+        lastPlayed: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString()
+      };
+    });
     
     // 게임 수 기준으로 정렬
     heroStats.sort((a, b) => b.matches - a.matches);
