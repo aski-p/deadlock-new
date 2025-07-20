@@ -1167,20 +1167,29 @@ app.get('/api/v1/players/:accountId/hero-stats', async (req, res) => {
     const { accountId } = req.params;
     const cacheKey = `hero-stats-${accountId}`;
     
-    // 캐시 확인
-    const cached = getCachedData(cacheKey);
-    if (cached) {
-      return res.json(cached);
+    // 강제 새로고침을 위해 캐시 건너뛰기 (임시)
+    const forceRefresh = req.query.refresh === 'true';
+    
+    // 캐시 확인 (강제 새로고침이 아닌 경우에만)
+    if (!forceRefresh) {
+      const cached = getCachedData(cacheKey);
+      if (cached) {
+        console.log(`📦 캐시된 영웅 스탯 반환: ${cached.length}개`);
+        return res.json(cached);
+      }
     }
     
     // 실제 API 호출 시도
     try {
+      console.log(`🌐 영웅 스탯 API 호출 시작: https://api.deadlock-api.com/v1/players/${accountId}/hero-stats`);
       const response = await axios.get(`https://api.deadlock-api.com/v1/players/${accountId}/hero-stats`, {
-        timeout: 5000,
+        timeout: 10000, // 타임아웃 증가
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
       });
+      
+      console.log(`📡 영웅 스탯 API 응답 상태: ${response.status}, 데이터 타입: ${typeof response.data}, 배열 여부: ${Array.isArray(response.data)}, 길이: ${response.data?.length}`);
       
       if (response.data && Array.isArray(response.data)) {
         // 실제 API 데이터를 프론트엔드 형식으로 변환
@@ -1219,12 +1228,11 @@ app.get('/api/v1/players/:accountId/hero-stats', async (req, res) => {
       console.log(`❌ 실제 영웅 스탯 API 실패: ${error.message}`);
     }
     
-    // 백업: 빠른 더미 영웅 스탯 생성
-    const heroStats = generateFastHeroStats(accountId);
-    setCachedData(cacheKey, heroStats);
-    
-    console.log(`✅ 백업 영웅 스탯 생성: ${heroStats.length}개 영웅`);
-    res.json(heroStats);
+    // 실제 API 데이터가 없으면 빈 배열 반환
+    console.log('⚠️ 실제 영웅 스탯 API 실패 - 빈 배열 반환');
+    const emptyStats = [];
+    setCachedData(cacheKey, emptyStats);
+    res.json(emptyStats);
     
   } catch (error) {
     console.error('Hero stats API error:', error);
