@@ -1408,10 +1408,11 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
       console.log(`📡 API 응답 상태: ${response.status}, 데이터 타입: ${typeof response.data}, 배열 여부: ${Array.isArray(response.data)}, 길이: ${response.data?.length}`);
       
       if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-        // 첫 번째 매치와 마지막 매치의 시간 확인
-        const sortedMatches = response.data.sort((a, b) => (b.start_time || 0) - (a.start_time || 0));
-        console.log(`🕐 최신 매치: ${new Date((sortedMatches[0]?.start_time || 0) * 1000).toISOString()}`);
-        console.log(`🕐 가장 오래된 매치: ${new Date((sortedMatches[sortedMatches.length - 1]?.start_time || 0) * 1000).toISOString()}`);
+        // match_id 기준으로 내림차순 정렬 (높은 번호 = 최신 매치)
+        const sortedMatches = response.data.sort((a, b) => (b.match_id || 0) - (a.match_id || 0));
+        console.log(`🎯 최신 매치 ID: ${sortedMatches[0]?.match_id}`);
+        console.log(`🎯 가장 오래된 매치 ID: ${sortedMatches[sortedMatches.length - 1]?.match_id}`);
+        console.log(`📊 전체 매치 수: ${response.data.length}, 상위 ${limit}개 선택`);
         
         // 실제 API 데이터를 프론트엔드 형식으로 변환
         const matches = sortedMatches
@@ -1454,7 +1455,8 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
           });
         
         console.log(`✅ 실제 매치 히스토리 API 변환 완료: ${matches.length}개 매치`);
-        console.log(`🎮 첫 번째 매치: ${matches[0]?.hero} - ${matches[0]?.result} (${matches[0]?.playedAt})`);
+        console.log(`🎮 첫 번째 매치: ID ${matches[0]?.matchId} - ${matches[0]?.hero} - ${matches[0]?.result}`);
+        console.log(`🎮 마지막 매치: ID ${matches[matches.length - 1]?.matchId} - ${matches[matches.length - 1]?.hero} - ${matches[matches.length - 1]?.result}`);
         setCachedData(cacheKey, matches);
         return res.json(matches);
       }
