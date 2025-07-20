@@ -1570,7 +1570,7 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
         // 실제 API 데이터를 프론트엔드 형식으로 변환
         const matches = sortedMatches
           .slice(0, limit) // 요청된 수만큼만
-          .map(match => {
+          .map((match, index) => {
             const heroName = heroIdMap[match.hero_id] || `Hero ${match.hero_id}`;
             
             // 승부 판정 로직 개선
