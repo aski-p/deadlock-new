@@ -1576,40 +1576,95 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
             // 승부 판정 로직 개선
             let isWin = false;
             
+            // 모든 매치의 주요 필드 로깅 (상위 3개 매치만)
+            if (index < 3) {
+              console.log(`🔍 매치 ${match.match_id} 주요 필드:`, {
+                match_id: match.match_id,
+                match_result: match.match_result,
+                team_assignment: match.team_assignment,
+                winning_team: match.winning_team,
+                team_position: match.team_position,
+                won: match.won,
+                victory: match.victory,
+                win: match.win,
+                lane_result: match.lane_result,
+                lane_won: match.lane_won,
+                laning_result: match.laning_result,
+                lane_victory: match.lane_victory,
+                all_fields: Object.keys(match)
+              });
+            }
+            
             // 매치 38022449 특별 로깅
             if (match.match_id === 38022449) {
               console.log(`🔍 매치 38022449 전체 데이터:`, JSON.stringify(match, null, 2));
             }
             
-            // 게임 결과 판정
+            // 게임 결과 판정 - deadlock.coach와 일치하도록 수정
+            // 매치 38022449는 deadlock.coach에서 승리로 표시됨
             if (match.team_assignment !== undefined && match.winning_team !== undefined) {
-              // team_assignment와 winning_team으로 판정
+              // team_assignment와 winning_team 비교가 가장 정확
               isWin = match.team_assignment === match.winning_team;
               console.log(`🏆 매치 ${match.match_id}: team_assignment=${match.team_assignment}, winning_team=${match.winning_team}, isWin=${isWin}`);
+            } else if (match.won !== undefined) {
+              // won 필드로 판정
+              isWin = match.won === true || match.won === 1;
+              console.log(`🏆 매치 ${match.match_id}: won=${match.won}, isWin=${isWin}`);
+            } else if (match.victory !== undefined) {
+              // victory 필드로 판정
+              isWin = match.victory === true || match.victory === 1;
+              console.log(`🏆 매치 ${match.match_id}: victory=${match.victory}, isWin=${isWin}`);
+            } else if (match.win !== undefined) {
+              // win 필드로 판정
+              isWin = match.win === true || match.win === 1;
+              console.log(`🏆 매치 ${match.match_id}: win=${match.win}, isWin=${isWin}`);
             } else if (match.match_result !== undefined) {
-              // match_result로 판정 (기존 방식)
+              // match_result 값에 따른 판정 - deadlock.coach 기준으로 역산
+              // 38022449는 match_result=1이고 승리여야 하므로 1=승리
               isWin = match.match_result === 1;
-              console.log(`🏆 매치 ${match.match_id}: match_result=${match.match_result}, isWin=${isWin}`);
+              console.log(`🏆 매치 ${match.match_id}: match_result=${match.match_result}, isWin=${isWin} (1=승리로 수정)`);
             } else {
               // 기본값
               isWin = false;
               console.log(`⚠️ 매치 ${match.match_id}: 승부 판정 데이터 없음`);
             }
             
-            // 라인전 결과 판정
+            // 라인전 결과 판정 - deadlock.coach와 일치하도록 수정
+            // 매치 38022449는 deadlock.coach에서 "Lane lost"로 표시됨
             let laneWin = null;
-            if (match.lane_result !== undefined) {
-              laneWin = match.lane_result === 1;
-            } else if (match.laning_result !== undefined) {
-              laneWin = match.laning_result === 1;
+            
+            // 먼저 모든 가능한 라인전 필드를 로그로 출력
+            console.log(`🛤️ 매치 ${match.match_id} 라인전 필드들:`, {
+              lane_won: match.lane_won,
+              lane_victory: match.lane_victory, 
+              laning_result: match.laning_result,
+              lane_result: match.lane_result,
+              laning_stage_result: match.laning_stage_result,
+              early_game_result: match.early_game_result
+            });
+            
+            if (match.laning_stage_result !== undefined) {
+              // laning_stage_result가 가장 정확한 라인전 결과일 가능성
+              laneWin = match.laning_stage_result === 1;
+              console.log(`🛤️ 매치 ${match.match_id}: laning_stage_result=${match.laning_stage_result}, laneWin=${laneWin}`);
             } else if (match.lane_won !== undefined) {
-              laneWin = match.lane_won === true;
+              laneWin = match.lane_won === true || match.lane_won === 1;
+              console.log(`🛤️ 매치 ${match.match_id}: lane_won=${match.lane_won}, laneWin=${laneWin}`);
+            } else if (match.lane_victory !== undefined) {
+              laneWin = match.lane_victory === true || match.lane_victory === 1;
+              console.log(`🛤️ 매치 ${match.match_id}: lane_victory=${match.lane_victory}, laneWin=${laneWin}`);
+            } else if (match.laning_result !== undefined) {
+              // deadlock.coach 기준으로 역산하여 0=패배, 1=승리로 시도
+              laneWin = match.laning_result === 1;
+              console.log(`🛤️ 매치 ${match.match_id}: laning_result=${match.laning_result}, laneWin=${laneWin}`);
+            } else if (match.lane_result !== undefined) {
+              laneWin = match.lane_result === 1;
+              console.log(`🛤️ 매치 ${match.match_id}: lane_result=${match.lane_result}, laneWin=${laneWin}`);
             } else {
               // 라인전 결과를 알 수 없는 경우
               laneWin = null;
+              console.log(`⚠️ 매치 ${match.match_id}: 라인전 결과 필드 없음`);
             }
-            
-            console.log(`🛤️ 매치 ${match.match_id}: 라인전 결과=${laneWin}`);
             
             const durationSeconds = match.match_duration_s || 0;
             const durationFormatted = `${Math.floor(durationSeconds / 60)}:${(durationSeconds % 60).toString().padStart(2, '0')}`;
