@@ -1581,7 +1581,7 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
               console.log(`🔍 매치 38022449 전체 데이터:`, JSON.stringify(match, null, 2));
             }
             
-            // 다양한 방법으로 승부 판정 시도
+            // 게임 결과 판정
             if (match.team_assignment !== undefined && match.winning_team !== undefined) {
               // team_assignment와 winning_team으로 판정
               isWin = match.team_assignment === match.winning_team;
@@ -1595,6 +1595,21 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
               isWin = false;
               console.log(`⚠️ 매치 ${match.match_id}: 승부 판정 데이터 없음`);
             }
+            
+            // 라인전 결과 판정
+            let laneWin = null;
+            if (match.lane_result !== undefined) {
+              laneWin = match.lane_result === 1;
+            } else if (match.laning_result !== undefined) {
+              laneWin = match.laning_result === 1;
+            } else if (match.lane_won !== undefined) {
+              laneWin = match.lane_won === true;
+            } else {
+              // 라인전 결과를 알 수 없는 경우
+              laneWin = null;
+            }
+            
+            console.log(`🛤️ 매치 ${match.match_id}: 라인전 결과=${laneWin}`);
             
             const durationSeconds = match.match_duration_s || 0;
             const durationFormatted = `${Math.floor(durationSeconds / 60)}:${(durationSeconds % 60).toString().padStart(2, '0')}`;
@@ -1614,6 +1629,10 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
               matchId: match.match_id,
               hero: heroName,
               result: isWin ? '승리' : '패배',
+              matchWin: isWin,
+              laneWin: laneWin,
+              matchResult: isWin ? 'Match won' : 'Match lost',
+              laneResult: laneWin === true ? 'Lane won' : laneWin === false ? 'Lane lost' : 'Lane unknown',
               duration: durationSeconds,
               durationFormatted: durationFormatted,
               kills: kills,

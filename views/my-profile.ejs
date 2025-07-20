@@ -441,6 +441,27 @@
     color: #EF4444;
 }
 
+.unknown-text {
+    color: #999;
+}
+
+.match-outcomes {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 4px;
+}
+
+.match-outcome {
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.lane-outcome {
+    font-weight: 500;
+    font-size: 11px;
+}
+
 .match-duration {
     font-size: 12px;
     color: #999;
@@ -1073,6 +1094,8 @@ function displayMatchHistory(matches) {
                 const hero = match?.hero || 'Unknown';
                 const result = match?.result || '알 수 없음';
                 const isWin = result === '승리';
+                const matchResult = match?.matchResult || (isWin ? 'Match won' : 'Match lost');
+                const laneResult = match?.laneResult || 'Lane unknown';
                 const duration = match?.durationFormatted || match?.duration ? `${Math.floor(match.duration / 60)}:${(match.duration % 60).toString().padStart(2, '0')}` : '0:00';
                 const kills = parseInt(match?.kills) || 0;
                 const deaths = parseInt(match?.deaths) || 0;
@@ -1090,7 +1113,10 @@ function displayMatchHistory(matches) {
                             <span class="match-hero-name">${hero}</span>
                         </div>
                         <div class="match-result">
-                            <span class="result-text ${isWin ? 'win-text' : 'loss-text'}">${result}</span>
+                            <div class="match-outcomes">
+                                <span class="match-outcome ${isWin ? 'win-text' : 'loss-text'}">${matchResult}</span>
+                                <span class="lane-outcome ${laneResult.includes('won') ? 'win-text' : laneResult.includes('lost') ? 'loss-text' : 'unknown-text'}">${laneResult}</span>
+                            </div>
                             <span class="match-duration">${duration}</span>
                             <span class="match-id">매치 #${matchId}</span>
                         </div>
