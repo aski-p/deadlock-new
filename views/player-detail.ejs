@@ -450,6 +450,38 @@
 </style>
 
 <script>
+// 국가 플래그를 이미지로 변환하는 함수
+function getCountryImage(countryFlag) {
+    const flagImageMap = {
+        '🇺🇸': '<img src="https://flagcdn.com/24x18/us.png" alt="미국" title="미국" class="flag-image">',
+        '🇨🇦': '<img src="https://flagcdn.com/24x18/ca.png" alt="캐나다" title="캐나다" class="flag-image">',
+        '🇲🇽': '<img src="https://flagcdn.com/24x18/mx.png" alt="멕시코" title="멕시코" class="flag-image">',
+        '🇬🇧': '<img src="https://flagcdn.com/24x18/gb.png" alt="영국" title="영국" class="flag-image">',
+        '🇩🇪': '<img src="https://flagcdn.com/24x18/de.png" alt="독일" title="독일" class="flag-image">',
+        '🇫🇷': '<img src="https://flagcdn.com/24x18/fr.png" alt="프랑스" title="프랑스" class="flag-image">',
+        '🇪🇸': '<img src="https://flagcdn.com/24x18/es.png" alt="스페인" title="스페인" class="flag-image">',
+        '🇮🇹': '<img src="https://flagcdn.com/24x18/it.png" alt="이탈리아" title="이탈리아" class="flag-image">',
+        '🇨🇳': '<img src="https://flagcdn.com/24x18/cn.png" alt="중국" title="중국" class="flag-image">',
+        '🇯🇵': '<img src="https://flagcdn.com/24x18/jp.png" alt="일본" title="일본" class="flag-image">',
+        '🇰🇷': '<img src="https://flagcdn.com/24x18/kr.png" alt="한국" title="한국" class="flag-image">',
+        '🇹🇼': '<img src="https://flagcdn.com/24x18/tw.png" alt="대만" title="대만" class="flag-image">',
+        '🇸🇬': '<img src="https://flagcdn.com/24x18/sg.png" alt="싱가포르" title="싱가포르" class="flag-image">',
+        '🇷🇺': '<img src="https://flagcdn.com/24x18/ru.png" alt="러시아" title="러시아" class="flag-image">',
+        '🇵🇱': '<img src="https://flagcdn.com/24x18/pl.png" alt="폴란드" title="폴란드" class="flag-image">',
+        '🇸🇪': '<img src="https://flagcdn.com/24x18/se.png" alt="스웨덴" title="스웨덴" class="flag-image">',
+        '🇳🇴': '<img src="https://flagcdn.com/24x18/no.png" alt="노르웨이" title="노르웨이" class="flag-image">',
+        '🇩🇰': '<img src="https://flagcdn.com/24x18/dk.png" alt="덴마크" title="덴마크" class="flag-image">',
+        '🇹🇭': '<img src="https://flagcdn.com/24x18/th.png" alt="태국" title="태국" class="flag-image">',
+        '🇻🇳': '<img src="https://flagcdn.com/24x18/vn.png" alt="베트남" title="베트남" class="flag-image">',
+        '🇲🇾': '<img src="https://flagcdn.com/24x18/my.png" alt="말레이시아" title="말레이시아" class="flag-image">',
+        '🇵🇭': '<img src="https://flagcdn.com/24x18/ph.png" alt="필리핀" title="필리핀" class="flag-image">',
+        '🇮🇩': '<img src="https://flagcdn.com/24x18/id.png" alt="인도네시아" title="인도네시아" class="flag-image">',
+        '🌍': '<img src="https://flagcdn.com/24x18/un.png" alt="알 수 없음" title="알 수 없음" class="flag-image">'
+    };
+    
+    return flagImageMap[countryFlag] || '<img src="https://flagcdn.com/24x18/un.png" alt="알 수 없음" title="알 수 없음" class="flag-image">';
+}
+
 let currentPlayer = null;
 
 async function loadPlayerData() {
@@ -485,7 +517,7 @@ function updatePlayerUI(player) {
     // Basic Info
     document.getElementById('player-avatar').src = player.avatar;
     document.getElementById('player-name').textContent = player.name;
-    document.getElementById('player-country').textContent = player.country;
+    document.getElementById('player-country').innerHTML = getCountryImage(player.country);
     
     // Rank
     const getMedalImage = (medal, subrank) => {

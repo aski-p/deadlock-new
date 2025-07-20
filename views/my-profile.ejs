@@ -64,20 +64,16 @@
                         <div class="stat-label">KDA</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value" id="stat-headshots">0%</div>
-                        <div class="stat-label">헤드샷</div>
-                    </div>
-                    <div class="stat-card">
                         <div class="stat-value" id="stat-souls">0</div>
                         <div class="stat-label">소울/분</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value" id="stat-damage">0</div>
-                        <div class="stat-label">데미지/분</div>
+                        <div class="stat-value" id="stat-denies">0</div>
+                        <div class="stat-label">디나이</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value" id="stat-healing">0</div>
-                        <div class="stat-label">힐링/분</div>
+                        <div class="stat-value" id="stat-endorsements">0</div>
+                        <div class="stat-label">추천수</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value" id="stat-duration">0:00</div>
@@ -853,6 +849,38 @@
 </style>
 
 <script>
+// 국가 플래그를 이미지로 변환하는 함수
+function getCountryImage(countryFlag) {
+    const flagImageMap = {
+        '🇺🇸': '<img src="https://flagcdn.com/24x18/us.png" alt="미국" title="미국" class="flag-image">',
+        '🇨🇦': '<img src="https://flagcdn.com/24x18/ca.png" alt="캐나다" title="캐나다" class="flag-image">',
+        '🇲🇽': '<img src="https://flagcdn.com/24x18/mx.png" alt="멕시코" title="멕시코" class="flag-image">',
+        '🇬🇧': '<img src="https://flagcdn.com/24x18/gb.png" alt="영국" title="영국" class="flag-image">',
+        '🇩🇪': '<img src="https://flagcdn.com/24x18/de.png" alt="독일" title="독일" class="flag-image">',
+        '🇫🇷': '<img src="https://flagcdn.com/24x18/fr.png" alt="프랑스" title="프랑스" class="flag-image">',
+        '🇪🇸': '<img src="https://flagcdn.com/24x18/es.png" alt="스페인" title="스페인" class="flag-image">',
+        '🇮🇹': '<img src="https://flagcdn.com/24x18/it.png" alt="이탈리아" title="이탈리아" class="flag-image">',
+        '🇨🇳': '<img src="https://flagcdn.com/24x18/cn.png" alt="중국" title="중국" class="flag-image">',
+        '🇯🇵': '<img src="https://flagcdn.com/24x18/jp.png" alt="일본" title="일본" class="flag-image">',
+        '🇰🇷': '<img src="https://flagcdn.com/24x18/kr.png" alt="한국" title="한국" class="flag-image">',
+        '🇹🇼': '<img src="https://flagcdn.com/24x18/tw.png" alt="대만" title="대만" class="flag-image">',
+        '🇸🇬': '<img src="https://flagcdn.com/24x18/sg.png" alt="싱가포르" title="싱가포르" class="flag-image">',
+        '🇷🇺': '<img src="https://flagcdn.com/24x18/ru.png" alt="러시아" title="러시아" class="flag-image">',
+        '🇵🇱': '<img src="https://flagcdn.com/24x18/pl.png" alt="폴란드" title="폴란드" class="flag-image">',
+        '🇸🇪': '<img src="https://flagcdn.com/24x18/se.png" alt="스웨덴" title="스웨덴" class="flag-image">',
+        '🇳🇴': '<img src="https://flagcdn.com/24x18/no.png" alt="노르웨이" title="노르웨이" class="flag-image">',
+        '🇩🇰': '<img src="https://flagcdn.com/24x18/dk.png" alt="덴마크" title="덴마크" class="flag-image">',
+        '🇹🇭': '<img src="https://flagcdn.com/24x18/th.png" alt="태국" title="태국" class="flag-image">',
+        '🇻🇳': '<img src="https://flagcdn.com/24x18/vn.png" alt="베트남" title="베트남" class="flag-image">',
+        '🇲🇾': '<img src="https://flagcdn.com/24x18/my.png" alt="말레이시아" title="말레이시아" class="flag-image">',
+        '🇵🇭': '<img src="https://flagcdn.com/24x18/ph.png" alt="필리핀" title="필리핀" class="flag-image">',
+        '🇮🇩': '<img src="https://flagcdn.com/24x18/id.png" alt="인도네시아" title="인도네시아" class="flag-image">',
+        '🌍': '<img src="https://flagcdn.com/24x18/un.png" alt="알 수 없음" title="알 수 없음" class="flag-image">'
+    };
+    
+    return flagImageMap[countryFlag] || '<img src="https://flagcdn.com/24x18/un.png" alt="알 수 없음" title="알 수 없음" class="flag-image">';
+}
+
 async function loadMyProfileData() {
     const loading = document.getElementById('player-loading');
     const content = document.getElementById('player-content');
@@ -935,7 +963,7 @@ function updatePlayerUIFast(player, heroStats, matchHistory, partyStats) {
         
         document.getElementById('player-avatar').src = avatar;
         document.getElementById('player-name').textContent = name;
-        document.getElementById('player-country').textContent = country;
+        document.getElementById('player-country').innerHTML = getCountryImage(country);
         
         // Rank (안전한 접근)
         const getMedalImage = (medal, subrank) => {
@@ -961,19 +989,17 @@ function updatePlayerUIFast(player, heroStats, matchHistory, partyStats) {
         const winRate = stats.winRate || 0;
         const laneWinRate = stats.laneWinRate || 0;
         const kda = stats.kda || '0.0';
-        const headshotPercent = stats.headshotPercent || 0;
         const soulsPerMin = stats.soulsPerMin || 0;
-        const damagePerMin = stats.damagePerMin || 0;
-        const healingPerMin = stats.healingPerMin || 0;
+        const denies = stats.denies || 0;
+        const endorsements = stats.endorsements || 0;
         
         document.getElementById('stat-matches').textContent = matches;
         document.getElementById('stat-winrate').textContent = `${winRate}%`;
         document.getElementById('stat-lane-winrate').textContent = `${laneWinRate}%`;
         document.getElementById('stat-kda').textContent = kda;
-        document.getElementById('stat-headshots').textContent = `${headshotPercent}%`;
         document.getElementById('stat-souls').textContent = (typeof soulsPerMin === 'number' ? soulsPerMin : parseInt(soulsPerMin) || 0).toLocaleString();
-        document.getElementById('stat-damage').textContent = (typeof damagePerMin === 'number' ? damagePerMin : parseInt(damagePerMin) || 0).toLocaleString();
-        document.getElementById('stat-healing').textContent = (typeof healingPerMin === 'number' ? healingPerMin : parseInt(healingPerMin) || 0).toLocaleString();
+        document.getElementById('stat-denies').textContent = (typeof denies === 'number' ? denies : parseInt(denies) || 0).toLocaleString();
+        document.getElementById('stat-endorsements').textContent = (typeof endorsements === 'number' ? endorsements : parseInt(endorsements) || 0).toLocaleString();
         
         // 평균 매치 시간 업데이트 (avgMatchDuration이 있다면)
         if (window.playerData && window.playerData.stats && window.playerData.stats.avgMatchDuration) {
@@ -1108,7 +1134,8 @@ function displayHeroStats(heroStats) {
                 'Warden': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/warden_card.webp',
                 'Vyper': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kali_card.webp',
                 'Wraith': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/wraith_card.webp',
-                'Yamato': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/yamato_card.webp'
+                'Yamato': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/yamato_card.webp',
+                'Sinclair': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/magician_card.webp'
             };
             return heroImageMap[heroName] || 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp';
         };
@@ -1266,7 +1293,8 @@ function displayMatchHistory(matches) {
                 'Warden': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/warden_card.webp',
                 'Vyper': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kali_card.webp',
                 'Wraith': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/wraith_card.webp',
-                'Yamato': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/yamato_card.webp'
+                'Yamato': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/yamato_card.webp',
+                'Sinclair': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/magician_card.webp'
             };
             return heroImageMap[heroName] || 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp';
         };
