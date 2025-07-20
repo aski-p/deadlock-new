@@ -27,6 +27,9 @@
                         <div class="player-meta">
                             <span class="player-country" id="player-country">🌍</span>
                             <span class="player-account-id">계정 ID: <%= accountId %></span>
+                            <% if (user && user.steamId) { %>
+                            <span class="player-steam-id">Steam ID: <%= user.steamId %></span>
+                            <% } %>
                         </div>
                     </div>
                 </div>

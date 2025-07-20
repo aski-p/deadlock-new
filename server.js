@@ -1653,111 +1653,120 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
     let totalShots = 0;
     let heroStats = {};
 
-    matches.forEach(match => {
-      // 매치 승리 카운트 (player_team === match_result 로직 적용)
-      let isMatchWin = false;
-      if (match.player_team !== undefined && match.match_result !== undefined) {
-        isMatchWin = match.player_team === match.match_result;
-      } else if (match.won !== undefined) {
-        isMatchWin = match.won === true || match.won === 1;
-      } else if (match.win_loss === true || match.win_loss === 'win') {
-        isMatchWin = true;
-      }
-      
-      if (isMatchWin) {
-        matchWins++;
-      }
-      
-      // 라인전 승리 카운트 (API 필드 확인 후 추정)
-      let isLaneWin = false;
-      
-      // 다양한 라인전 결과 필드 확인
-      if (match.lane_won !== undefined) {
-        isLaneWin = match.lane_won === true || match.lane_won === 1;
-      } else if (match.laning_result !== undefined) {
-        // laning_result가 1이면 승리, 0이면 패배로 가정
-        isLaneWin = match.laning_result === 1;
-      } else if (match.lane_victory !== undefined) {
-        isLaneWin = match.lane_victory === true || match.lane_victory === 1;
-      } else if (match.early_game_won !== undefined) {
-        isLaneWin = match.early_game_won === true || match.early_game_won === 1;
-      } else {
-        // API에 라인전 데이터가 없으면 매치 결과와 독립적으로 추정
-        // deadlock.coach 기준: 승률 40.1%, 라인승률 42.4% 
-        // 라인승률이 매치승률보다 약간 높은 경향을 반영
-        const duration = match.match_duration_s || 0;
-        if (duration > 0 && duration < 1200) { // 20분 미만 = 라인전에서 크게 이긴 경우
-          isLaneWin = Math.random() < 0.7; // 70% 확률로 라인승
-        } else if (duration < 1800) { // 20-30분 = 라인전에서 약간 이긴 경우
-          isLaneWin = Math.random() < 0.55; // 55% 확률로 라인승
-        } else if (duration < 2400) { // 30-40분 = 라인전 비슷
-          isLaneWin = Math.random() < 0.42; // 42% 확률로 라인승 (deadlock.coach와 유사)
-        } else { // 40분 이상 = 라인전에서 진 경우가 많음
-          isLaneWin = Math.random() < 0.3; // 30% 확률로 라인승
+    try {
+      matches.forEach((match, index) => {
+        try {
+          // 매치 승리 카운트 (player_team === match_result 로직 적용)
+          let isMatchWin = false;
+          if (match.player_team !== undefined && match.match_result !== undefined) {
+            isMatchWin = match.player_team === match.match_result;
+          } else if (match.won !== undefined) {
+            isMatchWin = match.won === true || match.won === 1;
+          } else if (match.win_loss === true || match.win_loss === 'win') {
+            isMatchWin = true;
+          }
+          
+          if (isMatchWin) {
+            matchWins++;
+          }
+          
+          // 라인전 승리 카운트 (API 필드 확인 후 추정)
+          let isLaneWin = false;
+          
+          // 다양한 라인전 결과 필드 확인
+          if (match.lane_won !== undefined) {
+            isLaneWin = match.lane_won === true || match.lane_won === 1;
+          } else if (match.laning_result !== undefined) {
+            // laning_result가 1이면 승리, 0이면 패배로 가정
+            isLaneWin = match.laning_result === 1;
+          } else if (match.lane_victory !== undefined) {
+            isLaneWin = match.lane_victory === true || match.lane_victory === 1;
+          } else if (match.early_game_won !== undefined) {
+            isLaneWin = match.early_game_won === true || match.early_game_won === 1;
+          } else {
+            // API에 라인전 데이터가 없으면 매치 결과와 독립적으로 추정
+            // deadlock.coach 기준: 승률 40.1%, 라인승률 42.4% 
+            // 라인승률이 매치승률보다 약간 높은 경향을 반영
+            const duration = match.match_duration_s || 0;
+            if (duration > 0 && duration < 1200) { // 20분 미만 = 라인전에서 크게 이긴 경우
+              isLaneWin = Math.random() < 0.7; // 70% 확률로 라인승
+            } else if (duration < 1800) { // 20-30분 = 라인전에서 약간 이긴 경우
+              isLaneWin = Math.random() < 0.55; // 55% 확률로 라인승
+            } else if (duration < 2400) { // 30-40분 = 라인전 비슷
+              isLaneWin = Math.random() < 0.42; // 42% 확률로 라인승 (deadlock.coach와 유사)
+            } else { // 40분 이상 = 라인전에서 진 경우가 많음
+              isLaneWin = Math.random() < 0.3; // 30% 확률로 라인승
+            }
+          }
+          
+          if (isLaneWin) {
+            laneWins++;
+          }
+          
+          // KDA 및 스탯 누적
+          totalKills += match.player_kills || match.kills || 0;
+          totalDeaths += match.player_deaths || match.deaths || 0;
+          totalAssists += match.player_assists || match.assists || 0;
+          
+          // 소울, 데미지, 힐링 누적
+          totalSouls += match.net_worth || 0;
+          totalDamage += match.player_damage || 0;
+          totalHealing += match.player_healing || 0;
+          totalDuration += match.match_duration_s || 0;
+          
+          // 헤드샷 추정 (API에 없으므로 KDA 기반으로 추정)
+          const kills = match.player_kills || match.kills || 0;
+          const estimatedHeadshots = Math.floor(kills * (0.1 + Math.random() * 0.2)); // 10-30% 헤드샷
+          totalHeadshots += estimatedHeadshots;
+          totalShots += Math.floor(kills * (3 + Math.random() * 4)); // 킬당 3-7샷 추정
+          
+          // 영웅별 통계
+          const heroId = match.hero_id;
+          const heroName = getHeroNameById(heroId);
+          const matchKills = match.player_kills || match.kills || 0;
+          const matchDeaths = match.player_deaths || match.deaths || 0;
+          const matchAssists = match.player_assists || match.assists || 0;
+          const matchSouls = match.net_worth || 0;
+          const matchDamage = match.player_damage || 0;
+          const matchHealing = match.player_healing || 0;
+          
+          if (!heroStats[heroName]) {
+            heroStats[heroName] = {
+              matches: 0,
+              wins: 0,
+              laneWins: 0,
+              kills: 0,
+              deaths: 0,
+              assists: 0,
+              souls: 0,
+              damage: 0,
+              healing: 0,
+              duration: 0
+            };
+          }
+          
+          heroStats[heroName].matches++;
+          if (isMatchWin) {
+            heroStats[heroName].wins++;
+          }
+          if (isLaneWin) {
+            heroStats[heroName].laneWins++;
+          }
+          heroStats[heroName].kills += matchKills;
+          heroStats[heroName].deaths += matchDeaths;
+          heroStats[heroName].assists += matchAssists;
+          heroStats[heroName].souls += matchSouls;
+          heroStats[heroName].damage += matchDamage;
+          heroStats[heroName].healing += matchHealing;
+          heroStats[heroName].duration += match.match_duration_s || 0;
+        } catch (error) {
+          console.log(`❌ 매치 ${index} 분석 중 오류: ${error.message}`);
         }
-      }
-      
-      if (isLaneWin) {
-        laneWins++;
-      }
-      
-      // KDA 및 스탯 누적
-      totalKills += match.player_kills || match.kills || 0;
-      totalDeaths += match.player_deaths || match.deaths || 0;
-      totalAssists += match.player_assists || match.assists || 0;
-      
-      // 소울, 데미지, 힐링 누적
-      totalSouls += match.net_worth || 0;
-      totalDamage += match.player_damage || 0;
-      totalHealing += match.player_healing || 0;
-      totalDuration += duration;
-      
-      // 헤드샷 추정 (API에 없으므로 KDA 기반으로 추정)
-      const kills = match.player_kills || match.kills || 0;
-      const estimatedHeadshots = Math.floor(kills * (0.1 + Math.random() * 0.2)); // 10-30% 헤드샷
-      totalHeadshots += estimatedHeadshots;
-      totalShots += Math.floor(kills * (3 + Math.random() * 4)); // 킬당 3-7샷 추정
-      
-      // 영웅별 통계
-      const heroId = match.hero_id;
-      const heroName = getHeroNameById(heroId);
-      const matchKills = match.player_kills || match.kills || 0;
-      const matchDeaths = match.player_deaths || match.deaths || 0;
-      const matchAssists = match.player_assists || match.assists || 0;
-      const matchSouls = match.net_worth || 0;
-      const matchDamage = match.player_damage || 0;
-      const matchHealing = match.player_healing || 0;
-      
-      if (!heroStats[heroName]) {
-        heroStats[heroName] = {
-          matches: 0,
-          wins: 0,
-          laneWins: 0,
-          kills: 0,
-          deaths: 0,
-          assists: 0,
-          souls: 0,
-          damage: 0,
-          healing: 0,
-          duration: 0
-        };
-      }
-      
-      heroStats[heroName].matches++;
-      if (isMatchWin) {
-        heroStats[heroName].wins++;
-      }
-      if (isLaneWin) {
-        heroStats[heroName].laneWins++;
-      }
-      heroStats[heroName].kills += matchKills;
-      heroStats[heroName].deaths += matchDeaths;
-      heroStats[heroName].assists += matchAssists;
-      heroStats[heroName].souls += matchSouls;
-      heroStats[heroName].damage += matchDamage;
-      heroStats[heroName].healing += matchHealing;
-      heroStats[heroName].duration += duration;
-    });
+      });
+    } catch (forEachError) {
+      console.log(`❌ 전체 매치 분석 중 오류: ${forEachError.message}`);
+      throw forEachError;
+    }
 
     // deadlock.coach와 동일한 통계 계산
     const matchWinRate = totalMatches > 0 ? ((matchWins / totalMatches) * 100).toFixed(1) : 0;
