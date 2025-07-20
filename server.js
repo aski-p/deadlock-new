@@ -321,7 +321,7 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       25: 'Warden',
       27: 'Wraith',
       31: 'Yamato',
-      50: 'Mirage',
+      50: 'Pocket',
       52: 'Lash',
       58: 'Calico',
       60: 'Holliday'
