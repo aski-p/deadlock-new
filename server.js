@@ -1306,11 +1306,11 @@ function generateFastHeroStats(accountId) {
 
 // 영웅 ID를 이름으로 변환하는 맵핑
 const heroIdMap = {
-  1: 'Abrams', 2: 'Seven', 4: 'Grey Talon', 6: 'Infernus', 7: 'Ivy', 
+  1: 'Infernus', 2: 'Seven', 4: 'Grey Talon', 6: 'Abrams', 7: 'Ivy', 
   8: 'Kelvin', 10: 'Paradox', 11: 'McGinnis', 13: 'Paradox', 
   14: 'Pocket', 15: 'Bebop', 16: 'Calico', 18: 'Viscous', 19: 'Shiv', 
-  20: 'Shiv', 25: 'Vindicta', 27: 'Dynamo', 31: 'Lash', 35: 'Wraith', 
-  50: 'Pocket', 52: 'Shiv', 58: 'Vyper', 60: 'Yamato'
+  20: 'Shiv', 25: 'Vindicta', 27: 'Yamato', 31: 'Lash', 35: 'Wraith', 
+  50: 'Pocket', 52: 'Shiv', 58: 'Vyper', 60: 'Dynamo'
 };
 
 
@@ -1858,11 +1858,11 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
 // 영웅 ID를 이름으로 변환하는 함수
 const getHeroNameById = (heroId) => {
   const heroMap = {
-    1: 'Abrams', 2: 'Seven', 4: 'Grey Talon', 6: 'Infernus', 7: 'Ivy', 
+    1: 'Infernus', 2: 'Seven', 4: 'Grey Talon', 6: 'Abrams', 7: 'Ivy', 
     8: 'Kelvin', 10: 'Paradox', 11: 'McGinnis', 13: 'Paradox', 
     14: 'Pocket', 15: 'Bebop', 16: 'Calico', 18: 'Viscous', 19: 'Shiv', 
-    20: 'Shiv', 25: 'Vindicta', 27: 'Dynamo', 31: 'Lash', 35: 'Wraith', 
-    50: 'Pocket', 52: 'Shiv', 58: 'Vyper', 60: 'Yamato'
+    20: 'Shiv', 25: 'Vindicta', 27: 'Yamato', 31: 'Lash', 35: 'Wraith', 
+    50: 'Pocket', 52: 'Shiv', 58: 'Vyper', 60: 'Dynamo'
   };
   return heroMap[heroId] || `Hero_${heroId}`;
 };
