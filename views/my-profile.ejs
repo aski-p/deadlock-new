@@ -652,41 +652,80 @@ async function loadMyProfileData() {
 
 // 빠른 UI 업데이트 - 모든 데이터를 한 번에 처리
 function updatePlayerUIFast(player, heroStats, matchHistory) {
-    // Basic Info
-    document.getElementById('player-avatar').src = player.avatar;
-    document.getElementById('player-name').textContent = player.name;
-    document.getElementById('player-country').textContent = player.country;
+    console.log('🎨 UI 업데이트 시작, 플레이어 데이터:', player);
     
-    // Rank
-    const getMedalImage = (medal, subrank) => {
-        const medalRankMap = {
-            'Eternus': 11, 'Phantom': 10, 'Oracle': 9, 'Ritualist': 8,
-            'Alchemist': 7, 'Arcanist': 6, 'Initiate': 5
+    try {
+        // Basic Info (안전한 접근)
+        const avatar = player?.avatar || 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg';
+        const name = player?.name || 'Unknown Player';
+        const country = player?.country || '🌍';
+        
+        document.getElementById('player-avatar').src = avatar;
+        document.getElementById('player-name').textContent = name;
+        document.getElementById('player-country').textContent = country;
+        
+        // Rank (안전한 접근)
+        const getMedalImage = (medal, subrank) => {
+            const medalRankMap = {
+                'Eternus': 11, 'Phantom': 10, 'Oracle': 9, 'Ritualist': 8,
+                'Alchemist': 7, 'Arcanist': 6, 'Initiate': 5
+            };
+            const rankNumber = medalRankMap[medal] || 9;
+            return `https://cdn.deadlock.coach/vpk/panorama/images/ranked/badges/rank${rankNumber}/badge_sm_subrank${subrank || 1}.webp`;
         };
-        const rankNumber = medalRankMap[medal] || 9;
-        return `https://cdn.deadlock.coach/vpk/panorama/images/ranked/badges/rank${rankNumber}/badge_sm_subrank${subrank}.webp`;
-    };
-    
-    document.getElementById('rank-medal').src = getMedalImage(player.rank.medal, player.rank.subrank);
-    document.getElementById('rank-name').textContent = `${player.rank.medal} ${player.rank.subrank}`;
-    document.getElementById('rank-score').textContent = player.rank.score.toLocaleString();
-    
-    // Stats
-    document.getElementById('stat-matches').textContent = player.stats.matches;
-    document.getElementById('stat-winrate').textContent = `${player.stats.winRate}%`;
-    document.getElementById('stat-lane-winrate').textContent = `${player.stats.laneWinRate}%`;
-    document.getElementById('stat-kda').textContent = player.stats.kda;
-    document.getElementById('stat-headshots').textContent = `${player.stats.headshotPercent}%`;
-    document.getElementById('stat-souls').textContent = player.stats.soulsPerMin.toLocaleString();
-    document.getElementById('stat-damage').textContent = player.stats.damagePerMin.toLocaleString();
-    document.getElementById('stat-healing').textContent = player.stats.healingPerMin.toLocaleString();
-    
-    // 즉시 영웅 및 매치 데이터 표시
-    if (heroStats && heroStats.length > 0) {
-        displayHeroStats(heroStats);
-    }
-    if (matchHistory && matchHistory.length > 0) {
-        displayMatchHistory(matchHistory);
+        
+        const medal = player?.rank?.medal || 'Oracle';
+        const subrank = player?.rank?.subrank || 1;
+        const score = player?.rank?.score || 3500;
+        
+        document.getElementById('rank-medal').src = getMedalImage(medal, subrank);
+        document.getElementById('rank-name').textContent = `${medal} ${subrank}`;
+        document.getElementById('rank-score').textContent = (typeof score === 'number' ? score : parseInt(score) || 3500).toLocaleString();
+        
+        // Stats (안전한 접근)
+        const stats = player?.stats || {};
+        const matches = stats.matches || 0;
+        const winRate = stats.winRate || 0;
+        const laneWinRate = stats.laneWinRate || 0;
+        const kda = stats.kda || '0.0';
+        const headshotPercent = stats.headshotPercent || 0;
+        const soulsPerMin = stats.soulsPerMin || 0;
+        const damagePerMin = stats.damagePerMin || 0;
+        const healingPerMin = stats.healingPerMin || 0;
+        
+        document.getElementById('stat-matches').textContent = matches;
+        document.getElementById('stat-winrate').textContent = `${winRate}%`;
+        document.getElementById('stat-lane-winrate').textContent = `${laneWinRate}%`;
+        document.getElementById('stat-kda').textContent = kda;
+        document.getElementById('stat-headshots').textContent = `${headshotPercent}%`;
+        document.getElementById('stat-souls').textContent = (typeof soulsPerMin === 'number' ? soulsPerMin : parseInt(soulsPerMin) || 0).toLocaleString();
+        document.getElementById('stat-damage').textContent = (typeof damagePerMin === 'number' ? damagePerMin : parseInt(damagePerMin) || 0).toLocaleString();
+        document.getElementById('stat-healing').textContent = (typeof healingPerMin === 'number' ? healingPerMin : parseInt(healingPerMin) || 0).toLocaleString();
+        
+        console.log('✅ 기본 UI 업데이트 완료');
+        
+        // 즉시 영웅 및 매치 데이터 표시
+        if (heroStats && Array.isArray(heroStats) && heroStats.length > 0) {
+            console.log('🎯 영웅 스탯 표시:', heroStats.length, '개');
+            displayHeroStats(heroStats);
+        } else {
+            console.log('⚠️ 영웅 스탯 없음');
+            document.getElementById('heroes-grid').innerHTML = '<p style="color: #999; text-align: center;">영웅 데이터가 없습니다.</p>';
+        }
+        
+        if (matchHistory && Array.isArray(matchHistory) && matchHistory.length > 0) {
+            console.log('📋 매치 히스토리 표시:', matchHistory.length, '개');
+            displayMatchHistory(matchHistory);
+        } else {
+            console.log('⚠️ 매치 히스토리 없음');
+            document.getElementById('matches-list').innerHTML = '<p style="color: #999; text-align: center;">최근 매치 데이터가 없습니다.</p>';
+        }
+        
+        console.log('🎉 모든 UI 업데이트 완료');
+        
+    } catch (error) {
+        console.error('❌ UI 업데이트 중 오류:', error);
+        throw error;
     }
 }
 
@@ -746,54 +785,84 @@ async function loadHeroStats(accountId) {
 function displayHeroStats(heroStats) {
     const grid = document.getElementById('heroes-grid');
     
-    const getHeroImage = (heroName) => {
-        const heroImageMap = {
-            'Abrams': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp',
-            'Bebop': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp',
-            'Dynamo': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/dynamo_card.webp',
-            'Grey Talon': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/archer_card.webp',
-            'Haze': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/haze_card.webp',
-            'Infernus': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/inferno_card.webp',
-            'Ivy': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/ivy_card.webp',
-            'Kelvin': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kelvin_card.webp',
-            'Lady Geist': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/spectre_card.webp',
-            'Lash': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/lash_card.webp',
-            'McGinnis': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/engineer_card.webp',
-            'Mo & Krill': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/digger_card.webp',
-            'Paradox': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/chrono_card.webp',
-            'Pocket': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/synth_card.webp',
-            'Seven': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/gigawatt_card.webp',
-            'Shiv': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/shiv_card.webp',
-            'Vindicta': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/magician_card.webp',
-            'Viscous': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/viscous_card.webp',
-            'Warden': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/warden_card.webp',
-            'Wraith': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/wraith_card.webp',
-            'Yamato': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/yamato_card.webp'
-        };
-        return heroImageMap[heroName] || 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp';
-    };
-    
-    grid.innerHTML = heroStats.map(hero => {
-        // 데이터 검증
-        const matches = hero.matches || 0;
-        const winRate = hero.winRate || Math.round((hero.wins / hero.matches) * 100) || 0;
-        const avgKda = hero.avgKda || '0.0';
-        const avgSouls = hero.avgSouls || 0;
-        const heroName = hero.hero || hero.name || 'Unknown';
+    try {
+        console.log('🎯 영웅 스탯 표시 시작:', heroStats);
         
-        return `
-            <div class="hero-card">
-                <img src="${getHeroImage(heroName)}" alt="${heroName}" class="hero-card-image">
-                <div class="hero-card-info">
-                    <h3>${heroName}</h3>
-                    <div class="hero-card-stats">
-                        ${matches}게임 · ${winRate}% 승률<br>
-                        <small style="color: #999;">KDA: ${avgKda} · 소울/분: ${avgSouls}</small>
+        if (!Array.isArray(heroStats) || heroStats.length === 0) {
+            grid.innerHTML = '<p style="color: #999; text-align: center;">영웅 데이터가 없습니다.</p>';
+            return;
+        }
+        
+        const getHeroImage = (heroName) => {
+            const heroImageMap = {
+                'Abrams': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp',
+                'Bebop': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp',
+                'Dynamo': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/dynamo_card.webp',
+                'Grey Talon': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/archer_card.webp',
+                'Haze': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/haze_card.webp',
+                'Infernus': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/inferno_card.webp',
+                'Ivy': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/ivy_card.webp',
+                'Kelvin': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kelvin_card.webp',
+                'Lady Geist': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/spectre_card.webp',
+                'Lash': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/lash_card.webp',
+                'McGinnis': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/engineer_card.webp',
+                'Mo & Krill': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/digger_card.webp',
+                'Paradox': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/chrono_card.webp',
+                'Pocket': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/synth_card.webp',
+                'Seven': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/gigawatt_card.webp',
+                'Shiv': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/shiv_card.webp',
+                'Vindicta': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/magician_card.webp',
+                'Viscous': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/viscous_card.webp',
+                'Warden': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/warden_card.webp',
+                'Wraith': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/wraith_card.webp',
+                'Yamato': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/yamato_card.webp'
+            };
+            return heroImageMap[heroName] || 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp';
+        };
+        
+        const heroCards = heroStats.map((hero, index) => {
+            try {
+                // 안전한 데이터 추출
+                const matches = parseInt(hero?.matches) || 0;
+                const wins = parseInt(hero?.wins) || 0;
+                const winRate = hero?.winRate || (matches > 0 ? Math.round((wins / matches) * 100) : 0);
+                const avgKda = hero?.avgKda || '0.0';
+                const avgSouls = parseInt(hero?.avgSouls) || 0;
+                const heroName = hero?.hero || hero?.name || `Hero${index + 1}`;
+                
+                return `
+                    <div class="hero-card">
+                        <img src="${getHeroImage(heroName)}" alt="${heroName}" class="hero-card-image">
+                        <div class="hero-card-info">
+                            <h3>${heroName}</h3>
+                            <div class="hero-card-stats">
+                                ${matches}게임 · ${winRate}% 승률<br>
+                                <small style="color: #999;">KDA: ${avgKda} · 소울/분: ${avgSouls.toLocaleString()}</small>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        `;
-    }).join('');
+                `;
+            } catch (heroError) {
+                console.error('영웅 카드 생성 오류:', heroError, hero);
+                return `
+                    <div class="hero-card">
+                        <img src="https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp" alt="Unknown" class="hero-card-image">
+                        <div class="hero-card-info">
+                            <h3>Unknown Hero</h3>
+                            <div class="hero-card-stats">데이터 오류</div>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+        
+        grid.innerHTML = heroCards.join('');
+        console.log('✅ 영웅 스탯 표시 완료');
+        
+    } catch (error) {
+        console.error('❌ 영웅 스탯 표시 오류:', error);
+        grid.innerHTML = '<p style="color: #ff6b6b; text-align: center;">영웅 데이터 표시 중 오류가 발생했습니다.</p>';
+    }
 }
 
 // 매치 히스토리 로드
@@ -819,74 +888,126 @@ async function loadMatchHistory(accountId) {
 function displayMatchHistory(matches) {
     const matchesList = document.getElementById('matches-list');
     
-    const getHeroImage = (heroName) => {
-        const heroImageMap = {
-            'Abrams': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp',
-            'Bebop': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp',
-            'Dynamo': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/dynamo_card.webp',
-            'Grey Talon': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/archer_card.webp',
-            'Haze': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/haze_card.webp',
-            'Infernus': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/inferno_card.webp',
-            'Ivy': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/ivy_card.webp',
-            'Kelvin': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kelvin_card.webp',
-            'Lady Geist': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/spectre_card.webp',
-            'Lash': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/lash_card.webp',
-            'McGinnis': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/engineer_card.webp',
-            'Mo & Krill': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/digger_card.webp',
-            'Paradox': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/chrono_card.webp',
-            'Pocket': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/synth_card.webp',
-            'Seven': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/gigawatt_card.webp',
-            'Shiv': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/shiv_card.webp',
-            'Vindicta': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/magician_card.webp',
-            'Viscous': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/viscous_card.webp',
-            'Warden': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/warden_card.webp',
-            'Wraith': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/wraith_card.webp',
-            'Yamato': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/yamato_card.webp'
-        };
-        return heroImageMap[heroName] || 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp';
-    };
-    
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffHours = Math.floor((now - date) / (1000 * 60 * 60));
+    try {
+        console.log('📋 매치 히스토리 표시 시작:', matches);
         
-        if (diffHours < 1) return '방금 전';
-        if (diffHours < 24) return `${diffHours}시간 전`;
-        const diffDays = Math.floor(diffHours / 24);
-        if (diffDays < 7) return `${diffDays}일 전`;
-        return date.toLocaleDateString('ko-KR');
-    };
-    
-    matchesList.innerHTML = matches.map(match => `
-        <div class="match-card ${match.result === '승리' ? 'win' : 'loss'}">
-            <div class="match-hero">
-                <img src="${getHeroImage(match.hero)}" alt="${match.hero}" class="match-hero-image">
-                <span class="match-hero-name">${match.hero}</span>
-            </div>
-            <div class="match-result">
-                <span class="result-text ${match.result === '승리' ? 'win-text' : 'loss-text'}">${match.result}</span>
-                <span class="match-duration">${match.durationFormatted}</span>
-            </div>
-            <div class="match-stats">
-                <span class="kda">${match.kills}/${match.deaths}/${match.assists}</span>
-                <span class="kda-ratio">KDA: ${match.kda}</span>
-            </div>
-            <div class="match-performance">
-                <div class="performance-item">
-                    <span class="performance-label">소울</span>
-                    <span class="performance-value">${match.souls.toLocaleString()}</span>
-                </div>
-                <div class="performance-item">
-                    <span class="performance-label">데미지</span>
-                    <span class="performance-value">${match.damage.toLocaleString()}</span>
-                </div>
-            </div>
-            <div class="match-time">
-                ${formatDate(match.playedAt)}
-            </div>
-        </div>
-    `).join('');
+        if (!Array.isArray(matches) || matches.length === 0) {
+            matchesList.innerHTML = '<p style="color: #999; text-align: center;">최근 매치 데이터가 없습니다.</p>';
+            return;
+        }
+        
+        const getHeroImage = (heroName) => {
+            const heroImageMap = {
+                'Abrams': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp',
+                'Bebop': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp',
+                'Dynamo': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/dynamo_card.webp',
+                'Grey Talon': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/archer_card.webp',
+                'Haze': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/haze_card.webp',
+                'Infernus': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/inferno_card.webp',
+                'Ivy': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/ivy_card.webp',
+                'Kelvin': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kelvin_card.webp',
+                'Lady Geist': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/spectre_card.webp',
+                'Lash': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/lash_card.webp',
+                'McGinnis': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/engineer_card.webp',
+                'Mo & Krill': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/digger_card.webp',
+                'Paradox': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/chrono_card.webp',
+                'Pocket': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/synth_card.webp',
+                'Seven': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/gigawatt_card.webp',
+                'Shiv': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/shiv_card.webp',
+                'Vindicta': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/magician_card.webp',
+                'Viscous': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/viscous_card.webp',
+                'Warden': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/warden_card.webp',
+                'Wraith': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/wraith_card.webp',
+                'Yamato': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/yamato_card.webp'
+            };
+            return heroImageMap[heroName] || 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp';
+        };
+        
+        const formatDate = (dateString) => {
+            try {
+                const date = new Date(dateString);
+                if (isNaN(date.getTime())) return '알 수 없음';
+                
+                const now = new Date();
+                const diffHours = Math.floor((now - date) / (1000 * 60 * 60));
+                
+                if (diffHours < 1) return '방금 전';
+                if (diffHours < 24) return `${diffHours}시간 전`;
+                const diffDays = Math.floor(diffHours / 24);
+                if (diffDays < 7) return `${diffDays}일 전`;
+                return date.toLocaleDateString('ko-KR');
+            } catch (error) {
+                return '알 수 없음';
+            }
+        };
+        
+        const matchCards = matches.map((match, index) => {
+            try {
+                // 안전한 데이터 추출
+                const hero = match?.hero || 'Unknown';
+                const result = match?.result || '알 수 없음';
+                const isWin = result === '승리';
+                const duration = match?.durationFormatted || match?.duration ? `${Math.floor(match.duration / 60)}:${(match.duration % 60).toString().padStart(2, '0')}` : '0:00';
+                const kills = parseInt(match?.kills) || 0;
+                const deaths = parseInt(match?.deaths) || 0;
+                const assists = parseInt(match?.assists) || 0;
+                const kda = match?.kda || '0.0';
+                const souls = parseInt(match?.souls) || 0;
+                const damage = parseInt(match?.damage) || 0;
+                const playedAt = match?.playedAt || new Date().toISOString();
+                
+                return `
+                    <div class="match-card ${isWin ? 'win' : 'loss'}">
+                        <div class="match-hero">
+                            <img src="${getHeroImage(hero)}" alt="${hero}" class="match-hero-image">
+                            <span class="match-hero-name">${hero}</span>
+                        </div>
+                        <div class="match-result">
+                            <span class="result-text ${isWin ? 'win-text' : 'loss-text'}">${result}</span>
+                            <span class="match-duration">${duration}</span>
+                        </div>
+                        <div class="match-stats">
+                            <span class="kda">${kills}/${deaths}/${assists}</span>
+                            <span class="kda-ratio">KDA: ${kda}</span>
+                        </div>
+                        <div class="match-performance">
+                            <div class="performance-item">
+                                <span class="performance-label">소울</span>
+                                <span class="performance-value">${souls.toLocaleString()}</span>
+                            </div>
+                            <div class="performance-item">
+                                <span class="performance-label">데미지</span>
+                                <span class="performance-value">${damage.toLocaleString()}</span>
+                            </div>
+                        </div>
+                        <div class="match-time">
+                            ${formatDate(playedAt)}
+                        </div>
+                    </div>
+                `;
+            } catch (matchError) {
+                console.error('매치 카드 생성 오류:', matchError, match);
+                return `
+                    <div class="match-card">
+                        <div class="match-hero">
+                            <img src="https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp" alt="Unknown" class="match-hero-image">
+                            <span class="match-hero-name">Unknown</span>
+                        </div>
+                        <div class="match-result">
+                            <span class="result-text">데이터 오류</span>
+                        </div>
+                    </div>
+                `;
+            }
+        });
+        
+        matchesList.innerHTML = matchCards.join('');
+        console.log('✅ 매치 히스토리 표시 완료');
+        
+    } catch (error) {
+        console.error('❌ 매치 히스토리 표시 오류:', error);
+        matchesList.innerHTML = '<p style="color: #ff6b6b; text-align: center;">매치 데이터 표시 중 오류가 발생했습니다.</p>';
+    }
 }
 
 
