@@ -594,15 +594,26 @@ async function loadMyProfileData() {
     error.style.display = 'none';
     
     try {
-        const response = await fetch(`/api/v1/players/<%= accountId %>`);
-        const data = await response.json();
+        // 병렬로 모든 데이터를 동시에 로드
+        const [playerResponse, heroStatsResponse, matchHistoryResponse] = await Promise.all([
+            fetch(`/api/v1/players/<%= accountId %>`),
+            fetch(`/api/v1/players/<%= accountId %>/hero-stats`),
+            fetch(`/api/v1/players/<%= accountId %>/match-history?limit=10`) // 20개에서 10개로 줄임
+        ]);
         
-        if (response.ok) {
-            updatePlayerUI(data);
+        const [playerData, heroStats, matchHistory] = await Promise.all([
+            playerResponse.json(),
+            heroStatsResponse.json(),
+            matchHistoryResponse.json()
+        ]);
+        
+        if (playerResponse.ok) {
+            // 빠른 UI 업데이트
+            updatePlayerUIFast(playerData, heroStats, matchHistory);
             loading.style.display = 'none';
             content.style.display = 'block';
         } else {
-            throw new Error(data.error || 'Failed to load profile');
+            throw new Error(playerData.error || 'Failed to load profile');
         }
         
     } catch (err) {
@@ -610,7 +621,6 @@ async function loadMyProfileData() {
         loading.style.display = 'none';
         error.style.display = 'block';
         
-        // 에러 메시지 표시
         const errorMessageEl = document.getElementById('error-message');
         if (errorMessageEl) {
             errorMessageEl.textContent = `오류 상세: ${err.message || '알 수 없는 오류'}`;
@@ -618,7 +628,8 @@ async function loadMyProfileData() {
     }
 }
 
-function updatePlayerUI(player) {
+// 빠른 UI 업데이트 - 모든 데이터를 한 번에 처리
+function updatePlayerUIFast(player, heroStats, matchHistory) {
     // Basic Info
     document.getElementById('player-avatar').src = player.avatar;
     document.getElementById('player-name').textContent = player.name;
@@ -648,10 +659,45 @@ function updatePlayerUI(player) {
     document.getElementById('stat-damage').textContent = player.stats.damagePerMin.toLocaleString();
     document.getElementById('stat-healing').textContent = player.stats.healingPerMin.toLocaleString();
     
-    // 영웅별 스탯 로드
-    loadHeroStats(player.accountId);
+    // 즉시 영웅 및 매치 데이터 표시
+    if (heroStats && heroStats.length > 0) {
+        displayHeroStats(heroStats);
+    }
+    if (matchHistory && matchHistory.length > 0) {
+        displayMatchHistory(matchHistory);
+    }
+}
+
+// 기존 함수는 호환성을 위해 유지
+function updatePlayerUI(player) {
+    // 기본 정보만 업데이트하고 별도로 로드
+    document.getElementById('player-avatar').src = player.avatar;
+    document.getElementById('player-name').textContent = player.name;
+    document.getElementById('player-country').textContent = player.country;
     
-    // 매치 히스토리 로드
+    const getMedalImage = (medal, subrank) => {
+        const medalRankMap = {
+            'Eternus': 11, 'Phantom': 10, 'Oracle': 9, 'Ritualist': 8,
+            'Alchemist': 7, 'Arcanist': 6, 'Initiate': 5
+        };
+        const rankNumber = medalRankMap[medal] || 9;
+        return `https://cdn.deadlock.coach/vpk/panorama/images/ranked/badges/rank${rankNumber}/badge_sm_subrank${subrank}.webp`;
+    };
+    
+    document.getElementById('rank-medal').src = getMedalImage(player.rank.medal, player.rank.subrank);
+    document.getElementById('rank-name').textContent = `${player.rank.medal} ${player.rank.subrank}`;
+    document.getElementById('rank-score').textContent = player.rank.score.toLocaleString();
+    
+    document.getElementById('stat-matches').textContent = player.stats.matches;
+    document.getElementById('stat-winrate').textContent = `${player.stats.winRate}%`;
+    document.getElementById('stat-lane-winrate').textContent = `${player.stats.laneWinRate}%`;
+    document.getElementById('stat-kda').textContent = player.stats.kda;
+    document.getElementById('stat-headshots').textContent = `${player.stats.headshotPercent}%`;
+    document.getElementById('stat-souls').textContent = player.stats.soulsPerMin.toLocaleString();
+    document.getElementById('stat-damage').textContent = player.stats.damagePerMin.toLocaleString();
+    document.getElementById('stat-healing').textContent = player.stats.healingPerMin.toLocaleString();
+    
+    loadHeroStats(player.accountId);
     loadMatchHistory(player.accountId);
 }
 
