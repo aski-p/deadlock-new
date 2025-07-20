@@ -1154,10 +1154,10 @@ function generateFastHeroStats(accountId) {
 
 // 영웅 ID를 이름으로 변환하는 맵핑
 const heroIdMap = {
-  1: 'Abrams', 2: 'Bebop', 4: 'Dynamo', 6: 'Grey Talon', 7: 'Haze', 8: 'Infernus',
-  10: 'Ivy', 11: 'Kelvin', 13: 'Lady Geist', 14: 'Lash', 15: 'McGinnis', 16: 'Mo & Krill',
-  17: 'Paradox', 18: 'Pocket', 19: 'Seven', 20: 'Shiv', 25: 'Vindicta', 27: 'Viscous',
-  31: 'Warden', 35: 'Wraith', 50: 'Yamato', 52: 'Mirage', 58: 'Calico', 60: 'Holliday'
+  1: 'Abrams', 2: 'Bebop', 4: 'Grey Talon', 6: 'Infernus', 7: 'Ivy', 
+  8: 'Kelvin', 9: 'Lady Geist', 10: 'Lash', 11: 'McGinnis', 13: 'Paradox', 
+  14: 'Pocket', 15: 'Seven', 16: 'Mo & Krill', 18: 'Viscous', 19: 'Warden', 
+  27: 'Dynamo', 31: 'Haze', 50: 'Vindicta', 52: 'Shiv', 58: 'Wraith', 60: 'Yamato'
 };
 
 // 영웅별 스탯 API - 실제 API 데이터 변환
@@ -1402,10 +1402,10 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
 // 영웅 ID를 이름으로 변환하는 함수
 const getHeroNameById = (heroId) => {
   const heroMap = {
-    1: 'Abrams', 2: 'Bebop', 3: 'Dynamo', 4: 'Grey Talon', 5: 'Haze',
-    6: 'Infernus', 7: 'Ivy', 8: 'Kelvin', 9: 'Lady Geist', 10: 'Lash',
-    11: 'McGinnis', 12: 'Mo & Krill', 13: 'Paradox', 14: 'Pocket', 15: 'Seven',
-    16: 'Shiv', 17: 'Vindicta', 18: 'Viscous', 19: 'Warden', 20: 'Wraith', 21: 'Yamato'
+    1: 'Abrams', 2: 'Bebop', 4: 'Grey Talon', 6: 'Infernus', 7: 'Ivy', 
+    8: 'Kelvin', 9: 'Lady Geist', 10: 'Lash', 11: 'McGinnis', 13: 'Paradox', 
+    14: 'Pocket', 15: 'Seven', 16: 'Mo & Krill', 18: 'Viscous', 19: 'Warden', 
+    27: 'Dynamo', 31: 'Haze', 50: 'Vindicta', 52: 'Shiv', 58: 'Wraith', 60: 'Yamato'
   };
   return heroMap[heroId] || `Hero_${heroId}`;
 };
@@ -1425,16 +1425,20 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
     
     // 실제 API 호출 시도
     try {
+      console.log(`🌐 API 호출 시작: https://api.deadlock-api.com/v1/players/${accountId}/match-history`);
       const response = await axios.get(`https://api.deadlock-api.com/v1/players/${accountId}/match-history`, {
-        timeout: 5000,
+        timeout: 10000, // 타임아웃 증가
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
       });
       
-      if (response.data && Array.isArray(response.data)) {
+      console.log(`📡 API 응답 상태: ${response.status}, 데이터 타입: ${typeof response.data}, 배열 여부: ${Array.isArray(response.data)}, 길이: ${response.data?.length}`);
+      
+      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
         // 실제 API 데이터를 프론트엔드 형식으로 변환
         const matches = response.data
+          .sort((a, b) => (b.match_id || 0) - (a.match_id || 0)) // match_id desc 정렬
           .slice(0, limit) // 요청된 수만큼만
           .map(match => {
             const heroName = heroIdMap[match.hero_id] || `Hero ${match.hero_id}`;
@@ -1479,14 +1483,16 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
       }
     } catch (error) {
       console.log(`❌ 실제 매치 히스토리 API 실패: ${error.message}`);
+      // API 실패 시 빈 배열 반환 (더미 데이터 대신)
+      console.log(`⚠️ API 호출 실패로 빈 매치 히스토리 반환`);
+      setCachedData(cacheKey, []);
+      return res.json([]);
     }
     
-    // 백업: 빠른 더미 매치 히스토리 생성
-    const matches = generateFastMatchHistory(accountId, limit);
-    setCachedData(cacheKey, matches);
-    
-    console.log(`✅ 백업 매치 히스토리 생성: ${matches.length}개 매치`);
-    res.json(matches);
+    // 여기에 도달하면 API는 성공했지만 데이터가 없거나 형식이 잘못된 경우
+    console.log(`⚠️ API 성공했지만 유효한 데이터 없음 - 빈 배열 반환`);
+    setCachedData(cacheKey, []);
+    res.json([]);
     
   } catch (error) {
     console.error('Match history API error:', error);
