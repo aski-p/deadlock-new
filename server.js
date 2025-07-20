@@ -1651,14 +1651,25 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
       // 영웅별 통계
       const heroId = match.hero_id;
       const heroName = getHeroNameById(heroId);
+      const matchKills = match.player_kills || match.kills || 0;
+      const matchDeaths = match.player_deaths || match.deaths || 0;
+      const matchAssists = match.player_assists || match.assists || 0;
+      const matchSouls = match.net_worth || 0;
+      const matchDamage = match.player_damage || 0;
+      const matchHealing = match.player_healing || 0;
       
       if (!heroStats[heroName]) {
         heroStats[heroName] = {
           matches: 0,
           wins: 0,
+          laneWins: 0,
           kills: 0,
           deaths: 0,
-          assists: 0
+          assists: 0,
+          souls: 0,
+          damage: 0,
+          healing: 0,
+          duration: 0
         };
       }
       
@@ -1666,9 +1677,16 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
       if (isMatchWin) {
         heroStats[heroName].wins++;
       }
-      heroStats[heroName].kills += totalKills;
-      heroStats[heroName].deaths += totalDeaths;
-      heroStats[heroName].assists += totalAssists;
+      if (isLaneWin) {
+        heroStats[heroName].laneWins++;
+      }
+      heroStats[heroName].kills += matchKills;
+      heroStats[heroName].deaths += matchDeaths;
+      heroStats[heroName].assists += matchAssists;
+      heroStats[heroName].souls += matchSouls;
+      heroStats[heroName].damage += matchDamage;
+      heroStats[heroName].healing += matchHealing;
+      heroStats[heroName].duration += duration;
     });
 
     // deadlock.coach와 동일한 통계 계산
@@ -1687,16 +1705,27 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
     const avgMatchDurationFormatted = `${Math.floor(avgMatchDuration / 60)}:${(avgMatchDuration % 60).toString().padStart(2, '0')}`;
     const headshotPercent = totalShots > 0 ? ((totalHeadshots / totalShots) * 100).toFixed(0) : 0;
 
-    // 상위 영웅 순서대로 정렬
+    // 상위 영웅 순서대로 정렬 (deadlock.coach 스타일)
     const sortedHeroes = Object.entries(heroStats)
-      .map(([hero, stats]) => ({
-        name: hero,
-        matches: stats.matches,
-        winRate: stats.matches > 0 ? ((stats.wins / stats.matches) * 100).toFixed(1) : 0,
-        avgKills: stats.matches > 0 ? (stats.kills / stats.matches).toFixed(1) : 0,
-        avgDeaths: stats.matches > 0 ? (stats.deaths / stats.matches).toFixed(1) : 0,
-        avgAssists: stats.matches > 0 ? (stats.assists / stats.matches).toFixed(1) : 0
-      }))
+      .map(([hero, stats]) => {
+        const heroMinutes = stats.duration > 0 ? stats.duration / 60 : stats.matches * 35;
+        return {
+          name: hero,
+          matches: stats.matches,
+          wins: stats.wins,
+          losses: stats.matches - stats.wins,
+          winRate: stats.matches > 0 ? parseFloat(((stats.wins / stats.matches) * 100).toFixed(1)) : 0,
+          laneWinRate: stats.matches > 0 ? parseFloat(((stats.laneWins / stats.matches) * 100).toFixed(1)) : 0,
+          avgKills: stats.matches > 0 ? parseFloat((stats.kills / stats.matches).toFixed(1)) : 0,
+          avgDeaths: stats.matches > 0 ? parseFloat((stats.deaths / stats.matches).toFixed(1)) : 0,
+          avgAssists: stats.matches > 0 ? parseFloat((stats.assists / stats.matches).toFixed(1)) : 0,
+          kda: stats.deaths > 0 ? parseFloat(((stats.kills + stats.assists) / stats.deaths).toFixed(2)) : parseFloat((stats.kills + stats.assists).toFixed(2)),
+          avgSoulsPerMin: heroMinutes > 0 ? Math.round(stats.souls / heroMinutes) : 0,
+          avgDamagePerMin: heroMinutes > 0 ? Math.round(stats.damage / heroMinutes) : 0,
+          avgHealingPerMin: heroMinutes > 0 ? Math.round(stats.healing / heroMinutes) : 0,
+          avgMatchDuration: stats.matches > 0 ? Math.round(stats.duration / stats.matches) : 0
+        };
+      })
       .sort((a, b) => b.matches - a.matches);
 
     // deadlock.coach 스타일 분석 결과

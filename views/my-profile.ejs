@@ -376,6 +376,65 @@
     color: #999;
 }
 
+/* 상세 영웅 카드 스타일 */
+.hero-card.detailed {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 25px;
+    min-height: 300px;
+}
+
+.hero-card.detailed .hero-card-image {
+    width: 60px;
+    height: 60px;
+    align-self: center;
+    margin-bottom: 15px;
+}
+
+.hero-card-name {
+    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    color: #FFEFD7;
+    margin: 0 0 20px 0;
+}
+
+.hero-card-main-stats {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hero-card-detailed-stats {
+    flex: 1;
+}
+
+.hero-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.hero-stat-label {
+    color: #999;
+    font-weight: 500;
+}
+
+.hero-stat-value {
+    color: #FFEFD7;
+    font-weight: 600;
+}
+
+.hero-stat-value.positive {
+    color: #10B981;
+}
+
+.hero-stat-value.negative {
+    color: #EF4444;
+}
+
 /* 매치 리스트 스타일 */
 .matches-list {
     display: flex;
@@ -981,22 +1040,65 @@ function displayHeroStats(heroStats) {
         
         const heroCards = heroStats.map((hero, index) => {
             try {
-                // 안전한 데이터 추출
+                // 안전한 데이터 추출 (deadlock.coach 스타일)
                 const matches = parseInt(hero?.matches) || 0;
                 const wins = parseInt(hero?.wins) || 0;
+                const losses = parseInt(hero?.losses) || (matches - wins);
                 const winRate = hero?.winRate || (matches > 0 ? Math.round((wins / matches) * 100) : 0);
-                const avgKda = hero?.avgKda || '0.0';
-                const avgSouls = parseInt(hero?.avgSouls) || 0;
+                const laneWinRate = hero?.laneWinRate || 0;
+                const kda = hero?.kda || hero?.avgKda || '0.0';
+                const avgKills = hero?.avgKills || 0;
+                const avgDeaths = hero?.avgDeaths || 0;
+                const avgAssists = hero?.avgAssists || 0;
+                const avgSoulsPerMin = hero?.avgSoulsPerMin || 0;
+                const avgDamagePerMin = hero?.avgDamagePerMin || 0;
+                const avgHealingPerMin = hero?.avgHealingPerMin || 0;
+                const avgMatchDuration = hero?.avgMatchDuration || 0;
+                const durationFormatted = avgMatchDuration > 0 ? 
+                    `${Math.floor(avgMatchDuration / 60)}:${(avgMatchDuration % 60).toString().padStart(2, '0')}` : '0:00';
                 const heroName = hero?.hero || hero?.name || `Hero${index + 1}`;
                 
                 return `
-                    <div class="hero-card">
+                    <div class="hero-card detailed">
                         <img src="${getHeroImage(heroName)}" alt="${heroName}" class="hero-card-image">
                         <div class="hero-card-info">
-                            <h3>${heroName}</h3>
-                            <div class="hero-card-stats">
-                                ${matches}게임 · ${winRate}% 승률<br>
-                                <small style="color: #999;">KDA: ${avgKda} · 소울/분: ${avgSouls.toLocaleString()}</small>
+                            <h3 class="hero-card-name">${heroName}</h3>
+                            <div class="hero-card-main-stats">
+                                <div class="hero-stat-row">
+                                    <span class="hero-stat-label">매치:</span>
+                                    <span class="hero-stat-value">${matches} (${wins}승 ${losses}패)</span>
+                                </div>
+                                <div class="hero-stat-row">
+                                    <span class="hero-stat-label">승률:</span>
+                                    <span class="hero-stat-value ${winRate >= 50 ? 'positive' : 'negative'}">${winRate}%</span>
+                                </div>
+                                <div class="hero-stat-row">
+                                    <span class="hero-stat-label">라인 승률:</span>
+                                    <span class="hero-stat-value ${laneWinRate >= 50 ? 'positive' : 'negative'}">${laneWinRate}%</span>
+                                </div>
+                            </div>
+                            <div class="hero-card-detailed-stats">
+                                <div class="hero-stat-row">
+                                    <span class="hero-stat-label">KDA:</span>
+                                    <span class="hero-stat-value">${avgKills}/${avgDeaths}/${avgAssists} (${kda})</span>
+                                </div>
+                                <div class="hero-stat-row">
+                                    <span class="hero-stat-label">소울/분:</span>
+                                    <span class="hero-stat-value">${avgSoulsPerMin.toLocaleString()}</span>
+                                </div>
+                                <div class="hero-stat-row">
+                                    <span class="hero-stat-label">데미지/분:</span>
+                                    <span class="hero-stat-value">${avgDamagePerMin.toLocaleString()}</span>
+                                </div>
+                                <div class="hero-stat-row">
+                                    <span class="hero-stat-label">힐링/분:</span>
+                                    <span class="hero-stat-value">${avgHealingPerMin.toLocaleString()}</span>
+                                </div>
+                                <div class="hero-stat-row">
+                                    <span class="hero-stat-label">평균 시간:</span>
+                                    <span class="hero-stat-value">${durationFormatted}</span>
+                                </div>
+                            </div>
                             </div>
                         </div>
                     </div>
