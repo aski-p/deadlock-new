@@ -705,6 +705,76 @@
     color: #FFEFD7;
 }
 
+/* 팀 랭크 배지 스타일 */
+.match-meta-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 4px 0;
+}
+
+.team-rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 12px;
+    border: 2px solid;
+    position: relative;
+}
+
+.rank-number {
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    line-height: 1;
+}
+
+/* 팀 랭크별 색상 (deadlock.coach 스타일) */
+.rank-1 {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    border-color: #FFD700;
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+}
+
+.rank-2 {
+    background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
+    border-color: #C0C0C0;
+    box-shadow: 0 2px 8px rgba(192, 192, 192, 0.4);
+}
+
+.rank-3 {
+    background: linear-gradient(135deg, #CD7F32, #B8860B);
+    border-color: #CD7F32;
+    box-shadow: 0 2px 8px rgba(205, 127, 50, 0.4);
+}
+
+.rank-4 {
+    background: linear-gradient(135deg, #63a2e2, #4a90e2);
+    border-color: #63a2e2;
+    box-shadow: 0 2px 8px rgba(99, 162, 226, 0.4);
+}
+
+.rank-5 {
+    background: linear-gradient(135deg, #8B4513, #A0522D);
+    border-color: #8B4513;
+    box-shadow: 0 2px 8px rgba(139, 69, 19, 0.4);
+}
+
+.rank-6 {
+    background: linear-gradient(135deg, #696969, #556B2F);
+    border-color: #696969;
+    box-shadow: 0 2px 8px rgba(105, 105, 105, 0.4);
+}
+
+/* 팀 랭크 호버 효과 */
+.team-rank-badge:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
 /* 반응형 */
 @media (max-width: 768px) {
     .player-detail-container {
@@ -752,6 +822,18 @@
     .match-time {
         text-align: center;
         min-width: auto;
+    }
+    
+    .match-meta-info {
+        flex-direction: column;
+        gap: 5px;
+        align-items: center;
+    }
+    
+    .team-rank-badge {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
     }
     
     .party-member {
@@ -1221,6 +1303,7 @@ function displayMatchHistory(matches) {
                 const damage = parseInt(match?.damage) || 0;
                 const playedAt = match?.playedAt || new Date().toISOString();
                 const matchId = match?.matchId || 'Unknown';
+                const teamRank = parseInt(match?.teamRank) || 6;
                 
                 return `
                     <div class="match-card ${isWin ? 'win' : 'loss'}">
@@ -1233,7 +1316,12 @@ function displayMatchHistory(matches) {
                                 <span class="match-outcome ${isWin ? 'win-text' : 'loss-text'}">${matchResult}</span>
                                 <span class="lane-outcome ${laneResult.includes('won') ? 'win-text' : laneResult.includes('lost') ? 'loss-text' : 'unknown-text'}">${laneResult}</span>
                             </div>
-                            <span class="match-duration">${duration}</span>
+                            <div class="match-meta-info">
+                                <span class="match-duration">${duration}</span>
+                                <div class="team-rank-badge rank-${teamRank}">
+                                    <span class="rank-number">${teamRank}</span>
+                                </div>
+                            </div>
                             <span class="match-id">매치 #${matchId}</span>
                         </div>
                         <div class="match-stats">
