@@ -1454,217 +1454,158 @@ app.get('/api/v1/players/:accountId/hero-stats', async (req, res) => {
 });
 
 // 파티 스탯 API - 실제 API 데이터 변환 (Steam ID 프로필 조회 개선)
+// 파티 통계 API - 매치 히스토리에서 파티 정보 추출 (deadlock.coach 방식)
 app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
   try {
     const { accountId } = req.params;
     const cacheKey = `party-stats-${accountId}`;
     
-    // 강제 새로고침을 위해 캐시 건너뛰기 (임시)
-    const forceRefresh = req.query.refresh === 'true';
+    console.log(`🎯 파티 통계 요청 시작: ${accountId}`);
     
-    // 캐시 확인 (강제 새로고침이 아닌 경우에만)
-    if (!forceRefresh) {
-      const cached = getCachedData(cacheKey);
-      if (cached) {
-        console.log(`📦 캐시된 파티 스탯 반환: ${cached.length}개`);
-        return res.json(cached);
-      }
+    // 캐시 확인
+    const cached = getCachedData(cacheKey);
+    if (cached) {
+      console.log(`📦 캐시된 파티 스탯 반환: ${cached.length}개 파티원`);
+      return res.json(cached);
     }
     
-    // 실제 API 호출 시도
+    // 매치 히스토리에서 파티원 정보 추출 (deadlock.coach 방식)
     try {
-      console.log(`🌐 파티 스탯 API 호출 시작: https://api.deadlock-api.com/v1/players/${accountId}/party-stats`);
-      const response = await axios.get(`https://api.deadlock-api.com/v1/players/${accountId}/party-stats`, {
+      console.log(`🌐 매치 히스토리에서 파티 정보 추출 시작`);
+      const matchResponse = await axios.get(`https://api.deadlock-api.com/v1/players/${accountId}/match-history`, {
         timeout: 10000,
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
       });
       
-      console.log(`📡 파티 스탯 API 응답 상태: ${response.status}, 데이터 타입: ${typeof response.data}, 배열 여부: ${Array.isArray(response.data)}, 길이: ${response.data?.length}`);
-      
-      // 실제 API 응답 구조 확인을 위한 상세 로깅
-      if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-        console.log('🔍 파티 스탯 API 첫 번째 항목 구조:', JSON.stringify(response.data[0], null, 2));
-        console.log('🔍 사용 가능한 필드들:', Object.keys(response.data[0]));
-        
-        // 이름 관련 필드들 체크
-        const firstItem = response.data[0];
-        console.log('🔍 이름 관련 필드 확인:', {
-          account_id: firstItem.account_id,
-          account_name: firstItem.account_name,
-          player_name: firstItem.player_name,
-          name: firstItem.name,
-          username: firstItem.username,
-          persona_name: firstItem.persona_name,
-          steam_name: firstItem.steam_name
-        });
+      if (!matchResponse.data || !Array.isArray(matchResponse.data) || matchResponse.data.length === 0) {
+        console.log('❌ 매치 히스토리 데이터 없음');
+        res.json([]);
+        return;
       }
       
-      if (response.data && Array.isArray(response.data)) {
-        // 실제 API 데이터를 프론트엔드 형식으로 변환 (이름 해결 포함)
-        const partyStatsPromises = response.data
-          .filter(party => {
-            // 디버깅: 필터링 전 데이터 확인
-            console.log(`🔍 파티 데이터 검증:`, {
-              account_id: party.account_id,
-              matches_played: party.matches_played,
-              account_name: party.account_name,
-              type_account_id: typeof party.account_id
+      console.log(`📊 ${matchResponse.data.length}개 매치에서 파티원 분석 중...`);
+      
+      // 파티원 통계 계산
+      const partyMembers = new Map();
+      
+      // 최근 50경기만 분석 (성능 최적화)
+      const recentMatches = matchResponse.data.slice(0, 50);
+      
+      for (const match of recentMatches) {
+        // 같은 팀 플레이어들 찾기
+        if (match.match_players && Array.isArray(match.match_players)) {
+          const currentPlayerTeam = match.player_team || match.team_assignment;
+          
+          for (const player of match.match_players) {
+            // 본인 제외하고 같은 팀원만
+            if (player.account_id && 
+                player.account_id != accountId && 
+                player.team_assignment === currentPlayerTeam) {
+              
+              const playerId = player.account_id;
+              
+              if (!partyMembers.has(playerId)) {
+                partyMembers.set(playerId, {
+                  accountId: playerId,
+                  name: player.player_name || player.account_name || `Player_${playerId}`,
+                  matches: 0,
+                  wins: 0,
+                  totalKills: 0,
+                  totalDeaths: 0,
+                  totalAssists: 0
+                });
+              }
+              
+              const memberData = partyMembers.get(playerId);
+              memberData.matches++;
+              
+              // 매치 승리 여부 확인
+              const isWin = (match.team_assignment !== undefined && match.winning_team !== undefined) 
+                          ? match.team_assignment === match.winning_team
+                          : match.won === true || match.won === 1;
+              
+              if (isWin) {
+                memberData.wins++;
+              }
+              
+              // 통계 누적
+              memberData.totalKills += player.kills || 0;
+              memberData.totalDeaths += player.deaths || 0;
+              memberData.totalAssists += player.assists || 0;
+            }
+          }
+        }
+      }
+      
+      // 파티원 데이터를 배열로 변환하고 정리
+      const partyStats = Array.from(partyMembers.values())
+        .filter(member => member.matches >= 2) // 최소 2경기 이상 함께한 팀원만
+        .map(member => {
+          const winRate = member.matches > 0 ? Math.round((member.wins / member.matches) * 100) : 0;
+          const avgKda = member.totalDeaths > 0 
+            ? ((member.totalKills + member.totalAssists) / member.totalDeaths).toFixed(1)
+            : (member.totalKills + member.totalAssists).toFixed(1);
+          
+          return {
+            accountId: member.accountId,
+            name: member.name,
+            avatar: 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
+            matches: member.matches,
+            wins: member.wins,
+            losses: member.matches - member.wins,
+            winRate: winRate,
+            avgKills: member.matches > 0 ? (member.totalKills / member.matches).toFixed(1) : '0.0',
+            avgDeaths: member.matches > 0 ? (member.totalDeaths / member.matches).toFixed(1) : '0.0',
+            avgAssists: member.matches > 0 ? (member.totalAssists / member.matches).toFixed(1) : '0.0',
+            avgKda: avgKda,
+            lastPlayedTogether: null
+          };
+        })
+        .sort((a, b) => b.matches - a.matches) // 많이 함께 플레이한 순으로 정렬
+        .slice(0, 10); // 상위 10명만
+      
+      // Steam 아바타 가져오기 (비동기 처리)
+      if (steamApiKey && partyStats.length > 0) {
+        const avatarPromises = partyStats.map(async (member) => {
+          try {
+            const steamId64 = (BigInt(member.accountId) + BigInt('76561197960265728')).toString();
+            const avatarResponse = await axios.get(`http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${steamApiKey}&steamids=${steamId64}`, {
+              timeout: 2000
             });
             
-            // deadlock.coach 스타일 필터링: 유효한 데이터만 처리
-            const isValid = party.matches_played > 0 && // 실제로 함께 플레이한 파티만
-                           party.account_id && // account_id가 존재하고
-                           party.account_id !== 'undefined' && // undefined가 아니며
-                           party.account_id !== null && // null이 아닌
-                           !isNaN(party.account_id); // 숫자 형태인 것만
-                           
-            if (!isValid) {
-              console.log(`❌ 파티 데이터 필터링됨:`, party);
-            }
-            
-            return isValid;
-          })
-          .slice(0, 10) // 처리할 파티원 수 제한 (API 호출 부담 줄이기)
-          .map(async (party) => {
-            const winRate = party.matches_played > 0 ? Math.round((party.wins / party.matches_played) * 100) : 0;
-            
-            // 이름 가져오기 (다양한 필드 시도)
-            let playerName = null;
-            
-            // 모든 가능한 이름 필드를 체크하고 로깅
-            const nameFields = {
-              account_name: party.account_name,
-              player_name: party.player_name,
-              name: party.name,
-              username: party.username,
-              persona_name: party.persona_name,
-              steam_name: party.steam_name,
-              personaname: party.personaname,
-              realname: party.realname,
-              real_name: party.real_name
-            };
-            
-            console.log(`🔍 파티원 ${party.account_id} 이름 필드들:`, nameFields);
-            
-            // 첫 번째로 유효한 이름 찾기
-            for (const [fieldName, value] of Object.entries(nameFields)) {
-              if (value && typeof value === 'string' && value.trim() !== '' && value !== 'undefined' && value !== 'null') {
-                playerName = value.trim();
-                console.log(`✅ 파티원 ${party.account_id} 이름 필드 ${fieldName}에서 발견: ${playerName}`);
-                break;
+            if (avatarResponse.data?.response?.players?.length > 0) {
+              const steamProfile = avatarResponse.data.response.players[0];
+              if (steamProfile.personaname && steamProfile.personaname.trim()) {
+                member.name = steamProfile.personaname;
+              }
+              if (steamProfile.avatarfull || steamProfile.avatarmedium || steamProfile.avatar) {
+                let avatarUrl = steamProfile.avatarfull || steamProfile.avatarmedium || steamProfile.avatar;
+                member.avatar = avatarUrl.replace('avatars.steamstatic.com', 'avatars.cloudflare.steamstatic.com');
               }
             }
-            
-            // 이름이 없거나 빈 값이면 Steam 프로필 API로 가져오기 시도
-            if (!playerName || playerName.trim() === '') {
-              try {
-                console.log(`🔍 파티원 ${party.account_id} Steam 프로필 정보 가져오기 시도...`);
-                
-                // 먼저 Deadlock API로 Steam 정보 시도
-                const steamResponse = await axios.get(`https://api.deadlock-api.com/v1/players/${party.account_id}/steam`, {
-                  timeout: 3000
-                });
-                
-                if (steamResponse.data && (steamResponse.data.personaname || steamResponse.data.real_name)) {
-                  playerName = steamResponse.data.personaname || steamResponse.data.real_name;
-                  console.log(`✅ 파티원 ${party.account_id} Deadlock API에서 이름 획득: ${playerName}`);
-                } else {
-                  // Account ID를 Steam ID로 변환하여 Steam API 직접 호출
-                  if (steamApiKey) {
-                    try {
-                      const steamId64 = (BigInt(party.account_id) + BigInt('76561197960265728')).toString();
-                      console.log(`🔄 Account ID ${party.account_id} → Steam ID ${steamId64} 변환 시도`);
-                      
-                      const steamDirectResponse = await axios.get(`http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${steamApiKey}&steamids=${steamId64}`, {
-                        timeout: 3000
-                      });
-                      
-                      if (steamDirectResponse.data?.response?.players?.length > 0) {
-                        const steamProfile = steamDirectResponse.data.response.players[0];
-                        playerName = steamProfile.personaname || steamProfile.realname;
-                        console.log(`✅ 파티원 ${party.account_id} Steam API에서 이름 획득: ${playerName}`);
-                      }
-                    } catch (steamDirectError) {
-                      console.log(`❌ 파티원 ${party.account_id} Steam API 직접 호출 실패: ${steamDirectError.message}`);
-                    }
-                  }
-                }
-              } catch (steamError) {
-                console.log(`❌ 파티원 ${party.account_id} Steam 프로필 가져오기 실패: ${steamError.message}`);
-              }
-            }
-            
-            // 여전히 이름이 없으면 기본값 사용 (deadlock.coach 스타일)
-            if (!playerName || playerName.trim() === '') {
-              // account_id가 유효한 경우에만 사용
-              if (party.account_id && party.account_id !== 'undefined' && party.account_id !== null) {
-                playerName = `Player_${party.account_id}`;
-              } else {
-                // account_id가 없으면 Anonymous 사용 (deadlock.coach 방식)
-                playerName = `Anonymous_${Math.random().toString(36).substr(2, 6)}`;
-              }
-            }
-            
-            // 아바타 URL 가져오기
-            let avatarUrl = null;
-            if (steamApiKey) {
-              try {
-                const steamId64 = (BigInt(party.account_id) + BigInt('76561197960265728')).toString();
-                const avatarResponse = await axios.get(`http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${steamApiKey}&steamids=${steamId64}`, {
-                  timeout: 2000
-                });
-                
-                if (avatarResponse.data?.response?.players?.length > 0) {
-                  const steamProfile = avatarResponse.data.response.players[0];
-                  avatarUrl = steamProfile.avatarfull || steamProfile.avatarmedium || steamProfile.avatar;
-                  if (avatarUrl) {
-                    avatarUrl = avatarUrl.replace('avatars.steamstatic.com', 'avatars.cloudflare.steamstatic.com');
-                  }
-                }
-              } catch (avatarError) {
-                console.log(`⚠️ 파티원 ${party.account_id} 아바타 가져오기 실패`);
-              }
-            }
-            
-            return {
-              accountId: party.account_id,
-              name: playerName,
-              avatar: avatarUrl || 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', // deadlock.coach 기본 아바타
-              matches: party.matches_played || party.matches || 0,
-              wins: party.wins || 0,
-              losses: (party.matches_played || party.matches || 0) - (party.wins || 0),
-              winRate: winRate,
-              avgKills: party.matches_played > 0 ? (party.kills / party.matches_played).toFixed(1) : '0.0',
-              avgDeaths: party.matches_played > 0 ? (party.deaths / party.matches_played).toFixed(1) : '0.0',
-              avgAssists: party.matches_played > 0 ? (party.assists / party.matches_played).toFixed(1) : '0.0',
-              avgKda: party.deaths > 0 ? ((party.kills + party.assists) / party.deaths).toFixed(1) : (party.kills + party.assists).toFixed(1),
-              lastPlayedTogether: party.last_match_time ? new Date(party.last_match_time * 1000).toISOString() : null
-            };
-          });
+          } catch (error) {
+            console.log(`⚠️ Steam 정보 가져오기 실패: ${member.accountId}`);
+          }
+          return member;
+        });
         
-        // 모든 파티원 정보를 병렬로 처리
-        const partyStats = await Promise.all(partyStatsPromises);
-        
-        // 많이 함께 플레이한 순으로 정렬
-        partyStats.sort((a, b) => b.matches - a.matches);
-        
-        console.log(`✅ 실제 파티 스탯 API 변환 완료: ${partyStats.length}개 파티원`);
-        console.log(`🎯 첫 번째 파티원: ${partyStats[0]?.name} (${partyStats[0]?.matches}경기)`);
-        
-        setCachedData(cacheKey, partyStats);
-        return res.json(partyStats);
+        await Promise.all(avatarPromises);
       }
+      
+      console.log(`✅ 파티 통계 분석 완료: ${partyStats.length}개 파티원 발견`);
+      if (partyStats.length > 0) {
+        console.log(`🎯 최다 동행: ${partyStats[0].name} (${partyStats[0].matches}경기, 승률 ${partyStats[0].winRate}%)`);
+      }
+      
+      setCachedData(cacheKey, partyStats);
+      res.json(partyStats);
+      
     } catch (error) {
-      console.log(`❌ 실제 파티 스탯 API 실패: ${error.message}`);
+      console.error(`❌ 파티 통계 분석 실패: ${error.message}`);
+      res.json([]);
     }
-    
-    // 실제 API 데이터가 없으면 빈 배열 반환
-    console.log('⚠️ 실제 파티 스탯 API 실패 - 빈 배열 반환');
-    const emptyStats = [];
-    setCachedData(cacheKey, emptyStats);
-    res.json(emptyStats);
     
   } catch (error) {
     console.error('Party stats API error:', error);
