@@ -1503,7 +1503,14 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
       if (response.data && Array.isArray(response.data)) {
         // 실제 API 데이터를 프론트엔드 형식으로 변환 (이름 해결 포함)
         const partyStatsPromises = response.data
-          .filter(party => party.matches_played > 0) // 실제로 함께 플레이한 파티만
+          .filter(party => {
+            // deadlock.coach 스타일 필터링: 유효한 데이터만 처리
+            return party.matches_played > 0 && // 실제로 함께 플레이한 파티만
+                   party.account_id && // account_id가 존재하고
+                   party.account_id !== 'undefined' && // undefined가 아니며
+                   party.account_id !== null && // null이 아닌
+                   !isNaN(party.account_id); // 숫자 형태인 것만
+          })
           .slice(0, 10) // 처리할 파티원 수 제한 (API 호출 부담 줄이기)
           .map(async (party) => {
             const winRate = party.matches_played > 0 ? Math.round((party.wins / party.matches_played) * 100) : 0;
@@ -1574,9 +1581,15 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
               }
             }
             
-            // 여전히 이름이 없으면 기본값 사용
+            // 여전히 이름이 없으면 기본값 사용 (deadlock.coach 스타일)
             if (!playerName || playerName.trim() === '') {
-              playerName = `Player_${party.account_id}`;
+              // account_id가 유효한 경우에만 사용
+              if (party.account_id && party.account_id !== 'undefined' && party.account_id !== null) {
+                playerName = `Player_${party.account_id}`;
+              } else {
+                // account_id가 없으면 Anonymous 사용 (deadlock.coach 방식)
+                playerName = `Anonymous_${Math.random().toString(36).substr(2, 6)}`;
+              }
             }
             
             // 아바타 URL 가져오기
@@ -1603,7 +1616,7 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
             return {
               accountId: party.account_id,
               name: playerName,
-              avatar: avatarUrl,
+              avatar: avatarUrl || 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg', // deadlock.coach 기본 아바타
               matches: party.matches_played || party.matches || 0,
               wins: party.wins || 0,
               losses: (party.matches_played || party.matches || 0) - (party.wins || 0),

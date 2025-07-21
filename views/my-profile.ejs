@@ -1476,15 +1476,20 @@ function displayPartyStats(partyStats) {
         
         const partyCards = partyStats.map((member, index) => {
             try {
-                // 안전한 데이터 추출
-                const accountId = member?.accountId || 'Unknown';
-                const name = member?.name || 'Unknown Player';
-                const matches = parseInt(member?.matches) || 0;
-                const wins = parseInt(member?.wins) || 0;
-                const losses = parseInt(member?.losses) || 0;
-                const winRate = parseInt(member?.winRate) || 0;
-                const avgKda = member?.avgKda || '0.0';
-                const lastPlayed = member?.lastPlayedTogether || null;
+                // deadlock.coach 스타일 데이터 검증
+                if (!member || !member.accountId || member.accountId === 'undefined' || member.accountId === null) {
+                    console.log('⚠️ 유효하지 않은 파티 멤버 데이터:', member);
+                    return ''; // 유효하지 않은 데이터는 표시하지 않음
+                }
+                
+                const accountId = member.accountId;
+                const name = member.name && member.name !== 'undefined' ? member.name : `Player_${accountId}`;
+                const matches = parseInt(member.matches) || 0;
+                const wins = parseInt(member.wins) || 0;
+                const losses = parseInt(member.losses) || 0;
+                const winRate = parseInt(member.winRate) || 0;
+                const avgKda = member.avgKda || '0.0';
+                const lastPlayed = member.lastPlayedTogether || null;
                 
                 return `
                     <div class="party-member" data-account-id="${accountId}">
@@ -1516,7 +1521,9 @@ function displayPartyStats(partyStats) {
             }
         });
         
-        partyStatsList.innerHTML = partyCards.join('');
+        // deadlock.coach 스타일: 빈 카드는 필터링하고 표시
+        const validPartyCards = partyCards.filter(card => card.trim() !== '');
+        partyStatsList.innerHTML = validPartyCards.join('');
         
         // 파티원 클릭 시 프로필 이동 기능 추가
         partyStatsList.addEventListener('click', (e) => {
