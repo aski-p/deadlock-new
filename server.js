@@ -322,9 +322,10 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       27: 'Wraith',
       31: 'Yamato',
       50: 'Pocket',
-      52: 'Vindicta',
+      52: 'Mirage',
       58: 'Calico',
-      60: 'Holliday'
+      60: 'Vindicta',
+      61: 'Holliday'
     };
 
     // 메달/랭크 매핑
@@ -1504,12 +1505,26 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
         // 실제 API 데이터를 프론트엔드 형식으로 변환 (이름 해결 포함)
         const partyStatsPromises = response.data
           .filter(party => {
+            // 디버깅: 필터링 전 데이터 확인
+            console.log(`🔍 파티 데이터 검증:`, {
+              account_id: party.account_id,
+              matches_played: party.matches_played,
+              account_name: party.account_name,
+              type_account_id: typeof party.account_id
+            });
+            
             // deadlock.coach 스타일 필터링: 유효한 데이터만 처리
-            return party.matches_played > 0 && // 실제로 함께 플레이한 파티만
-                   party.account_id && // account_id가 존재하고
-                   party.account_id !== 'undefined' && // undefined가 아니며
-                   party.account_id !== null && // null이 아닌
-                   !isNaN(party.account_id); // 숫자 형태인 것만
+            const isValid = party.matches_played > 0 && // 실제로 함께 플레이한 파티만
+                           party.account_id && // account_id가 존재하고
+                           party.account_id !== 'undefined' && // undefined가 아니며
+                           party.account_id !== null && // null이 아닌
+                           !isNaN(party.account_id); // 숫자 형태인 것만
+                           
+            if (!isValid) {
+              console.log(`❌ 파티 데이터 필터링됨:`, party);
+            }
+            
+            return isValid;
           })
           .slice(0, 10) // 처리할 파티원 수 제한 (API 호출 부담 줄이기)
           .map(async (party) => {
@@ -1918,7 +1933,7 @@ const getHeroNameById = (heroId) => {
     8: 'Mirage', 10: 'Paradox', 11: 'Kelvin', 13: 'Haze', 
     14: 'Holliday', 15: 'Bebop', 16: 'Calico', 17: 'Dynamo', 18: 'Wraith', 19: 'Shiv', 
     20: 'Ivy', 25: 'Mo & Krill', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
-    50: 'Pocket', 52: 'Vindicta', 58: 'Vyper', 60: 'Sinclair'
+    50: 'Pocket', 52: 'Mirage', 58: 'Vyper', 60: 'Vindicta'
   };
   return heroMap[heroId] || `Hero_${heroId}`;
 };
