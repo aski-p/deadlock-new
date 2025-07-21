@@ -323,8 +323,9 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       31: 'Yamato',
       50: 'Pocket',
       52: 'Mirage',
-      58: 'Calico',
-      60: 'Vindicta',
+      58: 'Vindicta',
+      59: 'Calico',
+      60: 'Sinclair',
       61: 'Holliday'
     };
 
@@ -1874,7 +1875,7 @@ const getHeroNameById = (heroId) => {
     8: 'Mirage', 10: 'Paradox', 11: 'Kelvin', 13: 'Haze', 
     14: 'Holliday', 15: 'Bebop', 16: 'Calico', 17: 'Dynamo', 18: 'Wraith', 19: 'Shiv', 
     20: 'Ivy', 25: 'Mo & Krill', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
-    50: 'Pocket', 52: 'Mirage', 58: 'Vyper', 60: 'Vindicta'
+    50: 'Pocket', 52: 'Mirage', 58: 'Vindicta', 60: 'Sinclair'
   };
   return heroMap[heroId] || `Hero_${heroId}`;
 };
