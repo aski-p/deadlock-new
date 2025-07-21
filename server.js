@@ -311,7 +311,7 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       11: 'Lady Geist',
       12: 'Lash',
       13: 'McGinnis',
-      14: 'Pocket',
+      14: 'Holliday',
       15: 'Bebop',
       16: 'Pocket',
       17: 'Seven',
@@ -1881,7 +1881,7 @@ const getHeroNameById = (heroId) => {
   const heroMap = {
     1: 'Infernus', 2: 'Seven', 4: 'Grey Talon', 6: 'Abrams', 7: 'Ivy', 
     8: 'McGinnis', 10: 'Paradox', 11: 'Kelvin', 13: 'Haze', 
-    14: 'Pocket', 15: 'Bebop', 16: 'Calico', 17: 'Dynamo', 18: 'Wraith', 19: 'Vindicta', 
+    14: 'Holliday', 15: 'Bebop', 16: 'Calico', 17: 'Dynamo', 18: 'Wraith', 19: 'Vindicta', 
     20: 'Shiv', 25: 'Mo & Krill', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
     50: 'Pocket', 52: 'Shiv', 58: 'Vyper', 60: 'Sinclair'
   };
