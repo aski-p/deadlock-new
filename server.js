@@ -316,9 +316,9 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       16: 'Pocket',
       17: 'Seven',
       18: 'Shiv',
-      19: 'Mo & Krill',
+      19: 'Vindicta',
       20: 'Viscous', 
-      25: 'Vindicta',
+      25: 'Mo & Krill',
       27: 'Wraith',
       31: 'Yamato',
       50: 'Pocket',
@@ -1881,8 +1881,8 @@ const getHeroNameById = (heroId) => {
   const heroMap = {
     1: 'Infernus', 2: 'Seven', 4: 'Grey Talon', 6: 'Abrams', 7: 'Ivy', 
     8: 'McGinnis', 10: 'Paradox', 11: 'Kelvin', 13: 'Haze', 
-    14: 'Pocket', 15: 'Bebop', 16: 'Calico', 17: 'Dynamo', 18: 'Wraith', 19: 'Mo & Krill', 
-    20: 'Shiv', 25: 'Vindicta', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
+    14: 'Pocket', 15: 'Bebop', 16: 'Calico', 17: 'Dynamo', 18: 'Wraith', 19: 'Vindicta', 
+    20: 'Shiv', 25: 'Mo & Krill', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
     50: 'Pocket', 52: 'Shiv', 58: 'Vyper', 60: 'Sinclair'
   };
   return heroMap[heroId] || `Hero_${heroId}`;
