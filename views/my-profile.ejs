@@ -599,31 +599,71 @@
 .party-member {
     display: flex;
     align-items: center;
-    gap: 20px;
-    padding: 20px;
+    gap: 15px;
+    padding: 15px 20px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.3s;
+    cursor: pointer;
 }
 
 .party-member:hover {
     background: rgba(99, 162, 226, 0.1);
     border-color: #63a2e2;
-    transform: translateY(-2px);
+    transform: translateX(5px);
+}
+
+.party-member-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.party-member-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .party-member-info {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    min-width: 150px;
+    gap: 4px;
 }
 
 .party-member-name {
     font-weight: 600;
     color: #FFEFD7;
     font-size: 16px;
-    margin-bottom: 4px;
+}
+
+.party-member-matches {
+    font-size: 14px;
+    color: #999;
+}
+
+.party-member-winrate {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 80px;
+}
+
+.winrate-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #63a2e2;
+}
+
+.winrate-label {
+    font-size: 12px;
+    color: #999;
+    text-transform: uppercase;
 }
 
 .party-member-id {
@@ -1448,34 +1488,18 @@ function displayPartyStats(partyStats) {
                 
                 return `
                     <div class="party-member" data-account-id="${accountId}">
+                        <div class="party-member-avatar">
+                            <img src="${member?.avatar || 'https://avatars.cloudflare.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg'}" 
+                                 alt="${name}" 
+                                 onerror="this.src='https://avatars.cloudflare.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg'">
+                        </div>
                         <div class="party-member-info">
                             <div class="party-member-name">${name}</div>
-                            <div class="party-member-id">ID: ${accountId}</div>
+                            <div class="party-member-matches">${matches} 매치</div>
                         </div>
-                        <div class="party-stats">
-                            <div class="party-stat">
-                                <div class="party-stat-label">매치</div>
-                                <div class="party-stat-value">${matches}</div>
-                            </div>
-                            <div class="party-stat">
-                                <div class="party-stat-label">승률</div>
-                                <div class="party-stat-value">${winRate}%</div>
-                            </div>
-                            <div class="party-stat">
-                                <div class="party-stat-label">승리</div>
-                                <div class="party-stat-value">${wins}</div>
-                            </div>
-                            <div class="party-stat">
-                                <div class="party-stat-label">패배</div>
-                                <div class="party-stat-value">${losses}</div>
-                            </div>
-                            <div class="party-stat">
-                                <div class="party-stat-label">평균 KDA</div>
-                                <div class="party-stat-value">${avgKda}</div>
-                            </div>
-                        </div>
-                        <div class="party-last-played">
-                            ${formatDate(lastPlayed)}
+                        <div class="party-member-winrate">
+                            <div class="winrate-value">${winRate}%</div>
+                            <div class="winrate-label">승률</div>
                         </div>
                     </div>
                 `;

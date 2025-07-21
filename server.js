@@ -1579,9 +1579,31 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
               playerName = `Player_${party.account_id}`;
             }
             
+            // 아바타 URL 가져오기
+            let avatarUrl = null;
+            if (steamApiKey) {
+              try {
+                const steamId64 = (BigInt(party.account_id) + BigInt('76561197960265728')).toString();
+                const avatarResponse = await axios.get(`http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${steamApiKey}&steamids=${steamId64}`, {
+                  timeout: 2000
+                });
+                
+                if (avatarResponse.data?.response?.players?.length > 0) {
+                  const steamProfile = avatarResponse.data.response.players[0];
+                  avatarUrl = steamProfile.avatarfull || steamProfile.avatarmedium || steamProfile.avatar;
+                  if (avatarUrl) {
+                    avatarUrl = avatarUrl.replace('avatars.steamstatic.com', 'avatars.cloudflare.steamstatic.com');
+                  }
+                }
+              } catch (avatarError) {
+                console.log(`⚠️ 파티원 ${party.account_id} 아바타 가져오기 실패`);
+              }
+            }
+            
             return {
               accountId: party.account_id,
               name: playerName,
+              avatar: avatarUrl,
               matches: party.matches_played || party.matches || 0,
               wins: party.wins || 0,
               losses: (party.matches_played || party.matches || 0) - (party.wins || 0),
