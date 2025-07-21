@@ -302,7 +302,7 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
     const heroIdMapping = {
       1: 'Abrams',
       2: 'Bebop', 
-      3: 'Dynamo',
+      3: 'Grey Talon',
       4: 'Grey Talon',
       6: 'Haze',
       7: 'Wraith',
@@ -327,7 +327,8 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       59: 'Calico',
       60: 'Sinclair',
       61: 'Holliday',
-      62: 'Mo & Krill'
+      62: 'Mo & Krill',
+      63: 'Dynamo'
     };
 
     // 메달/랭크 매핑
@@ -1874,9 +1875,9 @@ const getHeroNameById = (heroId) => {
   const heroMap = {
     1: 'Infernus', 2: 'Seven', 4: 'Grey Talon', 6: 'Abrams', 7: 'Wraith', 
     8: 'Mirage', 10: 'Paradox', 11: 'Kelvin', 13: 'Haze', 
-    14: 'Holliday', 15: 'Bebop', 16: 'Calico', 17: 'Dynamo', 18: 'Wraith', 19: 'Shiv', 
+    14: 'Holliday', 15: 'Bebop', 16: 'Calico', 17: 'Grey Talon', 18: 'Wraith', 19: 'Shiv', 
     20: 'Ivy', 25: 'Warden', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
-    50: 'Pocket', 52: 'Mirage', 58: 'Vindicta', 60: 'Sinclair', 62: 'Mo & Krill'
+    50: 'Pocket', 52: 'Mirage', 58: 'Vindicta', 60: 'Sinclair', 62: 'Mo & Krill', 63: 'Dynamo'
   };
   return heroMap[heroId] || `Hero_${heroId}`;
 };
