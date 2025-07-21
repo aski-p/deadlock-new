@@ -306,7 +306,7 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       4: 'Grey Talon',
       6: 'Haze',
       7: 'Wraith',
-      8: 'Ivy',
+      8: 'Mirage',
       10: 'Kelvin',
       11: 'Lady Geist',
       12: 'Lash',
@@ -316,13 +316,13 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       16: 'Pocket',
       17: 'Seven',
       18: 'Shiv',
-      19: 'Vindicta',
-      20: 'Viscous', 
+      19: 'Shiv',
+      20: 'Ivy', 
       25: 'Mo & Krill',
       27: 'Wraith',
       31: 'Yamato',
       50: 'Pocket',
-      52: 'Ivy',
+      52: 'Vindicta',
       58: 'Calico',
       60: 'Holliday'
     };
@@ -1902,10 +1902,10 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
 const getHeroNameById = (heroId) => {
   const heroMap = {
     1: 'Infernus', 2: 'Seven', 4: 'Grey Talon', 6: 'Abrams', 7: 'Wraith', 
-    8: 'McGinnis', 10: 'Paradox', 11: 'Kelvin', 13: 'Haze', 
-    14: 'Holliday', 15: 'Bebop', 16: 'Calico', 17: 'Dynamo', 18: 'Wraith', 19: 'Vindicta', 
-    20: 'Shiv', 25: 'Mo & Krill', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
-    50: 'Pocket', 52: 'Ivy', 58: 'Vyper', 60: 'Sinclair'
+    8: 'Mirage', 10: 'Paradox', 11: 'Kelvin', 13: 'Haze', 
+    14: 'Holliday', 15: 'Bebop', 16: 'Calico', 17: 'Dynamo', 18: 'Wraith', 19: 'Shiv', 
+    20: 'Ivy', 25: 'Mo & Krill', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
+    50: 'Pocket', 52: 'Vindicta', 58: 'Vyper', 60: 'Sinclair'
   };
   return heroMap[heroId] || `Hero_${heroId}`;
 };
