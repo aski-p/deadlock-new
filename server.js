@@ -306,11 +306,11 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       4: 'Grey Talon',
       6: 'Haze',
       7: 'Wraith',
-      8: 'Mirage',
+      8: 'McGinnis',
       10: 'Kelvin',
       11: 'Lady Geist',
       12: 'Lash',
-      13: 'Mirage',
+      13: 'Haze',
       14: 'Holliday',
       15: 'Bebop',
       16: 'Pocket',
@@ -558,7 +558,7 @@ const getRandomCountryFlag = (region) => {
 
 // Steam 데이터를 데드락 리더보드 형식으로 변환
 const convertSteamToDeadlockFormat = (steamPlayers, region, page) => {
-  const heroes = ['Abrams', 'Bebop', 'Dynamo', 'Grey Talon', 'Haze', 'Infernus', 'Ivy', 'Kelvin', 'Lady Geist', 'Lash', 'Mirage', 'Mo & Krill', 'Paradox', 'Pocket', 'Seven', 'Shiv', 'Viper', 'Viscous', 'Warden', 'Wraith', 'Yamato'];
+  const heroes = ['Abrams', 'Bebop', 'Dynamo', 'Grey Talon', 'Haze', 'Infernus', 'Ivy', 'Kelvin', 'Lady Geist', 'Lash', 'McGinnis', 'Mirage', 'Mo & Krill', 'Paradox', 'Pocket', 'Seven', 'Shiv', 'Viper', 'Viscous', 'Warden', 'Wraith', 'Yamato'];
   const medals = ['Eternus', 'Phantom', 'Oracle', 'Ritualist', 'Alchemist', 'Arcanist', 'Initiate'];
   const startRank = (page - 1) * 50 + 1;
 
@@ -613,7 +613,7 @@ const generateRealPlayerData = async (region, page = 1, limit = 50) => {
     'north-america': ['🇺🇸', '🇨🇦', '🇲🇽', '🇺🇸', '🇨🇦', '🇺🇸', '🇨🇦', '🇺🇸', '🇲🇽', '🇺🇸']
   };
 
-  const heroes = ['Abrams', 'Bebop', 'Dynamo', 'Grey Talon', 'Haze', 'Infernus', 'Ivy', 'Kelvin', 'Lady Geist', 'Lash', 'Mirage', 'Mo & Krill', 'Paradox', 'Pocket', 'Seven', 'Shiv', 'Viper', 'Viscous', 'Warden', 'Wraith', 'Yamato'];
+  const heroes = ['Abrams', 'Bebop', 'Dynamo', 'Grey Talon', 'Haze', 'Infernus', 'Ivy', 'Kelvin', 'Lady Geist', 'Lash', 'McGinnis', 'Mirage', 'Mo & Krill', 'Paradox', 'Pocket', 'Seven', 'Shiv', 'Viper', 'Viscous', 'Warden', 'Wraith', 'Yamato'];
   const medals = ['Eternus', 'Phantom', 'Oracle', 'Ritualist', 'Alchemist', 'Arcanist', 'Initiate'];
   
   const data = [];
@@ -754,7 +754,7 @@ const generateMockLeaderboardData = (region, page = 1, limit = 50) => {
     'north-america': ['🇺🇸', '🇨🇦', '🇲🇽', '🇺🇸', '🇨🇦', '🇺🇸', '🇨🇦', '🇺🇸', '🇲🇽', '🇺🇸']
   };
 
-  const heroes = ['Abrams', 'Bebop', 'Dynamo', 'Grey Talon', 'Haze', 'Infernus', 'Ivy', 'Kelvin', 'Lady Geist', 'Lash', 'Mirage', 'Mo & Krill', 'Paradox', 'Pocket', 'Seven', 'Shiv', 'Viper', 'Viscous', 'Warden', 'Wraith', 'Yamato'];
+  const heroes = ['Abrams', 'Bebop', 'Dynamo', 'Grey Talon', 'Haze', 'Infernus', 'Ivy', 'Kelvin', 'Lady Geist', 'Lash', 'McGinnis', 'Mirage', 'Mo & Krill', 'Paradox', 'Pocket', 'Seven', 'Shiv', 'Viper', 'Viscous', 'Warden', 'Wraith', 'Yamato'];
   const medals = ['Eternus', 'Phantom', 'Oracle', 'Ritualist', 'Alchemist', 'Arcanist', 'Initiate'];
   const avatars = [
     'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
@@ -989,7 +989,7 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
               kda: parseFloat(matchAnalysis.averageKDA.ratio),
               soulsPerMin: matchAnalysis.avgSoulsPerMin,
               denies: Math.floor(matchAnalysis.avgSoulsPerMin * 0.8), // 디나이 수 (소울/분 기반)
-              endorsements: Math.floor(matchAnalysis.totalMatches * (1 + Math.random() * 3)), // 추천수 추정
+              endorsements: Math.floor(matchAnalysis.totalMatches * 2.5), // 추천수 (매치 수 기반)
               avgMatchDuration: matchAnalysis.avgMatchDuration
             };
             playerData.heroes = matchAnalysis.topHeroes;
@@ -1284,7 +1284,7 @@ function setCachedData(key, data, ttl = CACHE_TTL) {
 
 // 빠른 영웅 스탯 생성 함수
 function generateFastHeroStats(accountId) {
-  const heroNames = ['Abrams', 'Bebop', 'Dynamo', 'Haze', 'Infernus', 'Ivy', 'Kelvin', 'Lash'];
+  const heroNames = ['Abrams', 'Bebop', 'Dynamo', 'Haze', 'Infernus', 'Ivy', 'Kelvin', 'Lash', 'McGinnis', 'Mirage'];
   const seed = parseInt(accountId) || 12345;
   
   // 시드 기반 랜덤으로 일관된 결과 보장
@@ -1323,10 +1323,10 @@ function generateFastHeroStats(accountId) {
 // 영웅 ID를 이름으로 변환하는 맵핑
 const heroIdMap = {
   1: 'Infernus', 2: 'Seven', 4: 'Grey Talon', 6: 'Abrams', 7: 'Ivy', 
-  8: 'Mirage', 10: 'Paradox', 11: 'Kelvin', 13: 'Haze', 
+  8: 'McGinnis', 10: 'Paradox', 11: 'Kelvin', 13: 'Haze', 
   14: 'Pocket', 15: 'Bebop', 16: 'Calico', 17: 'Dynamo', 18: 'Mo & Krill', 19: 'Shiv', 
   20: 'Shiv', 25: 'Viper', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
-  50: 'Pocket', 52: 'Shiv', 58: 'Viper', 60: 'Sinclair'
+  50: 'Pocket', 52: 'Mirage', 58: 'Viper', 60: 'Sinclair'
 };
 
 
@@ -1874,8 +1874,8 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
 const getHeroNameById = (heroId) => {
   const heroMap = {
     1: 'Infernus', 2: 'Seven', 4: 'Grey Talon', 6: 'Abrams', 7: 'Wraith', 
-    8: 'Mirage', 10: 'Paradox', 11: 'Kelvin', 13: 'Haze', 
-    14: 'Holliday', 15: 'Bebop', 16: 'Calico', 17: 'Grey Talon', 18: 'Mo & Krill', 19: 'Shiv', 
+    8: 'McGinnis', 10: 'Paradox', 11: 'Kelvin', 13: 'Haze', 
+    14: 'Holliday', 15: 'Bebop', 16: 'Calico', 17: 'Lady Geist', 18: 'Mo & Krill', 19: 'Shiv', 
     20: 'Ivy', 25: 'Warden', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
     50: 'Pocket', 52: 'Mirage', 58: 'Viper', 60: 'Sinclair', 62: 'Mo & Krill', 63: 'Dynamo'
   };
@@ -2216,7 +2216,7 @@ const generateRecentMatches = (playerHeroes) => {
   // 플레이어가 플레이하는 영웅들을 우선적으로 사용, 없으면 기본 영웅
   const heroes = playerHeroes && playerHeroes.length > 0 ? 
     playerHeroes : 
-    ['Abrams', 'Bebop', 'Haze', 'Infernus', 'Ivy', 'Dynamo'];
+    ['Abrams', 'Bebop', 'Haze', 'Infernus', 'Ivy', 'Dynamo', 'McGinnis', 'Mirage'];
   
   const results = ['승리', '패배'];
   
