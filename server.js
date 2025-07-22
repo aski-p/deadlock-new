@@ -323,7 +323,7 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       31: 'Yamato',
       50: 'Pocket',
       52: 'McGinnis',
-      58: 'Vindicta',
+      58: '바이퍼',
       59: 'Calico',
       60: 'Sinclair',
       61: 'Holliday',
@@ -558,7 +558,7 @@ const getRandomCountryFlag = (region) => {
 
 // Steam 데이터를 데드락 리더보드 형식으로 변환
 const convertSteamToDeadlockFormat = (steamPlayers, region, page) => {
-  const heroes = ['Abrams', 'Bebop', 'Dynamo', 'Grey Talon', 'Haze', 'Infernus', 'Ivy', 'Kelvin', 'Lady Geist', 'Lash', 'McGinnis', 'Mo & Krill', 'Paradox', 'Pocket', 'Seven', 'Shiv', 'Vindicta', 'Viscous', 'Warden', 'Wraith', 'Yamato'];
+  const heroes = ['Abrams', 'Bebop', 'Dynamo', 'Grey Talon', 'Haze', 'Infernus', 'Ivy', 'Kelvin', 'Lady Geist', 'Lash', 'McGinnis', 'Mo & Krill', 'Paradox', 'Pocket', 'Seven', 'Shiv', '바이퍼', 'Viscous', 'Warden', 'Wraith', 'Yamato'];
   const medals = ['Eternus', 'Phantom', 'Oracle', 'Ritualist', 'Alchemist', 'Arcanist', 'Initiate'];
   const startRank = (page - 1) * 50 + 1;
 
@@ -613,7 +613,7 @@ const generateRealPlayerData = async (region, page = 1, limit = 50) => {
     'north-america': ['🇺🇸', '🇨🇦', '🇲🇽', '🇺🇸', '🇨🇦', '🇺🇸', '🇨🇦', '🇺🇸', '🇲🇽', '🇺🇸']
   };
 
-  const heroes = ['Abrams', 'Bebop', 'Dynamo', 'Grey Talon', 'Haze', 'Infernus', 'Ivy', 'Kelvin', 'Lady Geist', 'Lash', 'McGinnis', 'Mo & Krill', 'Paradox', 'Pocket', 'Seven', 'Shiv', 'Vindicta', 'Viscous', 'Warden', 'Wraith', 'Yamato'];
+  const heroes = ['Abrams', 'Bebop', 'Dynamo', 'Grey Talon', 'Haze', 'Infernus', 'Ivy', 'Kelvin', 'Lady Geist', 'Lash', 'McGinnis', 'Mo & Krill', 'Paradox', 'Pocket', 'Seven', 'Shiv', '바이퍼', 'Viscous', 'Warden', 'Wraith', 'Yamato'];
   const medals = ['Eternus', 'Phantom', 'Oracle', 'Ritualist', 'Alchemist', 'Arcanist', 'Initiate'];
   
   const data = [];
@@ -754,7 +754,7 @@ const generateMockLeaderboardData = (region, page = 1, limit = 50) => {
     'north-america': ['🇺🇸', '🇨🇦', '🇲🇽', '🇺🇸', '🇨🇦', '🇺🇸', '🇨🇦', '🇺🇸', '🇲🇽', '🇺🇸']
   };
 
-  const heroes = ['Abrams', 'Bebop', 'Dynamo', 'Grey Talon', 'Haze', 'Infernus', 'Ivy', 'Kelvin', 'Lady Geist', 'Lash', 'McGinnis', 'Mo & Krill', 'Paradox', 'Pocket', 'Seven', 'Shiv', 'Vindicta', 'Viscous', 'Warden', 'Wraith', 'Yamato'];
+  const heroes = ['Abrams', 'Bebop', 'Dynamo', 'Grey Talon', 'Haze', 'Infernus', 'Ivy', 'Kelvin', 'Lady Geist', 'Lash', 'McGinnis', 'Mo & Krill', 'Paradox', 'Pocket', 'Seven', 'Shiv', '바이퍼', 'Viscous', 'Warden', 'Wraith', 'Yamato'];
   const medals = ['Eternus', 'Phantom', 'Oracle', 'Ritualist', 'Alchemist', 'Arcanist', 'Initiate'];
   const avatars = [
     'https://avatars.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
@@ -1325,8 +1325,8 @@ const heroIdMap = {
   1: 'Infernus', 2: 'Seven', 4: 'Grey Talon', 6: 'Abrams', 7: 'Ivy', 
   8: 'McGinnis', 10: 'Paradox', 11: 'Kelvin', 13: 'Haze', 
   14: 'Pocket', 15: 'Bebop', 16: 'Calico', 17: 'Dynamo', 18: 'Wraith', 19: 'Shiv', 
-  20: 'Shiv', 25: 'Vindicta', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
-  50: 'Pocket', 52: 'Shiv', 58: 'Vyper', 60: 'Sinclair'
+  20: 'Shiv', 25: '바이퍼', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
+  50: 'Pocket', 52: 'Shiv', 58: '바이퍼', 60: 'Sinclair'
 };
 
 
@@ -1877,7 +1877,7 @@ const getHeroNameById = (heroId) => {
     8: 'McGinnis', 10: 'Paradox', 11: 'Kelvin', 13: 'Haze', 
     14: 'Holliday', 15: 'Bebop', 16: 'Calico', 17: 'Grey Talon', 18: 'Wraith', 19: 'Shiv', 
     20: 'Ivy', 25: 'Warden', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
-    50: 'Pocket', 52: 'McGinnis', 58: 'Vindicta', 60: 'Sinclair', 62: 'Mo & Krill', 63: 'Dynamo'
+    50: 'Pocket', 52: 'McGinnis', 58: '바이퍼', 60: 'Sinclair', 62: 'Mo & Krill', 63: 'Dynamo'
   };
   return heroMap[heroId] || `Hero_${heroId}`;
 };
