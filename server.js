@@ -1324,7 +1324,7 @@ function generateFastHeroStats(accountId) {
 const heroIdMap = {
   1: 'Infernus', 2: 'Seven', 4: 'Grey Talon', 6: 'Abrams', 7: 'Ivy', 
   8: 'McGinnis', 10: 'Paradox', 11: 'Kelvin', 13: 'Haze', 
-  14: 'Pocket', 15: 'Bebop', 16: 'Calico', 17: 'Dynamo', 18: 'Wraith', 19: 'Shiv', 
+  14: 'Pocket', 15: 'Bebop', 16: 'Calico', 17: 'Dynamo', 18: 'Mo & Krill', 19: 'Shiv', 
   20: 'Shiv', 25: 'Viper', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
   50: 'Pocket', 52: 'Shiv', 58: 'Viper', 60: 'Sinclair'
 };
@@ -1875,7 +1875,7 @@ const getHeroNameById = (heroId) => {
   const heroMap = {
     1: 'Infernus', 2: 'Seven', 4: 'Grey Talon', 6: 'Abrams', 7: 'Wraith', 
     8: 'McGinnis', 10: 'Paradox', 11: 'Kelvin', 13: 'Haze', 
-    14: 'Holliday', 15: 'Bebop', 16: 'Calico', 17: 'Grey Talon', 18: 'Wraith', 19: 'Shiv', 
+    14: 'Holliday', 15: 'Bebop', 16: 'Calico', 17: 'Grey Talon', 18: 'Mo & Krill', 19: 'Shiv', 
     20: 'Ivy', 25: 'Warden', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
     50: 'Pocket', 52: 'McGinnis', 58: 'Viper', 60: 'Sinclair', 62: 'Mo & Krill', 63: 'Dynamo'
   };

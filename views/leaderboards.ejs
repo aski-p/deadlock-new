@@ -249,7 +249,9 @@ function updateLeaderboardTable(data) {
             '<div class="heroes-list">' +
                 player.heroes.map(hero => 
                     '<div class="hero-item">' +
-                        '<img src="' + getHeroImage(hero) + '" alt="' + hero + '" class="hero-image" title="' + hero + '">' +
+                        '<a href="/ko/players/' + (player.player.accountId || player.player.steamId || player.rank) + '" class="hero-link">' +
+                            '<img src="' + getHeroImage(hero) + '" alt="' + hero + '" class="hero-image" title="' + hero + '">' +
+                        '</a>' +
                     '</div>'
                 ).join('') +
             '</div>' +
@@ -316,3 +318,38 @@ document.addEventListener('DOMContentLoaded', () => {
     loadLeaderboardData();
 });
 </script>
+
+<style>
+.hero-link {
+    display: inline-block;
+    transition: all 0.3s ease;
+    border-radius: 4px;
+}
+
+.hero-link:hover {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+    box-shadow: 0 4px 8px rgba(99, 162, 226, 0.3);
+}
+
+.hero-image {
+    transition: all 0.3s ease;
+    border-radius: 4px;
+}
+
+.heroes-list {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.hero-item {
+    position: relative;
+}
+
+.hero-link {
+    text-decoration: none;
+    cursor: pointer;
+}
+</style>
