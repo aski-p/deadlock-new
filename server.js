@@ -26,73 +26,71 @@ async function initializeDatabase() {
   try {
     console.log('🗄️ 데이터베이스 테이블 초기화 중...');
     
-    // 게시판 테이블 생성
-    const { error: postsError } = await supabase.rpc('create_posts_table_if_not_exists');
-    if (postsError && !postsError.message.includes('already exists')) {
-      console.log('📝 게시글 테이블 수동 생성 시도...');
-      // SQL로 직접 테이블 생성 시도
-      const createPostsSQL = `
-        CREATE TABLE IF NOT EXISTS board_posts (
-          id SERIAL PRIMARY KEY,
-          title TEXT NOT NULL,
-          content TEXT NOT NULL,
-          author_steam_id TEXT NOT NULL,
-          author_username TEXT NOT NULL,
-          author_avatar TEXT,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-        );
-      `;
-      // RPC 함수로 테이블 생성 (실제로는 SQL 직접 실행이 안 되므로 로그만)
-      console.log('게시글 테이블 생성 SQL 준비됨');
+    // 게시글 테이블 생성 시도
+    console.log('📝 게시글 테이블 생성 중...');
+    const { error: postsError } = await supabase
+      .from('board_posts')
+      .select('count')
+      .limit(1);
+    
+    if (postsError && postsError.code === 'PGRST116') {
+      console.log('📝 게시글 테이블이 존재하지 않습니다. 수동 생성이 필요합니다.');
+    } else if (!postsError) {
+      console.log('✅ 게시글 테이블이 이미 존재합니다.');
     }
     
-    // 댓글 테이블 생성
-    const { error: commentsError } = await supabase.rpc('create_comments_table_if_not_exists');
-    if (commentsError && !commentsError.message.includes('already exists')) {
-      console.log('💬 댓글 테이블 수동 생성 시도...');
-      const createCommentsSQL = `
-        CREATE TABLE IF NOT EXISTS board_comments (
-          id SERIAL PRIMARY KEY,
-          post_id INTEGER REFERENCES board_posts(id) ON DELETE CASCADE,
-          content TEXT NOT NULL,
-          author_steam_id TEXT NOT NULL,
-          author_username TEXT NOT NULL,
-          author_avatar TEXT,
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-        );
-      `;
-      console.log('댓글 테이블 생성 SQL 준비됨');
+    // 댓글 테이블 확인
+    console.log('💬 댓글 테이블 확인 중...');
+    const { error: commentsError } = await supabase
+      .from('board_comments')
+      .select('count')
+      .limit(1);
+    
+    if (commentsError && commentsError.code === 'PGRST116') {
+      console.log('💬 댓글 테이블이 존재하지 않습니다. 수동 생성이 필요합니다.');
+    } else if (!commentsError) {
+      console.log('✅ 댓글 테이블이 이미 존재합니다.');
     }
     
     console.log('✅ 데이터베이스 초기화 완료');
+    
+    // 테이블 생성이 필요한 경우 안내
+    if ((postsError && postsError.code === 'PGRST116') || (commentsError && commentsError.code === 'PGRST116')) {
+      console.log(`
+🔧 Supabase 대시보드에서 다음 SQL을 실행해주세요:
+
+-- 게시글 테이블 생성
+CREATE TABLE IF NOT EXISTS board_posts (
+  id SERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  author_steam_id TEXT NOT NULL,
+  author_username TEXT NOT NULL,
+  author_avatar TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 댓글 테이블 생성
+CREATE TABLE IF NOT EXISTS board_comments (
+  id SERIAL PRIMARY KEY,
+  post_id INTEGER REFERENCES board_posts(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  author_steam_id TEXT NOT NULL,
+  author_username TEXT NOT NULL,
+  author_avatar TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 인덱스 생성
+CREATE INDEX IF NOT EXISTS idx_board_posts_created_at ON board_posts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_board_comments_post_id ON board_comments(post_id);
+      `);
+    }
+    
   } catch (error) {
     console.error('❌ 데이터베이스 초기화 실패:', error.message);
-    console.log('ℹ️ Supabase 대시보드에서 수동으로 테이블을 생성해주세요.');
-    console.log(`
-      📋 게시글 테이블 (board_posts):
-      CREATE TABLE board_posts (
-        id SERIAL PRIMARY KEY,
-        title TEXT NOT NULL,
-        content TEXT NOT NULL,
-        author_steam_id TEXT NOT NULL,
-        author_username TEXT NOT NULL,
-        author_avatar TEXT,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-      
-      💬 댓글 테이블 (board_comments):
-      CREATE TABLE board_comments (
-        id SERIAL PRIMARY KEY,
-        post_id INTEGER REFERENCES board_posts(id) ON DELETE CASCADE,
-        content TEXT NOT NULL,
-        author_steam_id TEXT NOT NULL,
-        author_username TEXT NOT NULL,
-        author_avatar TEXT,
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
-    `);
+    console.log('ℹ️ Supabase 연결을 확인해주세요.');
   }
 }
 
