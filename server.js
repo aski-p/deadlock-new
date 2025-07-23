@@ -1484,38 +1484,24 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
         const partyMembers = mateStats
           .filter(mate => mate.matches_played >= 2) // 최소 2경기 이상 함께 플레이
           .map(mate => {
-            // Steam ID를 Account ID로 변환 (필요한 경우)
-            let accountId = mate.account_id;
-            if (!accountId && mate.steam_id) {
-              // Steam ID 64를 Account ID로 변환
-              try {
-                accountId = (BigInt(mate.steam_id) - BigInt('76561197960265728')).toString();
-              } catch (error) {
-                console.log(`⚠️ Steam ID 변환 실패 (${mate.steam_id}):`, error.message);
-                accountId = mate.steam_id;
-              }
-            }
+            // mate_id를 accountId로 사용
+            const accountId = mate.mate_id?.toString() || 'unknown';
             
             // 승률 계산
             const winRate = mate.matches_played > 0 ? 
               ((mate.wins || 0) / mate.matches_played * 100).toFixed(1) : 0;
             
-            // KDA 계산
-            const avgKills = mate.matches_played > 0 ? 
-              (mate.kills / mate.matches_played).toFixed(1) : 0;
-            const avgDeaths = mate.matches_played > 0 ? 
-              (mate.deaths / mate.matches_played).toFixed(1) : 0;
-            const avgAssists = mate.matches_played > 0 ? 
-              (mate.assists / mate.matches_played).toFixed(1) : 0;
-            const avgKda = mate.deaths > 0 ? 
-              ((mate.kills + mate.assists) / mate.deaths).toFixed(2) : 
-              (mate.kills + mate.assists).toFixed(2);
+            // KDA는 mate-stats API에서 제공하지 않으므로 기본값 사용
+            const avgKills = 0;
+            const avgDeaths = 0;
+            const avgAssists = 0;
+            const avgKda = 0;
             
             return {
               accountId: accountId,
-              steamId: mate.steam_id,
-              name: mate.personaname || mate.account_name || `Player_${accountId}`,
-              avatar: mate.avatar || mate.avatarfull || 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
+              steamId: null, // mate-stats API에서 제공하지 않음
+              name: `Player_${accountId}`, // 이름 정보가 없으므로 기본 이름 사용
+              avatar: 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
               matches: mate.matches_played,
               wins: mate.wins || 0,
               losses: mate.matches_played - (mate.wins || 0),
@@ -1524,9 +1510,9 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
               avgDeaths: parseFloat(avgDeaths),
               avgAssists: parseFloat(avgAssists),
               avgKda: parseFloat(avgKda),
-              totalKills: mate.kills || 0,
-              totalDeaths: mate.deaths || 0,
-              totalAssists: mate.assists || 0
+              totalKills: 0,
+              totalDeaths: 0,
+              totalAssists: 0
             };
           })
           .sort((a, b) => b.matches - a.matches); // 함께 플레이한 경기 수 기준 정렬
