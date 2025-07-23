@@ -367,7 +367,7 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       }
 
       // 기본 영웅이 없으면 랜덤 영웅 할당
-      const finalHeroes = heroes.length > 0 ? heroes : [Object.values(heroIdMapping)[Math.floor(Math.random() * Object.values(heroIdMapping).length)]];
+      const finalHeroes = heroes.length > 0 ? heroes : [Object.values(heroIdMapping)[0]]; // Default to first hero
 
       return {
         rank: player.rank,
@@ -382,8 +382,8 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
         medal: getMedalFromRank(player.ranked_rank || 7, player.ranked_subrank || 1),
         subrank: player.ranked_subrank || 1,
         score: player.badge_level || Math.floor(4500 - (player.rank * 5)),
-        wins: Math.floor(Math.random() * 500) + 100,
-        losses: Math.floor(Math.random() * 200) + 50
+        wins: 150,
+        losses: 100
       };
     });
 
@@ -553,7 +553,9 @@ const getRandomCountryFlag = (region) => {
   };
   
   const flags = regionFlags[region] || regionFlags['asia'];
-  return flags[Math.floor(Math.random() * flags.length)];
+  // Return a fixed flag based on region for consistency
+  const index = region ? region.charCodeAt(0) % flags.length : 0;
+  return flags[index];
 };
 
 // Steam 데이터를 데드락 리더보드 형식으로 변환
@@ -573,10 +575,10 @@ const convertSteamToDeadlockFormat = (steamPlayers, region, page) => {
       },
       heroes: heroes.slice(index % 3, (index % 3) + 2), // 임시로 2-3개 영웅
       medal: medals[index % medals.length],
-      subrank: Math.floor(Math.random() * 6) + 1,
+      subrank: 1,
       score: Math.floor(4500 - (startRank + index) * 5),
-      wins: Math.floor(Math.random() * 500) + 100,
-      losses: Math.floor(Math.random() * 200) + 50
+      wins: 150,
+      losses: 100
     };
   });
 
@@ -689,12 +691,12 @@ const generateRealPlayerData = async (region, page = 1, limit = 50) => {
           steamId: uniqueSteamId,
           country: regionFlags[i % regionFlags.length]
         },
-        heroes: heroes.slice((i + page) % 5, ((i + page) % 5) + Math.floor(Math.random() * 3) + 1),
+        heroes: heroes.slice((i + page) % 5, ((i + page) % 5) + 2), // Fixed to 2 heroes
         medal: medals[Math.floor((rank - 1) / 7) % medals.length],
-        subrank: Math.floor(Math.random() * 6) + 1,
-        score: Math.floor(4500 - (rank * 5) - Math.random() * 100),
-        wins: Math.floor(Math.random() * 500) + 100,
-        losses: Math.floor(Math.random() * 200) + 50
+        subrank: ((rank + i) % 6) + 1, // Deterministic subrank
+        score: Math.floor(4500 - (rank * 5) - (i * 10)), // Deterministic score
+        wins: 200 - (rank * 2), // Deterministic wins based on rank
+        losses: 100 + rank // Deterministic losses based on rank
       };
 
       // Steam API에서 실제 사용자 정보 가져오기 시도 (처음 몇 명만)
@@ -802,12 +804,12 @@ const generateMockLeaderboardData = (region, page = 1, limit = 50) => {
         steamId: uniqueSteamId,
         country: regionFlags[i % regionFlags.length]
       },
-      heroes: heroes.slice((i + page) % 5, ((i + page) % 5) + Math.floor(Math.random() * 3) + 1),
+      heroes: heroes.slice((i + page) % 5, ((i + page) % 5) + 2), // Fixed to 2 heroes
       medal: medals[Math.floor((rank - 1) / 7) % medals.length],
-      subrank: Math.floor(Math.random() * 6) + 1,
-      score: Math.floor(4500 - (rank * 5) - Math.random() * 100),
-      wins: Math.floor(Math.random() * 500) + 100,
-      losses: Math.floor(Math.random() * 200) + 50
+      subrank: ((rank + i) % 6) + 1, // Deterministic subrank
+      score: Math.floor(4500 - (rank * 5) - (i * 10)), // Deterministic score
+      wins: 200 - (rank * 2), // Deterministic wins based on rank
+      losses: 100 + rank // Deterministic losses based on rank
     });
   }
 
@@ -1083,24 +1085,24 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
         region: 'unknown',
         leaderboardRank: null,
         stats: {
-          matches: Math.floor(Math.random() * 200) + 50,
-          winRate: Math.floor(Math.random() * 30) + 45, // 45-75% (일반 플레이어)
-          laneWinRate: Math.floor(Math.random() * 30) + 50,
-          kda: (Math.random() * 3 + 1.5).toFixed(1), // 1.5-4.5 (일반 플레이어)
-          headshotPercent: Math.floor(Math.random() * 20) + 15,
-          soulsPerMin: Math.floor(Math.random() * 150) + 350,
-          damagePerMin: Math.floor(Math.random() * 800) + 2200,
-          healingPerMin: Math.floor(Math.random() * 300) + 200
+          matches: 100,
+          winRate: 50, // Default 50% win rate
+          laneWinRate: 52, // Default 52% lane win rate
+          kda: '2.5', // Default KDA
+          headshotPercent: 20, // Default 20% headshot
+          soulsPerMin: 450, // Default souls per minute
+          damagePerMin: 2800, // Default damage per minute
+          healingPerMin: 300 // Default healing per minute
         },
         rank: {
           medal: 'Arcanist', // 기본 랭크
-          subrank: Math.floor(Math.random() * 6) + 1,
-          score: Math.floor(Math.random() * 1000) + 2000
+          subrank: 1,
+          score: 2500
         },
         heroes: [
-          { name: 'Abrams', matches: Math.floor(Math.random() * 30) + 10, winRate: Math.floor(Math.random() * 30) + 45 },
-          { name: 'Bebop', matches: Math.floor(Math.random() * 25) + 8, winRate: Math.floor(Math.random() * 30) + 45 },
-          { name: 'Haze', matches: Math.floor(Math.random() * 20) + 5, winRate: Math.floor(Math.random() * 30) + 45 }
+          { name: 'Abrams', matches: 25, winRate: 50 },
+          { name: 'Bebop', matches: 20, winRate: 48 },
+          { name: 'Haze', matches: 15, winRate: 52 }
         ],
         recentMatches: generateRecentMatches(['Abrams', 'Bebop', 'Haze'])
       };
@@ -1217,14 +1219,14 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
         subrank: foundPlayer.subrank,
         score: foundPlayer.score
       },
-      heroes: foundPlayer.heroes ? foundPlayer.heroes.map(heroName => ({
+      heroes: foundPlayer.heroes ? foundPlayer.heroes.map((heroName, index) => ({
         name: heroName,
-        matches: Math.floor(Math.random() * 50) + 10,
-        winRate: Math.floor(Math.random() * 40) + 50
+        matches: 30 - (index * 5), // Deterministic matches based on order
+        winRate: 55 - (index * 2) // Deterministic win rate based on order
       })) : [
-        { name: 'Abrams', matches: Math.floor(Math.random() * 50) + 10, winRate: Math.floor(Math.random() * 40) + 50 },
-        { name: 'Bebop', matches: Math.floor(Math.random() * 30) + 5, winRate: Math.floor(Math.random() * 40) + 50 },
-        { name: 'Haze', matches: Math.floor(Math.random() * 25) + 5, winRate: Math.floor(Math.random() * 40) + 50 }
+        { name: 'Abrams', matches: 30, winRate: 55 },
+        { name: 'Bebop', matches: 25, winRate: 53 },
+        { name: 'Haze', matches: 20, winRate: 51 }
       ],
       recentMatches: generateRecentMatches(foundPlayer.heroes)
     };
@@ -1406,8 +1408,10 @@ app.get('/api/v1/players/:accountId/hero-stats', async (req, res) => {
           
           const winRate = actualMatches > 0 ? ((actualWins / actualMatches) * 100).toFixed(1) : 0;
           const kda = hero.deaths > 0 ? ((hero.kills + hero.assists) / hero.deaths).toFixed(2) : (hero.kills + hero.assists).toFixed(2);
-          const avgMatchDuration = hero.time_played > 0 ? Math.round(hero.time_played / actualMatches) : 0;
-          const durationFormatted = `${Math.floor(avgMatchDuration / 60)}:${(avgMatchDuration % 60).toString().padStart(2, '0')}`;
+          const avgMatchDuration = hero.time_played > 0 && actualMatches > 0 ? Math.round(hero.time_played / actualMatches) : 2100; // Default to 35 minutes
+          const durationFormatted = avgMatchDuration > 0 
+            ? `${Math.floor(avgMatchDuration / 60)}:${(avgMatchDuration % 60).toString().padStart(2, '0')}`
+            : '35:00'; // Default to 35:00 if no duration data
           
           return {
             hero: heroName,
@@ -1695,13 +1699,13 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
             // 라인승률이 매치승률보다 약간 높은 경향을 반영
             const duration = match.match_duration_s || 0;
             if (duration > 0 && duration < 1200) { // 20분 미만 = 라인전에서 크게 이긴 경우
-              isLaneWin = Math.random() < 0.7; // 70% 확률로 라인승
+              isLaneWin = isWin; // 승리했으면 라인전도 이긴 것으로 추정
             } else if (duration < 1800) { // 20-30분 = 라인전에서 약간 이긴 경우
-              isLaneWin = Math.random() < 0.55; // 55% 확률로 라인승
+              isLaneWin = isWin; // 승리했으면 라인전도 이긴 것으로 추정
             } else if (duration < 2400) { // 30-40분 = 라인전 비슷
-              isLaneWin = Math.random() < 0.42; // 42% 확률로 라인승 (deadlock.coach와 유사)
+              isLaneWin = false; // 긴 경기는 라인전 패배로 추정
             } else { // 40분 이상 = 라인전에서 진 경우가 많음
-              isLaneWin = Math.random() < 0.3; // 30% 확률로 라인승
+              isLaneWin = false; // 긴 경기는 라인전 패배로 추정
             }
           }
           
@@ -1722,9 +1726,9 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
           
           // 헤드샷 추정 (API에 없으므로 KDA 기반으로 추정)
           const kills = match.player_kills || match.kills || 0;
-          const estimatedHeadshots = Math.floor(kills * (0.1 + Math.random() * 0.2)); // 10-30% 헤드샷
+          const estimatedHeadshots = Math.floor(kills * 0.2); // Fixed 20% headshot rate
           totalHeadshots += estimatedHeadshots;
-          totalShots += Math.floor(kills * (3 + Math.random() * 4)); // 킬당 3-7샷 추정
+          totalShots += Math.floor(kills * 5); // Fixed 5 shots per kill
           
           // 영웅별 통계
           const heroId = match.hero_id;
@@ -1787,7 +1791,10 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
     const avgDamagePerMin = totalMinutes > 0 ? Math.round(totalDamage / totalMinutes) : 0;
     const avgHealingPerMin = totalMinutes > 0 ? Math.round(totalHealing / totalMinutes) : 0;
     const avgMatchDuration = totalMatches > 0 ? Math.round(totalDuration / totalMatches) : 0;
-    const avgMatchDurationFormatted = `${Math.floor(avgMatchDuration / 60)}:${(avgMatchDuration % 60).toString().padStart(2, '0')}`;
+    // Format match duration, handling case where avgMatchDuration is 0
+    const avgMatchDurationFormatted = avgMatchDuration > 0 
+      ? `${Math.floor(avgMatchDuration / 60)}:${(avgMatchDuration % 60).toString().padStart(2, '0')}`
+      : '35:00'; // Default to 35:00 if no duration data
     const headshotPercent = totalShots > 0 ? ((totalHeadshots / totalShots) * 100).toFixed(0) : 0;
 
     // 상위 영웅 순서대로 정렬 (deadlock.coach 스타일)
@@ -2149,14 +2156,14 @@ const getMedalScore = (medal) => {
 const generateRealisticMatches = (rank, medal) => {
   const medalScore = getMedalScore(medal);
   // 높은 랭크일수록 더 많은 게임 수 (100-800게임)
-  const baseMatches = Math.max(100, Math.min(800, 100 + (medalScore * 60) + (Math.random() * 200)));
+  const baseMatches = Math.max(100, Math.min(800, 100 + (medalScore * 60) + (rank % 200))); // Deterministic based on rank
   return Math.floor(baseMatches);
 };
 
 const generateRealisticWinRate = (rank, medal) => {
   const medalScore = getMedalScore(medal);
   // 랭크가 높을수록 높은 승률 (50-95%)
-  let baseWinRate = 50 + (medalScore * 4) + (Math.random() * 10);
+  let baseWinRate = 50 + (medalScore * 4) + (rank % 10); // Deterministic based on rank
   
   // 상위 10등 이내는 보너스
   if (rank <= 10) baseWinRate += 10;
@@ -2168,13 +2175,13 @@ const generateRealisticWinRate = (rank, medal) => {
 const generateRealisticLaneWinRate = (rank, medal) => {
   const winRate = generateRealisticWinRate(rank, medal);
   // 라인 승률은 전체 승률보다 약간 높음
-  return Math.min(98, winRate + Math.floor(Math.random() * 8));
+  return Math.min(98, winRate + (rank % 8)); // Deterministic based on rank
 };
 
 const generateRealisticKDA = (rank, medal) => {
   const medalScore = getMedalScore(medal);
   // 높은 랭크일수록 높은 KDA (1.5-12.0)
-  const baseKDA = 1.5 + (medalScore * 0.8) + (Math.random() * 2);
+  const baseKDA = 1.5 + (medalScore * 0.8) + ((rank % 20) / 10); // Deterministic based on rank
   
   // 상위 10등 이내는 보너스
   if (rank <= 10) return (baseKDA + 2).toFixed(1);
@@ -2186,28 +2193,28 @@ const generateRealisticKDA = (rank, medal) => {
 const generateRealisticHeadshot = (rank, medal) => {
   const medalScore = getMedalScore(medal);
   // 높은 랭크일수록 높은 헤드샷 (10-40%)
-  const baseHeadshot = 10 + (medalScore * 2) + (Math.random() * 8);
+  const baseHeadshot = 10 + (medalScore * 2) + (rank % 8); // Deterministic based on rank
   return Math.min(40, Math.max(10, Math.floor(baseHeadshot)));
 };
 
 const generateRealisticSouls = (rank, medal) => {
   const medalScore = getMedalScore(medal);
   // 높은 랭크일수록 높은 소울/분 (400-800)
-  const baseSouls = 400 + (medalScore * 30) + (Math.random() * 100);
+  const baseSouls = 400 + (medalScore * 30) + (rank % 100); // Deterministic based on rank
   return Math.floor(baseSouls);
 };
 
 const generateRealisticDamage = (rank, medal) => {
   const medalScore = getMedalScore(medal);
   // 높은 랭크일수록 높은 데미지/분 (2500-6000)
-  const baseDamage = 2500 + (medalScore * 200) + (Math.random() * 800);
+  const baseDamage = 2500 + (medalScore * 200) + (rank % 800); // Deterministic based on rank
   return Math.floor(baseDamage);
 };
 
 const generateRealisticHealing = (rank, medal) => {
   const medalScore = getMedalScore(medal);
   // 높은 랭크일수록 높은 힐링/분 (200-1000)
-  const baseHealing = 200 + (medalScore * 50) + (Math.random() * 200);
+  const baseHealing = 200 + (medalScore * 50) + (rank % 200); // Deterministic based on rank
   return Math.floor(baseHealing);
 };
 
@@ -2222,11 +2229,11 @@ const generateRecentMatches = (playerHeroes) => {
   
   const matches = [];
   for (let i = 0; i < 10; i++) {
-    // 플레이어의 영웅을 더 자주 선택 (80% 확률)
-    const usePlayerHero = Math.random() < 0.8 && playerHeroes && playerHeroes.length > 0;
+    // 플레이어의 영웅을 더 자주 선택 (deterministic)
+    const usePlayerHero = (i % 5) < 4 && playerHeroes && playerHeroes.length > 0; // 4/5 of matches use player heroes
     const selectedHero = usePlayerHero ? 
-      playerHeroes[Math.floor(Math.random() * playerHeroes.length)] :
-      heroes[Math.floor(Math.random() * heroes.length)];
+      playerHeroes[i % playerHeroes.length] :
+      heroes[i % heroes.length];
     
     // 최근일수록 더 좋은 성과를 보이도록 조정
     const recentBonus = Math.max(0, (10 - i) * 0.05); // 최근 매치일수록 승률 보너스
@@ -2234,15 +2241,15 @@ const generateRecentMatches = (playerHeroes) => {
     
     matches.push({
       id: Date.now() - (i * 3600000), // 1시간씩 빼기
-      result: Math.random() < winChance ? '승리' : '패배',
+      result: (i * 7 + 3) % 10 < (winChance * 10) ? '승리' : '패배', // Deterministic result
       hero: selectedHero,
-      kills: Math.floor(Math.random() * 15) + 5, // 5-20 킬
-      deaths: Math.floor(Math.random() * 8) + 2, // 2-10 데스
-      assists: Math.floor(Math.random() * 20) + 5, // 5-25 어시스트
-      damage: Math.floor(Math.random() * 40000) + 25000, // 25k-65k 데미지
-      healing: Math.floor(Math.random() * 8000) + 2000, // 2k-10k 힐링
-      duration: Math.floor(Math.random() * 20) + 25, // 25-45분
-      teamRank: Math.floor(Math.random() * 6) + 1, // 1-6등
+      kills: ((i * 3 + 5) % 15) + 5, // 5-20 킬 (deterministic)
+      deaths: ((i * 2 + 2) % 8) + 2, // 2-10 데스 (deterministic)
+      assists: ((i * 4 + 5) % 20) + 5, // 5-25 어시스트 (deterministic)
+      damage: ((i * 3000 + 25000) % 40000) + 25000, // 25k-65k 데미지 (deterministic)
+      healing: ((i * 600 + 2000) % 8000) + 2000, // 2k-10k 힐링 (deterministic)
+      duration: ((i * 2 + 25) % 20) + 25, // 25-45분 (deterministic)
+      teamRank: (i % 6) + 1, // 1-6등 (deterministic)
       timestamp: new Date(Date.now() - (i * 3600000)).toISOString()
     });
   }
