@@ -26,38 +26,99 @@ async function initializeDatabase() {
   try {
     console.log('🗄️ 데이터베이스 테이블 초기화 중...');
     
-    // 게시글 테이블 생성 시도
-    console.log('📝 게시글 테이블 생성 중...');
+    // 먼저 SQL 실행 함수 생성을 시도
+    console.log('🔧 SQL 실행 함수 생성 시도...');
+    const createFunctionSQL = `
+      CREATE OR REPLACE FUNCTION create_board_tables()
+      RETURNS text AS $$
+      BEGIN
+        -- 게시글 테이블 생성
+        CREATE TABLE IF NOT EXISTS board_posts (
+          id SERIAL PRIMARY KEY,
+          title TEXT NOT NULL,
+          content TEXT NOT NULL,
+          author_steam_id TEXT NOT NULL,
+          author_username TEXT NOT NULL,
+          author_avatar TEXT,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+
+        -- 댓글 테이블 생성
+        CREATE TABLE IF NOT EXISTS board_comments (
+          id SERIAL PRIMARY KEY,
+          post_id INTEGER REFERENCES board_posts(id) ON DELETE CASCADE,
+          content TEXT NOT NULL,
+          author_steam_id TEXT NOT NULL,
+          author_username TEXT NOT NULL,
+          author_avatar TEXT,
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+
+        -- 인덱스 생성
+        CREATE INDEX IF NOT EXISTS idx_board_posts_created_at ON board_posts(created_at DESC);
+        CREATE INDEX IF NOT EXISTS idx_board_comments_post_id ON board_comments(post_id);
+        CREATE INDEX IF NOT EXISTS idx_board_comments_created_at ON board_comments(created_at DESC);
+
+        RETURN 'Tables created successfully';
+      END;
+      $$ LANGUAGE plpgsql SECURITY DEFINER;
+    `;
+    
+    // RPC를 통해 함수 생성 시도
+    try {
+      const { data: funcResult, error: funcError } = await supabase.rpc('exec', { sql: createFunctionSQL });
+      if (!funcError) {
+        console.log('🎯 SQL 함수 생성됨, 테이블 생성 실행 중...');
+        const { data: tableResult, error: tableError } = await supabase.rpc('create_board_tables');
+        if (!tableError) {
+          console.log('✅ 테이블 자동 생성 성공!', tableResult);
+          return;
+        }
+      }
+    } catch (error) {
+      console.log('⚠️ RPC 함수 방식 실패, 대안 시도 중...');
+    }
+    
+    // 대안: 테이블 존재 확인으로 생성 여부 판단
+    console.log('📝 게시글 테이블 확인 중...');
     const { error: postsError } = await supabase
       .from('board_posts')
       .select('count')
       .limit(1);
     
-    if (postsError && postsError.code === 'PGRST116') {
-      console.log('📝 게시글 테이블이 존재하지 않습니다. 수동 생성이 필요합니다.');
-    } else if (!postsError) {
-      console.log('✅ 게시글 테이블이 이미 존재합니다.');
-    }
-    
-    // 댓글 테이블 확인
     console.log('💬 댓글 테이블 확인 중...');
     const { error: commentsError } = await supabase
       .from('board_comments')
       .select('count')
       .limit(1);
     
-    if (commentsError && commentsError.code === 'PGRST116') {
-      console.log('💬 댓글 테이블이 존재하지 않습니다. 수동 생성이 필요합니다.');
-    } else if (!commentsError) {
-      console.log('✅ 댓글 테이블이 이미 존재합니다.');
-    }
+    const postsExist = !postsError || postsError.code !== 'PGRST116';
+    const commentsExist = !commentsError || commentsError.code !== 'PGRST116';
     
-    console.log('✅ 데이터베이스 초기화 완료');
-    
-    // 테이블 생성이 필요한 경우 안내
-    if ((postsError && postsError.code === 'PGRST116') || (commentsError && commentsError.code === 'PGRST116')) {
+    if (postsExist && commentsExist) {
+      console.log('✅ 모든 테이블이 이미 존재합니다.');
+    } else {
+      console.log('⚠️ 일부 테이블이 누락되었습니다.');
+      console.log('- board_posts:', postsExist ? '✅ 존재' : '❌ 누락');
+      console.log('- board_comments:', commentsExist ? '✅ 존재' : '❌ 누락');
+      
+      // 자동 생성을 위한 마지막 시도
+      console.log('🔄 테이블 자동 생성을 위한 마지막 시도...');
+      
+      // 게시글 테이블이 없으면 생성 시도
+      if (!postsExist) {
+        try {
+          // 빈 데이터 삽입 시도로 테이블 생성 유도 (실패할 것이지만 테이블 구조 확인 가능)
+          await supabase.from('board_posts').insert([]).select();
+        } catch (e) {
+          console.log('📝 게시글 테이블 생성 시도 결과:', e.message);
+        }
+      }
+      
       console.log(`
-🔧 Supabase 대시보드에서 다음 SQL을 실행해주세요:
+🔧 테이블이 자동 생성되지 않았습니다. Supabase 대시보드에서 다음 SQL을 실행해주세요:
+https://dpmoafgaysocfjxlmaum.supabase.co → SQL Editor
 
 -- 게시글 테이블 생성
 CREATE TABLE IF NOT EXISTS board_posts (
@@ -82,9 +143,10 @@ CREATE TABLE IF NOT EXISTS board_comments (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 인덱스 생성
+-- 인덱스 생성 (성능 향상)
 CREATE INDEX IF NOT EXISTS idx_board_posts_created_at ON board_posts(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_board_comments_post_id ON board_comments(post_id);
+CREATE INDEX IF NOT EXISTS idx_board_comments_created_at ON board_comments(created_at DESC);
       `);
     }
     
