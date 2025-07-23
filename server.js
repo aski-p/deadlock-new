@@ -156,6 +156,140 @@ CREATE INDEX IF NOT EXISTS idx_board_comments_created_at ON board_comments(creat
   }
 }
 
+// 사용자 포인트 및 랭크 관리 함수
+async function updateUserPoints(steamId, username, avatar, pointsToAdd = 0) {
+  try {
+    // user_points 테이블이 없으면 생성
+    await supabase.rpc('exec', {
+      sql: `
+        CREATE TABLE IF NOT EXISTS user_points (
+          steam_id TEXT PRIMARY KEY,
+          username TEXT NOT NULL,
+          avatar TEXT,
+          points INTEGER DEFAULT 0,
+          rank_name TEXT DEFAULT 'Initiate',
+          rank_image TEXT DEFAULT 'initiate.svg',
+          last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_user_points_points ON user_points(points DESC);
+      `
+    }).catch(() => {}); // 테이블이 이미 존재하면 에러 무시
+    
+    // 현재 포인트 조회
+    const { data: currentUser, error: fetchError } = await supabase
+      .from('user_points')
+      .select('points')
+      .eq('steam_id', steamId)
+      .single();
+    
+    const currentPoints = currentUser?.points || 0;
+    const newPoints = currentPoints + pointsToAdd;
+    
+    // 사용자 포인트 업데이트
+    const { error } = await supabase
+      .from('user_points')
+      .upsert({
+        steam_id: steamId,
+        username: username,
+        avatar: avatar,
+        points: newPoints,
+        last_updated: new Date().toISOString()
+      });
+      
+    if (error) {
+      console.error('포인트 업데이트 오류:', error);
+    }
+    
+    // 포인트에 따른 랭크 업데이트
+    await updateUserRank(steamId);
+    
+  } catch (error) {
+    console.error('사용자 포인트 업데이트 실패:', error);
+  }
+}
+
+async function updateUserRank(steamId) {
+  try {
+    // 현재 포인트 조회
+    const { data: userData, error: fetchError } = await supabase
+      .from('user_points')
+      .select('points')
+      .eq('steam_id', steamId)
+      .single();
+      
+    if (fetchError || !userData) {
+      return;
+    }
+    
+    const points = userData.points || 0;
+    let rankName = 'Initiate';
+    let rankImage = 'initiate.svg';
+    
+    // 데드락 랭크 시스템 (테스트: 100점마다 등급 상승)
+    if (points >= 700) {
+      rankName = 'Eternus';
+      rankImage = 'eternus.svg';
+    } else if (points >= 600) {
+      rankName = 'Phantom';
+      rankImage = 'phantom.svg';
+    } else if (points >= 500) {
+      rankName = 'Oracle';
+      rankImage = 'oracle.svg';
+    } else if (points >= 400) {
+      rankName = 'Ritualist';
+      rankImage = 'ritualist.svg';
+    } else if (points >= 300) {
+      rankName = 'Alchemist';
+      rankImage = 'alchemist.svg';
+    } else if (points >= 200) {
+      rankName = 'Arcanist';
+      rankImage = 'arcanist.svg';
+    } else if (points >= 100) {
+      rankName = 'Seeker';
+      rankImage = 'seeker.svg';
+    }
+    
+    // 랭크 업데이트
+    await supabase
+      .from('user_points')
+      .update({
+        rank_name: rankName,
+        rank_image: rankImage
+      })
+      .eq('steam_id', steamId);
+      
+  } catch (error) {
+    console.error('랭크 업데이트 실패:', error);
+  }
+}
+
+async function getUserRankInfo(steamId) {
+  try {
+    const { data, error } = await supabase
+      .from('user_points')
+      .select('points, rank_name, rank_image')
+      .eq('steam_id', steamId)
+      .single();
+      
+    if (error || !data) {
+      return {
+        points: 0,
+        rank_name: 'Initiate',
+        rank_image: 'initiate.svg'
+      };
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('랭크 정보 조회 실패:', error);
+    return {
+      points: 0,
+      rank_name: 'Initiate',
+      rank_image: 'initiate.svg'
+    };
+  }
+}
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -1547,6 +1681,21 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
             // mate_id를 accountId로 사용
             const accountId = mate.mate_id?.toString() || 'unknown';
             
+            // Account ID를 Steam ID 64로 변환
+            let steamId64 = null;
+            try {
+              if (accountId && accountId !== 'unknown' && !isNaN(accountId)) {
+                // Account ID를 Steam ID 64로 변환: Account ID + 76561197960265728
+                // JavaScript number가 너무 커서 정밀도 문제가 발생할 수 있으므로 BigInt 사용
+                const accountBigInt = BigInt(accountId);
+                const steamBaseBigInt = BigInt('76561197960265728');
+                steamId64 = (accountBigInt + steamBaseBigInt).toString();
+                console.log(`🔄 Account ID ${accountId} → Steam ID ${steamId64}`);
+              }
+            } catch (error) {
+              console.log(`⚠️ Account ID to Steam ID 변환 실패 (${accountId}):`, error.message);
+            }
+            
             // 승률 계산
             const winRate = mate.matches_played > 0 ? 
               ((mate.wins || 0) / mate.matches_played * 100).toFixed(1) : 0;
@@ -1559,8 +1708,8 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
             
             return {
               accountId: accountId,
-              steamId: null, // mate-stats API에서 제공하지 않음
-              name: `Player_${accountId}`, // 이름 정보가 없으므로 기본 이름 사용
+              steamId: steamId64,
+              name: `Player_${accountId}`, // Steam API에서 업데이트 예정
               avatar: 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
               matches: mate.matches_played,
               wins: mate.wins || 0,
@@ -2595,17 +2744,24 @@ app.get('/api/v1/board/posts', async (req, res) => {
       return res.status(500).json({ error: '게시글을 불러올 수 없습니다' });
     }
     
-    // 각 게시글의 댓글 수 조회
+    // 각 게시글의 댓글 수 및 작성자 랭크 정보 조회
     const postsWithCommentCount = await Promise.all(
       posts.map(async (post) => {
+        // 댓글 수 조회
         const { count: commentCount } = await supabase
           .from('board_comments')
           .select('*', { count: 'exact', head: true })
           .eq('post_id', post.id);
         
+        // 작성자 랭크 정보 조회
+        const rankInfo = await getUserRankInfo(post.author_steam_id);
+        
         return {
           ...post,
           commentCount: commentCount || 0,
+          points: rankInfo.points,
+          rank_name: rankInfo.rank_name,
+          rank_image: rankInfo.rank_image,
           author: {
             steamId: post.author_steam_id,
             username: post.author_username,
@@ -2658,6 +2814,15 @@ app.post('/api/v1/board/posts', async (req, res) => {
     if (error) {
       console.error('게시글 작성 오류:', error);
       return res.status(500).json({ error: '게시글 작성에 실패했습니다' });
+    }
+    
+    // 글 작성 시 10점 추가
+    try {
+      await updateUserPoints(req.user.steamId, req.user.username, req.user.avatar, 10);
+      console.log(`포인트 추가: ${req.user.username} (+10점)`);
+    } catch (pointError) {
+      console.error('포인트 추가 오류:', pointError);
+      // 포인트 오류가 있어도 게시글 작성은 성공으로 처리
     }
     
     res.json({
@@ -2719,6 +2884,9 @@ app.get('/api/v1/board/posts/:postId', async (req, res) => {
       console.error('댓글 조회 오류:', commentsError);
     }
     
+    // 작성자 랭크 정보 조회
+    const rankInfo = await getUserRankInfo(post.author_steam_id);
+    
     res.json({
       post: {
         id: post.id,
@@ -2728,13 +2896,117 @@ app.get('/api/v1/board/posts/:postId', async (req, res) => {
         author_avatar: post.author_avatar,
         view_count: post.view_count || 0,
         created_at: post.created_at,
-        updated_at: post.updated_at
+        updated_at: post.updated_at,
+        points: rankInfo.points,
+        rank_name: rankInfo.rank_name,
+        rank_image: rankInfo.rank_image
       },
-      comments: comments || []
+      comments: comments || [],
+      canEdit: req.user && req.user.steamId === post.author_steam_id // 수정 권한 확인
     });
     
   } catch (error) {
     console.error('게시글 상세 조회 API 오류:', error);
+    res.status(500).json({ error: '서버 오류가 발생했습니다' });
+  }
+});
+
+// 게시판 API - 게시글 수정
+app.put('/api/v1/board/posts/:postId', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Steam 로그인이 필요합니다' });
+    }
+    
+    const postId = parseInt(req.params.postId);
+    const { title, content } = req.body;
+    
+    if (!title || !content) {
+      return res.status(400).json({ error: '제목과 내용을 모두 입력해주세요' });
+    }
+    
+    // 게시글 존재 확인 및 작성자 확인
+    const { data: post, error: fetchError } = await supabase
+      .from('board_posts')
+      .select('author_steam_id')
+      .eq('id', postId)
+      .single();
+    
+    if (fetchError || !post) {
+      return res.status(404).json({ error: '게시글을 찾을 수 없습니다' });
+    }
+    
+    if (post.author_steam_id !== req.user.steamId) {
+      return res.status(403).json({ error: '본인의 게시글만 수정할 수 있습니다' });
+    }
+    
+    // 게시글 수정
+    const { data: updatedPost, error: updateError } = await supabase
+      .from('board_posts')
+      .update({
+        title: title.trim(),
+        content: content.trim(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', postId)
+      .select()
+      .single();
+    
+    if (updateError) {
+      console.error('게시글 수정 오류:', updateError);
+      return res.status(500).json({ error: '게시글 수정에 실패했습니다' });
+    }
+    
+    res.json({
+      success: true,
+      post: updatedPost
+    });
+    
+  } catch (error) {
+    console.error('게시글 수정 API 오류:', error);
+    res.status(500).json({ error: '서버 오류가 발생했습니다' });
+  }
+});
+
+// 게시판 API - 게시글 삭제
+app.delete('/api/v1/board/posts/:postId', async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Steam 로그인이 필요합니다' });
+    }
+    
+    const postId = parseInt(req.params.postId);
+    
+    // 게시글 존재 확인 및 작성자 확인
+    const { data: post, error: fetchError } = await supabase
+      .from('board_posts')
+      .select('author_steam_id')
+      .eq('id', postId)
+      .single();
+    
+    if (fetchError || !post) {
+      return res.status(404).json({ error: '게시글을 찾을 수 없습니다' });
+    }
+    
+    if (post.author_steam_id !== req.user.steamId) {
+      return res.status(403).json({ error: '본인의 게시글만 삭제할 수 있습니다' });
+    }
+    
+    // 게시글 삭제 (댓글도 CASCADE로 함께 삭제됨)
+    const { error: deleteError } = await supabase
+      .from('board_posts')
+      .delete()
+      .eq('id', postId);
+    
+    if (deleteError) {
+      console.error('게시글 삭제 오류:', deleteError);
+      return res.status(500).json({ error: '게시글 삭제에 실패했습니다' });
+    }
+    
+    res.json({ success: true });
+    
+  } catch (error) {
+    console.error('게시글 삭제 API 오류:', error);
     res.status(500).json({ error: '서버 오류가 발생했습니다' });
   }
 });
