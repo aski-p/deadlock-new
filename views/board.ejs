@@ -30,21 +30,76 @@
             </div>
         </div>
 
-        <!-- 게시글 목록 -->
+        <!-- 게시글 테이블 -->
         <div class="posts-container">
             <div class="posts-loading" id="postsLoading">
                 <div class="loading-spinner"></div>
                 <p>게시글을 불러오는 중...</p>
             </div>
             
-            <div class="posts-list" id="postsList" style="display: none;">
-                <!-- 게시글들이 여기에 동적으로 로드됩니다 -->
+            <div class="posts-table-container" id="postsTableContainer" style="display: none;">
+                <table class="posts-table">
+                    <thead>
+                        <tr>
+                            <th class="date-column">날짜</th>
+                            <th class="title-column">제목</th>
+                            <th class="author-column">글쓴이</th>
+                            <th class="views-column">조회수</th>
+                            <th class="comments-column">댓글</th>
+                        </tr>
+                    </thead>
+                    <tbody id="postsTableBody">
+                        <!-- 게시글들이 여기에 동적으로 로드됩니다 -->
+                    </tbody>
+                </table>
             </div>
             
             <div class="pagination" id="pagination" style="display: none;">
                 <button class="page-btn" id="prevBtn" onclick="changePage(-1)">이전</button>
                 <span class="page-info" id="pageInfo">1 / 1</span>
                 <button class="page-btn" id="nextBtn" onclick="changePage(1)">다음</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 게시글 상세 모달 -->
+<div class="post-modal" id="postModal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">게시글 제목</h2>
+            <button class="close-btn" onclick="closePostModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="post-info">
+                <div class="post-author">
+                    <img id="modalAuthorAvatar" src="" alt="작성자" class="author-avatar">
+                    <span id="modalAuthorName">작성자</span>
+                </div>
+                <div class="post-meta">
+                    <span id="modalDate">2025-01-01</span>
+                    <span>조회수: <span id="modalViews">0</span></span>
+                </div>
+            </div>
+            <div class="post-content" id="modalContent">
+                게시글 내용이 여기에 표시됩니다.
+            </div>
+            
+            <!-- 댓글 섹션 -->
+            <div class="comments-section">
+                <h3>댓글 <span id="commentsCount">0</span>개</h3>
+                <div class="comments-list" id="commentsList">
+                    <!-- 댓글들이 여기에 표시됩니다 -->
+                </div>
+                
+                <% if (user) { %>
+                <div class="comment-form">
+                    <textarea id="commentInput" placeholder="댓글을 입력하세요..." rows="3"></textarea>
+                    <button onclick="addComment()" class="comment-submit-btn">댓글 작성</button>
+                </div>
+                <% } else { %>
+                <p class="login-notice">댓글 작성을 위해서는 <a href="/auth/steam">Steam 로그인</a>이 필요합니다.</p>
+                <% } %>
             </div>
         </div>
     </div>
@@ -206,42 +261,66 @@
     100% { transform: rotate(360deg); }
 }
 
-.post-item {
+/* 게시글 테이블 스타일 */
+.posts-table-container {
     background: rgba(255, 255, 255, 0.05);
-    padding: 20px;
     border-radius: 12px;
-    margin-bottom: 20px;
+    overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.posts-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.posts-table thead {
+    background: rgba(99, 162, 226, 0.2);
+}
+
+.posts-table th {
+    padding: 15px 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #FFEFD7;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.posts-table td {
+    padding: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: #FFEFD7;
+    vertical-align: middle;
+}
+
+.posts-table tbody tr {
     transition: all 0.3s;
     cursor: pointer;
 }
 
-.post-item:hover {
+.posts-table tbody tr:hover {
     background: rgba(99, 162, 226, 0.1);
-    border-color: #63a2e2;
-    transform: translateY(-2px);
 }
 
-.post-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-}
+/* 테이블 컬럼 너비 */
+.date-column { width: 120px; }
+.title-column { width: auto; min-width: 300px; }
+.author-column { width: 150px; }
+.views-column { width: 80px; text-align: center; }
+.comments-column { width: 80px; text-align: center; }
 
-.post-title {
-    font-size: 18px;
-    font-weight: 600;
+.post-title-link {
     color: #FFEFD7;
-    margin: 0;
+    text-decoration: none;
+    font-weight: 500;
+    display: block;
+    padding: 4px 0;
 }
 
-.post-meta {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    font-size: 12px;
-    color: #999;
+.post-title-link:hover {
+    color: #63a2e2;
+    text-decoration: underline;
 }
 
 .post-author {
@@ -256,22 +335,162 @@
     border-radius: 50%;
 }
 
-.post-content-preview {
-    color: #ccc;
-    font-size: 14px;
-    line-height: 1.4;
-    margin-bottom: 12px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+.post-date {
+    color: #999;
+    font-size: 12px;
 }
 
-.post-stats {
+/* 모달 스타일 */
+.post-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
     display: flex;
-    gap: 15px;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: #1a1a1a;
+    border-radius: 12px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: #FFEFD7;
+    font-size: 20px;
+    flex: 1;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.close-btn:hover {
+    color: #FFEFD7;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.post-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.post-meta {
+    display: flex;
+    gap: 20px;
     font-size: 12px;
     color: #999;
+}
+
+.post-content {
+    color: #FFEFD7;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.comments-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 20px;
+}
+
+.comments-section h3 {
+    color: #FFEFD7;
+    margin-bottom: 15px;
+}
+
+.comment-item {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.comment-author {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.comment-content {
+    color: #ccc;
+    line-height: 1.4;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.comment-date {
+    color: #999;
+    font-size: 11px;
+    margin-top: 5px;
+}
+
+.comment-form {
+    margin-top: 20px;
+}
+
+.comment-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    color: #FFEFD7;
+    font-size: 14px;
+    box-sizing: border-box;
+    resize: vertical;
+    margin-bottom: 10px;
+}
+
+.comment-submit-btn {
+    background: #63a2e2;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.comment-submit-btn:hover {
+    background: #4f8bc9;
 }
 
 .pagination {
@@ -330,35 +549,36 @@
 <script>
 let currentPage = 1;
 let totalPages = 1;
+let currentPostId = null;
 
 // 페이지 로드 시 게시글 목록 불러오기
 document.addEventListener('DOMContentLoaded', () => {
     loadPosts();
 });
 
-// 게시글 목록 불러오기
+// 게시글 목록 불러오기 (50개씩)
 async function loadPosts(page = 1) {
     const loading = document.getElementById('postsLoading');
-    const postsList = document.getElementById('postsList');
+    const tableContainer = document.getElementById('postsTableContainer');
     const pagination = document.getElementById('pagination');
     
     loading.style.display = 'block';
-    postsList.style.display = 'none';
+    tableContainer.style.display = 'none';
     pagination.style.display = 'none';
     
     try {
-        const response = await fetch(`/api/v1/board/posts?page=${page}&limit=10`);
+        const response = await fetch(`/api/v1/board/posts?page=${page}`);
         const data = await response.json();
         
         if (response.ok) {
             currentPage = data.currentPage;
             totalPages = data.totalPages;
             
-            displayPosts(data.posts);
+            displayPostsTable(data.posts);
             updatePagination();
             
             loading.style.display = 'none';
-            postsList.style.display = 'block';
+            tableContainer.style.display = 'block';
             if (totalPages > 1) {
                 pagination.style.display = 'flex';
             }
@@ -371,34 +591,37 @@ async function loadPosts(page = 1) {
     }
 }
 
-// 게시글 목록 표시
-function displayPosts(posts) {
-    const postsList = document.getElementById('postsList');
+// 게시글 테이블 표시
+function displayPostsTable(posts) {
+    const tableBody = document.getElementById('postsTableBody');
     
     if (posts.length === 0) {
-        postsList.innerHTML = '<p style="text-align: center; color: #999; padding: 40px;">아직 게시글이 없습니다.</p>';
+        tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999; padding: 40px;">아직 게시글이 없습니다.</td></tr>';
         return;
     }
     
-    postsList.innerHTML = posts.map(post => `
-        <div class="post-item" onclick="viewPost(${post.id})">
-            <div class="post-header">
-                <h3 class="post-title">${escapeHtml(post.title)}</h3>
-                <div class="post-meta">
-                    <div class="post-author">
-                        <img src="${post.author.avatar}" alt="${post.author.username}" class="author-avatar" onerror="this.src='data:image/svg+xml;charset=utf-8,${encodeURIComponent('<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"24\\\" height=\\\"24\\\" viewBox=\\\"0 0 24 24\\\"><circle cx=\\\"12\\\" cy=\\\"12\\\" r=\\\"10\\\" fill=\\\"#666\\\" stroke=\\\"#fff\\\" stroke-width=\\\"2\\\"/><circle cx=\\\"12\\\" cy=\\\"10\\\" r=\\\"3\\\" fill=\\\"#fff\\\"/><path d=\\\"M6.5 17.5 Q12 15 17.5 17.5\\\" stroke=\\\"#fff\\\" stroke-width=\\\"2\\\" fill=\\\"none\\\"/></svg>')}'">
-                        <span>${escapeHtml(post.author.username)}</span>
-                    </div>
-                    <span>${formatDate(post.created_at)}</span>
+    tableBody.innerHTML = posts.map(post => `
+        <tr onclick="openPostModal(${post.id})">
+            <td class="date-column">
+                <div class="post-date">${formatDate(post.created_at)}</div>
+            </td>
+            <td class="title-column">
+                <div class="post-title-link">${escapeHtml(post.title)}</div>
+            </td>
+            <td class="author-column">
+                <div class="post-author">
+                    <img src="${post.author_avatar}" alt="${post.author_username}" class="author-avatar" 
+                         onerror="this.src='data:image/svg+xml;charset=utf-8,${encodeURIComponent('<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"24\\\" height=\\\"24\\\" viewBox=\\\"0 0 24 24\\\"><circle cx=\\\"12\\\" cy=\\\"12\\\" r=\\\"10\\\" fill=\\\"#666\\\" stroke=\\\"#fff\\\" stroke-width=\\\"2\\\"/><circle cx=\\\"12\\\" cy=\\\"10\\\" r=\\\"3\\\" fill=\\\"#fff\\\"/><path d=\\\"M6.5 17.5 Q12 15 17.5 17.5\\\" stroke=\\\"#fff\\\" stroke-width=\\\"2\\\" fill=\\\"none\\\"/></svg>')}'">
+                    <span>${escapeHtml(post.author_username)}</span>
                 </div>
-            </div>
-            <div class="post-content-preview">
-                ${escapeHtml(post.content)}
-            </div>
-            <div class="post-stats">
-                <span>💬 댓글 ${post.commentCount || 0}개</span>
-            </div>
-        </div>
+            </td>
+            <td class="views-column" style="text-align: center;">
+                ${post.view_count || 0}
+            </td>
+            <td class="comments-column" style="text-align: center;">
+                ${post.commentCount || 0}
+            </td>
+        </tr>
     `).join('');
 }
 
@@ -465,11 +688,120 @@ document.getElementById('writePostForm').addEventListener('submit', async (e) =>
     }
 });
 
-// 게시글 상세 보기 (추후 구현)
-function viewPost(postId) {
-    console.log('게시글 상세보기:', postId);
-    // 추후 모달이나 별도 페이지로 구현
+// 게시글 모달 열기
+async function openPostModal(postId) {
+    try {
+        currentPostId = postId;
+        
+        // 게시글 상세 정보 로드
+        const response = await fetch(`/api/v1/board/posts/${postId}`);
+        const data = await response.json();
+        
+        if (response.ok) {
+            // 모달 내용 업데이트
+            document.getElementById('modalTitle').textContent = data.post.title;
+            document.getElementById('modalAuthorAvatar').src = data.post.author_avatar;
+            document.getElementById('modalAuthorName').textContent = data.post.author_username;
+            document.getElementById('modalDate').textContent = formatDate(data.post.created_at);
+            document.getElementById('modalViews').textContent = data.post.view_count || 0;
+            document.getElementById('modalContent').textContent = data.post.content;
+            
+            // 댓글 표시
+            displayComments(data.comments || []);
+            
+            // 모달 표시
+            document.getElementById('postModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // 스크롤 방지
+        } else {
+            alert(data.error || '게시글을 불러올 수 없습니다.');
+        }
+    } catch (error) {
+        console.error('게시글 로드 오류:', error);
+        alert('게시글을 불러오는 중 오류가 발생했습니다.');
+    }
 }
+
+// 게시글 모달 닫기
+function closePostModal() {
+    document.getElementById('postModal').style.display = 'none';
+    document.body.style.overflow = 'auto'; // 스크롤 복원
+    currentPostId = null;
+}
+
+// 댓글 표시
+function displayComments(comments) {
+    const commentsList = document.getElementById('commentsList');
+    const commentsCount = document.getElementById('commentsCount');
+    
+    commentsCount.textContent = comments.length;
+    
+    if (comments.length === 0) {
+        commentsList.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">아직 댓글이 없습니다.</p>';
+        return;
+    }
+    
+    commentsList.innerHTML = comments.map(comment => `
+        <div class="comment-item">
+            <div class="comment-author">
+                <img src="${comment.author_avatar}" alt="${comment.author_username}" class="author-avatar"
+                     onerror="this.src='data:image/svg+xml;charset=utf-8,${encodeURIComponent('<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"24\\\" height=\\\"24\\\" viewBox=\\\"0 0 24 24\\\"><circle cx=\\\"12\\\" cy=\\\"12\\\" r=\\\"10\\\" fill=\\\"#666\\\" stroke=\\\"#fff\\\" stroke-width=\\\"2\\\"/><circle cx=\\\"12\\\" cy=\\\"10\\\" r=\\\"3\\\" fill=\\\"#fff\\\"/><path d=\\\"M6.5 17.5 Q12 15 17.5 17.5\\\" stroke=\\\"#fff\\\" stroke-\\\"2\\\" fill=\\\"none\\\"/></svg>')}'">
+                <span>${escapeHtml(comment.author_username)}</span>
+            </div>
+            <div class="comment-content">${escapeHtml(comment.content)}</div>
+            <div class="comment-date">${formatDate(comment.created_at)}</div>
+        </div>
+    `).join('');
+}
+
+// 댓글 작성
+async function addComment() {
+    if (!currentPostId) return;
+    
+    const commentInput = document.getElementById('commentInput');
+    const content = commentInput.value.trim();
+    
+    if (!content) {
+        alert('댓글 내용을 입력해주세요.');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/v1/board/posts/${currentPostId}/comments`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ content })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+            commentInput.value = '';
+            // 게시글 다시 로드해서 댓글 업데이트
+            openPostModal(currentPostId);
+        } else {
+            alert(data.error || '댓글 작성에 실패했습니다.');
+        }
+    } catch (error) {
+        console.error('댓글 작성 오류:', error);
+        alert('댓글 작성 중 오류가 발생했습니다.');
+    }
+}
+
+// 모달 외부 클릭시 닫기
+document.getElementById('postModal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('postModal')) {
+        closePostModal();
+    }
+});
+
+// ESC 키로 모달 닫기
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.getElementById('postModal').style.display === 'flex') {
+        closePostModal();
+    }
+});
 
 // HTML 이스케이프
 function escapeHtml(text) {

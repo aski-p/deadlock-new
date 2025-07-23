@@ -2570,7 +2570,7 @@ app.get('/ko/board', (req, res) => {
 app.get('/api/v1/board/posts', async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const limit = 50; // 고정 50개
     const offset = (page - 1) * limit;
     
     // 총 게시글 수 조회
@@ -2674,6 +2674,67 @@ app.post('/api/v1/board/posts', async (req, res) => {
     
   } catch (error) {
     console.error('게시글 작성 API 오류:', error);
+    res.status(500).json({ error: '서버 오류가 발생했습니다' });
+  }
+});
+
+// 게시판 API - 게시글 상세 조회 (조회수 증가)
+app.get('/api/v1/board/posts/:postId', async (req, res) => {
+  try {
+    const postId = parseInt(req.params.postId);
+    
+    if (!postId) {
+      return res.status(400).json({ error: '유효하지 않은 게시글 ID입니다' });
+    }
+    
+    // 조회수 증가
+    const { error: updateError } = await supabase
+      .from('board_posts')
+      .update({ view_count: supabase.sql`view_count + 1` })
+      .eq('id', postId);
+    
+    if (updateError) {
+      console.log('조회수 증가 실패:', updateError);
+    }
+    
+    // 게시글 상세 정보 조회
+    const { data: post, error: postError } = await supabase
+      .from('board_posts')
+      .select('*')
+      .eq('id', postId)
+      .single();
+    
+    if (postError || !post) {
+      return res.status(404).json({ error: '게시글을 찾을 수 없습니다' });
+    }
+    
+    // 댓글 조회
+    const { data: comments, error: commentsError } = await supabase
+      .from('board_comments')
+      .select('*')
+      .eq('post_id', postId)
+      .order('created_at', { ascending: true });
+    
+    if (commentsError) {
+      console.error('댓글 조회 오류:', commentsError);
+    }
+    
+    res.json({
+      post: {
+        id: post.id,
+        title: post.title,
+        content: post.content,
+        author_username: post.author_username,
+        author_avatar: post.author_avatar,
+        view_count: post.view_count || 0,
+        created_at: post.created_at,
+        updated_at: post.updated_at
+      },
+      comments: comments || []
+    });
+    
+  } catch (error) {
+    console.error('게시글 상세 조회 API 오류:', error);
     res.status(500).json({ error: '서버 오류가 발생했습니다' });
   }
 });
