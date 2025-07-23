@@ -1874,7 +1874,7 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
 const getHeroNameById = (heroId) => {
   const heroMap = {
     1: 'Infernus', 2: 'Seven', 4: 'Lady Geist', 6: 'Abrams', 7: 'Wraith', 
-    8: 'McGinnis', 10: 'Paradox', 11: 'Kelvin', 13: 'Haze', 
+    8: 'McGinnis', 10: 'Paradox', 11: 'Kelvin', 12: 'Kelvin', 13: 'Haze', 
     14: 'Holliday', 15: 'Bebop', 16: 'Calico', 17: 'Grey Talon', 18: 'Mo & Krill', 19: 'Shiv', 
     20: 'Ivy', 25: 'Warden', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
     50: 'Pocket', 52: 'Mirage', 58: 'Viper', 60: 'Sinclair', 62: 'Mo & Krill', 63: 'Dynamo'
