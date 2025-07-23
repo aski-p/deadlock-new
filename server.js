@@ -321,12 +321,12 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       25: 'Warden',
       27: 'Wraith',
       31: 'Yamato',
-      50: 'Pocket',
+      50: 'Holliday',
       52: 'Mirage',
       58: 'Viper',
       59: 'Calico',
       60: 'Sinclair',
-      61: 'Holliday',
+      61: 'Pocket',
       62: 'Mo & Krill',
       63: 'Dynamo'
     };
@@ -1326,9 +1326,9 @@ function generateFastHeroStats(accountId) {
 const heroIdMap = {
   1: 'Infernus', 2: 'Seven', 4: 'Grey Talon', 6: 'Abrams', 7: 'Ivy', 
   8: 'McGinnis', 10: 'Paradox', 11: 'Kelvin', 13: 'Haze', 
-  14: 'Pocket', 15: 'Bebop', 16: 'Calico', 17: 'Dynamo', 18: 'Mo & Krill', 19: 'Shiv', 
+  14: 'Holliday', 15: 'Bebop', 16: 'Pocket', 17: 'Dynamo', 18: 'Mo & Krill', 19: 'Shiv', 
   20: 'Shiv', 25: 'Viper', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
-  50: 'Pocket', 52: 'Mirage', 58: 'Viper', 60: 'Sinclair'
+  50: 'Holliday', 52: 'Mirage', 58: 'Viper', 60: 'Sinclair', 61: 'Pocket'
 };
 
 
@@ -1854,7 +1854,7 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
           matchId: match.match_id || match.id,
           hero: getHeroNameById(match.hero_id),
           result: isWin ? '승리' : '패배',
-          duration: match.match_duration_s || 0,
+          duration: Math.round((match.match_duration_s || 0) / 60),
           kills: match.player_kills || match.kills || 0,
           deaths: match.player_deaths || match.deaths || 0,
           assists: match.player_assists || match.assists || 0,
@@ -1882,9 +1882,9 @@ const getHeroNameById = (heroId) => {
   const heroMap = {
     1: 'Infernus', 2: 'Seven', 4: 'Lady Geist', 6: 'Abrams', 7: 'Wraith', 
     8: 'McGinnis', 10: 'Paradox', 11: 'Kelvin', 12: 'Dynamo', 13: 'Haze', 
-    14: 'Holliday', 15: 'Bebop', 16: 'Calico', 17: 'Grey Talon', 18: 'Mo & Krill', 19: 'Shiv', 
+    14: 'Holliday', 15: 'Bebop', 16: 'Pocket', 17: 'Grey Talon', 18: 'Mo & Krill', 19: 'Shiv', 
     20: 'Ivy', 25: 'Warden', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
-    50: 'Pocket', 52: 'Mirage', 58: 'Viper', 60: 'Sinclair', 62: 'Mo & Krill', 63: 'Dynamo'
+    50: 'Holliday', 52: 'Mirage', 58: 'Viper', 59: 'Calico', 60: 'Sinclair', 61: 'Pocket', 62: 'Mo & Krill', 63: 'Dynamo'
   };
   return heroMap[heroId] || `Hero_${heroId}`;
 };
