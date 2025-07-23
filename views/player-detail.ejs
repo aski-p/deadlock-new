@@ -666,6 +666,7 @@ function updateHeroesGrid(heroes) {
             'Pocket': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/synth_card.webp',
             'Seven': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/gigawatt_card.webp',
             'Shiv': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/shiv_card.webp',
+            'Vindicta': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kali_card.webp',
             'Viper': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kali_card.webp',
             'Viscous': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/viscous_card.webp',
             'Warden': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/warden_card.webp',
@@ -711,6 +712,7 @@ function updateMatchesList(matches) {
             'Pocket': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/synth_card.webp',
             'Seven': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/gigawatt_card.webp',
             'Shiv': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/shiv_card.webp',
+            'Vindicta': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kali_card.webp',
             'Viper': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kali_card.webp',
             'Viscous': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/viscous_card.webp',
             'Warden': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/warden_card.webp',
@@ -736,6 +738,8 @@ function updateMatchesList(matches) {
             <div class="match-stats">
                 <span>${(match.damage / 1000).toFixed(1)}k 데미지</span>
                 <span>${(match.healing / 1000).toFixed(1)}k 힐링</span>
+                <span>${match.denies} 디나이</span>
+                <span>${match.soulsPerMin}/분 소울</span>
                 <span>${match.duration}분</span>
                 <span>팀 순위 ${match.teamRank}</span>
             </div>
