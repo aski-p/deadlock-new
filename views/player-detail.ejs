@@ -69,6 +69,14 @@
                 </div>
             </div>
 
+            <!-- Party Stats Section -->
+            <div class="player-section">
+                <h2 class="section-title">파티 통계</h2>
+                <div class="party-stats-grid" id="party-stats-grid">
+                    <!-- Party stats will be populated by JavaScript -->
+                </div>
+            </div>
+
             <!-- Heroes Section -->
             <div class="player-section">
                 <h2 class="section-title">플레이한 영웅</h2>
@@ -382,6 +390,74 @@
     color: #999;
 }
 
+.party-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.party-stat-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 30px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s;
+    text-align: center;
+}
+
+.party-stat-card:hover {
+    background: rgba(99, 162, 226, 0.1);
+    border-color: #63a2e2;
+    transform: translateY(-2px);
+}
+
+.party-size {
+    font-size: 48px;
+    font-weight: 700;
+    color: #63a2e2;
+    margin-bottom: 10px;
+}
+
+.party-size-label {
+    font-size: 16px;
+    color: #FFEFD7;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.party-stats-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.party-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+}
+
+.party-stat-label {
+    color: #999;
+}
+
+.party-stat-value {
+    color: #FFEFD7;
+    font-weight: 600;
+}
+
+.party-win-rate {
+    font-size: 20px;
+    font-weight: 700;
+    color: #10B981;
+    margin-top: 10px;
+}
+
 .player-error {
     text-align: center;
     padding: 100px 20px;
@@ -543,6 +619,9 @@ function updatePlayerUI(player) {
     document.getElementById('stat-damage').textContent = player.stats.damagePerMin.toLocaleString();
     document.getElementById('stat-healing').textContent = player.stats.healingPerMin.toLocaleString();
     
+    // Party Stats
+    loadPartyStats();
+    
     // Heroes
     updateHeroesGrid(player.heroes);
     
@@ -644,6 +723,56 @@ function updateMatchesList(matches) {
                 <span>${match.duration}분</span>
                 <span>팀 순위 ${match.teamRank}</span>
             </div>
+        </div>
+    `).join('');
+}
+
+async function loadPartyStats() {
+    try {
+        const response = await fetch(`/api/v1/players/<%= accountId %>/party-stats`);
+        const partyStats = await response.json();
+        
+        if (response.ok && Array.isArray(partyStats)) {
+            updatePartyStatsGrid(partyStats);
+        } else {
+            console.error('Failed to load party stats:', partyStats);
+            document.getElementById('party-stats-grid').innerHTML = '<p style="text-align: center; color: #999;">파티 통계를 불러올 수 없습니다.</p>';
+        }
+    } catch (error) {
+        console.error('Party stats loading error:', error);
+        document.getElementById('party-stats-grid').innerHTML = '<p style="text-align: center; color: #999;">파티 통계를 불러올 수 없습니다.</p>';
+    }
+}
+
+function updatePartyStatsGrid(partyStats) {
+    const grid = document.getElementById('party-stats-grid');
+    
+    if (!partyStats || partyStats.length === 0) {
+        grid.innerHTML = '<p style="text-align: center; color: #999;">파티 통계 데이터가 없습니다.</p>';
+        return;
+    }
+    
+    grid.innerHTML = partyStats.map(stat => `
+        <div class="party-stat-card">
+            <div class="party-size">${stat.party_size}</div>
+            <div class="party-size-label">${stat.party_size}인 파티</div>
+            
+            <div class="party-stats-details">
+                <div class="party-stat-row">
+                    <span class="party-stat-label">총 경기</span>
+                    <span class="party-stat-value">${stat.matches_played}</span>
+                </div>
+                <div class="party-stat-row">
+                    <span class="party-stat-label">승리</span>
+                    <span class="party-stat-value" style="color: #10B981;">${stat.wins}</span>
+                </div>
+                <div class="party-stat-row">
+                    <span class="party-stat-label">패배</span>
+                    <span class="party-stat-value" style="color: #EF4444;">${stat.losses}</span>
+                </div>
+            </div>
+            
+            <div class="party-win-rate">${stat.win_rate}%</div>
         </div>
     `).join('');
 }

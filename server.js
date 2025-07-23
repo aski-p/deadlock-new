@@ -1472,145 +1472,54 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
     // 캐시 확인
     const cached = getCachedData(cacheKey);
     if (cached) {
-      console.log(`📦 캐시된 파티 스탯 반환: ${cached.length}개 파티원`);
+      console.log(`📦 캐시된 파티 스탯 반환: ${cached.length}개 파티 규모`);
       return res.json(cached);
     }
     
-    // 매치 히스토리에서 파티원 정보 추출 (deadlock.coach 방식)
+    // deadlock-api.com의 party-stats 엔드포인트 사용
     try {
-      console.log(`🌐 매치 히스토리에서 파티 정보 추출 시작`);
-      const matchResponse = await axios.get(`https://api.deadlock-api.com/v1/players/${accountId}/match-history`, {
+      console.log(`🌐 API에서 파티 통계 가져오기 시작`);
+      const response = await axios.get(`https://api.deadlock-api.com/v1/players/${accountId}/party-stats`, {
         timeout: 10000,
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
       });
       
-      if (!matchResponse.data || !Array.isArray(matchResponse.data) || matchResponse.data.length === 0) {
-        console.log('❌ 매치 히스토리 데이터 없음');
+      if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
+        console.log('❌ 파티 통계 데이터 없음');
         res.json([]);
         return;
       }
       
-      console.log(`📊 ${matchResponse.data.length}개 매치에서 파티원 분석 중...`);
-      
-      // 파티원 통계 계산
-      const partyMembers = new Map();
-      
-      // 최근 50경기만 분석 (성능 최적화)
-      const recentMatches = matchResponse.data.slice(0, 50);
-      
-      for (const match of recentMatches) {
-        // 같은 팀 플레이어들 찾기
-        if (match.match_players && Array.isArray(match.match_players)) {
-          const currentPlayerTeam = match.player_team || match.team_assignment;
-          
-          for (const player of match.match_players) {
-            // 본인 제외하고 같은 팀원만
-            if (player.account_id && 
-                player.account_id != accountId && 
-                player.team_assignment === currentPlayerTeam) {
-              
-              const playerId = player.account_id;
-              
-              if (!partyMembers.has(playerId)) {
-                partyMembers.set(playerId, {
-                  accountId: playerId,
-                  name: player.player_name || player.account_name || `Player_${playerId}`,
-                  matches: 0,
-                  wins: 0,
-                  totalKills: 0,
-                  totalDeaths: 0,
-                  totalAssists: 0
-                });
-              }
-              
-              const memberData = partyMembers.get(playerId);
-              memberData.matches++;
-              
-              // 매치 승리 여부 확인
-              const isWin = (match.team_assignment !== undefined && match.winning_team !== undefined) 
-                          ? match.team_assignment === match.winning_team
-                          : match.won === true || match.won === 1;
-              
-              if (isWin) {
-                memberData.wins++;
-              }
-              
-              // 통계 누적
-              memberData.totalKills += player.kills || 0;
-              memberData.totalDeaths += player.deaths || 0;
-              memberData.totalAssists += player.assists || 0;
-            }
-          }
-        }
-      }
-      
-      // 파티원 데이터를 배열로 변환하고 정리
-      const partyStats = Array.from(partyMembers.values())
-        .filter(member => member.matches >= 2) // 최소 2경기 이상 함께한 팀원만
-        .map(member => {
-          const winRate = member.matches > 0 ? Math.round((member.wins / member.matches) * 100) : 0;
-          const avgKda = member.totalDeaths > 0 
-            ? ((member.totalKills + member.totalAssists) / member.totalDeaths).toFixed(1)
-            : (member.totalKills + member.totalAssists).toFixed(1);
-          
-          return {
-            accountId: member.accountId,
-            name: member.name,
-            avatar: 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
-            matches: member.matches,
-            wins: member.wins,
-            losses: member.matches - member.wins,
-            winRate: winRate,
-            avgKills: member.matches > 0 ? (member.totalKills / member.matches).toFixed(1) : '0.0',
-            avgDeaths: member.matches > 0 ? (member.totalDeaths / member.matches).toFixed(1) : '0.0',
-            avgAssists: member.matches > 0 ? (member.totalAssists / member.matches).toFixed(1) : '0.0',
-            avgKda: avgKda,
-            lastPlayedTogether: null
-          };
-        })
-        .sort((a, b) => b.matches - a.matches) // 많이 함께 플레이한 순으로 정렬
-        .slice(0, 10); // 상위 10명만
-      
-      // Steam 아바타 가져오기 (비동기 처리)
-      if (steamApiKey && partyStats.length > 0) {
-        const avatarPromises = partyStats.map(async (member) => {
-          try {
-            const steamId64 = (BigInt(member.accountId) + BigInt('76561197960265728')).toString();
-            const avatarResponse = await axios.get(`http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${steamApiKey}&steamids=${steamId64}`, {
-              timeout: 2000
-            });
-            
-            if (avatarResponse.data?.response?.players?.length > 0) {
-              const steamProfile = avatarResponse.data.response.players[0];
-              if (steamProfile.personaname && steamProfile.personaname.trim()) {
-                member.name = steamProfile.personaname;
-              }
-              if (steamProfile.avatarfull || steamProfile.avatarmedium || steamProfile.avatar) {
-                let avatarUrl = steamProfile.avatarfull || steamProfile.avatarmedium || steamProfile.avatar;
-                member.avatar = avatarUrl.replace('avatars.steamstatic.com', 'avatars.cloudflare.steamstatic.com');
-              }
-            }
-          } catch (error) {
-            console.log(`⚠️ Steam 정보 가져오기 실패: ${member.accountId}`);
-          }
-          return member;
-        });
+      // API 응답 데이터를 우리 형식으로 변환
+      const partyStats = response.data.map(partyStat => {
+        const winRate = partyStat.matches_played > 0 
+          ? Math.round((partyStat.wins / partyStat.matches_played) * 100) 
+          : 0;
         
-        await Promise.all(avatarPromises);
-      }
+        return {
+          party_size: partyStat.party_size,
+          matches_played: partyStat.matches_played,
+          wins: partyStat.wins,
+          losses: partyStat.matches_played - partyStat.wins,
+          win_rate: winRate,
+          matches: partyStat.matches || [] // 매치 ID 리스트
+        };
+      }).sort((a, b) => a.party_size - b.party_size); // 파티 크기 순으로 정렬
       
-      console.log(`✅ 파티 통계 분석 완료: ${partyStats.length}개 파티원 발견`);
-      if (partyStats.length > 0) {
-        console.log(`🎯 최다 동행: ${partyStats[0].name} (${partyStats[0].matches}경기, 승률 ${partyStats[0].winRate}%)`);
-      }
+      console.log(`✅ 파티 통계 분석 완료: ${partyStats.length}개 파티 규모`);
+      
+      // 파티 통계 요약 로그
+      partyStats.forEach(stat => {
+        console.log(`🎯 ${stat.party_size}인 파티: ${stat.matches_played}경기, 승률 ${stat.win_rate}%`);
+      });
       
       setCachedData(cacheKey, partyStats);
       res.json(partyStats);
       
     } catch (error) {
-      console.error(`❌ 파티 통계 분석 실패: ${error.message}`);
+      console.error(`❌ 파티 통계 가져오기 실패: ${error.message}`);
       res.json([]);
     }
     
