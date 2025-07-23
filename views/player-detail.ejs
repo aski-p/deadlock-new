@@ -69,11 +69,11 @@
                 </div>
             </div>
 
-            <!-- Party Stats Section -->
+            <!-- Party Members Section -->
             <div class="player-section">
-                <h2 class="section-title">파티 통계</h2>
-                <div class="party-stats-grid" id="party-stats-grid">
-                    <!-- Party stats will be populated by JavaScript -->
+                <h2 class="section-title">함께 플레이한 팀원</h2>
+                <div class="party-members-list" id="party-members-list">
+                    <!-- Party members will be populated by JavaScript -->
                 </div>
             </div>
 
@@ -390,72 +390,88 @@
     color: #999;
 }
 
-.party-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-}
-
-.party-stat-card {
+.party-members-list {
     display: flex;
     flex-direction: column;
+    gap: 15px;
+}
+
+.party-member-card {
+    display: flex;
     align-items: center;
+    justify-content: space-between;
     background: rgba(255, 255, 255, 0.03);
-    padding: 30px 20px;
+    padding: 20px;
     border-radius: 12px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.3s;
-    text-align: center;
 }
 
-.party-stat-card:hover {
+.party-member-card:hover {
     background: rgba(99, 162, 226, 0.1);
     border-color: #63a2e2;
     transform: translateY(-2px);
 }
 
-.party-size {
-    font-size: 48px;
-    font-weight: 700;
-    color: #63a2e2;
-    margin-bottom: 10px;
-}
-
-.party-size-label {
-    font-size: 16px;
-    color: #FFEFD7;
-    margin-bottom: 20px;
-    font-weight: 600;
-}
-
-.party-stats-details {
+.party-member-info {
     display: flex;
-    flex-direction: column;
-    gap: 8px;
-    width: 100%;
-}
-
-.party-stat-row {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    font-size: 14px;
+    gap: 15px;
 }
 
-.party-stat-label {
+.party-member-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid #63a2e2;
+}
+
+.party-member-details h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #FFEFD7;
+    margin: 0 0 5px 0;
+}
+
+.party-member-matches {
+    font-size: 14px;
     color: #999;
 }
 
-.party-stat-value {
-    color: #FFEFD7;
+.party-member-stats {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+
+.party-stat-item {
+    text-align: center;
+}
+
+.party-stat-item .label {
+    font-size: 12px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 5px;
+}
+
+.party-stat-item .value {
+    font-size: 16px;
     font-weight: 600;
+    color: #FFEFD7;
 }
 
 .party-win-rate {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: #10B981;
-    margin-top: 10px;
+}
+
+.party-kda {
+    font-family: monospace;
+    font-size: 14px;
+    color: #FFEFD7;
 }
 
 .player-error {
@@ -619,8 +635,8 @@ function updatePlayerUI(player) {
     document.getElementById('stat-damage').textContent = player.stats.damagePerMin.toLocaleString();
     document.getElementById('stat-healing').textContent = player.stats.healingPerMin.toLocaleString();
     
-    // Party Stats
-    loadPartyStats();
+    // Party Members
+    loadPartyMembers();
     
     // Heroes
     updateHeroesGrid(player.heroes);
@@ -727,52 +743,60 @@ function updateMatchesList(matches) {
     `).join('');
 }
 
-async function loadPartyStats() {
+async function loadPartyMembers() {
     try {
         const response = await fetch(`/api/v1/players/<%= accountId %>/party-stats`);
-        const partyStats = await response.json();
+        const partyMembers = await response.json();
         
-        if (response.ok && Array.isArray(partyStats)) {
-            updatePartyStatsGrid(partyStats);
+        if (response.ok && Array.isArray(partyMembers)) {
+            updatePartyMembersList(partyMembers);
         } else {
-            console.error('Failed to load party stats:', partyStats);
-            document.getElementById('party-stats-grid').innerHTML = '<p style="text-align: center; color: #999;">파티 통계를 불러올 수 없습니다.</p>';
+            console.error('Failed to load party members:', partyMembers);
+            document.getElementById('party-members-list').innerHTML = '<p style="text-align: center; color: #999;">파티 멤버를 불러올 수 없습니다.</p>';
         }
     } catch (error) {
-        console.error('Party stats loading error:', error);
-        document.getElementById('party-stats-grid').innerHTML = '<p style="text-align: center; color: #999;">파티 통계를 불러올 수 없습니다.</p>';
+        console.error('Party members loading error:', error);
+        document.getElementById('party-members-list').innerHTML = '<p style="text-align: center; color: #999;">파티 멤버를 불러올 수 없습니다.</p>';
     }
 }
 
-function updatePartyStatsGrid(partyStats) {
-    const grid = document.getElementById('party-stats-grid');
+function updatePartyMembersList(partyMembers) {
+    const list = document.getElementById('party-members-list');
     
-    if (!partyStats || partyStats.length === 0) {
-        grid.innerHTML = '<p style="text-align: center; color: #999;">파티 통계 데이터가 없습니다.</p>';
+    if (!partyMembers || partyMembers.length === 0) {
+        list.innerHTML = '<p style="text-align: center; color: #999;">함께 플레이한 팀원이 없습니다.</p>';
         return;
     }
     
-    grid.innerHTML = partyStats.map(stat => `
-        <div class="party-stat-card">
-            <div class="party-size">${stat.party_size}</div>
-            <div class="party-size-label">${stat.party_size}인 파티</div>
-            
-            <div class="party-stats-details">
-                <div class="party-stat-row">
-                    <span class="party-stat-label">총 경기</span>
-                    <span class="party-stat-value">${stat.matches_played}</span>
-                </div>
-                <div class="party-stat-row">
-                    <span class="party-stat-label">승리</span>
-                    <span class="party-stat-value" style="color: #10B981;">${stat.wins}</span>
-                </div>
-                <div class="party-stat-row">
-                    <span class="party-stat-label">패배</span>
-                    <span class="party-stat-value" style="color: #EF4444;">${stat.losses}</span>
+    list.innerHTML = partyMembers.map(member => `
+        <div class="party-member-card">
+            <div class="party-member-info">
+                <img src="${member.avatar}" alt="${member.name}" class="party-member-avatar" 
+                     onerror="this.src='data:image/svg+xml;charset=utf-8,${encodeURIComponent('<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"50\" height=\"50\" viewBox=\"0 0 50 50\"><circle cx=\"25\" cy=\"25\" r=\"23\" fill=\"#666\" stroke=\"#fff\" stroke-width=\"2\"/><circle cx=\"25\" cy=\"18\" r=\"8\" fill=\"#fff\"/><path d=\"M8 40 Q25 32 42 40\" stroke=\"#fff\" stroke-width=\"4\" fill=\"none\"/></svg>')}'">
+                <div class="party-member-details">
+                    <h3>${member.name}</h3>
+                    <div class="party-member-matches">${member.matches}경기 함께 플레이</div>
                 </div>
             </div>
             
-            <div class="party-win-rate">${stat.win_rate}%</div>
+            <div class="party-member-stats">
+                <div class="party-stat-item">
+                    <div class="label">승률</div>
+                    <div class="value party-win-rate">${member.winRate}%</div>
+                </div>
+                <div class="party-stat-item">
+                    <div class="label">승/패</div>
+                    <div class="value">${member.wins}/${member.losses}</div>
+                </div>
+                <div class="party-stat-item">
+                    <div class="label">평균 KDA</div>
+                    <div class="value party-kda">${member.avgKills}/${member.avgDeaths}/${member.avgAssists}</div>
+                </div>
+                <div class="party-stat-item">
+                    <div class="label">KDA 비율</div>
+                    <div class="value">${member.avgKda}</div>
+                </div>
+            </div>
         </div>
     `).join('');
 }
