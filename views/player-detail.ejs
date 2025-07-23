@@ -15,8 +15,11 @@
                     <div class="player-main-info">
                         <h1 class="player-name" id="player-name">플레이어</h1>
                         <div class="player-meta">
-                            <span class="player-country" id="player-country">🌍</span>
-                            <span class="player-account-id">계정 ID: <%= accountId %></span>
+                            <div class="account-info">
+                                <span class="player-account-flag" id="player-account-flag">🌍</span>
+                                <span class="player-account-id">계정 ID: <%= accountId %></span>
+                            </div>
+                            <span class="player-steam-id" id="player-steam-id">Steam ID: 76561198015042012</span>
                         </div>
                     </div>
                 </div>
@@ -60,11 +63,11 @@
                     </div>
                     <div class="stat-card">
                         <div class="stat-value" id="stat-damage">0</div>
-                        <div class="stat-label">데미지/분</div>
+                        <div class="stat-label">디나이</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value" id="stat-healing">0</div>
-                        <div class="stat-label">힐링/분</div>
+                        <div class="stat-label">추천수</div>
                     </div>
                 </div>
             </div>
@@ -170,18 +173,37 @@
 
 .player-meta {
     display: flex;
-    align-items: center;
-    gap: 20px;
+    flex-direction: column;
+    gap: 8px;
     font-size: 16px;
 }
 
-.player-country {
-    font-size: 24px;
+.account-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.player-account-flag {
+    font-size: 18px;
 }
 
 .player-account-id {
     color: #999;
     font-size: 14px;
+}
+
+.player-steam-id {
+    color: #999;
+    font-size: 14px;
+}
+
+.flag-image {
+    width: 24px;
+    height: 18px;
+    object-fit: cover;
+    border-radius: 2px;
+    vertical-align: middle;
 }
 
 .player-rank {
@@ -411,6 +433,7 @@
     background: rgba(99, 162, 226, 0.1);
     border-color: #63a2e2;
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 162, 226, 0.2);
 }
 
 .party-member-info {
@@ -609,7 +632,12 @@ function updatePlayerUI(player) {
     // Basic Info
     document.getElementById('player-avatar').src = player.avatar;
     document.getElementById('player-name').textContent = player.name;
-    document.getElementById('player-country').innerHTML = getCountryImage(player.country);
+    document.getElementById('player-account-flag').innerHTML = getCountryImage(player.country);
+    
+    // Steam ID - display dynamically if available
+    if (player.steamId) {
+        document.getElementById('player-steam-id').textContent = `Steam ID: ${player.steamId}`;
+    }
     
     // Rank
     const getMedalImage = (medal, subrank) => {
@@ -632,8 +660,8 @@ function updatePlayerUI(player) {
     document.getElementById('stat-kda').textContent = player.stats.kda;
     document.getElementById('stat-headshots').textContent = `${player.stats.headshotPercent}%`;
     document.getElementById('stat-souls').textContent = player.stats.soulsPerMin.toLocaleString();
-    document.getElementById('stat-damage').textContent = player.stats.damagePerMin.toLocaleString();
-    document.getElementById('stat-healing').textContent = player.stats.healingPerMin.toLocaleString();
+    document.getElementById('stat-damage').textContent = player.stats.denies.toLocaleString();
+    document.getElementById('stat-healing').textContent = player.stats.endorsements.toLocaleString();
     
     // Party Members
     loadPartyMembers();
@@ -773,7 +801,7 @@ function updatePartyMembersList(partyMembers) {
     }
     
     list.innerHTML = partyMembers.map(member => `
-        <div class="party-member-card">
+        <div class="party-member-card" onclick="viewPartyMemberProfile('${member.accountId || member.memberId}')" style="cursor: pointer;">
             <div class="party-member-info">
                 <img src="${member.avatar}" alt="${member.name}" class="party-member-avatar" 
                      onerror="this.src='data:image/svg+xml;charset=utf-8,${encodeURIComponent('<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"50\" height=\"50\" viewBox=\"0 0 50 50\"><circle cx=\"25\" cy=\"25\" r=\"23\" fill=\"#666\" stroke=\"#fff\" stroke-width=\"2\"/><circle cx=\"25\" cy=\"18\" r=\"8\" fill=\"#fff\"/><path d=\"M8 40 Q25 32 42 40\" stroke=\"#fff\" stroke-width=\"4\" fill=\"none\"/></svg>')}'">
@@ -803,6 +831,15 @@ function updatePartyMembersList(partyMembers) {
             </div>
         </div>
     `).join('');
+}
+
+// 파티 멤버 프로필 보기
+function viewPartyMemberProfile(accountId) {
+    if (accountId && accountId !== 'undefined' && !accountId.startsWith('party_')) {
+        window.location.href = `/ko/players/${accountId}`;
+    } else {
+        console.log('유효하지 않은 계정 ID:', accountId);
+    }
 }
 
 // Load data when page loads
