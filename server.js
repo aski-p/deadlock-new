@@ -300,14 +300,14 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
   try {
     // 영웅 ID 매핑 (실제 API에서 사용하는 ID)
     const heroIdMapping = {
-      1: 'Abrams',
+      1: 'Dynamo',
       2: 'Bebop', 
       3: 'Grey Talon',
       4: 'Grey Talon',
       6: 'Haze',
       7: 'Wraith',
       8: 'McGinnis',
-      10: 'Kelvin',
+      10: 'Infernus',
       11: 'Lady Geist',
       12: 'Lash',
       13: 'Haze',
@@ -1185,9 +1185,9 @@ function generateFastHeroStats(accountId) {
 
 // 영웅 ID를 이름으로 변환하는 맵핑
 const heroIdMap = {
-  1: 'Infernus', 2: 'Seven', 4: 'Grey Talon', 6: 'Abrams', 7: 'Ivy', 
-  8: 'McGinnis', 10: 'Paradox', 11: 'Kelvin', 13: 'Haze', 
-  14: 'Holliday', 15: 'Bebop', 16: 'Calico', 17: 'Dynamo', 18: 'Mo & Krill', 19: 'Shiv', 
+  1: 'Dynamo', 2: 'Seven', 4: 'Grey Talon', 6: 'Abrams', 7: 'Ivy', 
+  8: 'McGinnis', 10: 'Paradox', 11: 'Infernus', 13: 'Haze', 
+  14: 'Holliday', 15: 'Bebop', 16: 'Calico', 17: 'Kelvin', 18: 'Mo & Krill', 19: 'Shiv', 
   20: 'Shiv', 25: 'Viper', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
   50: 'Pocket', 52: 'Mirage', 58: 'Viper', 60: 'Sinclair', 61: 'Unknown_61'
 };
@@ -1612,8 +1612,8 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
 // 영웅 ID를 이름으로 변환하는 함수
 const getHeroNameById = (heroId) => {
   const heroMap = {
-    1: 'Infernus', 2: 'Seven', 4: 'Lady Geist', 6: 'Abrams', 7: 'Wraith', 
-    8: 'McGinnis', 10: 'Paradox', 11: 'Kelvin', 12: 'Dynamo', 13: 'Haze', 
+    1: 'Dynamo', 2: 'Seven', 4: 'Lady Geist', 6: 'Abrams', 7: 'Wraith', 
+    8: 'McGinnis', 10: 'Paradox', 11: 'Infernus', 12: 'Kelvin', 13: 'Haze', 
     14: 'Holliday', 15: 'Bebop', 16: 'Calico', 17: 'Grey Talon', 18: 'Mo & Krill', 19: 'Shiv', 
     20: 'Ivy', 25: 'Warden', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
     50: 'Pocket', 52: 'Mirage', 58: 'Viper', 59: 'Unknown_59', 60: 'Sinclair', 61: 'Unknown_61', 62: 'Mo & Krill', 63: 'Dynamo'
