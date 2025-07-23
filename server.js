@@ -313,7 +313,7 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       13: 'Haze',
       14: 'Holliday',
       15: 'Bebop',
-      16: 'Pocket',
+      16: 'Unknown_16',
       17: 'Seven',
       18: 'Shiv',
       19: 'Shiv',
@@ -321,12 +321,12 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       25: 'Warden',
       27: 'Wraith',
       31: 'Yamato',
-      50: 'Holliday',
-      52: 'Pocket',
+      50: 'Pocket',
+      52: 'Mirage',
       58: 'Viper',
       59: 'Calico',
       60: 'Sinclair',
-      61: 'Mirage',
+      61: 'Unknown_61',
       62: 'Mo & Krill',
       63: 'Dynamo'
     };
@@ -1326,9 +1326,9 @@ function generateFastHeroStats(accountId) {
 const heroIdMap = {
   1: 'Infernus', 2: 'Seven', 4: 'Grey Talon', 6: 'Abrams', 7: 'Ivy', 
   8: 'McGinnis', 10: 'Paradox', 11: 'Kelvin', 13: 'Haze', 
-  14: 'Holliday', 15: 'Bebop', 16: 'Pocket', 17: 'Dynamo', 18: 'Mo & Krill', 19: 'Shiv', 
+  14: 'Holliday', 15: 'Bebop', 16: 'Unknown_16', 17: 'Dynamo', 18: 'Mo & Krill', 19: 'Shiv', 
   20: 'Shiv', 25: 'Viper', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
-  50: 'Holliday', 52: 'Pocket', 58: 'Viper', 60: 'Sinclair', 61: 'Mirage'
+  50: 'Pocket', 52: 'Mirage', 58: 'Viper', 60: 'Sinclair', 61: 'Unknown_61'
 };
 
 
@@ -1883,9 +1883,9 @@ const getHeroNameById = (heroId) => {
   const heroMap = {
     1: 'Infernus', 2: 'Seven', 4: 'Lady Geist', 6: 'Abrams', 7: 'Wraith', 
     8: 'McGinnis', 10: 'Paradox', 11: 'Kelvin', 12: 'Dynamo', 13: 'Haze', 
-    14: 'Holliday', 15: 'Bebop', 16: 'Pocket', 17: 'Grey Talon', 18: 'Mo & Krill', 19: 'Shiv', 
+    14: 'Holliday', 15: 'Bebop', 16: 'Unknown_16', 17: 'Grey Talon', 18: 'Mo & Krill', 19: 'Shiv', 
     20: 'Ivy', 25: 'Warden', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
-    50: 'Holliday', 52: 'Pocket', 58: 'Viper', 59: 'Calico', 60: 'Sinclair', 61: 'Mirage', 62: 'Mo & Krill', 63: 'Dynamo'
+    50: 'Pocket', 52: 'Mirage', 58: 'Viper', 59: 'Calico', 60: 'Sinclair', 61: 'Unknown_61', 62: 'Mo & Krill', 63: 'Dynamo'
   };
   return heroMap[heroId] || `Hero_${heroId}`;
 };
