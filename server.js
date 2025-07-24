@@ -1989,7 +1989,7 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
                 score: 0,
                 rankImage: 'initiate_5.webp'
               },
-              // 통계 정보 (Deadlock API에서 업데이트 예정)
+              // 통계 정보 (fetchAndAnalyzeAllMatches에서 업데이트 예정)
               stats: {
                 kda: '0.0',
                 avgDenies: 0
@@ -2197,10 +2197,23 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
                   console.log(`📈 ${member.accountId} 통계 업데이트: KDA ${member.stats.kda}, 평균 디나이 ${member.stats.avgDenies}, 영웅 ${member.topHeroes?.length || 0}개`);
                 } else {
                   console.log(`⚠️ ${member.accountId} 매치 분석 데이터 없음 - 기본값 유지`);
+                  // stats 객체가 없으면 기본값으로 초기화
+                  if (!member.stats) {
+                    member.stats = {
+                      kda: '0.0',
+                      avgDenies: 0
+                    };
+                  }
                 }
               } catch (statsError) {
                 console.log(`⚠️ ${member.accountId} 상세 통계 조회 실패:`, statsError.message);
-                // 기본값 유지
+                // stats 객체가 없으면 기본값으로 초기화
+                if (!member.stats) {
+                  member.stats = {
+                    kda: '0.0',
+                    avgDenies: 0
+                  };
+                }
               }
             } catch (error) {
               console.log(`⚠️ Deadlock API ${member.accountId} 프로필 조회 실패:`, error.message);
@@ -2218,13 +2231,22 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
               };
               console.log(`⚠️ ${member.accountId} (${member.name}) 랭크 정보 없음 - 기본값 Initiate 1 설정`);
             }
+            
+            // stats 정보가 없는 멤버들에게 기본 stats 설정
+            if (!member.stats) {
+              member.stats = {
+                kda: '0.0',
+                avgDenies: 0
+              };
+              console.log(`⚠️ ${member.accountId} (${member.name}) 통계 정보 없음 - 기본값 설정`);
+            }
           });
         }
         
-        // 최종 응답 전에 랭크 데이터 확인
-        console.log(`🎯 최종 파티 멤버 랭크 데이터 확인:`);
+        // 최종 응답 전에 랭크 및 통계 데이터 확인
+        console.log(`🎯 최종 파티 멤버 데이터 확인:`);
         topPartyMembers.forEach((member, index) => {
-          console.log(`  [${index + 1}] ${member.name}: rank=${JSON.stringify(member.rank)}`);
+          console.log(`  [${index + 1}] ${member.name}: rank=${JSON.stringify(member.rank)}, stats=${JSON.stringify(member.stats)}`);
         });
         
         setCachedData(cacheKey, topPartyMembers, 10 * 60 * 1000); // 10분 캐시
