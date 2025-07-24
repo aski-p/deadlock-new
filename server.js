@@ -2494,7 +2494,7 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
         // 아이템 ID를 이름으로 매핑하는 함수 (확장된 매핑)
         const getItemNameById = (itemId) => {
           const itemMap = {
-            // Weapon Items (무기)
+            // Weapon Items (무기) - Tier 1
             715762406: 'Basic Magazine',
             1342610602: 'Close Quarters', 
             1437614329: 'Headshot Booster',
@@ -2503,6 +2503,8 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
             1009965641: 'Monster Rounds',
             4147641675: 'Rapid Rounds',
             499683006: 'Restorative Shot',
+            
+            // Weapon Items (무기) - Tier 2
             1842576017: 'Active Reload',
             393974127: 'Berserker',
             2981692841: 'Escalating Resilience',
@@ -2522,12 +2524,22 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
             395944548: 'Toxic Bullets',
             2356412290: 'Vampiric Burst',
             1925087134: 'Warp Stone',
+            
+            // Weapon Items (무기) - Tier 3
             2617435668: 'Alchemical Fire',
             1102081447: 'Burst Fire',
             2037039379: 'Crippling Headshot',
             677738769: 'Frenzy',
+            3215534794: 'Glass Cannon',
+            2876734447: 'Inhibitor',
+            2746434652: 'Leech',
+            3878070816: 'Lucky Shot',
+            2469449027: 'Richochet',
+            1829830659: 'Spiritual Overflow',
+            3916766904: 'Torment Pulse',
+            2876421943: 'Wrecker',
             
-            // Vitality Items (생명력)
+            // Vitality Items (생명력) - Tier 1
             968099481: 'Extra Health',
             2678489038: 'Extra Regen',
             558396679: 'Extra Stamina',
@@ -2536,6 +2548,8 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
             1797283378: 'Healing Rite',
             1710079648: 'Bullet Armor',
             2059712766: 'Spirit Armor',
+            
+            // Vitality Items (생명력) - Tier 2
             3147316197: 'Enduring Speed',
             857669956: 'Reactive Barrier',
             1813726886: 'Debuff Remover',
@@ -2544,8 +2558,26 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
             7409189: 'Healing Booster',
             2081037738: 'Return Fire',
             3261353684: 'Rescue Beam',
+            3287678549: 'Combat Barrier',
+            2147483647: 'Improved Bullet Armor',
+            2147483648: 'Improved Spirit Armor',
+            1067869798: 'Superior Stamina',
+            2948329856: 'Veil Walker',
             
-            // Spirit Items (정신력)
+            // Vitality Items (생명력) - Tier 3
+            3428915467: 'Fortitude',
+            2876421943: 'Lifestrike',
+            1829830659: 'Metal Skin',
+            3916766904: 'Phantom Strike',
+            2469449027: 'Restorative Locket',
+            3878070816: 'Superior Duration',
+            2746434652: 'Unstoppable',
+            3215534794: 'Colossus',
+            2876734447: 'Leviathan',
+            1067869798: 'Majestic Leap',
+            2948329856: 'Soul Rebirth',
+            
+            // Spirit Items (정신력) - Tier 1
             380806748: 'Extra Spirit',
             811521119: 'Spirit Strike',
             1292979587: 'Mystic Burst',
@@ -2556,6 +2588,8 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
             381961617: 'Decay',
             2533252781: 'Slowing Hex',
             3919289022: 'Superior Cooldown',
+            
+            // Spirit Items (정신력) - Tier 2
             2820116164: 'Improved Burst',
             3005970438: 'Improved Reach',
             3357231760: 'Improved Spirit',
@@ -2564,10 +2598,17 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
             2800629741: 'Withering Whip',
             600033864: 'Escalating Exposure',
             1378931225: 'Ethereal Shift',
-            3005970438: 'Knockdown',
-            2820116164: 'Magic Carpet',
-            3357231760: 'Rapid Recharge',
-            3612042342: 'Silence Glyph'
+            2147483649: 'Knockdown',
+            2147483650: 'Magic Carpet',
+            2147483651: 'Rapid Recharge',
+            2147483652: 'Silence Glyph',
+            
+            // Spirit Items (정신력) - Tier 3
+            1829830660: 'Boundless Spirit',
+            3916766905: 'Diviner\'s Kevlar',
+            2469449028: 'Echo Shard',
+            3878070817: 'Mystic Reverb',
+            2746434653: 'Refresher'
           };
           return itemMap[itemId] || `Unknown Item (${itemId})`;
         };
