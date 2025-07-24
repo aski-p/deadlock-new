@@ -1306,10 +1306,31 @@ function updateMatchesList(matches) {
 
 async function loadPartyMembers() {
     try {
+        console.log('🔍 파티 멤버 로딩 시작...');
         const response = await fetch(`/api/v1/players/<%= accountId %>/party-stats`);
         const partyMembers = await response.json();
         
+        console.log('📡 파티 멤버 API 응답:', {
+            status: response.status,
+            ok: response.ok,
+            dataType: typeof partyMembers,
+            isArray: Array.isArray(partyMembers),
+            length: partyMembers?.length,
+            data: partyMembers
+        });
+        
         if (response.ok && Array.isArray(partyMembers)) {
+            // 각 멤버의 랭크 데이터 확인
+            partyMembers.forEach((member, index) => {
+                console.log(`👥 파티 멤버 ${index + 1}: ${member.name}`, {
+                    accountId: member.accountId,
+                    rank: member.rank,
+                    hasRank: !!member.rank,
+                    medal: member.rank?.medal,
+                    subrank: member.rank?.subrank
+                });
+            });
+            
             updatePartyMembersList(partyMembers);
         } else {
             console.error('Failed to load party members:', partyMembers);
@@ -1344,7 +1365,10 @@ function updatePartyMembersList(partyMembers) {
         const rankNumber = medalRankMap[medal?.toLowerCase()] || 5;
         const subrankFormatted = subrank || 1;
         
-        return `https://cdn.deadlock.coach/vpk/panorama/images/ranked/badges/rank${rankNumber}/badge_sm_subrank${subrankFormatted}.webp`;
+        const imageUrl = `https://cdn.deadlock.coach/vpk/panorama/images/ranked/badges/rank${rankNumber}/badge_sm_subrank${subrankFormatted}.webp`;
+        console.log(`🏆 랭크 이미지 생성: ${medal} ${subrank} → ${imageUrl}`);
+        
+        return imageUrl;
     };
     
     const getHeroImage = (heroName) => {
@@ -1379,7 +1403,19 @@ function updatePartyMembersList(partyMembers) {
 
     list.innerHTML = partyMembers.map(member => {
         const accountId = member.accountId || member.memberId;
-        console.log('파티 멤버 데이터:', { name: member.name, accountId: accountId });
+        
+        // 랭크 데이터 안전성 확인 및 기본값 설정
+        const rankData = member.rank || { medal: 'Initiate', subrank: 1 };
+        const medal = rankData.medal || 'Initiate';
+        const subrank = rankData.subrank || 1;
+        
+        console.log('🎮 파티 멤버 렌더링:', { 
+            name: member.name, 
+            accountId: accountId,
+            originalRank: member.rank,
+            processedRank: { medal, subrank }
+        });
+        
         return `
         <div class="party-member-card" onclick="viewPartyMemberProfile('${accountId}')" style="cursor: pointer;">
             <div class="party-member-info">
@@ -1389,9 +1425,9 @@ function updatePartyMembersList(partyMembers) {
                     <h3>${member.name}</h3>
                     <div class="party-member-matches">${member.matches}경기 함께 플레이</div>
                     <div class="party-member-rank">
-                        <img src="${getMedalImage(member.rank?.medal, member.rank?.subrank)}" 
-                             alt="${member.rank?.medal || 'Initiate'}" class="rank-badge-small">
-                        <span class="rank-text">${member.rank?.medal || 'Initiate'} ${member.rank?.subrank || 1}</span>
+                        <img src="${getMedalImage(medal, subrank)}" 
+                             alt="${medal}" class="rank-badge-small">
+                        <span class="rank-text">${medal} ${subrank}</span>
                     </div>
                 </div>
             </div>
