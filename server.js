@@ -2085,6 +2085,25 @@ function generateFastMatchHistory(accountId, limit = 10) {
   return [];
 }
 
+// 특정 매치의 상세 정보 가져오기 (아이템 포함)
+const fetchMatchDetails = async (matchId) => {
+  try {
+    console.log(`🔍 매치 ${matchId} 상세 정보 가져오는 중...`);
+    
+    const response = await axios.get(`https://api.deadlock-api.com/v1/matches/${matchId}/metadata`, {
+      timeout: 10000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+      }
+    });
+    
+    return response.data;
+  } catch (error) {
+    console.error(`❌ 매치 ${matchId} 상세 정보 가져오기 실패:`, error.message);
+    return null;
+  }
+};
+
 // 전체 매치 데이터 분석 함수 - 정확한 통계 계산
 const fetchAndAnalyzeAllMatches = async (accountId) => {
   try {
@@ -2369,7 +2388,7 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
       avgMatchDuration: avgMatchDurationFormatted,
       headshotPercent,
       topHeroes: sortedHeroes.slice(0, 10),
-      recentMatches: matches.slice(0, 10).map(match => {
+      recentMatches: await Promise.all(matches.slice(0, 10).map(async (match) => {
         // 매치별 승부 판정
         let isWin = false;
         if (match.player_team !== undefined && match.match_result !== undefined) {
@@ -2384,10 +2403,10 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
         const matchSouls = match.net_worth || 0;
         const soulsPerMin = matchDurationMinutes > 0 ? Math.round(matchSouls / matchDurationMinutes) : 0;
         
-        // 아이템 ID를 이름으로 매핑하는 함수
+        // 아이템 ID를 이름으로 매핑하는 함수 (확장된 매핑)
         const getItemNameById = (itemId) => {
           const itemMap = {
-            // Weapon Items
+            // Weapon Items (무기)
             715762406: 'Basic Magazine',
             1342610602: 'Close Quarters', 
             1437614329: 'Headshot Booster',
@@ -2413,7 +2432,14 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
             2163598980: 'Tesla Bullets',
             865846625: 'Titanic Magazine',
             395944548: 'Toxic Bullets',
-            // Vitality Items  
+            2356412290: 'Vampiric Burst',
+            1925087134: 'Warp Stone',
+            2617435668: 'Alchemical Fire',
+            1102081447: 'Burst Fire',
+            2037039379: 'Crippling Headshot',
+            677738769: 'Frenzy',
+            
+            // Vitality Items (생명력)
             968099481: 'Extra Health',
             2678489038: 'Extra Regen',
             558396679: 'Extra Stamina',
@@ -2422,19 +2448,74 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
             1797283378: 'Healing Rite',
             1710079648: 'Bullet Armor',
             2059712766: 'Spirit Armor',
-            // Spirit Items
+            3147316197: 'Enduring Speed',
+            857669956: 'Reactive Barrier',
+            1813726886: 'Debuff Remover',
+            3361075077: 'Divine Barrier',
+            2603935618: 'Enchanter\'s Barrier',
+            7409189: 'Healing Booster',
+            2081037738: 'Return Fire',
+            3261353684: 'Rescue Beam',
+            
+            // Spirit Items (정신력)
             380806748: 'Extra Spirit',
             811521119: 'Spirit Strike',
             1292979587: 'Mystic Burst',
             3403085434: 'Ammo Scavenger',
             1144549437: 'Infuser',
-            2951612397: 'Spirit Lifesteal'
+            2951612397: 'Spirit Lifesteal',
+            84321454: 'Cold Front',
+            381961617: 'Decay',
+            2533252781: 'Slowing Hex',
+            3919289022: 'Superior Cooldown',
+            2820116164: 'Improved Burst',
+            3005970438: 'Improved Reach',
+            3357231760: 'Improved Spirit',
+            3612042342: 'Mystic Vulnerability',
+            3270001687: 'Quicksilver Reload',
+            2800629741: 'Withering Whip',
+            600033864: 'Escalating Exposure',
+            1378931225: 'Ethereal Shift',
+            3005970438: 'Knockdown',
+            2820116164: 'Magic Carpet',
+            3357231760: 'Rapid Recharge',
+            3612042342: 'Silence Glyph'
           };
-          return itemMap[itemId] || `Item_${itemId}`;
+          return itemMap[itemId] || `Unknown Item (${itemId})`;
         };
         
-        // 매치별 최종 아이템 생성 (더 현실적인 빌드 시뮬레이션)
-        const generateMatchItems = () => {
+        // 매치별 최종 아이템 생성 (실제 API 데이터 우선, 없으면 Mock)
+        const generateMatchItems = async () => {
+          // 실제 매치 상세 정보에서 아이템 가져오기 시도
+          const matchDetails = await fetchMatchDetails(match.match_id || match.id);
+          
+          if (matchDetails && matchDetails.match_info && matchDetails.match_info.players) {
+            // 현재 플레이어의 아이템 찾기
+            const currentPlayer = matchDetails.match_info.players.find(p => 
+              p.account_id.toString() === accountId.toString()
+            );
+            
+            if (currentPlayer && currentPlayer.items && currentPlayer.items.length > 0) {
+              console.log(`✅ 매치 ${match.match_id} 실제 아이템 데이터 발견 (${currentPlayer.items.length}개)`);
+              
+              // 최종 아이템들만 필터링 (판매되지 않은 것들)
+              const finalItems = currentPlayer.items
+                .filter(item => item.sold_time_s === 0) // 판매되지 않은 아이템만
+                .slice(-6) // 마지막 6개
+                .map((item, index) => ({
+                  name: getItemNameById(item.item_id),
+                  slot: index + 1,
+                  itemId: item.item_id,
+                  gameTime: item.game_time_s
+                }));
+              
+              if (finalItems.length > 0) {
+                return finalItems;
+              }
+            }
+          }
+          
+          // API 데이터가 없으면 기존 Mock 데이터 사용
           const heroName = getHeroNameById(match.hero_id);
           
           // 영웅별 선호 아이템 템플릿
@@ -2544,9 +2625,9 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
             (((match.player_kills || match.kills || 0) + (match.player_assists || match.assists || 0)) / (match.player_deaths || match.deaths)).toFixed(1) : 
             ((match.player_kills || match.kills || 0) + (match.player_assists || match.assists || 0)).toFixed(1),
           playedAt: match.start_time ? new Date(match.start_time * 1000).toISOString() : new Date().toISOString(),
-          items: generateMatchItems() // 최종 아이템 데이터 추가
+          items: await generateMatchItems() // 최종 아이템 데이터 추가
         };
-      })
+      }))
     };
 
     // Infernus 통계 디버깅 로그
