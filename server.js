@@ -1278,6 +1278,43 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
     
     console.log(`🔍 플레이어 상세 정보 요청: ${accountId}`);
     
+    // 먼저 리더보드에서 플레이어 데이터를 찾기 시도
+    let leaderboardRankData = null;
+    try {
+      console.log(`🔍 리더보드에서 플레이어 ${accountId} 검색 중...`);
+      
+      // 모든 지역의 리더보드에서 플레이어 검색
+      const regions = ['asia', 'europe', 'north-america', 'south-america', 'oceania'];
+      
+      for (const region of regions) {
+        try {
+          const leaderboardData = await fetchDeadlockLeaderboard(region, 1, 1000);
+          if (leaderboardData && leaderboardData.data) {
+            const foundPlayer = leaderboardData.data.find(player => 
+              player.player.accountId == accountId || 
+              player.player.steamId == accountId ||
+              (player.player.accountId && player.player.accountId.toString() === accountId.toString())
+            );
+            
+            if (foundPlayer) {
+              leaderboardRankData = {
+                medal: foundPlayer.medal,
+                subrank: foundPlayer.subrank,
+                score: foundPlayer.score,
+                rank: foundPlayer.rank
+              };
+              console.log(`✅ 리더보드 ${region}에서 플레이어 발견:`, leaderboardRankData);
+              break;
+            }
+          }
+        } catch (regionError) {
+          console.log(`⚠️ 리더보드 ${region} 검색 실패: ${regionError.message}`);
+        }
+      }
+    } catch (leaderboardError) {
+      console.log(`⚠️ 리더보드 검색 전체 실패: ${leaderboardError.message}`);
+    }
+
     // 실제 플레이어 카드 API 호출 시도
     try {
       console.log(`🌐 플레이어 카드 API 호출: https://api.deadlock-api.com/v1/players/${accountId}/card`);
@@ -1323,16 +1360,26 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
         // Calculate Steam ID from account ID
         const steamId64 = (BigInt(accountId) + BigInt('76561197960265728')).toString();
         
-        const badgeLevel = playerCard.badge_level || 7;
-        const medal = getMedalFromBadgeLevel(badgeLevel);
-        const subrank = ((badgeLevel % 7) + 1) || 1;
+        // 리더보드 데이터가 있으면 우선 사용, 없으면 API 데이터 사용
+        let medal, subrank, score;
         
-        console.log(`🎯 플레이어 ${accountId} 랭크 계산:`, {
-          badgeLevel: badgeLevel,
-          medal: medal,
-          subrank: subrank,
-          rawBadgeLevel: playerCard.badge_level
-        });
+        if (leaderboardRankData) {
+          medal = leaderboardRankData.medal;
+          subrank = leaderboardRankData.subrank;
+          score = leaderboardRankData.score;
+          console.log(`🎯 플레이어 ${accountId} 리더보드 랭크 사용:`, leaderboardRankData);
+        } else {
+          const badgeLevel = playerCard.badge_level || 7;
+          medal = getMedalFromBadgeLevel(badgeLevel);
+          subrank = ((badgeLevel % 7) + 1) || 1;
+          score = badgeLevel;
+          console.log(`🎯 플레이어 ${accountId} API 랭크 계산:`, {
+            badgeLevel: badgeLevel,
+            medal: medal,
+            subrank: subrank,
+            rawBadgeLevel: playerCard.badge_level
+          });
+        }
         
         let playerData = {
           accountId: accountId,
@@ -1343,7 +1390,7 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
           rank: {
             medal: medal,
             subrank: subrank,
-            score: badgeLevel
+            score: score
           },
           stats: {
             matches: 0, // 매치 히스토리에서 계산
@@ -1448,17 +1495,20 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
     // Calculate Steam ID from account ID
     const steamId64 = (BigInt(accountId) + BigInt('76561197960265728')).toString();
     
+    // fallback에서도 리더보드 랭크 데이터 우선 사용
+    const fallbackRank = leaderboardRankData || {
+      medal: 'Oracle',
+      subrank: 1,
+      score: 3500
+    };
+    
     let playerData = {
       accountId: accountId,
       steamId: steamId64,
       name: `Player_${accountId}`,
       avatar: 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
       country: '🌍',
-      rank: {
-        medal: 'Oracle',
-        subrank: 1,
-        score: 3500
-      },
+      rank: fallbackRank,
       stats: {
         matches: 20,
         winRate: 50.0,
