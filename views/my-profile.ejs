@@ -595,7 +595,7 @@
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    min-width: 200px;
+    min-width: 250px;
 }
 
 .items-label {
@@ -606,9 +606,9 @@
 
 .items-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 4px;
-    max-width: 180px;
+    max-width: 240px;
 }
 
 .item-wrapper {
@@ -1445,26 +1445,44 @@ function displayMatchHistory(matches) {
             }
         };
         
-        // 최종 아이템 생성 함수
+        // 최종 아이템 생성 함수 (12개로 확장)
         const generateFinalItems = (hero, isWin, souls) => {
             const itemDatabase = {
                 weapon: [
                     { name: 'Basic Magazine', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp', tier: 1 },
+                    { name: 'High-Velocity Mag', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/high_velocity_mag.webp', tier: 1 },
+                    { name: 'Close Quarters', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/close_quarters.webp', tier: 1 },
                     { name: 'Kinetic Dash', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/kinetic_dash.webp', tier: 2 },
-                    { name: 'Pristine Emblem', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/pristine_emblem.webp', tier: 3 },
-                    { name: 'Tesla Bullets', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/tesla_bullets.webp', tier: 4 }
+                    { name: 'Headshot Booster', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/headshot_booster.webp', tier: 2 },
+                    { name: 'Fleetfoot', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/fleetfoot.webp', tier: 2 },
+                    { name: 'Hunter\'s Aura', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hunters_aura.webp', tier: 3 },
+                    { name: 'Spiritual Overflow', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/spiritual_overflow.webp', tier: 3 },
+                    { name: 'Tesla Bullets', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/tesla_bullets.webp', tier: 4 },
+                    { name: 'Ricochet', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/ricochet.webp', tier: 4 }
                 ],
                 vitality: [
                     { name: 'Healing Rite', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_rite.webp', tier: 1 },
-                    { name: 'Extra Health', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp', tier: 2 },
+                    { name: 'Extra Health', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp', tier: 1 },
+                    { name: 'Extra Regen', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_regen.webp', tier: 1 },
+                    { name: 'Bullet Armor', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/bullet_armor.webp', tier: 2 },
+                    { name: 'Spirit Armor', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/spirit_armor.webp', tier: 2 },
+                    { name: 'Divine Barrier', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/divine_barrier.webp', tier: 2 },
                     { name: 'Majestic Leap', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/majestic_leap.webp', tier: 3 },
-                    { name: 'Leech', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/leech.webp', tier: 4 }
+                    { name: 'Superior Stamina', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/superior_stamina.webp', tier: 3 },
+                    { name: 'Leech', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/leech.webp', tier: 4 },
+                    { name: 'Colossus', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/colossus.webp', tier: 4 }
                 ],
                 spirit: [
                     { name: 'Mystic Burst', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_burst.webp', tier: 1 },
-                    { name: 'Spirit Strike', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_strike.webp', tier: 2 },
+                    { name: 'Spirit Strike', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_strike.webp', tier: 1 },
+                    { name: 'Extra Spirit', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_spirit.webp', tier: 1 },
+                    { name: 'Mystic Reach', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_reach.webp', tier: 2 },
+                    { name: 'Spirit Lifesteal', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_lifesteal.webp', tier: 2 },
+                    { name: 'Quicksilver Reload', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/quicksilver_reload.webp', tier: 2 },
                     { name: 'Mystic Reverb', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_reverb.webp', tier: 3 },
-                    { name: 'Diviner\'s Kevlar', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/diviners_kevlar.webp', tier: 4 }
+                    { name: 'Ethereal Shift', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/ethereal_shift.webp', tier: 3 },
+                    { name: 'Diviner\'s Kevlar', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/diviners_kevlar.webp', tier: 4 },
+                    { name: 'Curse', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/curse.webp', tier: 4 }
                 ]
             };
             
@@ -1473,39 +1491,31 @@ function displayMatchHistory(matches) {
             
             const finalItems = [];
             
-            // 각 카테고리에서 하나씩 선택
-            ['weapon', 'vitality', 'spirit'].forEach((category, index) => {
-                const availableItems = getItemsByTier(category, Math.min(soulsTier, 4));
-                if (availableItems.length > 0) {
-                    const item = availableItems[index % availableItems.length];
-                    finalItems.push({
-                        ...item,
-                        type: category,
-                        borderColor: category === 'weapon' ? '#FF8C42' : category === 'vitality' ? '#4CAF50' : '#8E44AD',
-                        opacity: isWin ? 1.0 : 0.8
-                    });
+            // 12개 아이템 생성 (각 카테고리에서 4개씩)
+            const itemsPerCategory = 4;
+            ['weapon', 'vitality', 'spirit'].forEach((category, categoryIndex) => {
+                for (let slotIndex = 0; slotIndex < itemsPerCategory; slotIndex++) {
+                    // 티어 분산: 높은 티어부터 낮은 티어까지
+                    const tierPriority = [soulsTier, Math.max(1, soulsTier - 1), Math.max(1, soulsTier - 2), 1];
+                    const selectedTier = tierPriority[slotIndex] || 1;
+                    
+                    const availableItems = getItemsByTier(category, selectedTier);
+                    if (availableItems.length > 0) {
+                        // 영웅 이름 기반 시드로 다양성 보장
+                        const seed = (hero.charCodeAt(0) || 65) + slotIndex + categoryIndex;
+                        const item = availableItems[seed % availableItems.length];
+                        
+                        finalItems.push({
+                            ...item,
+                            type: category,
+                            borderColor: category === 'weapon' ? '#FF8C42' : category === 'vitality' ? '#4CAF50' : '#8E44AD',
+                            opacity: isWin ? 1.0 : 0.8
+                        });
+                    }
                 }
             });
             
-            // 추가 아이템들 (영웅별 특화)
-            const additionalSlots = 3;
-            for (let i = 0; i < additionalSlots; i++) {
-                const categories = Object.keys(itemDatabase);
-                const category = categories[i % categories.length];
-                const availableItems = getItemsByTier(category, Math.max(1, soulsTier - 1));
-                
-                if (availableItems.length > 0) {
-                    const item = availableItems[(i + hero.length) % availableItems.length];
-                    finalItems.push({
-                        ...item,
-                        type: category,
-                        borderColor: category === 'weapon' ? '#FF8C42' : category === 'vitality' ? '#4CAF50' : '#8E44AD',
-                        opacity: isWin ? 1.0 : 0.8
-                    });
-                }
-            }
-            
-            return finalItems.slice(0, 6); // 최대 6개 아이템
+            return finalItems.slice(0, 12); // 최대 12개 아이템
         };
         
         const matchCards = matches.map((match, index) => {
