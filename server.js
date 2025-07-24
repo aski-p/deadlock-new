@@ -523,7 +523,28 @@ app.get('/health/detailed', (req, res) => {
       steamAuth: !!steamApiKey,
       database: !!supabase,
       sessionSecret: !!process.env.SESSION_SECRET,
+    },
+    debug: {
+      steamApiKeyLength: steamApiKey ? steamApiKey.length : 0,
+      steamApiKeyPrefix: steamApiKey ? steamApiKey.substring(0, 8) + '...' : 'none',
+      sessionSecretLength: process.env.SESSION_SECRET ? process.env.SESSION_SECRET.length : 0,
     }
+  });
+});
+
+// Test endpoint for Steam auth debugging
+app.get('/test/steam-debug', (req, res) => {
+  res.json({
+    steamApiKeyConfigured: !!steamApiKey,
+    steamApiKeyLength: steamApiKey ? steamApiKey.length : 0,
+    baseUrl: isProduction
+      ? 'https://deadlock-new-production.up.railway.app'
+      : 'http://localhost:3000',
+    returnUrl: `${isProduction ? 'https://deadlock-new-production.up.railway.app' : 'http://localhost:3000'}/auth/steam/return`,
+    realmUrl: isProduction ? 'https://deadlock-new-production.up.railway.app' : 'http://localhost:3000',
+    passportInitialized: !!req._passport,
+    sessionExists: !!req.session,
+    sessionId: req.sessionID,
   });
 });
 
@@ -699,20 +720,51 @@ app.get('/ko/leaderboards/oceania', getUserTopHero, (req, res) => {
 // Steam Auth Routes (only if Steam is configured)
 if (steamApiKey) {
   app.get('/auth/steam', (req, res, next) => {
-    console.log('🔑 Steam login attempt initiated');
+    console.log('🔑 Steam login attempt initiated from IP:', req.ip);
+    console.log('🔑 Session ID:', req.sessionID);
+    console.log('🔑 User Agent:', req.get('User-Agent'));
     passport.authenticate('steam', { failureRedirect: '/?error=steam_auth_failed' })(req, res, next);
   });
 
   app.get(
     '/auth/steam/return',
     (req, res, next) => {
-      console.log('🔄 Steam callback received');
+      console.log('🔄 Steam callback received from IP:', req.ip);
+      console.log('🔄 Query params:', JSON.stringify(req.query));
+      console.log('🔄 Session ID:', req.sessionID);
+      
       passport.authenticate('steam', { 
         failureRedirect: '/?error=steam_callback_failed',
         successRedirect: '/?login=success'
       })(req, res, next);
     }
   );
+  
+  // Manual test endpoint to check Steam auth without redirect
+  app.get('/test/steam-manual', (req, res) => {
+    console.log('🧪 Manual Steam test initiated');
+    try {
+      const strategy = new (require('passport-steam').Strategy)({
+        returnURL: `${isProduction ? 'https://deadlock-new-production.up.railway.app' : 'http://localhost:3000'}/auth/steam/return`,
+        realm: isProduction ? 'https://deadlock-new-production.up.railway.app' : 'http://localhost:3000',
+        apiKey: steamApiKey,
+      }, () => {});
+      
+      res.json({
+        status: 'Steam strategy created successfully',
+        apiKeyExists: !!steamApiKey,
+        apiKeyLength: steamApiKey ? steamApiKey.length : 0,
+        returnURL: `${isProduction ? 'https://deadlock-new-production.up.railway.app' : 'http://localhost:3000'}/auth/steam/return`,
+        realm: isProduction ? 'https://deadlock-new-production.up.railway.app' : 'http://localhost:3000',
+      });
+    } catch (error) {
+      console.error('❌ Steam strategy test failed:', error);
+      res.status(500).json({
+        error: 'Steam strategy test failed',
+        message: error.message
+      });
+    }
+  });
 } else {
   // Fallback routes when Steam is not configured
   app.get('/auth/steam', (req, res) => {
