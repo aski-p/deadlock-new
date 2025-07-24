@@ -397,10 +397,19 @@ app.set('layout', 'layout');
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Session configuration
+// Session configuration with proper secret handling
+const sessionSecret = process.env.SESSION_SECRET || 
+  (process.env.NODE_ENV === 'production' 
+    ? 'railway-prod-secret-2025-deadlock-steam-auth-' + Date.now()
+    : 'fallback-secret-key-for-development');
+
+console.log('🔐 Session configuration:');
+console.log('- Secret configured:', !!sessionSecret);
+console.log('- Secret length:', sessionSecret.length);
+
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || 'fallback-secret-key-for-development',
+    secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
     rolling: true, // Reset expiration on activity
@@ -522,12 +531,13 @@ app.get('/health/detailed', (req, res) => {
     features: {
       steamAuth: !!steamApiKey,
       database: !!supabase,
-      sessionSecret: !!process.env.SESSION_SECRET,
+      sessionSecret: !!sessionSecret,
     },
     debug: {
       steamApiKeyLength: steamApiKey ? steamApiKey.length : 0,
       steamApiKeyPrefix: steamApiKey ? steamApiKey.substring(0, 8) + '...' : 'none',
-      sessionSecretLength: process.env.SESSION_SECRET ? process.env.SESSION_SECRET.length : 0,
+      sessionSecretLength: sessionSecret ? sessionSecret.length : 0,
+      sessionSecretSource: process.env.SESSION_SECRET ? 'environment' : 'fallback',
     }
   });
 });
