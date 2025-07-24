@@ -1486,78 +1486,7 @@ function displayMatchHistory(matches) {
             }
         };
         
-        // 최종 아이템 생성 함수 (12개로 확장)
-        const generateFinalItems = (hero, isWin, souls) => {
-            const itemDatabase = {
-                weapon: [
-                    { name: 'Basic Magazine', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp', tier: 1 },
-                    { name: 'High-Velocity Mag', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/high_velocity_mag.webp', tier: 1 },
-                    { name: 'Close Quarters', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/close_quarters.webp', tier: 1 },
-                    { name: 'Kinetic Dash', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/kinetic_dash.webp', tier: 2 },
-                    { name: 'Headshot Booster', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/headshot_booster.webp', tier: 2 },
-                    { name: 'Fleetfoot', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/fleetfoot.webp', tier: 2 },
-                    { name: 'Hunter\'s Aura', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hunters_aura.webp', tier: 3 },
-                    { name: 'Spiritual Overflow', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/spiritual_overflow.webp', tier: 3 },
-                    { name: 'Tesla Bullets', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/tesla_bullets.webp', tier: 4 },
-                    { name: 'Ricochet', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/ricochet.webp', tier: 4 }
-                ],
-                vitality: [
-                    { name: 'Healing Rite', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_rite.webp', tier: 1 },
-                    { name: 'Extra Health', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp', tier: 1 },
-                    { name: 'Extra Regen', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_regen.webp', tier: 1 },
-                    { name: 'Bullet Armor', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/bullet_armor.webp', tier: 2 },
-                    { name: 'Spirit Armor', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/spirit_armor.webp', tier: 2 },
-                    { name: 'Divine Barrier', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/divine_barrier.webp', tier: 2 },
-                    { name: 'Majestic Leap', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/majestic_leap.webp', tier: 3 },
-                    { name: 'Superior Stamina', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/superior_stamina.webp', tier: 3 },
-                    { name: 'Leech', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/leech.webp', tier: 4 },
-                    { name: 'Colossus', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/colossus.webp', tier: 4 }
-                ],
-                spirit: [
-                    { name: 'Mystic Burst', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_burst.webp', tier: 1 },
-                    { name: 'Spirit Strike', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_strike.webp', tier: 1 },
-                    { name: 'Extra Spirit', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_spirit.webp', tier: 1 },
-                    { name: 'Mystic Reach', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_reach.webp', tier: 2 },
-                    { name: 'Spirit Lifesteal', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_lifesteal.webp', tier: 2 },
-                    { name: 'Quicksilver Reload', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/quicksilver_reload.webp', tier: 2 },
-                    { name: 'Mystic Reverb', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_reverb.webp', tier: 3 },
-                    { name: 'Ethereal Shift', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/ethereal_shift.webp', tier: 3 },
-                    { name: 'Diviner\'s Kevlar', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/diviners_kevlar.webp', tier: 4 },
-                    { name: 'Curse', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/curse.webp', tier: 4 }
-                ]
-            };
-            
-            const getItemsByTier = (category, tier) => itemDatabase[category].filter(item => item.tier === tier);
-            const soulsTier = souls > 60000 ? 4 : souls > 40000 ? 3 : souls > 20000 ? 2 : 1;
-            
-            const finalItems = [];
-            
-            // 12개 아이템 생성 (각 카테고리에서 4개씩)
-            const itemsPerCategory = 4;
-            ['weapon', 'vitality', 'spirit'].forEach((category, categoryIndex) => {
-                for (let slotIndex = 0; slotIndex < itemsPerCategory; slotIndex++) {
-                    // 티어 분산: 높은 티어부터 낮은 티어까지
-                    const tierPriority = [soulsTier, Math.max(1, soulsTier - 1), Math.max(1, soulsTier - 2), 1];
-                    const selectedTier = tierPriority[slotIndex] || 1;
-                    
-                    const availableItems = getItemsByTier(category, selectedTier);
-                    if (availableItems.length > 0) {
-                        // 영웅 이름 기반 시드로 다양성 보장
-                        const seed = (hero.charCodeAt(0) || 65) + slotIndex + categoryIndex;
-                        const item = availableItems[seed % availableItems.length];
-                        
-                        finalItems.push({
-                            ...item,
-                            type: category,
-                            borderColor: category === 'weapon' ? '#FF8C42' : category === 'vitality' ? '#4CAF50' : '#8E44AD',
-                            opacity: isWin ? 1.0 : 0.8
-                        });
-                    }
-                }
-            });
-            
-            return finalItems.slice(0, 12); // 최대 12개 아이템
-        };
+        // generateFinalItems 함수 제거 - 더 이상 사용하지 않음
         
         const matchCards = matches.map((match, index) => {
             try {
@@ -1616,43 +1545,13 @@ function displayMatchHistory(matches) {
                             </div>
                         </div>
                         <div class="match-items">
-                            <div class="items-label">최종 아이템 (API 실제 데이터)</div>
-                            <div class="items-grid">
-                                ${(() => {
-                                    const finalItems = match.finalItems || [];
-                                    const totalSlots = 12;
-                                    const itemSlots = [];
-                                    
-                                    // 실제 아이템들을 앞쪽 슬롯에 배치
-                                    for (let i = 0; i < totalSlots; i++) {
-                                        if (i < finalItems.length) {
-                                            const item = finalItems[i];
-                                            itemSlots.push(`
-                                                <div class="item-wrapper">
-                                                    <img src="https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/${item.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}.webp" 
-                                                         alt="${item.name}" 
-                                                         class="item-image real-item" 
-                                                         title="${item.name} (Tier ${item.tier || 'Unknown'})"
-                                                         onerror="this.src='https://via.placeholder.com/48x48/444/fff?text=${item.name.charAt(0)}';">
-                                                </div>
-                                            `);
-                                        } else {
-                                            // 빈 슬롯
-                                            itemSlots.push(`
-                                                <div class="item-wrapper empty-slot">
-                                                    <div class="empty-item-placeholder" title="아이템 없음"></div>
-                                                </div>
-                                            `);
-                                        }
-                                    }
-                                    
-                                    return itemSlots.join('');
-                                })()}
+                            <div class="items-label">최종 아이템</div>
+                            <div class="items-grid" id="match-items-${index}">
+                                <!-- 아이템 데이터는 안정적으로 로드 후 표시 -->
+                                <div style="grid-column: 1/-1; text-align: center; color: #999; font-size: 12px; padding: 20px;">
+                                    매치 데이터 로딩 중...
+                                </div>
                             </div>
-                            ${match.finalItems && match.finalItems.length > 0 ? 
-                                `<div class="items-info">✅ 실제 게임 데이터 (${match.finalItems.length}개)</div>` : 
-                                `<div class="items-info">⚠️ API에서 아이템 데이터 없음</div>`
-                            }
                         </div>
                         <div class="match-time">
                             ${formatDate(playedAt)}
@@ -1676,6 +1575,41 @@ function displayMatchHistory(matches) {
         });
         
         matchesList.innerHTML = matchCards.join('');
+        
+        // 매치 아이템 데이터를 안정적으로 로드
+        matches.forEach((match, index) => {
+            const itemsContainer = document.getElementById(`match-items-${index}`);
+            if (itemsContainer && match.finalItems && match.finalItems.length > 0) {
+                // 실제 API 데이터가 있는 경우에만 표시
+                const itemsHTML = match.finalItems.slice(0, 12).map(item => `
+                    <div class="item-wrapper">
+                        <img src="https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/${item.name?.toLowerCase().replace(/[^a-z0-9]/g, '_') || 'unknown'}.webp" 
+                             alt="${item.name || 'Unknown Item'}" 
+                             class="item-image real-item" 
+                             title="${item.name || 'Unknown Item'}"
+                             onerror="this.src='https://via.placeholder.com/48x48/444/fff?text=?';">
+                    </div>
+                `).join('');
+                
+                // 빈 슬롯 추가 (최대 12개까지)
+                const emptySlots = Math.max(0, 12 - match.finalItems.length);
+                const emptyHTML = Array(emptySlots).fill().map(() => `
+                    <div class="item-wrapper empty-slot">
+                        <div class="empty-item-placeholder" title="아이템 없음"></div>
+                    </div>
+                `).join('');
+                
+                itemsContainer.innerHTML = itemsHTML + emptyHTML;
+            } else if (itemsContainer) {
+                // API 데이터가 없는 경우
+                itemsContainer.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; color: #999; font-size: 12px; padding: 10px;">
+                        <i class="fas fa-info-circle"></i> 아이템 데이터 없음
+                    </div>
+                `;
+            }
+        });
+        
         console.log('✅ 매치 히스토리 표시 완료');
         
     } catch (error) {
