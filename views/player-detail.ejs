@@ -345,6 +345,16 @@
     color: #999;
 }
 
+.hero-stat-line {
+    margin-bottom: 4px;
+}
+
+.hero-kda-line {
+    font-size: 12px;
+    color: #63a2e2;
+    font-weight: 600;
+}
+
 .matches-list {
     display: flex;
     flex-direction: column;
@@ -784,7 +794,8 @@ function updateHeroesGrid(heroes) {
             <div class="hero-card-info">
                 <h3>${hero.name}</h3>
                 <div class="hero-card-stats">
-                    ${hero.matches}게임 · ${hero.winRate}% 승률
+                    <div class="hero-stat-line">${hero.matches}게임 · ${hero.winRate}% 승률</div>
+                    <div class="hero-kda-line">KDA: ${hero.kda || '0.0'}</div>
                 </div>
             </div>
         </div>

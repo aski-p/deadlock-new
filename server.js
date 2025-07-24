@@ -658,15 +658,15 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
   try {
     // 영웅 ID 매핑 (실제 API에서 사용하는 ID)
     const heroIdMapping = {
-      1: 'Dynamo',
+      1: 'Infernus',
       2: 'Bebop', 
-      3: 'Grey Talon',
+      3: 'Vindicta',
       4: 'Grey Talon',
-      6: 'Haze',
+      6: 'Abrams',
       7: 'Wraith',
       8: 'McGinnis',
-      10: 'Infernus',
-      11: 'Lady Geist',
+      10: 'Paradox',
+      11: 'Dynamo',
       12: 'Lash',
       13: 'Haze',
       14: 'Holliday',
@@ -1587,10 +1587,10 @@ function generateFastHeroStats(accountId) {
 
 // 영웅 ID를 이름으로 변환하는 맵핑
 const heroIdMap = {
-  1: 'Dynamo', 2: 'Seven', 4: 'Grey Talon', 6: 'Abrams', 7: 'Ivy', 
-  8: 'McGinnis', 10: 'Paradox', 11: 'Infernus', 13: 'Haze', 
+  1: 'Infernus', 2: 'Seven', 3: 'Vindicta', 4: 'Grey Talon', 6: 'Abrams', 7: 'Ivy', 
+  8: 'McGinnis', 10: 'Paradox', 11: 'Dynamo', 13: 'Haze', 
   14: 'Holliday', 15: 'Bebop', 16: 'Calico', 17: 'Kelvin', 18: 'Mo & Krill', 19: 'Shiv', 
-  20: 'Shiv', 25: 'Vindicta', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
+  20: 'Shiv', 25: 'Warden', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
   50: 'Pocket', 52: 'Mirage', 58: 'Viper', 60: 'Sinclair', 61: 'Unknown_61'
 };
 
@@ -2116,6 +2116,24 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
     let totalDenies = 0; // 디나이 총합 추가
     let heroStats = {};
 
+    // 매치 데이터 형식 디버깅
+    console.log(`🔍 매치 데이터 샘플 (첫 3개):`);
+    matches.slice(0, 3).forEach((match, i) => {
+      console.log(`  매치 ${i + 1}: hero_id=${match.hero_id}, match_id=${match.match_id}, heroName=${getHeroNameById(match.hero_id)}`);
+    });
+
+    // 모든 hero_id 수집
+    const allHeroIds = matches.map(match => match.hero_id).filter(id => id !== undefined);
+    const heroIdCounts = {};
+    allHeroIds.forEach(id => {
+      heroIdCounts[id] = (heroIdCounts[id] || 0) + 1;
+    });
+    console.log(`🎮 발견된 모든 Hero ID들:`, Object.entries(heroIdCounts)
+      .sort((a, b) => b[1] - a[1])
+      .map(([id, count]) => `${id}(${getHeroNameById(parseInt(id))}):${count}`)
+      .join(', '));
+    console.log(`🔥 Infernus(ID:1) 매치 수: ${heroIdCounts[1] || 0}`);
+
     try {
       matches.forEach((match, index) => {
         try {
@@ -2225,6 +2243,12 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
           // 영웅별 통계
           const heroId = match.hero_id;
           const heroName = getHeroNameById(heroId);
+          
+          // Infernus 디버깅 로그 추가 (수정된 매핑: ID 1)
+          if (heroId === 1) {
+            console.log(`🔥 Infernus 매치 발견 - 매치 ${index + 1}/${matches.length}: ID ${match.match_id}, heroId ${heroId}, heroName ${heroName}`);
+          }
+          
           const matchKills = match.player_kills || match.kills || 0;
           const matchDeaths = match.player_deaths || match.deaths || 0;
           const matchAssists = match.player_assists || match.assists || 0;
@@ -2376,6 +2400,14 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
       })
     };
 
+    // Infernus 통계 디버깅 로그
+    const infernusStats = heroStats['Infernus'];
+    if (infernusStats) {
+      console.log(`🔥 Infernus 최종 통계: ${infernusStats.matches}경기 (승률: ${((infernusStats.wins / infernusStats.matches) * 100).toFixed(1)}%)`);
+    } else {
+      console.log(`🔥 Infernus 데이터 없음 - heroStats에서 찾을 수 없음`);
+    }
+
     console.log(`✅ deadlock.coach 스타일 분석 완료: ${totalMatches}경기, 승률 ${matchWinRate}%, 라인승률 ${laneWinRate}%, 평균 디나이: ${avgDenies}개, 주력 영웅: ${sortedHeroes.slice(0, 3).map(h => `${h.name}(${h.matches}경기)`).join(', ')}`);
     return analysis;
     
@@ -2388,10 +2420,10 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
 // 영웅 ID를 이름으로 변환하는 함수
 const getHeroNameById = (heroId) => {
   const heroMap = {
-    1: 'Dynamo', 2: 'Seven', 4: 'Lady Geist', 6: 'Abrams', 7: 'Wraith', 
-    8: 'McGinnis', 10: 'Paradox', 11: 'Infernus', 12: 'Kelvin', 13: 'Haze', 
+    1: 'Infernus', 2: 'Seven', 3: 'Vindicta', 4: 'Lady Geist', 6: 'Abrams', 7: 'Wraith', 
+    8: 'McGinnis', 10: 'Paradox', 11: 'Dynamo', 12: 'Kelvin', 13: 'Haze', 
     14: 'Holliday', 15: 'Bebop', 16: 'Calico', 17: 'Grey Talon', 18: 'Mo & Krill', 19: 'Shiv', 
-    20: 'Ivy', 25: 'Vindicta', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
+    20: 'Ivy', 25: 'Warden', 27: 'Yamato', 31: 'Lash', 35: 'Viscous', 
     50: 'Pocket', 52: 'Mirage', 58: 'Viper', 59: 'Unknown_59', 60: 'Sinclair', 61: 'Unknown_61', 62: 'Mo & Krill', 63: 'Dynamo'
   };
   return heroMap[heroId] || `Hero_${heroId}`;
