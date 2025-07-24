@@ -2852,14 +2852,23 @@ app.get('/api/v1/board/posts/:postId', async (req, res) => {
       return res.status(400).json({ error: '유효하지 않은 게시글 ID입니다' });
     }
     
-    // 조회수 증가
-    const { error: updateError } = await supabase
+    // 현재 조회수 가져오기
+    const { data: currentPost, error: fetchError } = await supabase
       .from('board_posts')
-      .update({ view_count: supabase.sql`view_count + 1` })
-      .eq('id', postId);
+      .select('view_count')
+      .eq('id', postId)
+      .single();
+      
+    if (!fetchError && currentPost) {
+      // 조회수 증가
+      const { error: updateError } = await supabase
+        .from('board_posts')
+        .update({ view_count: (currentPost.view_count || 0) + 1 })
+        .eq('id', postId);
     
-    if (updateError) {
-      console.log('조회수 증가 실패:', updateError);
+      if (updateError) {
+        console.log('조회수 증가 실패:', updateError);
+      }
     }
     
     // 게시글 상세 정보 조회
@@ -3070,59 +3079,6 @@ app.post('/api/v1/board/posts/:postId/comments', async (req, res) => {
     
   } catch (error) {
     console.error('댓글 작성 API 오류:', error);
-    res.status(500).json({ error: '서버 오류가 발생했습니다' });
-  }
-});
-
-// 게시판 API - 글 상세 조회 (Supabase, 댓글 포함)
-app.get('/api/v1/board/posts/:postId', async (req, res) => {
-  try {
-    const postId = parseInt(req.params.postId);
-    
-    // 게시글 조회
-    const { data: post, error: postError } = await supabase
-      .from('board_posts')
-      .select('*')
-      .eq('id', postId)
-      .single();
-    
-    if (postError || !post) {
-      return res.status(404).json({ error: '게시글을 찾을 수 없습니다' });
-    }
-    
-    // 댓글 조회
-    const { data: comments, error: commentsError } = await supabase
-      .from('board_comments')
-      .select('*')
-      .eq('post_id', postId)
-      .order('created_at', { ascending: true });
-    
-    if (commentsError) {
-      console.error('댓글 조회 오류:', commentsError);
-    }
-    
-    // 데이터 형식 변환
-    const formattedPost = {
-      ...post,
-      author: {
-        steamId: post.author_steam_id,
-        username: post.author_username,
-        avatar: post.author_avatar
-      },
-      comments: (comments || []).map(comment => ({
-        ...comment,
-        author: {
-          steamId: comment.author_steam_id,
-          username: comment.author_username,
-          avatar: comment.author_avatar
-        }
-      }))
-    };
-    
-    res.json(formattedPost);
-    
-  } catch (error) {
-    console.error('게시글 상세 조회 API 오류:', error);
     res.status(500).json({ error: '서버 오류가 발생했습니다' });
   }
 });

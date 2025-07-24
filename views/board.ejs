@@ -670,7 +670,7 @@ function displayPostsTable(posts) {
     }
     
     tableBody.innerHTML = posts.map(post => `
-        <tr onclick="openPostModal(${post.id})">
+        <tr onclick="openPostModal(${post.id})" style="cursor: pointer;">
             <td class="date-column">
                 <div class="post-date">${formatDate(post.created_at)}</div>
             </td>
@@ -760,6 +760,7 @@ document.getElementById('writePostForm').addEventListener('submit', async (e) =>
 
 // 게시글 모달 열기
 async function openPostModal(postId) {
+    console.log('Opening post modal for postId:', postId);
     try {
         currentPostId = postId;
         
@@ -802,11 +803,12 @@ async function openPostModal(postId) {
             document.getElementById('postModal').style.display = 'flex';
             document.body.style.overflow = 'hidden'; // 스크롤 방지
         } else {
+            console.error('게시글 로드 실패:', data);
             alert(data.error || '게시글을 불러올 수 없습니다.');
         }
     } catch (error) {
         console.error('게시글 로드 오류:', error);
-        alert('게시글을 불러오는 중 오류가 발생했습니다.');
+        alert('게시글을 불러오는 중 오류가 발생했습니다.\n' + error.message);
     }
 }
 
@@ -819,6 +821,7 @@ function closePostModal() {
 
 // 댓글 표시
 function displayComments(comments) {
+    console.log('Displaying comments:', comments);
     const commentsList = document.getElementById('commentsList');
     const commentsCount = document.getElementById('commentsCount');
     
@@ -833,7 +836,7 @@ function displayComments(comments) {
         <div class="comment-item">
             <div class="comment-author">
                 <img src="${comment.author_avatar}" alt="${comment.author_username}" class="author-avatar"
-                     onerror="this.src='data:image/svg+xml;charset=utf-8,${encodeURIComponent('<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"24\\\" height=\\\"24\\\" viewBox=\\\"0 0 24 24\\\"><circle cx=\\\"12\\\" cy=\\\"12\\\" r=\\\"10\\\" fill=\\\"#666\\\" stroke=\\\"#fff\\\" stroke-width=\\\"2\\\"/><circle cx=\\\"12\\\" cy=\\\"10\\\" r=\\\"3\\\" fill=\\\"#fff\\\"/><path d=\\\"M6.5 17.5 Q12 15 17.5 17.5\\\" stroke=\\\"#fff\\\" stroke-\\\"2\\\" fill=\\\"none\\\"/></svg>')}'">
+                     onerror="this.src='data:image/svg+xml;charset=utf-8,${encodeURIComponent('<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"24\\\" height=\\\"24\\\" viewBox=\\\"0 0 24 24\\\"><circle cx=\\\"12\\\" cy=\\\"12\\\" r=\\\"10\\\" fill=\\\"#666\\\" stroke=\\\"#fff\\\" stroke-width=\\\"2\\\"/><circle cx=\\\"12\\\" cy=\\\"10\\\" r=\\\"3\\\" fill=\\\"#fff\\\"/><path d=\\\"M6.5 17.5 Q12 15 17.5 17.5\\\" stroke=\\\"#fff\\\" stroke-width=\\\"2\\\" fill=\\\"none\\\"/></svg>')}'">
                 <span>${escapeHtml(comment.author_username)}</span>
             </div>
             <div class="comment-content">${escapeHtml(comment.content)}</div>
@@ -844,7 +847,10 @@ function displayComments(comments) {
 
 // 댓글 작성
 async function addComment() {
-    if (!currentPostId) return;
+    if (!currentPostId) {
+        console.error('No currentPostId');
+        return;
+    }
     
     const commentInput = document.getElementById('commentInput');
     const content = commentInput.value.trim();
@@ -853,6 +859,8 @@ async function addComment() {
         alert('댓글 내용을 입력해주세요.');
         return;
     }
+    
+    console.log('Adding comment:', { postId: currentPostId, content });
     
     try {
         const response = await fetch(`/api/v1/board/posts/${currentPostId}/comments`, {
@@ -866,15 +874,17 @@ async function addComment() {
         const data = await response.json();
         
         if (response.ok) {
+            console.log('Comment added successfully:', data);
             commentInput.value = '';
             // 게시글 다시 로드해서 댓글 업데이트
             openPostModal(currentPostId);
         } else {
+            console.error('Comment creation failed:', data);
             alert(data.error || '댓글 작성에 실패했습니다.');
         }
     } catch (error) {
         console.error('댓글 작성 오류:', error);
-        alert('댓글 작성 중 오류가 발생했습니다.');
+        alert('댓글 작성 중 오류가 발생했습니다.\n' + error.message);
     }
 }
 
