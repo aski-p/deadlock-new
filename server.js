@@ -2024,12 +2024,12 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
                 }
                 
                 // 등급 정보 업데이트
-                if (playerCard.rank_tier && playerCard.rank) {
-                  const rankTier = playerCard.rank_tier || 5;
-                  const rankName = playerCard.rank || 'Initiate';
+                if (playerCard.rank_tier !== undefined && playerCard.rank) {
+                  const rankTier = playerCard.rank_tier || 1;
+                  const rankName = playerCard.rank;
                   const points = playerCard.points || 0;
                   
-                  // 랭크별 번호 매핑
+                  // 랭크별 번호 매핑 (정확한 매핑)
                   const rankMap = {
                     'Eternus': 11, 'Phantom': 10, 'Oracle': 9, 'Ritualist': 8,
                     'Alchemist': 7, 'Arcanist': 6, 'Initiate': 5
@@ -2044,6 +2044,15 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
                   };
                   
                   console.log(`🏆 ${member.accountId} 등급 업데이트: ${rankName} ${rankTier} (${points}점)`);
+                } else {
+                  // API에서 랭크 정보가 없는 경우 기본값 설정
+                  member.rank = {
+                    medal: 'Initiate',
+                    subrank: 1,
+                    score: 0,
+                    rankImage: `rank5/badge_sm_subrank1.webp`
+                  };
+                  console.log(`⚠️ ${member.accountId} 랭크 정보 없음 - 기본값(Initiate 1) 설정`);
                 }
                 
                 console.log(`✅ ${member.accountId} 프로필 업데이트 완료: ${member.name}`);
