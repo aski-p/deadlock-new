@@ -211,6 +211,43 @@ nav {
     text-decoration: underline;
 }
 
+/* 데드락 로고 스타일 */
+.deadlock-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.deadlock-logo-img {
+    width: 350px;
+    height: auto;
+    max-width: 100%;
+    filter: brightness(1.1) drop-shadow(0 4px 20px rgba(255, 239, 215, 0.3));
+    animation: floatLogo 4s ease-in-out infinite;
+}
+
+@keyframes floatLogo {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .deadlock-logo-img {
+        width: 250px;
+    }
+}
+
+@media (max-width: 480px) {
+    .deadlock-logo-img {
+        width: 200px;
+    }
+}
+
 /* 윈도우 앱 섹션 */
 .app-section {
     background: linear-gradient(135deg, rgba(88, 101, 242, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
