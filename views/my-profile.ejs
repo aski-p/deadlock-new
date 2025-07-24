@@ -589,6 +589,56 @@
     text-align: right;
 }
 
+/* Match Items Styles */
+.match-items {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 200px;
+}
+
+.items-label {
+    font-size: 12px;
+    color: #999;
+    font-weight: 500;
+}
+
+.items-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    max-width: 180px;
+}
+
+.item-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.item-image {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    transition: transform 0.2s ease;
+}
+
+.item-image:hover {
+    transform: scale(1.1);
+}
+
+.weapon-item {
+    border-color: #FF8C42 !important;
+}
+
+.vitality-item {
+    border-color: #4CAF50 !important;
+}
+
+.spirit-item {
+    border-color: #8E44AD !important;
+}
+
 /* 파티 스탯 스타일 */
 .party-stats-list {
     display: flex;
@@ -945,13 +995,13 @@ async function loadMyProfileData() {
             throw new Error('Account ID가 유효하지 않습니다. 다시 로그인해주세요.');
         }
         
-        // 병렬로 모든 데이터를 동시에 로드
+        // 병렬로 모든 데이터를 동시에 로드 (캐시 활용으로 성능 최적화)
         console.log('🔄 API 호출 시작...');
         const [playerResponse, heroStatsResponse, matchHistoryResponse, partyStatsResponse] = await Promise.all([
-            fetch(`/api/v1/players/${accountId}?refresh=true`),
-            fetch(`/api/v1/players/${accountId}/hero-stats?refresh=true`),
-            fetch(`/api/v1/players/${accountId}/match-history?limit=10&refresh=true`),
-            fetch(`/api/v1/players/${accountId}/party-stats?refresh=true`)
+            fetch(`/api/v1/players/${accountId}`),
+            fetch(`/api/v1/players/${accountId}/hero-stats`),
+            fetch(`/api/v1/players/${accountId}/match-history?limit=10`),
+            fetch(`/api/v1/players/${accountId}/party-stats`)
         ]);
         
         console.log('📡 API 응답 상태:', {
@@ -1395,6 +1445,69 @@ function displayMatchHistory(matches) {
             }
         };
         
+        // 최종 아이템 생성 함수
+        const generateFinalItems = (hero, isWin, souls) => {
+            const itemDatabase = {
+                weapon: [
+                    { name: 'Basic Magazine', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp', tier: 1 },
+                    { name: 'Kinetic Dash', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/kinetic_dash.webp', tier: 2 },
+                    { name: 'Pristine Emblem', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/pristine_emblem.webp', tier: 3 },
+                    { name: 'Tesla Bullets', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/tesla_bullets.webp', tier: 4 }
+                ],
+                vitality: [
+                    { name: 'Healing Rite', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_rite.webp', tier: 1 },
+                    { name: 'Extra Health', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp', tier: 2 },
+                    { name: 'Majestic Leap', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/majestic_leap.webp', tier: 3 },
+                    { name: 'Leech', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/leech.webp', tier: 4 }
+                ],
+                spirit: [
+                    { name: 'Mystic Burst', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_burst.webp', tier: 1 },
+                    { name: 'Spirit Strike', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_strike.webp', tier: 2 },
+                    { name: 'Mystic Reverb', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_reverb.webp', tier: 3 },
+                    { name: 'Diviner\'s Kevlar', image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/diviners_kevlar.webp', tier: 4 }
+                ]
+            };
+            
+            const getItemsByTier = (category, tier) => itemDatabase[category].filter(item => item.tier === tier);
+            const soulsTier = souls > 60000 ? 4 : souls > 40000 ? 3 : souls > 20000 ? 2 : 1;
+            
+            const finalItems = [];
+            
+            // 각 카테고리에서 하나씩 선택
+            ['weapon', 'vitality', 'spirit'].forEach((category, index) => {
+                const availableItems = getItemsByTier(category, Math.min(soulsTier, 4));
+                if (availableItems.length > 0) {
+                    const item = availableItems[index % availableItems.length];
+                    finalItems.push({
+                        ...item,
+                        type: category,
+                        borderColor: category === 'weapon' ? '#FF8C42' : category === 'vitality' ? '#4CAF50' : '#8E44AD',
+                        opacity: isWin ? 1.0 : 0.8
+                    });
+                }
+            });
+            
+            // 추가 아이템들 (영웅별 특화)
+            const additionalSlots = 3;
+            for (let i = 0; i < additionalSlots; i++) {
+                const categories = Object.keys(itemDatabase);
+                const category = categories[i % categories.length];
+                const availableItems = getItemsByTier(category, Math.max(1, soulsTier - 1));
+                
+                if (availableItems.length > 0) {
+                    const item = availableItems[(i + hero.length) % availableItems.length];
+                    finalItems.push({
+                        ...item,
+                        type: category,
+                        borderColor: category === 'weapon' ? '#FF8C42' : category === 'vitality' ? '#4CAF50' : '#8E44AD',
+                        opacity: isWin ? 1.0 : 0.8
+                    });
+                }
+            }
+            
+            return finalItems.slice(0, 6); // 최대 6개 아이템
+        };
+        
         const matchCards = matches.map((match, index) => {
             try {
                 // 안전한 데이터 추출
@@ -1449,6 +1562,20 @@ function displayMatchHistory(matches) {
                             <div class="performance-item">
                                 <span class="performance-label">데미지</span>
                                 <span class="performance-value">${damage.toLocaleString()}</span>
+                            </div>
+                        </div>
+                        <div class="match-items">
+                            <div class="items-label">최종 아이템</div>
+                            <div class="items-grid">
+                                ${generateFinalItems(hero, isWin, souls).map(item => `
+                                    <div class="item-wrapper">
+                                        <img src="${item.image}" 
+                                             alt="${item.name}" 
+                                             class="item-image ${item.type}-item" 
+                                             title="${item.name}"
+                                             style="border: 2px solid ${item.borderColor}; opacity: ${item.opacity};">
+                                    </div>
+                                `).join('')}
                             </div>
                         </div>
                         <div class="match-time">
