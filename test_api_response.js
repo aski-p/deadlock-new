@@ -6,39 +6,51 @@ async function testApiResponse() {
     console.log('🧪 API 응답에서 아이템 데이터 테스트 중...\n');
     
     // 로컬 서버에서 플레이어 데이터 가져오기
-    const response = await axios.get('http://localhost:3001/api/v1/players/1486063236?refresh=true', {
-      timeout: 10000
-    });
+    // Test with different account IDs
+    const testAccountIds = ['1486063236', '76561198015042012', '123456789'];
     
-    const playerData = response.data;
-    
-    console.log('📊 플레이어 기본 정보:');
-    console.log(`- 이름: ${playerData.name}`);
-    console.log(`- 계정 ID: ${playerData.accountId}`);
-    console.log(`- 총 매치: ${playerData.stats?.matches || 0}`);
-    console.log();
-    
-    console.log('🎮 최근 매치 데이터:');
-    if (playerData.recentMatches && playerData.recentMatches.length > 0) {
-      playerData.recentMatches.forEach((match, index) => {
-        console.log(`📋 매치 ${index + 1}:`);
-        console.log(`  - ID: ${match.matchId}`);
-        console.log(`  - 영웅: ${match.hero}`);
-        console.log(`  - 결과: ${match.result}`);
-        console.log(`  - 아이템 개수: ${match.items ? match.items.length : 0}`);
+    for (const testAccountId of testAccountIds) {
+      console.log(`\n🔍 Testing account ID: ${testAccountId}`);
+      
+      try {
+        const response = await axios.get(`http://localhost:3001/api/v1/players/${testAccountId}?refresh=true`, {
+          timeout: 10000
+        });
         
-        if (match.items && match.items.length > 0) {
-          console.log(`  - 아이템 목록:`);
-          match.items.forEach(item => {
-            console.log(`    • ${item.name} (${item.category || 'unknown'})`);
+        const playerData = response.data;
+        
+        console.log('📊 플레이어 기본 정보:');
+        console.log(`- 이름: ${playerData.name}`);
+        console.log(`- 계정 ID: ${playerData.accountId}`);
+        console.log(`- 총 매치: ${playerData.stats?.matches || 0}`);
+        console.log();
+        
+        console.log('🎮 최근 매치 데이터:');
+        if (playerData.recentMatches && playerData.recentMatches.length > 0) {
+          playerData.recentMatches.forEach((match, index) => {
+            console.log(`📋 매치 ${index + 1}:`);
+            console.log(`  - ID: ${match.matchId}`);
+            console.log(`  - 영웅: ${match.hero}`);
+            console.log(`  - 결과: ${match.result}`);
+            console.log(`  - 아이템 개수: ${match.items ? match.items.length : 0}`);
+            
+            if (match.items && match.items.length > 0) {
+              console.log(`  - 아이템 목록:`);
+              match.items.forEach(item => {
+                console.log(`    • ${item.name} (${item.category || 'unknown'})`);
+              });
+            } else {
+              console.log(`  - ❌ 아이템 데이터 없음`);
+            }
+            console.log();
           });
         } else {
-          console.log(`  - ❌ 아이템 데이터 없음`);
+          console.log('❌ 최근 매치 데이터 없음');
         }
-        console.log();
-      });
-    } else {
-      console.log('❌ 최근 매치 데이터 없음');
+        
+      } catch (error) {
+        console.log(`❌ Account ${testAccountId} 실패: ${error.message}`);
+      }
     }
     
     console.log('🖼️ 아이템 이미지 URL 테스트:');

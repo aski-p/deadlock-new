@@ -895,7 +895,7 @@ function getItemImage(itemName) {
         'Cold Front': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/cold_front.webp',
         'Decay': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/decay.webp',
         'Slowing Hex': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/slowing_hex.webp',
-        'Superior Cooldown': 'https://cdn.dreamhack.deadlock.coach/images/items/spirit/superior_cooldown.webp',
+        'Superior Cooldown': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/superior_cooldown.webp',
         'Improved Burst': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_burst.webp',
         'Improved Reach': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_reach.webp',
         'Improved Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_spirit.webp',
@@ -970,6 +970,18 @@ function updateHeroesGrid(heroes) {
 function updateMatchesList(matches) {
     const list = document.getElementById('matches-list');
     
+    console.log('🎮 Updating matches list:', matches?.length, 'matches');
+    if (matches && matches.length > 0) {
+        matches.forEach((match, index) => {
+            console.log(`📋 Match ${index + 1}:`, {
+                hero: match.hero,
+                result: match.result,
+                itemCount: match.items?.length || 0,
+                items: match.items?.map(item => item.name) || []
+            });
+        });
+    }
+    
     const getHeroImage = (heroName) => {
         const heroImageMap = {
             'Abrams': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp',
@@ -1024,21 +1036,25 @@ function updateMatchesList(matches) {
                 <div class="match-items">
                     <div class="items-label">최종 아이템</div>
                     <div class="items-grid">
-                        ${match.items.map(item => `
-                            <img src="${getItemImage(item.name)}" alt="${item.name}" class="item-image" title="${item.name}">
-                        `).join('')}
+                        ${match.items.map(item => {
+                            const imageUrl = getItemImage(item.name);
+                            console.log('🖼️ 아이템 이미지 생성:', item.name, '→', imageUrl);
+                            return `<img src="${imageUrl}" alt="${item.name}" class="item-image" title="${item.name}" 
+                                         onload="console.log('✅ 아이템 이미지 로드 성공:', '${item.name}')" 
+                                         onerror="console.error('❌ 아이템 이미지 로드 실패:', '${item.name}', this.src); this.style.border='2px solid red';">`;
+                        }).join('')}
                     </div>
                 </div>
             ` : `
                 <div class="match-items">
-                    <div class="items-label">최종 아이템</div>
+                    <div class="items-label">최종 아이템 (데이터 없음)</div>
                     <div class="items-grid">
-                        <img src="${getItemImage('Basic Magazine')}" alt="Basic Magazine" class="item-image" title="Basic Magazine">
-                        <img src="${getItemImage('Extra Health')}" alt="Extra Health" class="item-image" title="Extra Health">
-                        <img src="${getItemImage('Extra Spirit')}" alt="Extra Spirit" class="item-image" title="Extra Spirit">
-                        <img src="${getItemImage('Improved Bullet Armor')}" alt="Improved Bullet Armor" class="item-image" title="Improved Bullet Armor">
-                        <img src="${getItemImage('Mystic Vulnerability')}" alt="Mystic Vulnerability" class="item-image" title="Mystic Vulnerability">
-                        <img src="${getItemImage('Leech')}" alt="Leech" class="item-image" title="Leech">
+                        <img src="${getItemImage('Basic Magazine')}" alt="Basic Magazine" class="item-image" title="Basic Magazine (예시)">
+                        <img src="${getItemImage('Extra Health')}" alt="Extra Health" class="item-image" title="Extra Health (예시)">
+                        <img src="${getItemImage('Extra Spirit')}" alt="Extra Spirit" class="item-image" title="Extra Spirit (예시)">
+                        <img src="${getItemImage('Improved Bullet Armor')}" alt="Improved Bullet Armor" class="item-image" title="Improved Bullet Armor (예시)">
+                        <img src="${getItemImage('Mystic Vulnerability')}" alt="Mystic Vulnerability" class="item-image" title="Mystic Vulnerability (예시)">
+                        <img src="${getItemImage('Leech')}" alt="Leech" class="item-image" title="Leech (예시)">
                     </div>
                 </div>
             `}
