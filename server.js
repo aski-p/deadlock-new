@@ -415,9 +415,9 @@ app.use(
     rolling: true, // Reset expiration on activity
     name: 'deadlock.sid', // Custom session name
     cookie: {
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // Steam 로그인 문제 해결: secure 비활성화
       httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours (과거 작동 설정으로 복원)
       sameSite: 'lax', // CSRF protection
     },
   })
@@ -430,8 +430,8 @@ app.use(passport.session());
 // Check if Steam API key is configured
 const steamApiKey = process.env.STEAM_API_KEY;
 const isProduction = process.env.NODE_ENV === 'production' || process.env.RAILWAY_ENVIRONMENT;
-const baseUrl = isProduction
-  ? 'https://deadlock-new-production.up.railway.app'
+const baseUrl = isProduction 
+  ? 'https://deadlock-new-production.up.railway.app' // 하드코딩된 도메인 (과거 작동 설정)
   : 'http://localhost:3000';
 
 console.log('🔧 Environment check:');
@@ -451,25 +451,14 @@ if (steamApiKey) {
       },
       async (identifier, profile, done) => {
         try {
-          console.log('🔍 Steam strategy callback initiated');
           // Extract Steam ID from identifier
           const steamId = identifier.split('/').pop();
-          console.log(`📋 Steam ID extracted: ${steamId}`);
 
           // Get additional user info from Steam API
-          console.log('🌐 Fetching user data from Steam API...');
           const userResponse = await axios.get(
-            `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${process.env.STEAM_API_KEY}&steamids=${steamId}`,
-            { timeout: 10000 }
+            `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${process.env.STEAM_API_KEY}&steamids=${steamId}`
           );
-          
-          if (!userResponse.data?.response?.players?.[0]) {
-            console.error('❌ No user data received from Steam API');
-            return done(new Error('Failed to fetch user data from Steam'), null);
-          }
-          
           const userData = userResponse.data.response.players[0];
-          console.log(`✅ Steam user data fetched: ${userData.personaname}`);
 
           // Steam 아바타 URL을 Cloudflare CDN으로 변환
           let avatarUrl = userData.avatarfull || userData.avatarmedium || userData.avatar;
@@ -489,13 +478,9 @@ if (steamApiKey) {
             profile: profile,
           };
 
-          console.log(`🎉 Steam authentication successful: ${user.username} (${user.steamId})`);
           return done(null, user);
         } catch (error) {
-          console.error('❌ Steam authentication error:', error.message);
-          if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
-            console.error('🌐 Network error connecting to Steam API');
-          }
+          console.error('Steam authentication error:', error);
           return done(error, null);
         }
       }
@@ -727,26 +712,17 @@ app.get('/ko/leaderboards/oceania', getUserTopHero, (req, res) => {
   });
 });
 
-// Steam Auth Routes (only if Steam is configured)
+// Steam Auth Routes (only if Steam is configured) - 과거 작동 버전으로 복원
 if (steamApiKey) {
-  app.get('/auth/steam', (req, res, next) => {
-    console.log('🔑 Steam login attempt initiated from IP:', req.ip);
-    console.log('🔑 Session ID:', req.sessionID);
-    console.log('🔑 User Agent:', req.get('User-Agent'));
-    passport.authenticate('steam', { failureRedirect: '/?error=steam_auth_failed' })(req, res, next);
+  app.get('/auth/steam', passport.authenticate('steam', { failureRedirect: '/' }), (req, res) => {
+    res.redirect('/');
   });
 
-  app.get(
-    '/auth/steam/return',
-    (req, res, next) => {
-      console.log('🔄 Steam callback received from IP:', req.ip);
-      console.log('🔄 Query params:', JSON.stringify(req.query));
-      console.log('🔄 Session ID:', req.sessionID);
-      
-      passport.authenticate('steam', { 
-        failureRedirect: '/?error=steam_callback_failed',
-        successRedirect: '/?login=success'
-      })(req, res, next);
+  app.get('/auth/steam/return', 
+    passport.authenticate('steam', { failureRedirect: '/' }),
+    (req, res) => {
+      console.log('✅ Steam 로그인 성공:', req.user?.username);
+      res.redirect('/');
     }
   );
   
