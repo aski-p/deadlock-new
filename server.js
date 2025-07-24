@@ -3063,21 +3063,26 @@ function generateFastMatchHistory(accountId, limit = 10) {
 // 특정 매치의 상세 정보 가져오기 (아이템 포함)
 const fetchMatchDetails = async matchId => {
   try {
-    console.log(`🔍 매치 ${matchId} 상세 정보 가져오는 중...`);
+    console.log(`🔍 매치 ${matchId} 상세 정보 가져오는 중... (아이템 포함)`);
 
     const response = await axios.get(
-      `https://api.deadlock-api.com/v1/matches/${matchId}/metadata`,
+      `https://api.deadlock-api.com/v1/matches/${matchId}/metadata?include_player_items=true`,
       {
-        timeout: 10000,
+        timeout: 15000, // 타임아웃 증가
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         },
       }
     );
 
+    console.log(`✅ 매치 ${matchId} API 응답 성공, 상태: ${response.status}`);
     return response.data;
   } catch (error) {
     console.error(`❌ 매치 ${matchId} 상세 정보 가져오기 실패:`, error.message);
+    if (error.response) {
+      console.error(`   응답 상태: ${error.response.status}`);
+      console.error(`   응답 데이터:`, error.response.data);
+    }
     return null;
   }
 };
@@ -3089,14 +3094,16 @@ const fetchAndAnalyzeAllMatches = async accountId => {
 
     // 실제 Deadlock API에서 전체 매치 히스토리 가져오기
     const response = await axios.get(
-      `https://api.deadlock-api.com/v1/players/${accountId}/match-history`,
+      `https://api.deadlock-api.com/v1/players/${accountId}/match-history?force_refetch=false`,
       {
-        timeout: 10000,
+        timeout: 15000, // 타임아웃 증가
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         },
       }
     );
+    
+    console.log(`✅ 플레이어 ${accountId} 매치 히스토리 API 응답 성공, 상태: ${response.status}`);
 
     if (!response.data || !Array.isArray(response.data)) {
       console.log(`❌ 매치 데이터 없음: ${accountId}`);
@@ -3652,21 +3659,29 @@ const fetchAndAnalyzeAllMatches = async accountId => {
                       // 첫 번째 아이템의 구조 로깅
                       console.log(`🎒 첫 번째 아이템 구조:`, currentPlayer.items[0]);
 
-                      // 최종 아이템들만 필터링 (판매되지 않은 것들)
+                      // 게임 종료 시점의 최종 아이템들만 필터링
                       const finalItems = currentPlayer.items
-                        .filter(item => item.sold_time_s === 0) // 판매되지 않은 아이템만
-                        .slice(-12) // 마지막 12개로 증가
+                        .filter(item => {
+                          // 판매되지 않은 아이템만 (sold_time_s가 0이거나 없음)
+                          const notSold = !item.sold_time_s || item.sold_time_s === 0;
+                          // 아이템 ID가 유효한지 확인
+                          const validItem = item.item_id && item.item_id > 0;
+                          return notSold && validItem;
+                        })
+                        // 구매 시간순으로 정렬 (최신 구매가 마지막)
+                        .sort((a, b) => (a.game_time_s || 0) - (b.game_time_s || 0))
                         .map((item, index) => ({
                           name: getItemNameById(item.item_id),
                           slot: index + 1,
                           itemId: item.item_id,
-                          gameTime: item.game_time_s,
+                          gameTime: item.game_time_s || 0,
                           tier: getItemTier(item.item_id),
+                          purchaseTime: item.game_time_s ? `${Math.floor(item.game_time_s / 60)}:${String(Math.floor(item.game_time_s % 60)).padStart(2, '0')}` : '0:00'
                         }));
 
                       console.log(
                         `🎒 최종 아이템 목록 (${finalItems.length}개):`,
-                        finalItems.map(item => item.name)
+                        finalItems.map(item => `${item.name} (${item.purchaseTime})`)
                       );
 
                       if (finalItems.length > 0) {
@@ -3722,6 +3737,7 @@ const fetchAndAnalyzeAllMatches = async accountId => {
               ? new Date(match.start_time * 1000).toISOString()
               : new Date().toISOString(),
             items: await generateMatchItems(), // 최종 아이템 데이터 추가
+            finalItems: await generateMatchItems(), // 호환성을 위한 별칭
           };
         })
       ),

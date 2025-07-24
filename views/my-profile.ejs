@@ -896,6 +896,41 @@
     filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.5)) brightness(1.1);
 }
 
+/* 아이템 시간 표시 스타일 */
+.item-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.item-time {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    font-size: 9px;
+    padding: 1px 3px;
+    border-radius: 3px;
+    line-height: 1;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 2;
+}
+
+.empty-item-placeholder {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px dashed rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 12px;
+}
+
 /* 반응형 */
 @media (max-width: 768px) {
     .player-detail-container {
@@ -1745,38 +1780,49 @@ function displayMatchHistory(matches) {
         // 매치 아이템 데이터를 안정적으로 로드
         matches.forEach((match, index) => {
             const itemsContainer = document.getElementById(`match-items-${index}`);
-            if (itemsContainer && match.finalItems && match.finalItems.length > 0) {
-                // 실제 API 데이터가 있는 경우에만 표시
-                const itemsHTML = match.finalItems.slice(0, 12).map(item => {
-                    const itemImage = getItemImage(item.name || item.id);
-                    const itemCategory = getItemCategory(item.name || item.id);
-                    return `
-                        <div class="item-wrapper">
-                            <img src="${itemImage}" 
-                                 alt="${item.name || 'Unknown Item'}" 
-                                 class="item-image real-item ${itemCategory}-item" 
-                                 title="${item.name || 'Unknown Item'}"
-                                 onerror="this.src='https://via.placeholder.com/48x48/444/fff?text=?';">
+            if (itemsContainer) {
+                // match.items 또는 match.finalItems에서 아이템 데이터 확인
+                const itemsData = match.items || match.finalItems || [];
+                
+                if (itemsData && itemsData.length > 0) {
+                    console.log(`🎒 매치 ${index} 아이템 데이터:`, itemsData);
+                    
+                    // 실제 API 데이터가 있는 경우에만 표시
+                    const itemsHTML = itemsData.slice(0, 12).map((item, itemIndex) => {
+                        const itemName = item.name || `Unknown Item (${item.itemId || item.id})`;
+                        const itemImage = getItemImage(itemName);
+                        const itemCategory = getItemCategory(itemName);
+                        const purchaseTime = item.purchaseTime || (item.gameTime ? `${Math.floor(item.gameTime / 60)}:${String(Math.floor(item.gameTime % 60)).padStart(2, '0')}` : '');
+                        
+                        return `
+                            <div class="item-wrapper">
+                                <img src="${itemImage}" 
+                                     alt="${itemName}" 
+                                     class="item-image real-item ${itemCategory}-item" 
+                                     title="${itemName} ${purchaseTime ? `(${purchaseTime})` : ''}"
+                                     onerror="this.src='https://via.placeholder.com/48x48/444/fff?text=?';">
+                                ${purchaseTime ? `<div class="item-time">${purchaseTime}</div>` : ''}
+                            </div>
+                        `;
+                    }).join('');
+                    
+                    // 빈 슬롯 추가 (최대 12개까지)
+                    const emptySlots = Math.max(0, 12 - itemsData.length);
+                    const emptyHTML = Array(emptySlots).fill().map(() => `
+                        <div class="item-wrapper empty-slot">
+                            <div class="empty-item-placeholder" title="아이템 슬롯 없음"></div>
+                        </div>
+                    `).join('');
+                    
+                    itemsContainer.innerHTML = itemsHTML + emptyHTML;
+                } else {
+                    // API 데이터가 없는 경우
+                    itemsContainer.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; color: #666; font-size: 11px; padding: 8px; border: 1px dashed #333; border-radius: 4px;">
+                            <i class="fas fa-info-circle"></i> 아이템 데이터 로딩 중 또는 없음
                         </div>
                     `;
-                }).join('');
-                
-                // 빈 슬롯 추가 (최대 12개까지)
-                const emptySlots = Math.max(0, 12 - match.finalItems.length);
-                const emptyHTML = Array(emptySlots).fill().map(() => `
-                    <div class="item-wrapper empty-slot">
-                        <div class="empty-item-placeholder" title="아이템 없음"></div>
-                    </div>
-                `).join('');
-                
-                itemsContainer.innerHTML = itemsHTML + emptyHTML;
-            } else if (itemsContainer) {
-                // API 데이터가 없는 경우
-                itemsContainer.innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; color: #999; font-size: 12px; padding: 10px;">
-                        <i class="fas fa-info-circle"></i> 아이템 데이터 없음
-                    </div>
-                `;
+                }
             }
         });
         
