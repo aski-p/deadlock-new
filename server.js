@@ -402,22 +402,101 @@ const steamAPI = {
   }
 };
 
+// 사용자의 주요 영웅을 가져오는 미들웨어
+const getUserTopHero = async (req, res, next) => {
+  if (req.user && req.user.accountId) {
+    try {
+      console.log(`🎯 사용자 ${req.user.accountId}의 주요 영웅 조회 중...`);
+      
+      // 캐시 확인
+      const cacheKey = `user-top-hero-${req.user.accountId}`;
+      const cached = getCachedData(cacheKey);
+      if (cached) {
+        req.user.topHero = cached;
+        return next();
+      }
+      
+      // 사용자 매치 분석으로 주요 영웅 가져오기
+      const playerAnalysis = await fetchAndAnalyzeAllMatches(req.user.accountId);
+      
+      if (playerAnalysis && playerAnalysis.topHeroes && playerAnalysis.topHeroes.length > 0) {
+        const topHero = playerAnalysis.topHeroes[0]; // 가장 많이 플레이한 영웅
+        
+        // 영웅 이미지 매핑
+        const heroImageMap = {
+          'Abrams': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp',
+          'Bebop': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp',
+          'Dynamo': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/dynamo_card.webp',
+          'Grey Talon': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/archer_card.webp',
+          'Haze': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/haze_card.webp',
+          'Infernus': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/inferno_card.webp',
+          'Ivy': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/ivy_card.webp',
+          'Kelvin': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kelvin_card.webp',
+          'Lady Geist': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/spectre_card.webp',
+          'Lash': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/lash_card.webp',
+          'McGinnis': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/engineer_card.webp',
+          'Mo & Krill': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/digger_card.webp',
+          'Paradox': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/chrono_card.webp',
+          'Pocket': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/synth_card.webp',
+          'Seven': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/gigawatt_card.webp',
+          'Shiv': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/shiv_card.webp',
+          'Vindicta': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kali_card.webp',
+          'Viper': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kali_card.webp',
+          'Viscous': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/viscous_card.webp',
+          'Warden': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/warden_card.webp',
+          'Holliday': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/astro_card.webp',
+          'Mirage': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/mirage_card.webp',
+          'Wraith': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/wraith_card.webp',
+          'Yamato': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/yamato_card.webp'
+        };
+        
+        req.user.topHero = {
+          name: topHero.name,
+          image: heroImageMap[topHero.name] || 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp',
+          matches: topHero.matches
+        };
+        
+        // 30분 캐시
+        setCachedData(cacheKey, req.user.topHero, 30 * 60 * 1000);
+        console.log(`✅ 사용자 주요 영웅 설정: ${topHero.name} (${topHero.matches}경기)`);
+      } else {
+        // 기본값 설정
+        req.user.topHero = {
+          name: 'Bebop',
+          image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp',
+          matches: 0
+        };
+        console.log(`⚠️ 사용자 매치 데이터 없음 - 기본 영웅 설정`);
+      }
+    } catch (error) {
+      console.log(`❌ 사용자 주요 영웅 조회 실패:`, error.message);
+      // 기본값 설정
+      req.user.topHero = {
+        name: 'Bebop',
+        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp',
+        matches: 0
+      };
+    }
+  }
+  next();
+};
+
 // Routes
-app.get('/', (req, res) => {
+app.get('/', getUserTopHero, (req, res) => {
   res.render('index', { 
     user: req.user,
     title: '박근형의 데드락'
   });
 });
 
-app.get('/ko', (req, res) => {
+app.get('/ko', getUserTopHero, (req, res) => {
   res.render('index', { 
     user: req.user,
     title: '박근형의 데드락'
   });
 });
 
-app.get('/ko/leaderboards/europe', (req, res) => {
+app.get('/ko/leaderboards/europe', getUserTopHero, (req, res) => {
   res.render('leaderboards', { 
     user: req.user,
     region: 'europe',
@@ -425,7 +504,7 @@ app.get('/ko/leaderboards/europe', (req, res) => {
   });
 });
 
-app.get('/ko/leaderboards/asia', (req, res) => {
+app.get('/ko/leaderboards/asia', getUserTopHero, (req, res) => {
   res.render('leaderboards', { 
     user: req.user,
     region: 'asia',
@@ -433,7 +512,7 @@ app.get('/ko/leaderboards/asia', (req, res) => {
   });
 });
 
-app.get('/ko/leaderboards/north-america', (req, res) => {
+app.get('/ko/leaderboards/north-america', getUserTopHero, (req, res) => {
   res.render('leaderboards', { 
     user: req.user,
     region: 'north-america',
@@ -441,7 +520,7 @@ app.get('/ko/leaderboards/north-america', (req, res) => {
   });
 });
 
-app.get('/ko/leaderboards/south-america', (req, res) => {
+app.get('/ko/leaderboards/south-america', getUserTopHero, (req, res) => {
   res.render('leaderboards', { 
     user: req.user,
     region: 'south-america',
@@ -449,7 +528,7 @@ app.get('/ko/leaderboards/south-america', (req, res) => {
   });
 });
 
-app.get('/ko/leaderboards/oceania', (req, res) => {
+app.get('/ko/leaderboards/oceania', getUserTopHero, (req, res) => {
   res.render('leaderboards', { 
     user: req.user,
     region: 'oceania',
@@ -2781,7 +2860,7 @@ app.get('/api/v1/players/steam-search', async (req, res) => {
 });
 
 // 플레이어 상세 페이지 라우트
-app.get('/ko/players/:accountId', (req, res) => {
+app.get('/ko/players/:accountId', getUserTopHero, (req, res) => {
   const { accountId } = req.params;
   res.render('player-detail', { 
     user: req.user,
@@ -2799,7 +2878,7 @@ app.get('/ko/search', (req, res) => {
 });
 
 // 개인 프로필 페이지 라우트 (로그인 필요)
-app.get('/ko/profile', (req, res) => {
+app.get('/ko/profile', getUserTopHero, (req, res) => {
   if (!req.user) {
     return res.redirect('/auth/steam');
   }
@@ -2866,7 +2945,7 @@ app.get('/health', (req, res) => {
 });
 
 // 게시판 메인 페이지
-app.get('/ko/board', (req, res) => {
+app.get('/ko/board', getUserTopHero, (req, res) => {
   res.render('board', { 
     user: req.user,
     title: '게시판 - 박근형의 데드락'

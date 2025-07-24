@@ -11,7 +11,11 @@
     <header>
         <nav>
             <a href="/ko" class="logo">
-                <img src="https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp" alt="Bebop" width="40" height="40" style="border-radius: 8px; object-fit: cover;">
+                <% if (user && user.topHero) { %>
+                    <img src="<%= user.topHero.image %>" alt="<%= user.topHero.name %>" width="40" height="40" style="border-radius: 8px; object-fit: cover;" title="주요 영웅: <%= user.topHero.name %> (<%= user.topHero.matches %>경기)">
+                <% } else { %>
+                    <img src="https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp" alt="Bebop" width="40" height="40" style="border-radius: 8px; object-fit: cover;">
+                <% } %>
                 <span>박근형의 데드락</span>
             </a>
             <div class="nav-right">
