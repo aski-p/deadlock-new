@@ -830,7 +830,7 @@ function getItemImage(itemName) {
         'Mystic Shot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/mystic_shot.webp',
         'Point Blank': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/point_blank.webp',
         'Pristine Emblem': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/pristine_emblem.webp',
-        'Sharpshooter': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/headshot_booster.webp',
+        'Sharpshooter': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/sharpshooter.webp',
         'Soul Shredder Bullets': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/soul_shredder_bullets.webp',
         'Surge of Power': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/surge_of_power.webp',
         'Tesla Bullets': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/tesla_bullets.webp',
@@ -844,7 +844,7 @@ function getItemImage(itemName) {
         'Frenzy': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/frenzy.webp',
         'Glass Cannon': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/glass_cannon.webp',
         'Inhibitor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/inhibitor.webp',
-        'Leech': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/toxic_bullets.webp',
+        'Leech': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/leech.webp',
         'Lucky Shot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/lucky_shot.webp',
         'Richochet': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/richochet.webp',
         'Spiritual Overflow': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/spiritual_overflow.webp',
@@ -858,8 +858,8 @@ function getItemImage(itemName) {
         'Melee Lifesteal': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/melee_lifesteal.webp',
         'Sprint Boots': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/sprint_boots.webp',
         'Healing Rite': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_rite.webp',
-        'Bullet Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp',
-        'Spirit Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/spirit_lifesteal.webp',
+        'Bullet Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/bullet_armor.webp',
+        'Spirit Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/divine_barrier.webp',
         'Enduring Speed': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/enduring_speed.webp',
         'Reactive Barrier': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/reactive_barrier.webp',
         'Debuff Remover': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/debuff_remover.webp',
@@ -869,8 +869,8 @@ function getItemImage(itemName) {
         'Return Fire': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/return_fire.webp',
         'Rescue Beam': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/rescue_beam.webp',
         'Combat Barrier': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/combat_barrier.webp',
-        'Improved Bullet Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/metal_skin.webp',
-        'Improved Spirit Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/metal_skin.webp',
+        'Improved Bullet Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/unstoppable.webp',
+        'Improved Spirit Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/veil_walker.webp',
         'Superior Stamina': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/superior_stamina.webp',
         'Veil Walker': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/veil_walker.webp',
         'Fortitude': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/fortitude.webp',
@@ -1102,6 +1102,24 @@ function updatePartyMembersList(partyMembers) {
         return;
     }
     
+    // 메달 이미지 매핑 함수
+    const getMedalImage = (medal, subrank) => {
+        const medalRankMap = {
+            'eternus': 11,
+            'phantom': 10,
+            'oracle': 9,
+            'ritualist': 8,
+            'alchemist': 7,
+            'arcanist': 6,
+            'initiate': 5
+        };
+        
+        const rankNumber = medalRankMap[medal?.toLowerCase()] || 5;
+        const subrankFormatted = subrank || 1;
+        
+        return `https://cdn.deadlock.coach/vpk/panorama/images/ranked/badges/rank${rankNumber}/badge_sm_subrank${subrankFormatted}.webp`;
+    };
+    
     const getHeroImage = (heroName) => {
         const heroImageMap = {
             'Abrams': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp',
@@ -1144,9 +1162,9 @@ function updatePartyMembersList(partyMembers) {
                     <h3>${member.name}</h3>
                     <div class="party-member-matches">${member.matches}경기 함께 플레이</div>
                     <div class="party-member-rank">
-                        <img src="https://cdn.deadlock.coach/vpk/panorama/images/ranked/badges/${member.rank?.rankImage || 'rank5/badge_sm_subrank5.webp'}" 
+                        <img src="${getMedalImage(member.rank?.medal, member.rank?.subrank)}" 
                              alt="${member.rank?.medal || 'Initiate'}" class="rank-badge-small">
-                        <span class="rank-text">${member.rank?.medal || 'Initiate'} ${member.rank?.subrank || 5}</span>
+                        <span class="rank-text">${member.rank?.medal || 'Initiate'} ${member.rank?.subrank || 1}</span>
                     </div>
                 </div>
             </div>
