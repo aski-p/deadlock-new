@@ -481,18 +481,24 @@ const getUserTopHero = async (req, res, next) => {
   next();
 };
 
+// 동적 타이틀 생성 헬퍼 함수
+const getDynamicTitle = (user, pageName = '') => {
+  const baseName = user && user.username ? `${user.username}의 데드락` : '데드락';
+  return pageName ? `${pageName} - ${baseName}` : baseName;
+};
+
 // Routes
 app.get('/', getUserTopHero, (req, res) => {
   res.render('index', { 
     user: req.user,
-    title: '박근형의 데드락'
+    title: getDynamicTitle(req.user)
   });
 });
 
 app.get('/ko', getUserTopHero, (req, res) => {
   res.render('index', { 
     user: req.user,
-    title: '박근형의 데드락'
+    title: getDynamicTitle(req.user)
   });
 });
 
@@ -500,7 +506,7 @@ app.get('/ko/leaderboards/europe', getUserTopHero, (req, res) => {
   res.render('leaderboards', { 
     user: req.user,
     region: 'europe',
-    title: 'European Leaderboards - 박근형의 데드락'
+    title: getDynamicTitle(req.user, 'European Leaderboards')
   });
 });
 
@@ -508,7 +514,7 @@ app.get('/ko/leaderboards/asia', getUserTopHero, (req, res) => {
   res.render('leaderboards', { 
     user: req.user,
     region: 'asia',
-    title: 'Asian Leaderboards - 박근형의 데드락'
+    title: getDynamicTitle(req.user, 'Asian Leaderboards')
   });
 });
 
@@ -516,7 +522,7 @@ app.get('/ko/leaderboards/north-america', getUserTopHero, (req, res) => {
   res.render('leaderboards', { 
     user: req.user,
     region: 'north-america',
-    title: 'North American Leaderboards - 박근형의 데드락'
+    title: getDynamicTitle(req.user, 'North American Leaderboards')
   });
 });
 
@@ -524,7 +530,7 @@ app.get('/ko/leaderboards/south-america', getUserTopHero, (req, res) => {
   res.render('leaderboards', { 
     user: req.user,
     region: 'south-america',
-    title: 'South American Leaderboards - 박근형의 데드락'
+    title: getDynamicTitle(req.user, 'South American Leaderboards')
   });
 });
 
@@ -532,7 +538,7 @@ app.get('/ko/leaderboards/oceania', getUserTopHero, (req, res) => {
   res.render('leaderboards', { 
     user: req.user,
     region: 'oceania',
-    title: 'Oceania Leaderboards - 박근형의 데드락'
+    title: getDynamicTitle(req.user, 'Oceania Leaderboards')
   });
 });
 
@@ -2897,7 +2903,7 @@ app.get('/ko/players/:accountId', getUserTopHero, (req, res) => {
   res.render('player-detail', { 
     user: req.user,
     accountId: accountId,
-    title: `플레이어 정보 - 박근형의 데드락`
+    title: getDynamicTitle(req.user, '플레이어 정보')
   });
 });
 
@@ -2905,7 +2911,7 @@ app.get('/ko/players/:accountId', getUserTopHero, (req, res) => {
 app.get('/ko/search', (req, res) => {
   res.render('player-search', {
     user: req.user,
-    title: '플레이어 검색 - 박근형의 데드락'
+    title: getDynamicTitle(req.user, '플레이어 검색')
   });
 });
 
@@ -2958,7 +2964,7 @@ app.get('/ko/profile', getUserTopHero, (req, res) => {
   res.render('my-profile', { 
     user: req.user,
     accountId: accountId,
-    title: `내 프로필 - 박근형의 데드락`
+    title: getDynamicTitle(req.user, '내 프로필')
   });
 });
 
@@ -2980,7 +2986,7 @@ app.get('/health', (req, res) => {
 app.get('/ko/board', getUserTopHero, (req, res) => {
   res.render('board', { 
     user: req.user,
-    title: '게시판 - 박근형의 데드락'
+    title: getDynamicTitle(req.user, '게시판')
   });
 });
 
@@ -3362,12 +3368,12 @@ app.use((err, req, res, next) => {
 app.use((req, res) => {
   res.status(404).render('404', { 
     user: req.user,
-    title: 'Page Not Found - 박근형의 데드락'
+    title: getDynamicTitle(req.user, 'Page Not Found')
   });
 });
 
 app.listen(PORT, async () => {
-  console.log(`🚀 박근형의 데드락 server running on port ${PORT}`);
+  console.log(`🚀 데드락 서버가 포트 ${PORT}에서 실행 중입니다`);
   console.log(`🔗 URL: ${baseUrl}`);
   console.log(`🎮 Steam API: ${steamApiKey ? 'Configured' : 'Missing (authentication disabled)'}`);
   console.log(`🌐 Environment: ${isProduction ? 'Production' : 'Development'}`);
