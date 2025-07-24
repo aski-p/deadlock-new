@@ -3105,13 +3105,33 @@ const fetchAndAnalyzeAllMatches = async accountId => {
     
     console.log(`✅ 플레이어 ${accountId} 매치 히스토리 API 응답 성공, 상태: ${response.status}`);
 
-    if (!response.data || !Array.isArray(response.data)) {
-      console.log(`❌ 매치 데이터 없음: ${accountId}`);
-      return null;
+    if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
+      console.log(`❌ 매치 데이터 없음 또는 빈 배열: ${accountId}`);
+      // 실제 데이터가 없으면 빈 분석 결과 반환
+      return {
+        matches: 0,
+        wins: 0,
+        losses: 0,
+        winRate: 0,
+        laneWinRate: 0,
+        kda: '0.0',
+        avgKills: 0,
+        avgDeaths: 0,
+        avgAssists: 0,
+        soulsPerMin: 0,
+        avgDamage: 0,
+        avgHealing: 0,
+        denies: 0,
+        endorsements: 0,
+        avgMatchDuration: '0:00',
+        headshotPercent: 0,
+        topHeroes: [],
+        recentMatches: [] // 빈 매치 배열
+      };
     }
 
     const matches = response.data;
-    console.log(`📊 총 ${matches.length}경기 데이터 분석 중 (deadlock.coach 방식)...`);
+    console.log(`📊 총 ${matches.length}경기 데이터 분석 중 (실제 API 데이터)...`);
 
     // deadlock.coach와 동일한 통계 계산
     const totalMatches = matches.length;
@@ -4061,9 +4081,12 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
               `🏅 매치 ${match.match_id}: 성과점수=${finalScore.toFixed(1)}, 팀랭크=${teamRank}등`
             );
 
-            // 실제 매치 데이터 기반 아이템 생성
+            // 더미 아이템 생성 함수 완전 비활성화
             const generateRealisticItems = (heroName, matchData) => {
-              // 실제 아이템 데이터베이스 (deadlock.coach CDN 사용)
+              console.log(`⚠️ generateRealisticItems 호출됨 - 더미 데이터 생성 비활성화`);
+              return []; // 항상 빈 배열 반환
+              
+              // 아래 코드는 실행되지 않음 (더미 데이터 생성 방지)
               const itemDatabase = {
                 weapon: [
                   {
@@ -4376,7 +4399,7 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
               denies: match.denies || 0,
               teamRank: teamRank, // 1-6등 팀 랭크
               performanceScore: Math.round(finalScore), // 디버깅용
-              finalItems: generateRealisticItems(heroName, { ...match, isWin }), // 실제 매치 데이터 기반 아이템
+              finalItems: [], // 더미 아이템 완전 제거 - 실제 API 데이터만 사용
             };
           });
 
@@ -4493,9 +4516,12 @@ const generateRealisticHealing = (rank, medal) => {
   return Math.floor(baseHealing);
 };
 
-// 플레이어 최근 매치 생성 (실제 영웅 기반)
+// 더미 매치 생성 함수 완전 비활성화
 const generateRecentMatches = playerHeroes => {
-  // 플레이어가 플레이하는 영웅들을 우선적으로 사용, 없으면 기본 영웅
+  console.log(`⚠️ generateRecentMatches 호출됨 - 더미 데이터 생성 비활성화`);
+  return []; // 항상 빈 배열 반환
+  
+  // 아래 코드는 실행되지 않음 (더미 데이터 생성 방지)
   const heroes =
     playerHeroes && playerHeroes.length > 0
       ? playerHeroes
