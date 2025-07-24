@@ -2384,6 +2384,29 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
         const matchSouls = match.net_worth || 0;
         const soulsPerMin = matchDurationMinutes > 0 ? Math.round(matchSouls / matchDurationMinutes) : 0;
         
+        // 매치별 최종 아이템 생성 (API에서 제공하지 않으므로 Mock 데이터)
+        const generateMatchItems = () => {
+          const weaponItems = ['Basic Magazine', 'Monster Rounds', 'Active Reload', 'Berserker', 'Toxic Bullets', 'Leech'];
+          const vitalityItems = ['Extra Health', 'Sprint Boots', 'Bullet Armor', 'Improved Bullet Armor', 'Metal Skin', 'Colossus'];
+          const spiritItems = ['Extra Spirit', 'Mystic Burst', 'Cold Front', 'Improved Spirit', 'Ethereal Shift', 'Boundless Spirit'];
+          
+          const allItems = [...weaponItems, ...vitalityItems, ...spiritItems];
+          const selectedItems = [];
+          
+          // 6개의 랜덤 아이템 선택 (중복 없음)
+          while (selectedItems.length < 6) {
+            const randomItem = allItems[Math.floor(Math.random() * allItems.length)];
+            if (!selectedItems.find(item => item.name === randomItem)) {
+              selectedItems.push({
+                name: randomItem,
+                slot: selectedItems.length + 1
+              });
+            }
+          }
+          
+          return selectedItems;
+        };
+
         return {
           matchId: match.match_id || match.id,
           hero: getHeroNameById(match.hero_id),
@@ -2401,7 +2424,8 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
           kda: (match.player_deaths || match.deaths) > 0 ? 
             (((match.player_kills || match.kills || 0) + (match.player_assists || match.assists || 0)) / (match.player_deaths || match.deaths)).toFixed(1) : 
             ((match.player_kills || match.kills || 0) + (match.player_assists || match.assists || 0)).toFixed(1),
-          playedAt: match.start_time ? new Date(match.start_time * 1000).toISOString() : new Date().toISOString()
+          playedAt: match.start_time ? new Date(match.start_time * 1000).toISOString() : new Date().toISOString(),
+          items: generateMatchItems() // 최종 아이템 데이터 추가
         };
       })
     };
