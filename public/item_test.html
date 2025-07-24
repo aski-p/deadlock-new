@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이템 이미지 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #444;
+            border-radius: 8px;
+        }
+        
+        .test-title {
+            color: #63a2e2;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+        
+        .items-grid {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        
+        .item-image {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .item-image:hover {
+            border-color: #63a2e2;
+            transform: scale(1.1);
+        }
+        
+        .item-image.error {
+            border-color: red;
+            background: #330000;
+        }
+        
+        .item-info {
+            font-size: 12px;
+            margin-top: 5px;
+            text-align: center;
+        }
+        
+        .item-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px;
+        }
+        
+        .status {
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin-top: 3px;
+        }
+        
+        .status.success {
+            background: #004400;
+            color: #00ff00;
+        }
+        
+        .status.error {
+            background: #440000;
+            color: #ff0000;
+        }
+        
+        .api-data {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        
+        pre {
+            margin: 0;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 데드락 아이템 이미지 표시 테스트</h1>
+    
+    <div class="test-section">
+        <h2 class="test-title">1. 기본 아이템 이미지 테스트</h2>
+        <div id="basic-items"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2 class="test-title">2. 실제 API 데이터 테스트</h2>
+        <div id="api-status">Loading...</div>
+        <div class="api-data">
+            <pre id="api-response">Loading API data...</pre>
+        </div>
+        <div id="api-items"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2 class="test-title">3. 아이템 이미지 URL 유효성 검사</h2>
+        <div id="url-validation"></div>
+    </div>
+
+    <script>
+        // player-detail.ejs에서 복사한 getItemImage 함수
+        function getItemImage(itemName) {
+            const itemImageMap = {
+                // Weapon Items
+                'Basic Magazine': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp',
+                'Close Quarters': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/close_quarters.webp',
+                'Headshot Booster': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/headshot_booster.webp',
+                'Monster Rounds': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/monster_rounds.webp',
+                'Active Reload': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/active_reload.webp',
+                'Berserker': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/berserker.webp',
+                'Sharpshooter': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/headshot_booster.webp',
+                'Tesla Bullets': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/tesla_bullets.webp',
+                'Titanic Magazine': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/titanic_magazine.webp',
+                'Toxic Bullets': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/toxic_bullets.webp',
+                'Glass Cannon': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/glass_cannon.webp',
+                'Crippling Headshot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/crippling_headshot.webp',
+                'Lucky Shot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/lucky_shot.webp',
+                'Leech': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/toxic_bullets.webp',
+
+                // Vitality Items
+                'Extra Health': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp',
+                'Sprint Boots': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/sprint_boots.webp',
+                'Bullet Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp',
+                'Improved Bullet Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/metal_skin.webp',
+                'Metal Skin': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/metal_skin.webp',
+                'Colossus': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/colossus.webp',
+                'Lifestrike': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/lifestrike.webp',
+                'Spirit Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/spirit_lifesteal.webp',
+                'Improved Spirit Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/metal_skin.webp',
+
+                // Spirit Items
+                'Extra Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_spirit.webp',
+                'Mystic Burst': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_burst.webp',
+                'Cold Front': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/cold_front.webp',
+                'Improved Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_spirit.webp',
+                'Ethereal Shift': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/ethereal_shift.webp',
+                'Boundless Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/boundless_spirit.webp',
+                'Superior Duration': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/superior_duration.webp',
+                'Echo Shard': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/echo_shard.webp',
+                'Mystic Reverb': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_reverb.webp'
+            };
+            
+            return itemImageMap[itemName] || 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp';
+        }
+        
+        // 1. 기본 아이템 테스트
+        const basicItems = [
+            'Toxic Bullets', 'Monster Rounds', 'Extra Health', 
+            'Metal Skin', 'Extra Spirit', 'Boundless Spirit',
+            'Basic Magazine', 'Tesla Bullets', 'Colossus', 'Echo Shard'
+        ];
+        
+        function createItemElement(itemName) {
+            const container = document.createElement('div');
+            container.className = 'item-container';
+            
+            const img = document.createElement('img');
+            img.src = getItemImage(itemName);
+            img.alt = itemName;
+            img.title = itemName;
+            img.className = 'item-image';
+            
+            const info = document.createElement('div');
+            info.className = 'item-info';
+            info.textContent = itemName;
+            
+            const status = document.createElement('div');
+            status.className = 'status';
+            
+            img.onload = function() {
+                status.className = 'status success';
+                status.textContent = 'OK';
+                console.log(`✅ 이미지 로드 성공: ${itemName}`);
+            };
+            
+            img.onerror = function() {
+                img.className = 'item-image error';
+                status.className = 'status error';
+                status.textContent = 'FAIL';
+                console.error(`❌ 이미지 로드 실패: ${itemName} - ${img.src}`);
+            };
+            
+            container.appendChild(img);
+            container.appendChild(info);
+            container.appendChild(status);
+            
+            return container;
+        }
+        
+        const basicContainer = document.getElementById('basic-items');
+        basicItems.forEach(item => {
+            basicContainer.appendChild(createItemElement(item));
+        });
+        
+        // 2. API 데이터 테스트
+        async function testApiData() {
+            try {
+                const response = await fetch('/api/v1/players/1486063236?refresh=true');
+                const data = await response.json();
+                
+                document.getElementById('api-response').textContent = JSON.stringify(data, null, 2);
+                
+                const apiContainer = document.getElementById('api-items');
+                const statusElement = document.getElementById('api-status');
+                
+                if (data.recentMatches && data.recentMatches.length > 0) {
+                    statusElement.textContent = `✅ ${data.recentMatches.length}개의 최근 매치 발견`;
+                    statusElement.style.color = '#00ff00';
+                    
+                    data.recentMatches.forEach((match, index) => {
+                        const matchDiv = document.createElement('div');
+                        matchDiv.innerHTML = `<h4>매치 ${index + 1}: ${match.hero} (${match.result})</h4>`;
+                        
+                        if (match.items && match.items.length > 0) {
+                            const itemsDiv = document.createElement('div');
+                            itemsDiv.className = 'items-grid';
+                            
+                            match.items.forEach(item => {
+                                itemsDiv.appendChild(createItemElement(item.name));
+                            });
+                            
+                            matchDiv.appendChild(itemsDiv);
+                        } else {
+                            matchDiv.innerHTML += '<p>❌ 이 매치에 아이템 데이터가 없습니다.</p>';
+                        }
+                        
+                        apiContainer.appendChild(matchDiv);
+                    });
+                } else {
+                    statusElement.textContent = '❌ 최근 매치 데이터가 없습니다';
+                    statusElement.style.color = '#ff0000';
+                    apiContainer.innerHTML = '<p>최근 매치 데이터가 없어서 아이템을 표시할 수 없습니다.</p>';
+                }
+            } catch (error) {
+                console.error('API 테스트 오류:', error);
+                document.getElementById('api-status').textContent = `❌ API 오류: ${error.message}`;
+                document.getElementById('api-status').style.color = '#ff0000';
+            }
+        }
+        
+        // 3. URL 유효성 검사
+        async function validateImageUrls() {
+            const validationContainer = document.getElementById('url-validation');
+            const testUrls = [
+                'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/toxic_bullets.webp',
+                'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp',
+                'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_spirit.webp'
+            ];
+            
+            for (const url of testUrls) {
+                const testDiv = document.createElement('div');
+                testDiv.style.marginBottom = '10px';
+                
+                try {
+                    const response = await fetch(url, { method: 'HEAD' });
+                    testDiv.innerHTML = `✅ <code>${url}</code> - ${response.status} ${response.statusText}`;
+                    testDiv.style.color = '#00ff00';
+                } catch (error) {
+                    testDiv.innerHTML = `❌ <code>${url}</code> - ${error.message}`;
+                    testDiv.style.color = '#ff0000';
+                }
+                
+                validationContainer.appendChild(testDiv);
+            }
+        }
+        
+        // 페이지 로드 시 실행
+        document.addEventListener('DOMContentLoaded', () => {
+            testApiData();
+            validateImageUrls();
+        });
+    </script>
+</body>
+</html>

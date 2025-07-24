@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이템 이미지 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: white;
+            padding: 20px;
+        }
+        
+        .item-image {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        .item-image:hover {
+            border-color: #63a2e2;
+            transform: scale(1.1);
+        }
+        
+        .items-grid {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #444;
+            border-radius: 8px;
+        }
+        
+        .test-title {
+            color: #63a2e2;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>아이템 이미지 표시 테스트</h1>
+    
+    <div class="test-section">
+        <h2 class="test-title">기본 아이템 테스트</h2>
+        <div class="items-grid">
+            <img src="https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp" alt="Basic Magazine" class="item-image" title="Basic Magazine">
+            <img src="https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp" alt="Extra Health" class="item-image" title="Extra Health">
+            <img src="https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_spirit.webp" alt="Extra Spirit" class="item-image" title="Extra Spirit">
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2 class="test-title">Infernus 빌드 테스트</h2>
+        <div class="items-grid" id="infernus-items">
+            <!-- JavaScript로 생성될 예정 -->
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2 class="test-title">JavaScript 동적 생성 테스트</h2>
+        <div class="items-grid" id="dynamic-items">
+            <!-- JavaScript로 생성될 예정 -->
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2 class="test-title">실제 API 데이터 테스트</h2>
+        <div class="items-grid" id="api-items">
+            <p>Loading...</p>
+        </div>
+    </div>
+
+    <script>
+        // 아이템 이미지 매핑 함수 (player-detail.ejs에서 복사)
+        function getItemImage(itemName) {
+            const itemImageMap = {
+                // Weapon Items
+                'Basic Magazine': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp',
+                'Monster Rounds': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/monster_rounds.webp',
+                'Toxic Bullets': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/toxic_bullets.webp',
+                'Titanic Magazine': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/titanic_magazine.webp',
+                'Glass Cannon': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/glass_cannon.webp',
+                
+                // Vitality Items
+                'Extra Health': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp',
+                'Bullet Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp',
+                'Metal Skin': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/metal_skin.webp',
+                'Lifestrike': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/lifestrike.webp',
+                
+                // Spirit Items
+                'Extra Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_spirit.webp',
+                'Mystic Burst': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_burst.webp',
+                'Improved Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_spirit.webp',
+                'Boundless Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/boundless_spirit.webp'
+            };
+            
+            return itemImageMap[itemName] || 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp';
+        }
+        
+        // Infernus 빌드 테스트
+        const infernusItems = ['Toxic Bullets', 'Monster Rounds', 'Extra Health', 'Bullet Armor', 'Extra Spirit', 'Mystic Burst'];
+        const infernusContainer = document.getElementById('infernus-items');
+        infernusContainer.innerHTML = infernusItems.map(item => 
+            `<img src="${getItemImage(item)}" alt="${item}" class="item-image" title="${item}">`
+        ).join('');
+        
+        // 동적 생성 테스트 (실제 player-detail.ejs 로직 시뮬레이션)
+        const mockMatch = {
+            items: [
+                { name: 'Basic Magazine', slot: 1 },
+                { name: 'Extra Health', slot: 2 },
+                { name: 'Extra Spirit', slot: 3 },
+                { name: 'Toxic Bullets', slot: 4 },
+                { name: 'Metal Skin', slot: 5 },
+                { name: 'Boundless Spirit', slot: 6 }
+            ]
+        };
+        
+        const dynamicContainer = document.getElementById('dynamic-items');
+        if (mockMatch.items && mockMatch.items.length > 0) {
+            dynamicContainer.innerHTML = mockMatch.items.map(item => 
+                `<img src="${getItemImage(item.name)}" alt="${item.name}" class="item-image" title="${item.name}">`
+            ).join('');
+        }
+        
+        // API 데이터 테스트
+        async function testApiData() {
+            try {
+                const response = await fetch('/api/v1/players/1486063236?refresh=true');
+                const data = await response.json();
+                
+                const apiContainer = document.getElementById('api-items');
+                
+                if (data.recentMatches && data.recentMatches.length > 0) {
+                    const firstMatch = data.recentMatches[0];
+                    if (firstMatch.items && firstMatch.items.length > 0) {
+                        apiContainer.innerHTML = firstMatch.items.map(item => 
+                            `<img src="${getItemImage(item.name)}" alt="${item.name}" class="item-image" title="${item.name}">`
+                        ).join('');
+                    } else {
+                        apiContainer.innerHTML = '<p>첫 번째 매치에 아이템 데이터가 없습니다.</p>';
+                    }
+                } else {
+                    apiContainer.innerHTML = '<p>최근 매치 데이터가 없습니다.</p>';
+                }
+            } catch (error) {
+                console.error('API 테스트 오류:', error);
+                document.getElementById('api-items').innerHTML = `<p>API 오류: ${error.message}</p>`;
+            }
+        }
+        
+        // 페이지 로드 시 API 테스트 실행
+        testApiData();
+        
+        // 이미지 로드 오류 감지
+        document.addEventListener('error', function(e) {
+            if (e.target.tagName === 'IMG') {
+                console.error('이미지 로드 실패:', e.target.src);
+                console.error('Alt text:', e.target.alt);
+                e.target.style.border = '2px solid red';
+                e.target.title = `로드 실패: ${e.target.alt}`;
+            }
+        }, true);
+        
+        // 이미지 로드 성공 감지
+        document.querySelectorAll('.item-image').forEach(img => {
+            img.addEventListener('load', function() {
+                console.log('이미지 로드 성공:', this.src);
+            });
+        });
+    </script>
+</body>
+</html>

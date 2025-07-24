@@ -1498,6 +1498,94 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
         endorsements: 63, // 매치수의 2.5배
         avgMatchDuration: '32:45'
       };
+      
+      // Mock 최근 매치 데이터 생성 (아이템 이미지 테스트용)
+      playerData.recentMatches = [
+        {
+          matchId: 12345,
+          hero: 'Infernus',
+          result: '승리',
+          duration: 28,
+          kills: 8,
+          deaths: 4,
+          assists: 12,
+          souls: 15000,
+          soulsPerMin: 536,
+          denies: 23,
+          damage: 28500,
+          healing: 4200,
+          teamRank: 1,
+          kda: '5.0',
+          playedAt: new Date().toISOString(),
+          items: [
+            { name: 'Toxic Bullets', slot: 1, category: 'weapon' },
+            { name: 'Monster Rounds', slot: 2, category: 'weapon' },
+            { name: 'Extra Health', slot: 3, category: 'vitality' },
+            { name: 'Metal Skin', slot: 4, category: 'vitality' },
+            { name: 'Extra Spirit', slot: 5, category: 'spirit' },
+            { name: 'Boundless Spirit', slot: 6, category: 'spirit' }
+          ]
+        },
+        {
+          matchId: 12346,
+          hero: 'Seven',
+          result: '패배',
+          duration: 35,
+          kills: 6,
+          deaths: 8,
+          assists: 15,
+          souls: 18200,
+          soulsPerMin: 520,
+          denies: 19,
+          damage: 31200,
+          healing: 2800,
+          teamRank: 3,
+          kda: '2.6',
+          playedAt: new Date(Date.now() - 86400000).toISOString(),
+          items: [
+            { name: 'Basic Magazine', slot: 1, category: 'weapon' },
+            { name: 'Tesla Bullets', slot: 2, category: 'weapon' },
+            { name: 'Extra Health', slot: 3, category: 'vitality' },
+            { name: 'Colossus', slot: 4, category: 'vitality' },
+            { name: 'Extra Spirit', slot: 5, category: 'spirit' },
+            { name: 'Echo Shard', slot: 6, category: 'spirit' }
+          ]
+        },
+        {
+          matchId: 12347,
+          hero: 'Vindicta',
+          result: '승리',
+          duration: 42,
+          kills: 12,
+          deaths: 3,
+          assists: 9,
+          souls: 22500,
+          soulsPerMin: 536,
+          denies: 31,
+          damage: 45600,
+          healing: 1900,
+          teamRank: 1,
+          kda: '7.0',
+          playedAt: new Date(Date.now() - 172800000).toISOString(),
+          items: [
+            { name: 'Headshot Booster', slot: 1, category: 'weapon' },
+            { name: 'Crippling Headshot', slot: 2, category: 'weapon' },
+            { name: 'Extra Health', slot: 3, category: 'vitality' },
+            { name: 'Metal Skin', slot: 4, category: 'vitality' },
+            { name: 'Extra Spirit', slot: 5, category: 'spirit' },
+            { name: 'Improved Spirit', slot: 6, category: 'spirit' }
+          ]
+        }
+      ];
+      
+      // Mock 영웅 데이터도 추가
+      playerData.heroes = [
+        { name: 'Infernus', matches: 8, wins: 5, losses: 3, winRate: 62.5, avgKda: '4.2' },
+        { name: 'Seven', matches: 6, wins: 3, losses: 3, winRate: 50.0, avgKda: '3.1' },
+        { name: 'Vindicta', matches: 5, wins: 4, losses: 1, winRate: 80.0, avgKda: '5.8' },
+        { name: 'Haze', matches: 4, wins: 2, losses: 2, winRate: 50.0, avgKda: '2.9' },
+        { name: 'Lash', matches: 2, wins: 1, losses: 1, winRate: 50.0, avgKda: '3.5' }
+      ];
     }
     
     // Steam 프로필 정보 가져오기
