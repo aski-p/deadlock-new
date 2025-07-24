@@ -41,6 +41,7 @@
                 <table class="posts-table">
                     <thead>
                         <tr>
+                            <th class="seq-column">번호</th>
                             <th class="date-column">날짜</th>
                             <th class="title-column">제목</th>
                             <th class="author-column">글쓴이</th>
@@ -327,6 +328,7 @@
 }
 
 /* 테이블 컬럼 너비 */
+.seq-column { width: 60px; text-align: center; font-weight: bold; color: #999; }
 .date-column { width: 120px; }
 .title-column { width: auto; min-width: 300px; }
 .author-column { width: 150px; }
@@ -643,7 +645,7 @@ async function loadPosts(page = 1) {
             currentPage = data.currentPage;
             totalPages = data.totalPages;
             
-            displayPostsTable(data.posts);
+            displayPostsTable(data.posts, data.totalPosts, data.currentPage);
             updatePagination();
             
             loading.style.display = 'none';
@@ -661,16 +663,25 @@ async function loadPosts(page = 1) {
 }
 
 // 게시글 테이블 표시
-function displayPostsTable(posts) {
+function displayPostsTable(posts, totalCount, currentPage) {
     const tableBody = document.getElementById('postsTableBody');
     
     if (posts.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #999; padding: 40px;">아직 게시글이 없습니다.</td></tr>';
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999; padding: 40px;">아직 게시글이 없습니다.</td></tr>';
         return;
     }
     
-    tableBody.innerHTML = posts.map(post => `
+    // 페이지당 50개씩이므로 현재 페이지의 시작 번호 계산
+    const postsPerPage = 50;
+    const startNumber = totalCount - ((currentPage - 1) * postsPerPage);
+    
+    tableBody.innerHTML = posts.map((post, index) => {
+        const sequenceNumber = startNumber - index;
+        return `
         <tr onclick="openPostModal(${post.id})" style="cursor: pointer;">
+            <td class="seq-column" style="text-align: center;">
+                ${sequenceNumber}
+            </td>
             <td class="date-column">
                 <div class="post-date">${formatDate(post.created_at)}</div>
             </td>
@@ -692,7 +703,8 @@ function displayPostsTable(posts) {
                 ${post.commentCount || 0}
             </td>
         </tr>
-    `).join('');
+        `;
+    }).join('');
 }
 
 // 페이지네이션 업데이트
