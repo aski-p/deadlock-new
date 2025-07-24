@@ -616,15 +616,56 @@
     display: inline-block;
 }
 
+.empty-slot {
+    opacity: 0.3;
+}
+
+.empty-item-placeholder {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 20px;
+}
+
+.empty-item-placeholder::before {
+    content: '?';
+    font-weight: bold;
+}
+
+.items-info {
+    font-size: 11px;
+    color: #999;
+    text-align: center;
+    margin-top: 4px;
+    font-style: italic;
+}
+
 .item-image {
-    width: 32px;
-    height: 32px;
+    width: 48px;
+    height: 48px;
     border-radius: 4px;
     transition: transform 0.2s ease;
+    object-fit: cover;
 }
 
 .item-image:hover {
     transform: scale(1.1);
+}
+
+.item-image.real-item {
+    border: 2px solid #10B981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+}
+
+.item-image.real-item:hover {
+    border-color: #059669;
+    box-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
 }
 
 .weapon-item {
@@ -1575,19 +1616,43 @@ function displayMatchHistory(matches) {
                             </div>
                         </div>
                         <div class="match-items">
-                            <div class="items-label">최종 아이템</div>
+                            <div class="items-label">최종 아이템 (API 실제 데이터)</div>
                             <div class="items-grid">
-                                ${(match.finalItems || generateFinalItems(hero, isWin, souls)).map(item => `
-                                    <div class="item-wrapper">
-                                        <img src="${item.image}" 
-                                             alt="${item.name}" 
-                                             class="item-image ${item.type}-item" 
-                                             title="${item.name}"
-                                             style="border: 2px solid ${item.borderColor}; opacity: ${item.opacity};"
-                                             onerror="this.src='https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp';">
-                                    </div>
-                                `).join('')}
+                                ${(() => {
+                                    const finalItems = match.finalItems || [];
+                                    const totalSlots = 12;
+                                    const itemSlots = [];
+                                    
+                                    // 실제 아이템들을 앞쪽 슬롯에 배치
+                                    for (let i = 0; i < totalSlots; i++) {
+                                        if (i < finalItems.length) {
+                                            const item = finalItems[i];
+                                            itemSlots.push(`
+                                                <div class="item-wrapper">
+                                                    <img src="https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/${item.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}.webp" 
+                                                         alt="${item.name}" 
+                                                         class="item-image real-item" 
+                                                         title="${item.name} (Tier ${item.tier || 'Unknown'})"
+                                                         onerror="this.src='https://via.placeholder.com/48x48/444/fff?text=${item.name.charAt(0)}';">
+                                                </div>
+                                            `);
+                                        } else {
+                                            // 빈 슬롯
+                                            itemSlots.push(`
+                                                <div class="item-wrapper empty-slot">
+                                                    <div class="empty-item-placeholder" title="아이템 없음"></div>
+                                                </div>
+                                            `);
+                                        }
+                                    }
+                                    
+                                    return itemSlots.join('');
+                                })()}
                             </div>
+                            ${match.finalItems && match.finalItems.length > 0 ? 
+                                `<div class="items-info">✅ 실제 게임 데이터 (${match.finalItems.length}개)</div>` : 
+                                `<div class="items-info">⚠️ API에서 아이템 데이터 없음</div>`
+                            }
                         </div>
                         <div class="match-time">
                             ${formatDate(playedAt)}
