@@ -883,18 +883,40 @@ function updatePlayerUI(player) {
         document.getElementById('player-steam-id').textContent = `Steam ID: ${player.steamId}`;
     }
     
-    // Rank
+    // Rank - 리더보드와 동일한 매핑 사용
     const getMedalImage = (medal, subrank) => {
         const medalRankMap = {
-            'Eternus': 11, 'Phantom': 10, 'Oracle': 9, 'Ritualist': 8,
-            'Alchemist': 7, 'Arcanist': 6, 'Initiate': 5
+            'eternus': 11,
+            'phantom': 10,
+            'oracle': 9,
+            'ritualist': 8,
+            'alchemist': 7,
+            'arcanist': 6,
+            'initiate': 5
         };
-        const rankNumber = medalRankMap[medal] || 9;
-        return `https://cdn.deadlock.coach/vpk/panorama/images/ranked/badges/rank${rankNumber}/badge_sm_subrank${subrank}.webp`;
+        
+        const rankNumber = medalRankMap[medal?.toLowerCase()] || 5;
+        const subrankFormatted = subrank || 1;
+        
+        return `https://cdn.deadlock.coach/vpk/panorama/images/ranked/badges/rank${rankNumber}/badge_sm_subrank${subrankFormatted}.webp`;
+    };
+    
+    // 한글 메달명 변환 함수
+    const getKoreanMedal = (englishMedal) => {
+        const medalTranslation = {
+            'Eternus': '이터누스',
+            'Phantom': '팬텀',
+            'Oracle': '오라클',
+            'Ritualist': '리츄얼리스트',
+            'Alchemist': '알케미스트',
+            'Arcanist': '아케니스트',
+            'Initiate': '탐험가'
+        };
+        return medalTranslation[englishMedal] || englishMedal;
     };
     
     document.getElementById('rank-medal').src = getMedalImage(player.rank.medal, player.rank.subrank);
-    document.getElementById('rank-name').textContent = `${player.rank.medal} ${player.rank.subrank}`;
+    document.getElementById('rank-name').textContent = `${getKoreanMedal(player.rank.medal)} ${player.rank.subrank}`;
     document.getElementById('rank-score').textContent = player.rank.score.toLocaleString();
     
     // Stats
@@ -1350,7 +1372,7 @@ function updatePartyMembersList(partyMembers) {
         return;
     }
     
-    // 메달 이미지 매핑 함수
+    // 메달 이미지 매핑 함수 - 리더보드와 동일한 매핑
     const getMedalImage = (medal, subrank) => {
         const medalRankMap = {
             'eternus': 11,
@@ -1366,9 +1388,23 @@ function updatePartyMembersList(partyMembers) {
         const subrankFormatted = subrank || 1;
         
         const imageUrl = `https://cdn.deadlock.coach/vpk/panorama/images/ranked/badges/rank${rankNumber}/badge_sm_subrank${subrankFormatted}.webp`;
-        console.log(`🏆 랭크 이미지 생성: ${medal} ${subrank} → ${imageUrl}`);
+        console.log(`🏆 파티 멤버 랭크 이미지 생성: ${medal} ${subrank} → ${imageUrl}`);
         
         return imageUrl;
+    };
+    
+    // 파티 멤버용 한글 메달명 변환 함수
+    const getKoreanMedal = (englishMedal) => {
+        const medalTranslation = {
+            'Eternus': '이터누스',
+            'Phantom': '팬텀',
+            'Oracle': '오라클',
+            'Ritualist': '리츄얼리스트',
+            'Alchemist': '알케미스트',
+            'Arcanist': '아케니스트',
+            'Initiate': '탐험가'
+        };
+        return medalTranslation[englishMedal] || englishMedal;
     };
     
     const getHeroImage = (heroName) => {
@@ -1426,8 +1462,8 @@ function updatePartyMembersList(partyMembers) {
                     <div class="party-member-matches">${member.matches}경기 함께 플레이</div>
                     <div class="party-member-rank">
                         <img src="${getMedalImage(medal, subrank)}" 
-                             alt="${medal}" class="rank-badge-small">
-                        <span class="rank-text">${medal} ${subrank}</span>
+                             alt="${getKoreanMedal(medal)}" class="rank-badge-small">
+                        <span class="rank-text">${getKoreanMedal(medal)} ${subrank}</span>
                     </div>
                 </div>
             </div>

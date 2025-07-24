@@ -1296,6 +1296,7 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
         
         // 배지 레벨을 메달로 변환하는 함수
         const getMedalFromBadgeLevel = (badgeLevel) => {
+          console.log(`🏆 Badge Level 변환: ${badgeLevel}`);
           if (badgeLevel >= 77) return 'Eternus';
           if (badgeLevel >= 70) return 'Phantom';
           if (badgeLevel >= 63) return 'Oracle';
@@ -1322,6 +1323,17 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
         // Calculate Steam ID from account ID
         const steamId64 = (BigInt(accountId) + BigInt('76561197960265728')).toString();
         
+        const badgeLevel = playerCard.badge_level || 7;
+        const medal = getMedalFromBadgeLevel(badgeLevel);
+        const subrank = ((badgeLevel % 7) + 1) || 1;
+        
+        console.log(`🎯 플레이어 ${accountId} 랭크 계산:`, {
+          badgeLevel: badgeLevel,
+          medal: medal,
+          subrank: subrank,
+          rawBadgeLevel: playerCard.badge_level
+        });
+        
         let playerData = {
           accountId: accountId,
           steamId: steamId64,
@@ -1329,9 +1341,9 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
           avatar: playerCard.avatar_url || 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
           country: '🌍', // API에서 제공되지 않는 경우 기본값
           rank: {
-            medal: getKoreanMedal(getMedalFromBadgeLevel(playerCard.badge_level || 7)),
-            subrank: ((playerCard.badge_level % 7) + 1) || 1,
-            score: playerCard.badge_level || 7
+            medal: medal,
+            subrank: subrank,
+            score: badgeLevel
           },
           stats: {
             matches: 0, // 매치 히스토리에서 계산
