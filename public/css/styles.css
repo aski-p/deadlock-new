@@ -220,8 +220,8 @@ nav {
 }
 
 .vindicta-character-img {
-    width: 400px;
-    height: 300px;
+    width: 600px;
+    height: 450px;
     max-width: 100%;
     object-fit: cover;
     object-position: center;
@@ -248,15 +248,15 @@ nav {
 /* 모바일 반응형 */
 @media (max-width: 768px) {
     .vindicta-character-img {
-        width: 300px;
-        height: 225px;
+        width: 450px;
+        height: 338px;
     }
 }
 
 @media (max-width: 480px) {
     .vindicta-character-img {
-        width: 250px;
-        height: 188px;
+        width: 350px;
+        height: 263px;
     }
 }
 
