@@ -454,9 +454,120 @@
     cursor: pointer;
 }
 
+/* 데드락 아이템 타입별 스타일 */
+.item-wrapper {
+    position: relative;
+    display: inline-block;
+    margin: 2px;
+}
+
+.weapon-item {
+    border-color: #FF6B35 !important;
+    box-shadow: 0 0 8px rgba(255, 107, 53, 0.3);
+}
+
+.vitality-item {
+    border-color: #4CAF50 !important;
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
+}
+
+.spirit-item {
+    border-color: #9C27B0 !important;
+    box-shadow: 0 0 8px rgba(156, 39, 176, 0.3);
+}
+
+.unknown-item {
+    border-color: #ff6b6b !important;
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.3);
+    animation: pulse-red 2s infinite;
+}
+
+.fallback-item {
+    border-color: #ffd93d !important;
+    box-shadow: 0 0 8px rgba(255, 217, 61, 0.3);
+}
+
+.unknown-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff6b6b;
+    color: white;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    font-size: 10px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 8px rgba(255, 107, 107, 0.3); }
+    50% { box-shadow: 0 0 15px rgba(255, 107, 107, 0.6); }
+    100% { box-shadow: 0 0 8px rgba(255, 107, 107, 0.3); }
+}
+
+/* 아이템 호버 효과 개선 */
 .item-image:hover {
     transform: scale(1.1);
-    border-color: #63a2e2;
+    z-index: 10;
+    position: relative;
+}
+
+/* 아이템 그리드 개선 */
+.items-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+    justify-content: flex-start;
+    max-width: 100%;
+}
+
+@media (max-width: 768px) {
+    .item-image {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .unknown-badge {
+        width: 14px;
+        height: 14px;
+        font-size: 9px;
+    }
+}
+
+/* Deadlock 프로필 초기화 함수 */
+async function initializeDeadlockProfile() {
+    try {
+        console.log('🎮 데드락 프로필 시스템 초기화 중...');
+        
+        // 아이템 매니저 캐시 워밍업
+        const commonItems = [
+            'Basic Magazine', 'Extra Health', 'Extra Spirit', 'Bullet Armor', 
+            'Spirit Armor', 'Metal Skin', 'Mystic Burst', 'Tesla Bullets',
+            'Colossus', 'Echo Shard', 'Refresher', 'Glass Cannon'
+        ];
+        
+        commonItems.forEach(itemName => {
+            itemManager.getItemData(itemName);
+        });
+        
+        console.log('✅ 데드락 프로필 시스템 초기화 완료');
+        console.log(`📦 아이템 캐시: ${itemManager.itemCache.size}개 아이템 로드됨`);
+        
+    } catch (error) {
+        console.error('❌ 데드락 프로필 초기화 실패:', error);
+    }
+}
+
+// 페이지 로드시 초기화
+document.addEventListener('DOMContentLoaded', () => {
+    initializeDeadlockProfile();
+});
     box-shadow: 0 2px 8px rgba(99, 162, 226, 0.3);
 }
 
@@ -807,13 +918,217 @@ function updatePlayerUI(player) {
     updateMatchesList(player.recentMatches);
 }
 
-// 아이템 이미지 매핑 함수
+// 데드락 아이템 관리 시스템
+class DeadlockItemManager {
+    constructor() {
+        this.itemCache = new Map();
+        this.initialized = false;
+        this.fallbackItems = this.initializeFallbackItems();
+    }
+
+    initializeFallbackItems() {
+        return {
+            // Weapon Items (주황색)
+            'weapon': {
+                'Basic Magazine': { type: 'weapon', tier: 1, color: '#FF6B35' },
+                'Close Quarters': { type: 'weapon', tier: 1, color: '#FF6B35' },
+                'Headshot Booster': { type: 'weapon', tier: 1, color: '#FF6B35' },
+                'High-Velocity Mag': { type: 'weapon', tier: 1, color: '#FF6B35' },
+                'Monster Rounds': { type: 'weapon', tier: 1, color: '#FF6B35' },
+                'Rapid Rounds': { type: 'weapon', tier: 1, color: '#FF6B35' },
+                'Active Reload': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Berserker': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Kinetic Dash': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Long Range': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Sharpshooter': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Tesla Bullets': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Toxic Bullets': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Glass Cannon': { type: 'weapon', tier: 3, color: '#FFAD5A' },
+                'Leech': { type: 'weapon', tier: 3, color: '#FFAD5A' },
+                'Lucky Shot': { type: 'weapon', tier: 3, color: '#FFAD5A' }
+            },
+            // Vitality Items (초록색)
+            'vitality': {
+                'Extra Health': { type: 'vitality', tier: 1, color: '#4CAF50' },
+                'Extra Stamina': { type: 'vitality', tier: 1, color: '#4CAF50' },
+                'Sprint Boots': { type: 'vitality', tier: 1, color: '#4CAF50' },
+                'Bullet Armor': { type: 'vitality', tier: 1, color: '#4CAF50' },
+                'Spirit Armor': { type: 'vitality', tier: 1, color: '#4CAF50' },
+                'Healing Rite': { type: 'vitality', tier: 1, color: '#4CAF50' },
+                'Enduring Speed': { type: 'vitality', tier: 2, color: '#66BB6A' },
+                'Reactive Barrier': { type: 'vitality', tier: 2, color: '#66BB6A' },
+                'Healing Booster': { type: 'vitality', tier: 2, color: '#66BB6A' },
+                'Return Fire': { type: 'vitality', tier: 2, color: '#66BB6A' },
+                'Metal Skin': { type: 'vitality', tier: 3, color: '#81C784' },
+                'Colossus': { type: 'vitality', tier: 3, color: '#81C784' },
+                'Unstoppable': { type: 'vitality', tier: 3, color: '#81C784' }
+            },
+            // Spirit Items (보라색)
+            'spirit': {
+                'Extra Spirit': { type: 'spirit', tier: 1, color: '#9C27B0' },
+                'Mystic Burst': { type: 'spirit', tier: 1, color: '#9C27B0' },
+                'Spirit Lifesteal': { type: 'spirit', tier: 1, color: '#9C27B0' },
+                'Cold Front': { type: 'spirit', tier: 1, color: '#9C27B0' },
+                'Superior Cooldown': { type: 'spirit', tier: 1, color: '#9C27B0' },
+                'Improved Spirit': { type: 'spirit', tier: 2, color: '#BA68C8' },
+                'Mystic Vulnerability': { type: 'spirit', tier: 2, color: '#BA68C8' },
+                'Ethereal Shift': { type: 'spirit', tier: 2, color: '#BA68C8' },
+                'Magic Carpet': { type: 'spirit', tier: 2, color: '#BA68C8' },
+                'Echo Shard': { type: 'spirit', tier: 3, color: '#CE93D8' },
+                'Refresher': { type: 'spirit', tier: 3, color: '#CE93D8' },
+                'Boundless Spirit': { type: 'spirit', tier: 3, color: '#CE93D8' }
+            }
+        };
+    }
+
+    getItemData(itemName) {
+        // 캐시에서 먼저 확인
+        if (this.itemCache.has(itemName)) {
+            return this.itemCache.get(itemName);
+        }
+
+        // Fallback 데이터에서 검색
+        for (const category of Object.values(this.fallbackItems)) {
+            if (category[itemName]) {
+                const itemData = {
+                    name: itemName,
+                    ...category[itemName],
+                    image: this.getItemImageUrl(itemName)
+                };
+                this.itemCache.set(itemName, itemData);
+                return itemData;
+            }
+        }
+
+        // Unknown Item 처리
+        const unknownItem = {
+            name: itemName,
+            type: 'unknown',
+            tier: 1,
+            color: '#666666',
+            image: this.getItemImageUrl('Basic Magazine') // 기본 이미지
+        };
+        this.itemCache.set(itemName, unknownItem);
+        return unknownItem;
+    }
+
+    getItemImageUrl(itemName) {
+        const itemImageMap = {
+            // Weapon Items
+            'Basic Magazine': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp',
+            'Close Quarters': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/close_quarters.webp',
+            'Headshot Booster': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/headshot_booster.webp',
+            'High-Velocity Mag': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/high_velocity_mag.webp',
+            'Monster Rounds': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/monster_rounds.webp',
+            'Rapid Rounds': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/rapid_rounds.webp',
+            'Active Reload': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/active_reload.webp',
+            'Berserker': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/berserker.webp',
+            'Kinetic Dash': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/kinetic_dash.webp',
+            'Long Range': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/long_range.webp',
+            'Sharpshooter': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/sharpshooter.webp',
+            'Tesla Bullets': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/tesla_bullets.webp',
+            'Toxic Bullets': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/toxic_bullets.webp',
+            'Glass Cannon': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/glass_cannon.webp',
+            'Leech': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/leech.webp',
+            'Lucky Shot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/lucky_shot.webp',
+            
+            // Vitality Items
+            'Extra Health': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp',
+            'Extra Stamina': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_stamina.webp',
+            'Sprint Boots': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/sprint_boots.webp',
+            'Bullet Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/bullet_armor.webp',
+            'Spirit Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/divine_barrier.webp',
+            'Healing Rite': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_rite.webp',
+            'Enduring Speed': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/enduring_speed.webp',
+            'Reactive Barrier': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/reactive_barrier.webp',
+            'Healing Booster': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_booster.webp',
+            'Return Fire': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/return_fire.webp',
+            'Metal Skin': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/metal_skin.webp',
+            'Colossus': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/colossus.webp',
+            'Unstoppable': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/unstoppable.webp',
+            
+            // Spirit Items
+            'Extra Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_spirit.webp',
+            'Mystic Burst': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_burst.webp',
+            'Spirit Lifesteal': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_lifesteal.webp',
+            'Cold Front': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/cold_front.webp',
+            'Superior Cooldown': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/superior_cooldown.webp',
+            'Improved Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_spirit.webp',
+            'Mystic Vulnerability': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_vulnerability.webp',
+            'Ethereal Shift': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/ethereal_shift.webp',
+            'Magic Carpet': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/magic_carpet.webp',
+            'Echo Shard': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/echo_shard.webp',
+            'Refresher': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/refresher.webp',
+            'Boundless Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/boundless_spirit.webp'
+        };
+        
+        return itemImageMap[itemName] || 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp';
+    }
+}
+
+// 글로벌 아이템 매니저 인스턴스
+const itemManager = new DeadlockItemManager();
+
+// 매치 처리 클래스
+class DeadlockMatchProcessor {
+    constructor(itemManager) {
+        this.itemManager = itemManager;
+    }
+
+    async processMatchData(matchData) {
+        try {
+            console.log('🎮 매치 데이터 처리 시작:', matchData.matchId);
+            
+            // 아이템 데이터 처리
+            if (matchData.items && Array.isArray(matchData.items)) {
+                matchData.processedItems = matchData.items.slice(0, 12).map(item => {
+                    const itemData = this.itemManager.getItemData(item.name);
+                    return {
+                        ...item,
+                        ...itemData,
+                        isUnknown: itemData.type === 'unknown'
+                    };
+                });
+                
+                console.log(`✅ ${matchData.processedItems.length}개 아이템 처리 완료`);
+            } else {
+                // 아이템 데이터가 없으면 기본 아이템 생성
+                matchData.processedItems = this.generateFallbackItems(matchData.hero);
+                console.log('⚠️ 아이템 데이터 없음, 기본 아이템 생성');
+            }
+            
+            return matchData;
+        } catch (error) {
+            console.error('❌ 매치 데이터 처리 실패:', error);
+            matchData.processedItems = this.generateFallbackItems();
+            return matchData;
+        }
+    }
+
+    generateFallbackItems(heroName = 'Default') {
+        const fallbackItems = [
+            'Basic Magazine', 'Extra Health', 'Extra Spirit',
+            'Bullet Armor', 'Mystic Burst', 'Metal Skin'
+        ];
+        
+        return fallbackItems.map(itemName => {
+            const itemData = this.itemManager.getItemData(itemName);
+            return {
+                name: itemName,
+                ...itemData,
+                isFallback: true
+            };
+        });
+    }
+}
+
+// 글로벌 매치 프로세서 인스턴스
+const matchProcessor = new DeadlockMatchProcessor(itemManager);
+
+// 기존 함수를 새 시스템으로 대체
 function getItemImage(itemName) {
-    const itemImageMap = {
-        // Weapon Items
-        'Basic Magazine': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp',
-        'Close Quarters': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/close_quarters.webp',
-        'Headshot Booster': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/headshot_booster.webp',
+    const itemData = itemManager.getItemData(itemName);
+    return itemData.image;
         'High-Velocity Mag': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/high_velocity_mag.webp',
         'Hollow Point Ward': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hollow_point_ward.webp',
         'Monster Rounds': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/monster_rounds.webp',
@@ -1041,38 +1356,54 @@ function updateMatchesList(matches) {
         </div>
     `).join('');
     
-    // 각 매치의 아이템 이미지를 생성
-    matches.forEach(match => {
-        const itemsContainer = document.getElementById(`match-items-${match.matchId}`);
-        if (itemsContainer && match.items) {
-            console.log('🖼️ 매치', match.matchId, '아이템 생성:', match.items.length, '개');
+    // 각 매치의 아이템을 새로운 시스템으로 처리
+    matches.forEach(async (match, index) => {
+        try {
+            // 매치 데이터를 새로운 시스템으로 처리
+            const processedMatch = await matchProcessor.processMatchData(match);
+            const itemsContainer = document.getElementById(`match-items-${match.matchId}`);
             
-            // 최대 12개 아이템까지 표시
-            const itemsToShow = match.items.slice(0, 12);
-            
-            itemsContainer.innerHTML = itemsToShow.map(item => {
-                const imageUrl = getItemImage(item.name);
-                console.log('🎯 아이템 이미지:', item.name, '→', imageUrl);
+            if (itemsContainer && processedMatch.processedItems) {
+                console.log(`🎯 매치 ${match.matchId} 아이템 렌더링:`, processedMatch.processedItems.length, '개');
                 
-                return `<img src="${imageUrl}" 
-                            alt="${item.name}" 
-                            class="item-image" 
-                            title="${item.name}"
-                            onload="console.log('✅ 이미지 로드 성공: ${item.name}')"
-                            onerror="console.error('❌ 이미지 로드 실패: ${item.name}', this.src); this.style.border='2px solid red';">`;
-            }).join('');
-        } else if (itemsContainer) {
-            // 아이템 데이터가 없는 경우 예시 아이템 표시
-            console.log('⚠️ 매치', match.matchId, '아이템 데이터 없음, 예시 표시');
-            const exampleItems = ['Basic Magazine', 'Extra Health', 'Extra Spirit', 'Metal Skin', 'Mystic Burst', 'Colossus'];
-            itemsContainer.innerHTML = exampleItems.map(itemName => {
-                const imageUrl = getItemImage(itemName);
-                return `<img src="${imageUrl}" 
-                            alt="${itemName}" 
-                            class="item-image" 
-                            title="${itemName} (예시)"
-                            style="opacity: 0.6;">`;
-            }).join('');
+                itemsContainer.innerHTML = processedMatch.processedItems.map(item => {
+                    // 아이템 타입별 테두리 색상
+                    const borderColor = item.isUnknown ? '#ff6b6b' : 
+                                       item.isFallback ? '#ffd93d' : 
+                                       item.color || '#66c2a5';
+                    
+                    // 아이템 티어별 배경 투명도
+                    const opacity = item.isUnknown ? '0.5' : 
+                                   item.isFallback ? '0.7' : '1.0';
+                    
+                    return `<div class="item-wrapper" style="position: relative; display: inline-block;">
+                                <img src="${item.image}" 
+                                     alt="${item.name}" 
+                                     class="item-image ${item.type || 'unknown'}-item" 
+                                     title="${item.name}${item.isUnknown ? ' (Unknown)' : ''}${item.isFallback ? ' (예시)' : ''}"
+                                     style="border: 2px solid ${borderColor}; opacity: ${opacity};"
+                                     onload="console.log('✅ 아이템 로드 성공:', '${item.name}')"
+                                     onerror="console.error('❌ 아이템 로드 실패:', '${item.name}'); this.src='https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp';">
+                                ${item.isUnknown ? '<div class="unknown-badge">?</div>' : ''}
+                            </div>`;
+                }).join('');
+            } else if (itemsContainer) {
+                // 완전히 실패한 경우 기본 아이템 표시
+                console.log('⚠️ 매치', match.matchId, '처리 실패, 기본 아이템 표시');
+                const fallbackItems = matchProcessor.generateFallbackItems(match.hero);
+                
+                itemsContainer.innerHTML = fallbackItems.map(item => {
+                    return `<div class="item-wrapper">
+                                <img src="${item.image}" 
+                                     alt="${item.name}" 
+                                     class="item-image fallback-item" 
+                                     title="${item.name} (기본)"
+                                     style="border: 2px solid #ffd93d; opacity: 0.6;">
+                            </div>`;
+                }).join('');
+            }
+        } catch (error) {
+            console.error(`❌ 매치 ${match.matchId} 아이템 처리 실패:`, error);
         }
     });
 }
