@@ -5262,27 +5262,16 @@ app.post('/api/system/cache-clear', (req, res) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  try {
-    const healthData = {
-      status: 'OK',
-      timestamp: new Date().toISOString(),
-      uptime: process.uptime(),
-      environment: {
-        nodeEnv: process.env.NODE_ENV || 'development',
-        railway: !!process.env.RAILWAY_ENVIRONMENT,
-        steamConfigured: !!process.env.STEAM_API_KEY,
-      },
-    };
-
-    res.status(200).json(healthData);
-  } catch (error) {
-    console.error('❌ Health check error:', error);
-    res.status(503).json({
-      status: 'ERROR',
-      error: error.message,
-      timestamp: new Date().toISOString(),
-    });
-  }
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: {
+      nodeEnv: process.env.NODE_ENV || 'development',
+      railway: process.env.RAILWAY_ENVIRONMENT ? true : false,
+      steamConfigured: process.env.STEAM_API_KEY ? true : false,
+    },
+  });
 });
 
 // 404 handler
