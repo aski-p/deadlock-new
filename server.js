@@ -440,7 +440,7 @@ const getUserTopHero = async (req, res, next) => {
           'Pocket': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/synth_card.webp',
           'Seven': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/gigawatt_card.webp',
           'Shiv': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/shiv_card.webp',
-          'Vindicta': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kali_card.webp',
+          'Vindicta': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/hornet_card.webp',
           'Viper': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kali_card.webp',
           'Viscous': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/viscous_card.webp',
           'Warden': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/warden_card.webp',
