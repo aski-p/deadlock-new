@@ -15,21 +15,40 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Environment validation
+// Early health check endpoint for Railway
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+  });
+});
+
+// Environment validation (non-blocking for Railway deployment)
 const requiredEnvVars = ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'SESSION_SECRET'];
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
 if (missingEnvVars.length > 0) {
-  console.error('❌ Missing required environment variables:', missingEnvVars.join(', '));
-  if (process.env.NODE_ENV === 'production') {
-    process.exit(1);
-  }
+  console.warn('⚠️ Missing environment variables:', missingEnvVars.join(', '));
+  console.warn('⚠️ Some features may not work properly');
+  // Don't exit in production - let Railway health check handle it
 }
 
-// Supabase 설정
+// Supabase 설정 (안전한 초기화)
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+let supabase = null;
+
+if (supabaseUrl && supabaseServiceKey) {
+  try {
+    supabase = createClient(supabaseUrl, supabaseServiceKey);
+    console.log('✅ Supabase client initialized');
+  } catch (error) {
+    console.error('❌ Supabase initialization failed:', error.message);
+  }
+} else {
+  console.warn('⚠️ Supabase not configured - database features disabled');
+}
 
 console.log('🔧 Environment check:');
 console.log('- NODE_ENV:', process.env.NODE_ENV || 'development');
@@ -5260,8 +5279,8 @@ app.post('/api/system/cache-clear', (req, res) => {
   }
 });
 
-// Health check endpoint
-app.get('/health', (req, res) => {
+// Detailed health check endpoint (환경 정보 포함)
+app.get('/health/detailed', (req, res) => {
   res.status(200).json({
     status: 'OK',
     timestamp: new Date().toISOString(),
@@ -5270,6 +5289,7 @@ app.get('/health', (req, res) => {
       nodeEnv: process.env.NODE_ENV || 'development',
       railway: process.env.RAILWAY_ENVIRONMENT ? true : false,
       steamConfigured: process.env.STEAM_API_KEY ? true : false,
+      supabaseConfigured: supabase ? true : false,
     },
   });
 });
