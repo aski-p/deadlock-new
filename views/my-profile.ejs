@@ -1577,13 +1577,14 @@ function displayMatchHistory(matches) {
                         <div class="match-items">
                             <div class="items-label">최종 아이템</div>
                             <div class="items-grid">
-                                ${generateFinalItems(hero, isWin, souls).map(item => `
+                                ${(match.finalItems || generateFinalItems(hero, isWin, souls)).map(item => `
                                     <div class="item-wrapper">
                                         <img src="${item.image}" 
                                              alt="${item.name}" 
                                              class="item-image ${item.type}-item" 
                                              title="${item.name}"
-                                             style="border: 2px solid ${item.borderColor}; opacity: ${item.opacity};">
+                                             style="border: 2px solid ${item.borderColor}; opacity: ${item.opacity};"
+                                             onerror="this.src='https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp';">
                                     </div>
                                 `).join('')}
                             </div>
