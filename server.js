@@ -15,7 +15,7 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Early health check endpoint for Railway
+// Basic health check endpoint for Railway (early registration)
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'OK',
@@ -442,14 +442,25 @@ if (steamApiKey) {
       },
       async (identifier, profile, done) => {
         try {
+          console.log('🔍 Steam strategy callback initiated');
           // Extract Steam ID from identifier
           const steamId = identifier.split('/').pop();
+          console.log(`📋 Steam ID extracted: ${steamId}`);
 
           // Get additional user info from Steam API
+          console.log('🌐 Fetching user data from Steam API...');
           const userResponse = await axios.get(
-            `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${process.env.STEAM_API_KEY}&steamids=${steamId}`
+            `http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${process.env.STEAM_API_KEY}&steamids=${steamId}`,
+            { timeout: 10000 }
           );
+          
+          if (!userResponse.data?.response?.players?.[0]) {
+            console.error('❌ No user data received from Steam API');
+            return done(new Error('Failed to fetch user data from Steam'), null);
+          }
+          
           const userData = userResponse.data.response.players[0];
+          console.log(`✅ Steam user data fetched: ${userData.personaname}`);
 
           // Steam 아바타 URL을 Cloudflare CDN으로 변환
           let avatarUrl = userData.avatarfull || userData.avatarmedium || userData.avatar;
@@ -469,9 +480,13 @@ if (steamApiKey) {
             profile: profile,
           };
 
+          console.log(`🎉 Steam authentication successful: ${user.username} (${user.steamId})`);
           return done(null, user);
         } catch (error) {
-          console.error('Steam authentication error:', error);
+          console.error('❌ Steam authentication error:', error.message);
+          if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+            console.error('🌐 Network error connecting to Steam API');
+          }
           return done(error, null);
         }
       }
@@ -488,6 +503,29 @@ if (steamApiKey) {
 } else {
   console.log('⚠️ Steam API key not configured - Steam authentication disabled');
 }
+
+// Enhanced health check with detailed configuration
+app.get('/health/detailed', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    configuration: {
+      steamConfigured: !!steamApiKey,
+      supabaseConfigured: !!supabase,
+      environment: process.env.NODE_ENV || 'development',
+      baseUrl: isProduction
+        ? 'https://deadlock-new-production.up.railway.app'
+        : 'http://localhost:3000',
+      isProduction: isProduction,
+    },
+    features: {
+      steamAuth: !!steamApiKey,
+      database: !!supabase,
+      sessionSecret: !!process.env.SESSION_SECRET,
+    }
+  });
+});
 
 // Steam API utility functions
 const steamAPI = {
@@ -660,20 +698,25 @@ app.get('/ko/leaderboards/oceania', getUserTopHero, (req, res) => {
 
 // Steam Auth Routes (only if Steam is configured)
 if (steamApiKey) {
-  app.get('/auth/steam', passport.authenticate('steam', { failureRedirect: '/' }), (req, res) => {
-    res.redirect('/');
+  app.get('/auth/steam', (req, res, next) => {
+    console.log('🔑 Steam login attempt initiated');
+    passport.authenticate('steam', { failureRedirect: '/?error=steam_auth_failed' })(req, res, next);
   });
 
   app.get(
     '/auth/steam/return',
-    passport.authenticate('steam', { failureRedirect: '/' }),
-    (req, res) => {
-      res.redirect('/');
+    (req, res, next) => {
+      console.log('🔄 Steam callback received');
+      passport.authenticate('steam', { 
+        failureRedirect: '/?error=steam_callback_failed',
+        successRedirect: '/?login=success'
+      })(req, res, next);
     }
   );
 } else {
   // Fallback routes when Steam is not configured
   app.get('/auth/steam', (req, res) => {
+    console.log('❌ Steam auth attempted but not configured');
     res.status(503).json({
       error: 'Steam authentication not configured',
       message: 'Please set STEAM_API_KEY environment variable',
@@ -681,6 +724,7 @@ if (steamApiKey) {
   });
 
   app.get('/auth/steam/return', (req, res) => {
+    console.log('❌ Steam callback attempted but not configured');
     res.redirect('/?error=steam_not_configured');
   });
 }

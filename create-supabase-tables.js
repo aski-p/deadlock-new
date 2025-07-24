@@ -1,7 +1,8 @@
 const https = require('https');
 
 const supabaseUrl = 'dpmoafgaysocfjxlmaum.supabase.co';
-const serviceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwbW9hZmdheXNvY2ZqeGxtYXVtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTQ2NDMzMSwiZXhwIjoyMDY3MDQwMzMxfQ.G2woWTLhGpc0FOEyfABZs7k1wYTSYCaDeYhYtpoY73c';
+const serviceKey =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRwbW9hZmdheXNvY2ZqeGxtYXVtIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTQ2NDMzMSwiZXhwIjoyMDY3MDQwMzMxfQ.G2woWTLhGpc0FOEyfABZs7k1wYTSYCaDeYhYtpoY73c';
 
 // Supabase에서 SQL 함수를 생성하고 실행하는 함수
 async function createSQLFunction() {
@@ -45,7 +46,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
     `;
 
     const postData = JSON.stringify({
-      query: functionSQL
+      query: functionSQL,
     });
 
     const options = {
@@ -56,14 +57,14 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
       headers: {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(postData),
-        'Authorization': `Bearer ${serviceKey}`,
-        'apikey': serviceKey
-      }
+        Authorization: `Bearer ${serviceKey}`,
+        apikey: serviceKey,
+      },
     };
 
-    const req = https.request(options, (res) => {
+    const req = https.request(options, res => {
       let data = '';
-      res.on('data', (chunk) => data += chunk);
+      res.on('data', chunk => (data += chunk));
       res.on('end', () => {
         console.log('함수 생성 응답:', res.statusCode, data);
         if (res.statusCode === 200 || res.statusCode === 201) {
@@ -93,14 +94,14 @@ async function executeSQLFunction() {
       headers: {
         'Content-Type': 'application/json',
         'Content-Length': Buffer.byteLength(postData),
-        'Authorization': `Bearer ${serviceKey}`,
-        'apikey': serviceKey
-      }
+        Authorization: `Bearer ${serviceKey}`,
+        apikey: serviceKey,
+      },
     };
 
-    const req = https.request(options, (res) => {
+    const req = https.request(options, res => {
       let data = '';
-      res.on('data', (chunk) => data += chunk);
+      res.on('data', chunk => (data += chunk));
       res.on('end', () => {
         console.log('함수 실행 응답:', res.statusCode, data);
         if (res.statusCode === 200) {
@@ -153,8 +154,8 @@ async function directSQL() {
       method: 'POST',
       headers: {
         'Content-Type': 'application/sql',
-        'Authorization': `Bearer ${serviceKey}`
-      }
+        Authorization: `Bearer ${serviceKey}`,
+      },
     };
 
     console.log('PostgreSQL 직접 연결 시도...');
@@ -165,16 +166,15 @@ async function directSQL() {
 
 async function main() {
   console.log('🗄️ Supabase 테이블 자동 생성 시작...');
-  
+
   try {
     console.log('1️⃣ SQL 함수 생성 시도...');
     await createSQLFunction();
-    
+
     console.log('2️⃣ 함수 실행 시도...');
     const result = await executeSQLFunction();
-    
+
     console.log('✅ 테이블 생성 완료!', result);
-    
   } catch (error) {
     console.log('❌ 자동 생성 실패:', error.message);
     console.log('📋 Supabase에서 수동으로 다음 SQL을 실행해주세요:');
