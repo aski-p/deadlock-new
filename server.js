@@ -2003,13 +2003,15 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
               
               if (cardResponse.data) {
                 const playerCard = cardResponse.data;
-                console.log(`📋 ${member.accountId} Deadlock API 데이터:`, JSON.stringify({
-                  account_name: playerCard.account_name,
-                  avatar_url: playerCard.avatar_url,
+                console.log(`📋 ${member.accountId} Deadlock API 전체 응답:`, JSON.stringify(playerCard, null, 2));
+                console.log(`📋 ${member.accountId} 랭크 관련 필드들:`, {
                   rank: playerCard.rank,
                   rank_tier: playerCard.rank_tier,
-                  points: playerCard.points
-                }, null, 2));
+                  points: playerCard.points,
+                  badge_level: playerCard.badge_level,
+                  medal: playerCard.medal,
+                  tier: playerCard.tier
+                });
                 
                 // 이름 업데이트
                 if (playerCard.account_name) {
@@ -2096,7 +2098,24 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
               console.log(`⚠️ Deadlock API ${member.accountId} 프로필 조회 실패:`, error.message);
             }
           }
+          
+          // 랭크 정보가 없는 멤버들에게 기본 랭크 설정
+          if (!member.rank) {
+            member.rank = {
+              medal: 'Initiate',
+              subrank: 1,
+              score: 0,
+              rankImage: 'rank5/badge_sm_subrank1.webp'
+            };
+            console.log(`⚠️ ${member.accountId} (${member.name}) 랭크 정보 없음 - 기본값 Initiate 1 설정`);
+          }
         }
+        
+        // 최종 응답 전에 랭크 데이터 확인
+        console.log(`🎯 최종 파티 멤버 랭크 데이터 확인:`);
+        topPartyMembers.forEach((member, index) => {
+          console.log(`  [${index + 1}] ${member.name}: rank=${JSON.stringify(member.rank)}`);
+        });
         
         setCachedData(cacheKey, topPartyMembers, 10 * 60 * 1000); // 10분 캐시
         return res.json(topPartyMembers);
@@ -2127,7 +2146,13 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
           avgKda: '5.0',
           totalKills: 123,
           totalDeaths: 62,
-          totalAssists: 185
+          totalAssists: 185,
+          rank: {
+            medal: 'Oracle',
+            subrank: 3,
+            score: 3200,
+            rankImage: 'rank9/badge_sm_subrank3.webp'
+          }
         },
         {
           accountId: '23456789',
@@ -2144,7 +2169,13 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
           avgKda: '4.2',
           totalKills: 94,
           totalDeaths: 54,
-          totalAssists: 134
+          totalAssists: 134,
+          rank: {
+            medal: 'Phantom',
+            subrank: 2,
+            score: 4500,
+            rankImage: 'rank10/badge_sm_subrank2.webp'
+          }
         },
         {
           accountId: '34567890',
@@ -2161,7 +2192,13 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
           avgKda: '5.9',
           totalKills: 73,
           totalDeaths: 30,
-          totalAssists: 108
+          totalAssists: 108,
+          rank: {
+            medal: 'Ritualist',
+            subrank: 4,
+            score: 2800,
+            rankImage: 'rank8/badge_sm_subrank4.webp'
+          }
         }
       ];
       
