@@ -4840,18 +4840,7 @@ app.get('/ko/profile', getUserTopHero, (req, res) => {
 });
 
 // Health check
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'OK',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: {
-      nodeEnv: process.env.NODE_ENV,
-      railway: !!process.env.RAILWAY_ENVIRONMENT,
-      steamConfigured: !!steamApiKey,
-    },
-  });
-});
+// Health check endpoint (첫 번째 정의 제거 - 아래에 통합된 버전 사용)
 
 // 영웅 페이지 라우트
 app.get('/ko/heroes', getUserTopHero, (req, res) => {
@@ -5273,17 +5262,27 @@ app.post('/api/system/cache-clear', (req, res) => {
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  const healthData = {
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    memory: process.memoryUsage(),
-    cache: memoryCache.getStats(),
-    environment: process.env.NODE_ENV || 'development',
-    version: '1.0.0',
-  };
+  try {
+    const healthData = {
+      status: 'OK',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      environment: {
+        nodeEnv: process.env.NODE_ENV || 'development',
+        railway: !!process.env.RAILWAY_ENVIRONMENT,
+        steamConfigured: !!process.env.STEAM_API_KEY,
+      },
+    };
 
-  res.json(healthData);
+    res.status(200).json(healthData);
+  } catch (error) {
+    console.error('❌ Health check error:', error);
+    res.status(503).json({
+      status: 'ERROR',
+      error: error.message,
+      timestamp: new Date().toISOString(),
+    });
+  }
 });
 
 // 404 handler
@@ -5321,7 +5320,7 @@ process.on('unhandledRejection', (reason, promise) => {
   process.exit(1);
 });
 
-const server = app.listen(PORT, async () => {
+const server = app.listen(PORT, '0.0.0.0', async () => {
   console.log(`🚀 데드락 서버가 포트 ${PORT}에서 실행 중입니다`);
   console.log(`🔗 URL: ${baseUrl}`);
   console.log(`🎮 Steam API: ${steamApiKey ? 'Configured' : 'Missing (authentication disabled)'}`);
