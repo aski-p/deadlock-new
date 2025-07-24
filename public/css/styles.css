@@ -1030,3 +1030,149 @@ footer {
         font-size: 11px;
     }
 }
+
+/* Steam & Discord Button Styles */
+.steam-login-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: linear-gradient(135deg, #171a21 0%, #2a475e 50%, #66c0f4 100%);
+    border: 1px solid #4c6b22;
+    border-radius: 3px;
+    color: #c7d5e0;
+    text-decoration: none;
+    font-family: "Motiva Sans", Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+    box-shadow: 
+        0 1px 0 0 rgba(255, 255, 255, 0.1) inset,
+        0 1px 2px 0 rgba(0, 0, 0, 0.15);
+    position: relative;
+    overflow: hidden;
+}
+
+.steam-login-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.steam-login-btn:hover {
+    background: linear-gradient(135deg, #1e2328 0%, #2e5266 50%, #67c1f5 100%);
+    border-color: #5c7e10;
+    box-shadow: 
+        0 1px 0 0 rgba(255, 255, 255, 0.15) inset,
+        0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+}
+
+.steam-login-btn:hover::before {
+    left: 100%;
+}
+
+.steam-login-btn:active {
+    background: linear-gradient(135deg, #0f1419 0%, #1e3a4a 50%, #4a9fd1 100%);
+    box-shadow: 
+        0 1px 0 0 rgba(0, 0, 0, 0.15) inset,
+        0 1px 1px 0 rgba(0, 0, 0, 0.1);
+    transform: translateY(0);
+}
+
+.steam-icon {
+    width: 18px;
+    height: 18px;
+    filter: drop-shadow(1px 1px 0px rgba(0, 0, 0, 0.3));
+}
+
+.discord-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: #5865f2;
+    border: none;
+    border-radius: 4px;
+    color: #ffffff;
+    text-decoration: none;
+    font-family: "gg sans", "Noto Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.17s ease;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.discord-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.4s ease;
+}
+
+.discord-btn:hover {
+    background: #4752c4;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.discord-btn:hover::before {
+    left: 100%;
+}
+
+.discord-btn:active {
+    background: #3c45a5;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
+    transform: translateY(0);
+}
+
+.discord-icon {
+    width: 18px;
+    height: 18px;
+}
+
+/* Responsive adjustments for buttons */
+@media (max-width: 768px) {
+    .steam-login-btn,
+    .discord-btn {
+        padding: 8px 14px;
+        font-size: 13px;
+        gap: 6px;
+    }
+    
+    .steam-icon,
+    .discord-icon {
+        width: 16px;
+        height: 16px;
+    }
+    
+    .steam-login-btn span,
+    .discord-btn span {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-right {
+        gap: 10px;
+    }
+    
+    .steam-login-btn,
+    .discord-btn {
+        padding: 6px 10px;
+        min-width: 40px;
+        justify-content: center;
+    }
+}
