@@ -1878,27 +1878,33 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
                 console.log(`❌ ${member.accountId} Deadlock API 응답 데이터 없음`);
               }
               
-              // 플레이어 상세 통계 가져오기 (KDA, 평균 디나이)
+              // 플레이어 상세 통계 가져오기 (KDA, 평균 디나이, 영웅별 승률)
               try {
                 console.log(`📊 ${member.accountId} 상세 통계 조회 중...`);
                 
-                // 내부 API 호출로 상세 통계 가져오기
-                const statsResponse = await axios.get(`http://localhost:${PORT}/api/v1/players/${member.accountId}`, {
-                  timeout: 10000,
-                  headers: {
-                    'User-Agent': 'Internal-Request'
-                  }
-                });
+                // fetchAndAnalyzeAllMatches 함수를 직접 호출하여 상세 통계 가져오기
+                const playerAnalysis = await fetchAndAnalyzeAllMatches(member.accountId);
                 
-                if (statsResponse.data && statsResponse.data.stats) {
-                  const playerStats = statsResponse.data.stats;
-                  
+                if (playerAnalysis && playerAnalysis.totalMatches > 0) {
                   member.stats = {
-                    kda: playerStats.kda || '0.0',
-                    avgDenies: Math.round(playerStats.denies / playerStats.matches) || 0 // 총 디나이를 매치 수로 나누어 평균 계산
+                    kda: playerAnalysis.averageKDA?.ratio || '0.0',
+                    avgDenies: playerAnalysis.avgDenies || 0
                   };
                   
-                  console.log(`📈 ${member.accountId} 통계 업데이트: KDA ${member.stats.kda}, 평균 디나이 ${member.stats.avgDenies}`);
+                  // 영웅별 승률 정보 추가 (상위 5개 영웅)
+                  if (playerAnalysis.topHeroes && playerAnalysis.topHeroes.length > 0) {
+                    member.topHeroes = playerAnalysis.topHeroes.slice(0, 5).map(hero => ({
+                      name: hero.name,
+                      matches: hero.matches,
+                      winRate: hero.winRate,
+                      wins: hero.wins,
+                      losses: hero.losses
+                    }));
+                  }
+                  
+                  console.log(`📈 ${member.accountId} 통계 업데이트: KDA ${member.stats.kda}, 평균 디나이 ${member.stats.avgDenies}, 영웅 ${member.topHeroes?.length || 0}개`);
+                } else {
+                  console.log(`⚠️ ${member.accountId} 매치 분석 데이터 없음 - 기본값 유지`);
                 }
               } catch (statsError) {
                 console.log(`⚠️ ${member.accountId} 상세 통계 조회 실패:`, statsError.message);

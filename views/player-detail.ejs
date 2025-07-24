@@ -516,6 +516,58 @@
     color: #FFEFD7;
 }
 
+.party-member-heroes {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.heroes-label {
+    font-size: 12px;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.heroes-list {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.hero-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.hero-mini-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.hero-mini-stats {
+    text-align: center;
+}
+
+.hero-name {
+    font-size: 10px;
+    color: #FFEFD7;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.hero-winrate {
+    font-size: 9px;
+    color: #10B981;
+    font-weight: 500;
+}
+
 .player-error {
     text-align: center;
     padding: 100px 20px;
@@ -820,6 +872,36 @@ function updatePartyMembersList(partyMembers) {
         return;
     }
     
+    const getHeroImage = (heroName) => {
+        const heroImageMap = {
+            'Abrams': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp',
+            'Bebop': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp',
+            'Dynamo': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/dynamo_card.webp',
+            'Grey Talon': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/archer_card.webp',
+            'Haze': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/haze_card.webp',
+            'Infernus': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/inferno_card.webp',
+            'Ivy': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/ivy_card.webp',
+            'Kelvin': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kelvin_card.webp',
+            'Lady Geist': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/spectre_card.webp',
+            'Lash': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/lash_card.webp',
+            'McGinnis': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/engineer_card.webp',
+            'Mo & Krill': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/digger_card.webp',
+            'Paradox': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/chrono_card.webp',
+            'Pocket': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/synth_card.webp',
+            'Seven': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/gigawatt_card.webp',
+            'Shiv': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/shiv_card.webp',
+            'Vindicta': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kali_card.webp',
+            'Viper': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kali_card.webp',
+            'Viscous': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/viscous_card.webp',
+            'Warden': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/warden_card.webp',
+            'Holliday': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/astro_card.webp',
+            'Mirage': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/mirage_card.webp',
+            'Wraith': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/wraith_card.webp',
+            'Yamato': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/yamato_card.webp'
+        };
+        return heroImageMap[heroName] || 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp';
+    };
+
     list.innerHTML = partyMembers.map(member => `
         <div class="party-member-card" onclick="viewPartyMemberProfile('${member.accountId || member.memberId}')" style="cursor: pointer;">
             <div class="party-member-info">
@@ -854,6 +936,23 @@ function updatePartyMembersList(partyMembers) {
                     <div class="value">${member.stats?.avgDenies || 0}</div>
                 </div>
             </div>
+            
+            ${member.topHeroes && member.topHeroes.length > 0 ? `
+                <div class="party-member-heroes">
+                    <div class="heroes-label">주요 영웅</div>
+                    <div class="heroes-list">
+                        ${member.topHeroes.slice(0, 3).map(hero => `
+                            <div class="hero-item">
+                                <img src="${getHeroImage(hero.name)}" alt="${hero.name}" class="hero-mini-image">
+                                <div class="hero-mini-stats">
+                                    <div class="hero-name">${hero.name}</div>
+                                    <div class="hero-winrate">${hero.winRate}% (${hero.matches}경기)</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : ''}
         </div>
     `).join('');
 }
