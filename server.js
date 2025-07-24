@@ -1730,7 +1730,19 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
               avgKda: parseFloat(avgKda),
               totalKills: 0,
               totalDeaths: 0,
-              totalAssists: 0
+              totalAssists: 0,
+              // 등급 정보 (Deadlock API에서 업데이트 예정)
+              rank: {
+                medal: 'Initiate',
+                subrank: 5,
+                score: 0,
+                rankImage: 'initiate_5.webp'
+              },
+              // 통계 정보 (Deadlock API에서 업데이트 예정)
+              stats: {
+                kda: '0.0',
+                avgDenies: 0
+              }
             };
           })
           .sort((a, b) => b.matches - a.matches); // 함께 플레이한 경기 수 기준 정렬
@@ -1820,7 +1832,10 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
                 const playerCard = cardResponse.data;
                 console.log(`📋 ${member.accountId} Deadlock API 데이터:`, JSON.stringify({
                   account_name: playerCard.account_name,
-                  avatar_url: playerCard.avatar_url
+                  avatar_url: playerCard.avatar_url,
+                  rank: playerCard.rank,
+                  rank_tier: playerCard.rank_tier,
+                  points: playerCard.points
                 }, null, 2));
                 
                 // 이름 업데이트
@@ -1835,9 +1850,59 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
                   console.log(`🖼️ ${member.accountId} 아바타 업데이트: ${member.avatar}`);
                 }
                 
+                // 등급 정보 업데이트
+                if (playerCard.rank_tier && playerCard.rank) {
+                  const rankTier = playerCard.rank_tier || 5;
+                  const rankName = playerCard.rank || 'Initiate';
+                  const points = playerCard.points || 0;
+                  
+                  // 랭크별 번호 매핑
+                  const rankMap = {
+                    'Eternus': 11, 'Phantom': 10, 'Oracle': 9, 'Ritualist': 8,
+                    'Alchemist': 7, 'Arcanist': 6, 'Initiate': 5
+                  };
+                  const rankNumber = rankMap[rankName] || 5;
+                  
+                  member.rank = {
+                    medal: rankName,
+                    subrank: rankTier,
+                    score: points,
+                    rankImage: `rank${rankNumber}/badge_sm_subrank${rankTier}.webp`
+                  };
+                  
+                  console.log(`🏆 ${member.accountId} 등급 업데이트: ${rankName} ${rankTier} (${points}점)`);
+                }
+                
                 console.log(`✅ ${member.accountId} 프로필 업데이트 완료: ${member.name}`);
               } else {
                 console.log(`❌ ${member.accountId} Deadlock API 응답 데이터 없음`);
+              }
+              
+              // 플레이어 상세 통계 가져오기 (KDA, 평균 디나이)
+              try {
+                console.log(`📊 ${member.accountId} 상세 통계 조회 중...`);
+                
+                // 내부 API 호출로 상세 통계 가져오기
+                const statsResponse = await axios.get(`http://localhost:${PORT}/api/v1/players/${member.accountId}`, {
+                  timeout: 10000,
+                  headers: {
+                    'User-Agent': 'Internal-Request'
+                  }
+                });
+                
+                if (statsResponse.data && statsResponse.data.stats) {
+                  const playerStats = statsResponse.data.stats;
+                  
+                  member.stats = {
+                    kda: playerStats.kda || '0.0',
+                    avgDenies: Math.round(playerStats.denies / playerStats.matches) || 0 // 총 디나이를 매치 수로 나누어 평균 계산
+                  };
+                  
+                  console.log(`📈 ${member.accountId} 통계 업데이트: KDA ${member.stats.kda}, 평균 디나이 ${member.stats.avgDenies}`);
+                }
+              } catch (statsError) {
+                console.log(`⚠️ ${member.accountId} 상세 통계 조회 실패:`, statsError.message);
+                // 기본값 유지
               }
             } catch (error) {
               console.log(`⚠️ Deadlock API ${member.accountId} 프로필 조회 실패:`, error.message);
