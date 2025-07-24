@@ -614,6 +614,12 @@
     transform: translateX(5px);
 }
 
+.party-member:active {
+    background: rgba(99, 162, 226, 0.15);
+    border-color: #5289c7;
+    transform: translateX(3px) scale(0.98);
+}
+
 .party-member-avatar {
     width: 48px;
     height: 48px;
@@ -1534,8 +1540,13 @@ function displayPartyStats(partyStats) {
             const partyMember = e.target.closest('.party-member');
             if (partyMember) {
                 const accountId = partyMember.dataset.accountId;
+                console.log('파티 멤버 클릭:', { accountId: accountId });
                 if (accountId && accountId !== 'Unknown') {
-                    window.location.href = `/ko/profile?accountId=${accountId}`;
+                    console.log('프로필 페이지로 이동:', `/ko/players/${accountId}`);
+                    window.location.href = `/ko/players/${accountId}`;
+                } else {
+                    console.log('유효하지 않은 Account ID:', accountId);
+                    alert('이 플레이어의 프로필을 볼 수 없습니다.');
                 }
             }
         });
