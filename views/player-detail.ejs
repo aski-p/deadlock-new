@@ -1471,11 +1471,15 @@ function updatePartyMembersList(partyMembers) {
             <div class="party-member-stats">
                 <div class="party-stat-item">
                     <div class="label">승률</div>
-                    <div class="value party-win-rate">${member.winRate}%</div>
+                    <div class="value party-win-rate">${Math.round(member.winRate || 0)}%</div>
                 </div>
                 <div class="party-stat-item">
-                    <div class="label">승/패</div>
-                    <div class="value">${member.wins}/${member.losses}</div>
+                    <div class="label">승</div>
+                    <div class="value party-wins">${member.wins || 0}</div>
+                </div>
+                <div class="party-stat-item">
+                    <div class="label">패</div>
+                    <div class="value party-losses">${member.losses || 0}</div>
                 </div>
                 <div class="party-stat-item">
                     <div class="label">KDA</div>
