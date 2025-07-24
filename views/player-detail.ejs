@@ -654,14 +654,15 @@ function updatePlayerUI(player) {
     document.getElementById('rank-score').textContent = player.rank.score.toLocaleString();
     
     // Stats
-    document.getElementById('stat-matches').textContent = player.stats.matches;
-    document.getElementById('stat-winrate').textContent = `${player.stats.winRate}%`;
-    document.getElementById('stat-lane-winrate').textContent = `${player.stats.laneWinRate}%`;
-    document.getElementById('stat-kda').textContent = player.stats.kda;
-    document.getElementById('stat-headshots').textContent = `${player.stats.headshotPercent}%`;
-    document.getElementById('stat-souls').textContent = player.stats.soulsPerMin.toLocaleString();
-    document.getElementById('stat-damage').textContent = player.stats.denies.toLocaleString();
-    document.getElementById('stat-healing').textContent = player.stats.endorsements.toLocaleString();
+    console.log('Player stats:', player.stats);
+    document.getElementById('stat-matches').textContent = player.stats.matches || 0;
+    document.getElementById('stat-winrate').textContent = `${player.stats.winRate || 0}%`;
+    document.getElementById('stat-lane-winrate').textContent = `${player.stats.laneWinRate || 0}%`;
+    document.getElementById('stat-kda').textContent = player.stats.kda || '0.0';
+    document.getElementById('stat-headshots').textContent = `${player.stats.headshotPercent || 0}%`;
+    document.getElementById('stat-souls').textContent = (player.stats.soulsPerMin || 0).toLocaleString();
+    document.getElementById('stat-damage').textContent = (player.stats.denies || 0).toLocaleString();
+    document.getElementById('stat-healing').textContent = (player.stats.endorsements || 0).toLocaleString();
     
     // Party Members
     loadPartyMembers();

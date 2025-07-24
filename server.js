@@ -1267,11 +1267,20 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
           
           if (matchAnalysis) {
             // deadlock.coach 스타일 실제 매치 데이터 적용
+            console.log(`📊 매치 분석 데이터 적용 중:`, {
+              totalMatches: matchAnalysis.totalMatches,
+              winRate: matchAnalysis.winRate,
+              laneWinRate: matchAnalysis.laneWinRate,
+              kda: matchAnalysis.averageKDA.ratio,
+              avgSoulsPerMin: matchAnalysis.avgSoulsPerMin,
+              avgDenies: matchAnalysis.avgDenies
+            });
+            
             playerData.stats = {
               matches: matchAnalysis.totalMatches,
               winRate: parseFloat(matchAnalysis.winRate),
               laneWinRate: parseFloat(matchAnalysis.laneWinRate),
-              kda: parseFloat(matchAnalysis.averageKDA.ratio),
+              kda: matchAnalysis.averageKDA.ratio, // 이미 문자열로 포맷됨
               headshotPercent: Math.round(matchAnalysis.headshotPercent) || 20,
               soulsPerMin: matchAnalysis.avgSoulsPerMin,
               denies: matchAnalysis.avgDenies, // 실제 디나이 데이터 사용
@@ -1935,7 +1944,7 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
             const matchId = match.match_id || 0;
             const seed = matchId % 100; // 일관된 시드
             
-            if (isWin) {
+            if (isMatchWin) {
               // 승리한 경우 - 게임 시간에 따라 라인전 승률 조정
               if (duration > 0 && duration < 1200) { // 20분 미만 = 라인전 대승 후 빠른 승리
                 isLaneWin = seed < 80; // 80% 확률로 라인승
