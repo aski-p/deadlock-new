@@ -733,9 +733,6 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       // 기본 영웅이 없으면 랜덤 영웅 할당
       const finalHeroes = heroes.length > 0 ? heroes : [Object.values(heroIdMapping)[0]]; // Default to first hero
 
-      const initialCountry = getRandomCountryFlag(region, player.rank || player.possible_account_ids?.[0]);
-      console.log(`🎲 초기 국기 할당: ${player.account_name} -> ${initialCountry} (region: ${region})`);
-      
       return {
         rank: player.rank,
         player: {
@@ -743,7 +740,7 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
           avatar: `https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg`, // 기본 아바타
           steamId: steamId,
           accountId: player.possible_account_ids && player.possible_account_ids.length > 0 ? player.possible_account_ids[0] : player.rank,
-          country: initialCountry
+          country: '🌍' // 기본값, Steam API에서 실제 국가 정보로 업데이트
         },
         heroes: finalHeroes,
         medal: getMedalFromRank(player.ranked_rank || 7, player.ranked_subrank || 1),
@@ -847,11 +844,11 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       console.log(`⚠️ Steam API 키가 설정되지 않았습니다`);
     }
 
-    // Steam API에서 국가 정보를 못 받은 플레이어들에게 지역별 다양한 국기 할당
+    // Steam API에서 국가 정보를 못 받은 플레이어들은 기본 국기(🌍) 유지
     convertedPlayers.forEach(player => {
       if (player.player.country === '🌍' || !player.player.country) {
-        player.player.country = getRandomCountryFlag(region, player.player.accountId || player.rank);
-        console.log(`🎲 플레이어 ${player.player.name}에게 지역별 랜덤 국기 할당: ${player.player.country} (region: ${region})`);
+        player.player.country = '🌍'; // 실제 데이터만 사용, 더미/랜덤 데이터 없음
+        console.log(`🌍 플레이어 ${player.player.name}는 Steam API에서 국가 정보 없음 - 기본 국기 유지`);
       }
     });
 

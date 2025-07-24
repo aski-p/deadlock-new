@@ -1021,12 +1021,26 @@ function updatePlayerUIFast(player, heroStats, matchHistory, partyStats) {
             return `https://cdn.deadlock.coach/vpk/panorama/images/ranked/badges/rank${rankNumber}/badge_sm_subrank${subrank || 1}.webp`;
         };
         
+        // 영어 등급을 한글로 변환하는 함수
+        const getKoreanMedal = (englishMedal) => {
+            const medalTranslation = {
+                'Eternus': '이터누스',
+                'Phantom': '팬텀',
+                'Oracle': '오라클',
+                'Ritualist': '리츄얼리스트',
+                'Alchemist': '알케미스트',
+                'Arcanist': '아케니스트',
+                'Initiate': '탐험가'
+            };
+            return medalTranslation[englishMedal] || englishMedal;
+        };
+        
         const medal = player?.rank?.medal || 'Oracle';
         const subrank = player?.rank?.subrank || 1;
         const score = player?.rank?.score || 3500;
         
         document.getElementById('rank-medal').src = getMedalImage(medal, subrank);
-        document.getElementById('rank-name').textContent = `${medal} ${subrank}`;
+        document.getElementById('rank-name').textContent = `${getKoreanMedal(medal)} ${subrank}`;
         document.getElementById('rank-score').textContent = (typeof score === 'number' ? score : parseInt(score) || 3500).toLocaleString();
         
         // Stats (안전한 접근)
@@ -1103,8 +1117,22 @@ function updatePlayerUI(player) {
         return `https://cdn.deadlock.coach/vpk/panorama/images/ranked/badges/rank${rankNumber}/badge_sm_subrank${subrank}.webp`;
     };
     
+    // 영어 등급을 한글로 변환하는 함수
+    const getKoreanMedal = (englishMedal) => {
+        const medalTranslation = {
+            'Eternus': '이터누스',
+            'Phantom': '팬텀',
+            'Oracle': '오라클',
+            'Ritualist': '리츄얼리스트',
+            'Alchemist': '알케미스트',
+            'Arcanist': '아케니스트',
+            'Initiate': '탐험가'
+        };
+        return medalTranslation[englishMedal] || englishMedal;
+    };
+    
     document.getElementById('rank-medal').src = getMedalImage(player.rank.medal, player.rank.subrank);
-    document.getElementById('rank-name').textContent = `${player.rank.medal} ${player.rank.subrank}`;
+    document.getElementById('rank-name').textContent = `${getKoreanMedal(player.rank.medal)} ${player.rank.subrank}`;
     document.getElementById('rank-score').textContent = player.rank.score.toLocaleString();
     
     document.getElementById('stat-matches').textContent = player.stats.matches;
