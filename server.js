@@ -2384,25 +2384,144 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
         const matchSouls = match.net_worth || 0;
         const soulsPerMin = matchDurationMinutes > 0 ? Math.round(matchSouls / matchDurationMinutes) : 0;
         
-        // 매치별 최종 아이템 생성 (API에서 제공하지 않으므로 Mock 데이터)
+        // 아이템 ID를 이름으로 매핑하는 함수
+        const getItemNameById = (itemId) => {
+          const itemMap = {
+            // Weapon Items
+            715762406: 'Basic Magazine',
+            1342610602: 'Close Quarters', 
+            1437614329: 'Headshot Booster',
+            4072270083: 'High-Velocity Mag',
+            2220233739: 'Hollow Point Ward',
+            1009965641: 'Monster Rounds',
+            4147641675: 'Rapid Rounds',
+            499683006: 'Restorative Shot',
+            1842576017: 'Active Reload',
+            393974127: 'Berserker',
+            2981692841: 'Escalating Resilience',
+            4139877411: 'Fleetfoot',
+            1414319208: 'Hunter\'s Aura',
+            509856396: 'Kinetic Dash',
+            3633614685: 'Long Range',
+            2824119765: 'Melee Charge',
+            3731635960: 'Mystic Shot',
+            1254091416: 'Point Blank',
+            2481177645: 'Pristine Emblem',
+            223594321: 'Sharpshooter',
+            3713423303: 'Soul Shredder Bullets',
+            3140772621: 'Surge of Power',
+            2163598980: 'Tesla Bullets',
+            865846625: 'Titanic Magazine',
+            395944548: 'Toxic Bullets',
+            // Vitality Items  
+            968099481: 'Extra Health',
+            2678489038: 'Extra Regen',
+            558396679: 'Extra Stamina',
+            395867183: 'Melee Lifesteal',
+            1548066885: 'Sprint Boots',
+            1797283378: 'Healing Rite',
+            1710079648: 'Bullet Armor',
+            2059712766: 'Spirit Armor',
+            // Spirit Items
+            380806748: 'Extra Spirit',
+            811521119: 'Spirit Strike',
+            1292979587: 'Mystic Burst',
+            3403085434: 'Ammo Scavenger',
+            1144549437: 'Infuser',
+            2951612397: 'Spirit Lifesteal'
+          };
+          return itemMap[itemId] || `Item_${itemId}`;
+        };
+        
+        // 매치별 최종 아이템 생성 (더 현실적인 빌드 시뮬레이션)
         const generateMatchItems = () => {
-          const weaponItems = ['Basic Magazine', 'Monster Rounds', 'Active Reload', 'Berserker', 'Toxic Bullets', 'Leech'];
-          const vitalityItems = ['Extra Health', 'Sprint Boots', 'Bullet Armor', 'Improved Bullet Armor', 'Metal Skin', 'Colossus'];
-          const spiritItems = ['Extra Spirit', 'Mystic Burst', 'Cold Front', 'Improved Spirit', 'Ethereal Shift', 'Boundless Spirit'];
+          const heroName = getHeroNameById(match.hero_id);
           
-          const allItems = [...weaponItems, ...vitalityItems, ...spiritItems];
+          // 영웅별 선호 아이템 템플릿
+          const heroBuildTemplates = {
+            'Infernus': {
+              weapon: ['Toxic Bullets', 'Monster Rounds', 'Titanic Magazine', 'Glass Cannon'],
+              vitality: ['Extra Health', 'Bullet Armor', 'Metal Skin', 'Lifestrike'],
+              spirit: ['Extra Spirit', 'Mystic Burst', 'Improved Spirit', 'Boundless Spirit']
+            },
+            'Seven': {
+              weapon: ['Basic Magazine', 'Active Reload', 'Tesla Bullets', 'Pristine Emblem'],
+              vitality: ['Extra Health', 'Spirit Armor', 'Improved Spirit Armor', 'Colossus'],
+              spirit: ['Extra Spirit', 'Cold Front', 'Echo Shard', 'Mystic Reverb']
+            },
+            'Vindicta': {
+              weapon: ['Headshot Booster', 'Sharpshooter', 'Crippling Headshot', 'Lucky Shot'],
+              vitality: ['Extra Health', 'Bullet Armor', 'Veil Walker', 'Metal Skin'],
+              spirit: ['Extra Spirit', 'Mystic Vulnerability', 'Silence Glyph', 'Improved Spirit']
+            },
+            'Bebop': {
+              weapon: ['Monster Rounds', 'High-Velocity Mag', 'Tesla Bullets', 'Leech'],
+              vitality: ['Extra Health', 'Bullet Armor', 'Colossus', 'Unstoppable'],
+              spirit: ['Extra Spirit', 'Mystic Burst', 'Knockdown', 'Echo Shard']
+            },
+            'Dynamo': {
+              weapon: ['Basic Magazine', 'Mystic Shot', 'Surge of Power', 'Spiritual Overflow'],
+              vitality: ['Extra Health', 'Spirit Armor', 'Superior Duration', 'Colossus'],
+              spirit: ['Extra Spirit', 'Improved Spirit', 'Superior Cooldown', 'Boundless Spirit']
+            },
+            'Haze': {
+              weapon: ['Headshot Booster', 'Berserker', 'Lucky Shot', 'Glass Cannon'],
+              vitality: ['Extra Health', 'Bullet Armor', 'Phantom Strike', 'Metal Skin'],
+              spirit: ['Extra Spirit', 'Ethereal Shift', 'Silence Glyph', 'Improved Spirit']
+            },
+            'Lash': {
+              weapon: ['Basic Magazine', 'Melee Charge', 'Kinetic Dash', 'Titanic Magazine'],
+              vitality: ['Extra Health', 'Sprint Boots', 'Lifestrike', 'Majestic Leap'],
+              spirit: ['Extra Spirit', 'Superior Cooldown', 'Magic Carpet', 'Echo Shard']
+            },
+            'McGinnis': {
+              weapon: ['Monster Rounds', 'High-Velocity Mag', 'Titanic Magazine', 'Tesla Bullets'],
+              vitality: ['Extra Health', 'Bullet Armor', 'Metal Skin', 'Colossus'],
+              spirit: ['Extra Spirit', 'Improved Spirit', 'Superior Duration', 'Boundless Spirit']
+            },
+            'Paradox': {
+              weapon: ['Basic Magazine', 'Mystic Shot', 'Surge of Power', 'Spiritual Overflow'],
+              vitality: ['Extra Health', 'Spirit Armor', 'Superior Duration', 'Unstoppable'],
+              spirit: ['Extra Spirit', 'Improved Spirit', 'Superior Cooldown', 'Refresher']
+            },
+            'Pocket': {
+              weapon: ['Basic Magazine', 'Active Reload', 'Kinetic Dash', 'Vampiric Burst'],
+              vitality: ['Extra Health', 'Extra Stamina', 'Enduring Speed', 'Superior Stamina'],
+              spirit: ['Extra Spirit', 'Mystic Burst', 'Improved Spirit', 'Boundless Spirit']
+            },
+            'Wraith': {
+              weapon: ['Headshot Booster', 'Sharpshooter', 'Crippling Headshot', 'Glass Cannon'],
+              vitality: ['Extra Health', 'Bullet Armor', 'Phantom Strike', 'Veil Walker'],
+              spirit: ['Extra Spirit', 'Mystic Vulnerability', 'Silence Glyph', 'Improved Spirit']
+            },
+            'Abrams': {
+              weapon: ['Close Quarters', 'Monster Rounds', 'Leech', 'Vampiric Burst'],
+              vitality: ['Extra Health', 'Bullet Armor', 'Metal Skin', 'Colossus'],
+              spirit: ['Extra Spirit', 'Superior Duration', 'Improved Spirit', 'Boundless Spirit']
+            },
+            'default': {
+              weapon: ['Basic Magazine', 'Monster Rounds', 'Active Reload', 'Berserker', 'Toxic Bullets', 'Leech'],
+              vitality: ['Extra Health', 'Sprint Boots', 'Bullet Armor', 'Improved Bullet Armor', 'Metal Skin', 'Colossus'],
+              spirit: ['Extra Spirit', 'Mystic Burst', 'Cold Front', 'Improved Spirit', 'Ethereal Shift', 'Boundless Spirit']
+            }
+          };
+          
+          const buildTemplate = heroBuildTemplates[heroName] || heroBuildTemplates['default'];
           const selectedItems = [];
           
-          // 6개의 랜덤 아이템 선택 (중복 없음)
-          while (selectedItems.length < 6) {
-            const randomItem = allItems[Math.floor(Math.random() * allItems.length)];
-            if (!selectedItems.find(item => item.name === randomItem)) {
+          // 각 카테고리에서 2개씩 선택
+          ['weapon', 'vitality', 'spirit'].forEach(category => {
+            const categoryItems = buildTemplate[category];
+            const shuffled = [...categoryItems].sort(() => 0.5 - Math.random());
+            
+            for (let i = 0; i < 2 && i < shuffled.length; i++) {
               selectedItems.push({
-                name: randomItem,
-                slot: selectedItems.length + 1
+                name: shuffled[i],
+                slot: selectedItems.length + 1,
+                category: category
               });
             }
-          }
+          });
           
           return selectedItems;
         };
