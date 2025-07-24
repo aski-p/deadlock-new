@@ -733,6 +733,9 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       // 기본 영웅이 없으면 랜덤 영웅 할당
       const finalHeroes = heroes.length > 0 ? heroes : [Object.values(heroIdMapping)[0]]; // Default to first hero
 
+      const initialCountry = getRandomCountryFlag(region, player.rank || player.possible_account_ids?.[0]);
+      console.log(`🎲 초기 국기 할당: ${player.account_name} -> ${initialCountry} (region: ${region})`);
+      
       return {
         rank: player.rank,
         player: {
@@ -740,7 +743,7 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
           avatar: `https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg`, // 기본 아바타
           steamId: steamId,
           accountId: player.possible_account_ids && player.possible_account_ids.length > 0 ? player.possible_account_ids[0] : player.rank,
-          country: getRandomCountryFlag(region)
+          country: initialCountry
         },
         heroes: finalHeroes,
         medal: getMedalFromRank(player.ranked_rank || 7, player.ranked_subrank || 1),
@@ -844,6 +847,14 @@ const convertDeadlockApiToOurFormat = async (apiData, region) => {
       console.log(`⚠️ Steam API 키가 설정되지 않았습니다`);
     }
 
+    // Steam API에서 국가 정보를 못 받은 플레이어들에게 지역별 다양한 국기 할당
+    convertedPlayers.forEach(player => {
+      if (player.player.country === '🌍' || !player.player.country) {
+        player.player.country = getRandomCountryFlag(region, player.player.accountId || player.rank);
+        console.log(`🎲 플레이어 ${player.player.name}에게 지역별 랜덤 국기 할당: ${player.player.country} (region: ${region})`);
+      }
+    });
+
     // 2000등까지만 표시
     const limitedPlayers = convertedPlayers.slice(0, 2000);
 
@@ -906,8 +917,8 @@ const getCountryFlag = (countryCode) => {
   return countryToFlag[countryCode] || '🌍';
 };
 
-// 지역별 랜덤 국가 플래그 반환 (fallback)
-const getRandomCountryFlag = (region) => {
+// 지역별 랜덤 국가 플래그 반환 (fallback) - 진짜 랜덤으로 개선
+const getRandomCountryFlag = (region, playerId = null) => {
   const regionFlags = {
     'europe': ['🇩🇪', '🇬🇧', '🇫🇷', '🇪🇸', '🇮🇹', '🇵🇱', '🇷🇺', '🇸🇪', '🇳🇴', '🇩🇰', '🇳🇱', '🇧🇪', '🇦🇹', '🇨🇭', '🇫🇮'],
     'asia': ['🇰🇷', '🇯🇵', '🇨🇳', '🇹🇼', '🇹🇭', '🇻🇳', '🇸🇬', '🇲🇾', '🇵🇭', '🇮🇩', '🇮🇳', '🇦🇺', '🇳🇿'],
@@ -916,9 +927,17 @@ const getRandomCountryFlag = (region) => {
     'oceania': ['🇦🇺', '🇳🇿', '🇫🇯', '🇵🇬', '🇳🇨', '🇻🇺', '🇸🇧', '🇹🇴', '🇼🇸', '🇰🇮']
   };
   
-  const flags = regionFlags[region] || regionFlags['asia'];
-  // Return a fixed flag based on region for consistency
-  const index = region ? region.charCodeAt(0) % flags.length : 0;
+  const flags = regionFlags[region] || regionFlags['europe'];
+  
+  // 플레이어 ID 기반 일관된 랜덤 (같은 플레이어는 항상 같은 국기)
+  if (playerId) {
+    const seed = parseInt(playerId.toString().slice(-3)) || Math.abs(playerId.toString().split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a; }, 0));
+    const index = seed % flags.length;
+    return flags[index];
+  }
+  
+  // 실제 랜덤
+  const index = Math.floor(Math.random() * flags.length);
   return flags[index];
 };
 
@@ -935,7 +954,7 @@ const convertSteamToDeadlockFormat = (steamPlayers, region, page) => {
         name: player.personaname || `Player_${region}_${index}`,
         avatar: player.avatarfull || player.avatarmedium || player.avatar,
         steamId: player.steamid,
-        country: getCountryFromSteamLocation(player.loccountrycode) || '🌍'
+        country: getCountryFromSteamLocation(player.loccountrycode) || getRandomCountryFlag(region, player.steamid)
       },
       heroes: heroes.slice(index % 3, (index % 3) + 2), // 임시로 2-3개 영웅
       medal: medals[index % medals.length],
@@ -2087,27 +2106,48 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
                   console.log(`🖼️ ${member.accountId} 아바타 업데이트: ${member.avatar}`);
                 }
                 
-                // 등급 정보 업데이트
-                if (playerCard.rank_tier !== undefined && playerCard.rank) {
+                // 등급 정보 업데이트 - 메인 플레이어와 동일한 로직 사용
+                // 배지 레벨을 메달로 변환하는 함수
+                const getMedalFromBadgeLevel = (badgeLevel) => {
+                  console.log(`🏆 파티 멤버 Badge Level 변환: ${badgeLevel}`);
+                  if (badgeLevel >= 77) return 'Eternus';
+                  if (badgeLevel >= 70) return 'Phantom';
+                  if (badgeLevel >= 63) return 'Oracle';
+                  if (badgeLevel >= 56) return 'Ritualist';
+                  if (badgeLevel >= 49) return 'Alchemist';
+                  if (badgeLevel >= 42) return 'Arcanist';
+                  return 'Initiate';
+                };
+                
+                // badge_level이 있으면 우선 사용 (더 정확함)
+                if (playerCard.badge_level !== undefined) {
+                  const badgeLevel = playerCard.badge_level || 7;
+                  const medal = getMedalFromBadgeLevel(badgeLevel);
+                  const subrank = ((badgeLevel % 7) + 1) || 1;
+                  const score = badgeLevel;
+                  
+                  member.rank = {
+                    medal: medal,
+                    subrank: subrank,
+                    score: score,
+                    rankImage: `rank${getRankNumber(medal)}/badge_sm_subrank${subrank}.webp`
+                  };
+                  
+                  console.log(`🏆 ${member.accountId} badge_level 기반 등급 업데이트: ${medal} ${subrank} (badge_level: ${badgeLevel})`);
+                } else if (playerCard.rank_tier !== undefined && playerCard.rank) {
+                  // 백업으로 rank_tier/rank 사용
                   const rankTier = playerCard.rank_tier || 1;
                   const rankName = playerCard.rank;
                   const points = playerCard.points || 0;
-                  
-                  // 랭크별 번호 매핑 (정확한 매핑)
-                  const rankMap = {
-                    'Eternus': 11, 'Phantom': 10, 'Oracle': 9, 'Ritualist': 8,
-                    'Alchemist': 7, 'Arcanist': 6, 'Initiate': 5
-                  };
-                  const rankNumber = rankMap[rankName] || 5;
                   
                   member.rank = {
                     medal: rankName,
                     subrank: rankTier,
                     score: points,
-                    rankImage: `rank${rankNumber}/badge_sm_subrank${rankTier}.webp`
+                    rankImage: `rank${getRankNumber(rankName)}/badge_sm_subrank${rankTier}.webp`
                   };
                   
-                  console.log(`🏆 ${member.accountId} 등급 업데이트: ${rankName} ${rankTier} (${points}점)`);
+                  console.log(`🏆 ${member.accountId} rank 기반 등급 업데이트: ${rankName} ${rankTier} (${points}점)`);
                 } else {
                   // API에서 랭크 정보가 없는 경우 기본값 설정
                   member.rank = {
@@ -2117,6 +2157,15 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
                     rankImage: `rank5/badge_sm_subrank1.webp`
                   };
                   console.log(`⚠️ ${member.accountId} 랭크 정보 없음 - 기본값(Initiate 1) 설정`);
+                }
+                
+                // 랭크 번호 매핑 헬퍼 함수
+                function getRankNumber(medal) {
+                  const rankMap = {
+                    'Eternus': 11, 'Phantom': 10, 'Oracle': 9, 'Ritualist': 8,
+                    'Alchemist': 7, 'Arcanist': 6, 'Initiate': 5
+                  };
+                  return rankMap[medal] || 5;
                 }
                 
                 console.log(`✅ ${member.accountId} 프로필 업데이트 완료: ${member.name}`);
@@ -2162,15 +2211,17 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
           }
           
           // 랭크 정보가 없는 멤버들에게 기본 랭크 설정
-          if (!member.rank) {
-            member.rank = {
-              medal: 'Initiate',
-              subrank: 1,
-              score: 0,
-              rankImage: 'rank5/badge_sm_subrank1.webp'
-            };
-            console.log(`⚠️ ${member.accountId} (${member.name}) 랭크 정보 없음 - 기본값 Initiate 1 설정`);
-          }
+          topPartyMembers.forEach(member => {
+            if (!member.rank) {
+              member.rank = {
+                medal: 'Initiate',
+                subrank: 1,
+                score: 0,
+                rankImage: 'rank5/badge_sm_subrank1.webp'
+              };
+              console.log(`⚠️ ${member.accountId} (${member.name}) 랭크 정보 없음 - 기본값 Initiate 1 설정`);
+            }
+          });
         }
         
         // 최종 응답 전에 랭크 데이터 확인
