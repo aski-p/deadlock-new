@@ -211,44 +211,52 @@ nav {
     text-decoration: underline;
 }
 
-/* 데드락 로고 스타일 */
-.deadlock-logo {
+/* Vindicta 캐릭터 이미지 스타일 */
+.vindicta-character {
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
 }
 
-.deadlock-logo-img {
-    width: 300px;
+.vindicta-character-img {
+    width: 400px;
     height: 300px;
     max-width: 100%;
-    object-fit: contain;
-    filter: brightness(1.1) drop-shadow(0 4px 20px rgba(255, 239, 215, 0.3));
-    animation: floatLogo 4s ease-in-out infinite;
-    border-radius: 8px;
+    object-fit: cover;
+    object-position: center;
+    filter: brightness(1.1) drop-shadow(0 4px 20px rgba(255, 100, 150, 0.4));
+    animation: floatCharacter 6s ease-in-out infinite;
+    border-radius: 12px;
+    transition: all 0.3s ease;
 }
 
-@keyframes floatLogo {
+.vindicta-character-img:hover {
+    transform: scale(1.05);
+    filter: brightness(1.2) drop-shadow(0 8px 30px rgba(255, 100, 150, 0.6));
+}
+
+@keyframes floatCharacter {
     0%, 100% {
         transform: translateY(0);
     }
     50% {
-        transform: translateY(-10px);
+        transform: translateY(-15px);
     }
 }
 
 /* 모바일 반응형 */
 @media (max-width: 768px) {
-    .deadlock-logo-img {
-        width: 220px;
-        height: 220px;
+    .vindicta-character-img {
+        width: 300px;
+        height: 225px;
     }
 }
 
 @media (max-width: 480px) {
-    .deadlock-logo-img {
-        width: 180px;
-        height: 180px;
+    .vindicta-character-img {
+        width: 250px;
+        height: 188px;
     }
 }
 
