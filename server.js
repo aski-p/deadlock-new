@@ -3650,6 +3650,51 @@ app.get('/api/v1/heroes', async (req, res) => {
         kda: '1.38',
         pickRate: 13.6,
         winRate: 51.7
+      },
+      {
+        name: 'Calico',
+        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/nano_card.webp',
+        matches: 45620,
+        players: 34210,
+        kda: '1.41',
+        pickRate: 6.7,
+        winRate: 52.8
+      },
+      {
+        name: 'Mirage',
+        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/mirage_card.webp',
+        matches: 52840,
+        players: 39750,
+        kda: '1.35',
+        pickRate: 7.8,
+        winRate: 50.6
+      },
+      {
+        name: 'Viper',
+        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kali_card.webp',
+        matches: 58930,
+        players: 43280,
+        kda: '1.58',
+        pickRate: 8.7,
+        winRate: 53.7
+      },
+      {
+        name: 'Holliday',
+        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/astro_card.webp',
+        matches: 41870,
+        players: 31450,
+        kda: '1.33',
+        pickRate: 6.2,
+        winRate: 51.9
+      },
+      {
+        name: 'Sinclair',
+        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/magician_card.webp',
+        matches: 38760,
+        players: 29180,
+        kda: '1.46',
+        pickRate: 5.7,
+        winRate: 52.4
       }
     ];
     
