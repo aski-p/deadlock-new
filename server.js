@@ -1740,49 +1740,90 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
         // 상위 10명만 선택
         const topPartyMembers = partyMembers.slice(0, 10);
         
-        // Steam API가 있다면 Steam 프로필 정보로 아바타 업데이트
-        if (steamApiKey && topPartyMembers.length > 0) {
-          try {
-            console.log(`🔍 Steam API로 파티 멤버 프로필 정보 업데이트 중...`);
-            
-            // Steam ID들 수집 (최대 100개까지 배치 처리 가능)
-            const steamIds = topPartyMembers
-              .map(member => member.steamId)
-              .filter(steamId => steamId && steamId !== 'undefined')
-              .slice(0, 100); // Steam API 제한
-            
-            if (steamIds.length > 0) {
-              const steamResponse = await axios.get(`http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/`, {
-                params: {
-                  key: steamApiKey,
-                  steamids: steamIds.join(',')
-                },
-                timeout: 5000
+        // Steam 프로필 정보 업데이트 (Steam API 또는 Deadlock API 사용)
+        if (topPartyMembers.length > 0) {
+          console.log(`🔍 파티 멤버 프로필 정보 업데이트 중...`);
+          
+          // Steam API가 있는 경우 우선 사용
+          if (steamApiKey) {
+            try {
+              // Steam ID들 수집 (최대 100개까지 배치 처리 가능)
+              const steamIds = topPartyMembers
+                .map(member => member.steamId)
+                .filter(steamId => steamId && steamId !== 'undefined')
+                .slice(0, 100); // Steam API 제한
+              
+              if (steamIds.length > 0) {
+                const steamResponse = await axios.get(`http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/`, {
+                  params: {
+                    key: steamApiKey,
+                    steamids: steamIds.join(',')
+                  },
+                  timeout: 5000
+                });
+                
+                if (steamResponse.data?.response?.players?.length > 0) {
+                  const steamProfiles = steamResponse.data.response.players;
+                  console.log(`✅ Steam API로 ${steamProfiles.length}명의 프로필 정보 획득`);
+                  
+                  // 파티 멤버 정보 업데이트
+                  topPartyMembers.forEach(member => {
+                    const steamProfile = steamProfiles.find(profile => profile.steamid === member.steamId);
+                    if (steamProfile) {
+                      // 이름 업데이트
+                      if (steamProfile.personaname) {
+                        member.name = steamProfile.personaname;
+                      }
+                      // 아바타 업데이트
+                      if (steamProfile.avatarfull || steamProfile.avatarmedium || steamProfile.avatar) {
+                        let avatarUrl = steamProfile.avatarfull || steamProfile.avatarmedium || steamProfile.avatar;
+                        member.avatar = avatarUrl.replace('avatars.steamstatic.com', 'avatars.cloudflare.steamstatic.com');
+                      }
+                    }
+                  });
+                }
+              }
+            } catch (steamError) {
+              console.log(`⚠️ Steam API 호출 실패, Deadlock API로 대체:`, steamError.message);
+            }
+          }
+          
+          // Deadlock API로 추가 정보 가져오기 (Steam API 실패 시 또는 보완용)
+          for (const member of topPartyMembers) {
+            try {
+              // 이미 프로필 정보가 있으면 건너뜀
+              if (member.name !== `Player_${member.accountId}` && member.avatar !== 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg') {
+                continue;
+              }
+              
+              console.log(`🔍 Deadlock API로 ${member.accountId} 프로필 조회 중...`);
+              
+              // 플레이어 카드 API 호출
+              const cardResponse = await axios.get(`https://api.deadlock-api.com/v1/players/${member.accountId}/card`, {
+                timeout: 3000,
+                headers: {
+                  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                }
               });
               
-              if (steamResponse.data?.response?.players?.length > 0) {
-                const steamProfiles = steamResponse.data.response.players;
-                console.log(`✅ ${steamProfiles.length}명의 Steam 프로필 정보 획득`);
+              if (cardResponse.data) {
+                const playerCard = cardResponse.data;
                 
-                // 파티 멤버 정보 업데이트
-                topPartyMembers.forEach(member => {
-                  const steamProfile = steamProfiles.find(profile => profile.steamid === member.steamId);
-                  if (steamProfile) {
-                    // 이름 업데이트
-                    if (steamProfile.personaname) {
-                      member.name = steamProfile.personaname;
-                    }
-                    // 아바타 업데이트
-                    if (steamProfile.avatarfull || steamProfile.avatarmedium || steamProfile.avatar) {
-                      let avatarUrl = steamProfile.avatarfull || steamProfile.avatarmedium || steamProfile.avatar;
-                      member.avatar = avatarUrl.replace('avatars.steamstatic.com', 'avatars.cloudflare.steamstatic.com');
-                    }
-                  }
-                });
+                // 이름 업데이트
+                if (playerCard.account_name) {
+                  member.name = playerCard.account_name;
+                }
+                
+                // 아바타 업데이트
+                if (playerCard.avatar_url) {
+                  member.avatar = playerCard.avatar_url;
+                }
+                
+                console.log(`✅ ${member.accountId} 프로필 업데이트 완료: ${member.name}`);
               }
+            } catch (error) {
+              console.log(`⚠️ Deadlock API ${member.accountId} 프로필 조회 실패:`, error.message);
             }
-          } catch (steamError) {
-            console.log(`❌ Steam API 파티 멤버 프로필 호출 실패:`, steamError.message);
           }
         }
         
