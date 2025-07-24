@@ -61,13 +61,13 @@
                 <label for="medal-filter">메달 필터:</label>
                 <select id="medal-filter" class="filter-select">
                     <option value="all">모든 메달</option>
-                    <option value="eternus">Eternus</option>
-                    <option value="phantom">Phantom</option>
-                    <option value="oracle">Oracle</option>
-                    <option value="ritualist">Ritualist</option>
-                    <option value="alchemist">Alchemist</option>
-                    <option value="arcanist">Arcanist</option>
-                    <option value="initiate">Initiate</option>
+                    <option value="eternus">이터누스</option>
+                    <option value="phantom">팬텀</option>
+                    <option value="oracle">오라클</option>
+                    <option value="ritualist">리츄얼리스트</option>
+                    <option value="alchemist">알케미스트</option>
+                    <option value="arcanist">아케니스트</option>
+                    <option value="initiate">탐험가</option>
                 </select>
             </div>
         </div>
@@ -197,6 +197,20 @@ function updateLeaderboardTable(data) {
         return `https://cdn.deadlock.coach/vpk/panorama/images/ranked/badges/rank${rankNumber}/badge_sm_subrank${subrankFormatted}.webp`;
     };
 
+    // 영어 메달을 한글로 변환하는 함수
+    const getKoreanMedal = (englishMedal) => {
+        const medalTranslation = {
+            'Eternus': '이터누스',
+            'Phantom': '팬텀', 
+            'Oracle': '오라클',
+            'Ritualist': '리츄얼리스트',
+            'Alchemist': '알케미스트',
+            'Arcanist': '아케니스트',
+            'Initiate': '탐험가'
+        };
+        return medalTranslation[englishMedal] || englishMedal;
+    };
+
     // 영웅 이미지 매핑 - deadlock.coach CDN 사용
     const getHeroImage = (heroName) => {
         const heroImageMap = {
@@ -260,7 +274,7 @@ function updateLeaderboardTable(data) {
         '</td>' +
         '<td class="medal-cell">' +
             '<div class="medal-badge">' +
-                '<img src="' + getMedalImage(player.medal, player.subrank) + '" alt="' + player.medal + ' ' + player.subrank + '" class="medal-image" title="' + player.medal + ' ' + player.subrank + '">' +
+                '<img src="' + getMedalImage(player.medal, player.subrank) + '" alt="' + getKoreanMedal(player.medal) + ' ' + player.subrank + '" class="medal-image" title="' + getKoreanMedal(player.medal) + ' ' + player.subrank + '">' +
             '</div>' +
         '</td>' +
         '<td class="score-cell">' +
