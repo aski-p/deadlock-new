@@ -1719,7 +1719,7 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
               accountId: accountId,
               steamId: steamId64,
               name: `Player_${accountId}`, // Steam API에서 업데이트 예정
-              avatar: 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
+              avatar: 'data:image/svg+xml;charset=utf-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"%3E%3Ccircle cx="25" cy="25" r="23" fill="%23666" stroke="%23fff" stroke-width="2"/%3E%3Ccircle cx="25" cy="18" r="8" fill="%23fff"/%3E%3Cpath d="M8 40 Q25 32 42 40" stroke="%23fff" stroke-width="4" fill="none"/%3E%3C/svg%3E', // 기본 아바타
               matches: mate.matches_played,
               wins: mate.wins || 0,
               losses: mate.matches_played - (mate.wins || 0),
@@ -1770,6 +1770,7 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
                   topPartyMembers.forEach(member => {
                     const steamProfile = steamProfiles.find(profile => profile.steamid === member.steamId);
                     if (steamProfile) {
+                      console.log(`✅ Steam API에서 ${member.accountId} 프로필 발견: ${steamProfile.personaname}`);
                       // 이름 업데이트
                       if (steamProfile.personaname) {
                         member.name = steamProfile.personaname;
@@ -1778,7 +1779,10 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
                       if (steamProfile.avatarfull || steamProfile.avatarmedium || steamProfile.avatar) {
                         let avatarUrl = steamProfile.avatarfull || steamProfile.avatarmedium || steamProfile.avatar;
                         member.avatar = avatarUrl.replace('avatars.steamstatic.com', 'avatars.cloudflare.steamstatic.com');
+                        console.log(`🖼️ ${member.accountId} 아바타 업데이트: ${member.avatar}`);
                       }
+                    } else {
+                      console.log(`❌ Steam API에서 ${member.accountId} (Steam ID: ${member.steamId}) 프로필 찾지 못함`);
                     }
                   });
                 }
@@ -1791,9 +1795,15 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
           // Deadlock API로 추가 정보 가져오기 (Steam API 실패 시 또는 보완용)
           for (const member of topPartyMembers) {
             try {
-              // 이미 프로필 정보가 있으면 건너뜀
-              if (member.name !== `Player_${member.accountId}` && member.avatar !== 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg') {
-                continue;
+              // Steam API로 업데이트되지 않았거나 기본 아바타인 경우만 Deadlock API 호출
+              const hasDefaultName = member.name === `Player_${member.accountId}`;
+              const hasDefaultAvatar = member.avatar.includes('data:image/svg+xml') || member.avatar.includes('avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg');
+              
+              console.log(`🔍 ${member.accountId} 프로필 상태 확인: 기본이름=${hasDefaultName}, 기본아바타=${hasDefaultAvatar}`);
+              
+              if (!hasDefaultName && !hasDefaultAvatar) {
+                console.log(`✅ ${member.accountId} 이미 Steam API에서 업데이트됨 - 건너뜀`);
+                continue; // 이미 Steam API에서 업데이트됨
               }
               
               console.log(`🔍 Deadlock API로 ${member.accountId} 프로필 조회 중...`);
@@ -1808,18 +1818,26 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
               
               if (cardResponse.data) {
                 const playerCard = cardResponse.data;
+                console.log(`📋 ${member.accountId} Deadlock API 데이터:`, JSON.stringify({
+                  account_name: playerCard.account_name,
+                  avatar_url: playerCard.avatar_url
+                }, null, 2));
                 
                 // 이름 업데이트
                 if (playerCard.account_name) {
                   member.name = playerCard.account_name;
+                  console.log(`👤 ${member.accountId} 이름 업데이트: ${member.name}`);
                 }
                 
                 // 아바타 업데이트
                 if (playerCard.avatar_url) {
                   member.avatar = playerCard.avatar_url;
+                  console.log(`🖼️ ${member.accountId} 아바타 업데이트: ${member.avatar}`);
                 }
                 
                 console.log(`✅ ${member.accountId} 프로필 업데이트 완료: ${member.name}`);
+              } else {
+                console.log(`❌ ${member.accountId} Deadlock API 응답 데이터 없음`);
               }
             } catch (error) {
               console.log(`⚠️ Deadlock API ${member.accountId} 프로필 조회 실패:`, error.message);
