@@ -1,0 +1,313 @@
+<div class="heroes-section">
+    <div class="heroes-container">
+        <div class="heroes-header">
+            <h1 class="page-title">영웅</h1>
+            <p class="page-description">데드락의 모든 영웅들을 확인하고 통계를 살펴보세요</p>
+        </div>
+
+        <!-- Loading State -->
+        <div class="heroes-loading" id="heroes-loading">
+            <div class="loading-spinner"></div>
+            <p>영웅 데이터를 불러오는 중...</p>
+        </div>
+
+        <!-- Heroes Grid -->
+        <div class="heroes-grid" id="heroes-grid" style="display: none;">
+            <!-- Heroes will be populated by JavaScript -->
+        </div>
+
+        <!-- Error State -->
+        <div class="heroes-error" id="heroes-error" style="display: none;">
+            <h2>⚠️ 영웅 데이터를 불러올 수 없습니다</h2>
+            <p>데이터를 가져오는 중 문제가 발생했습니다.</p>
+            <button onclick="loadHeroesData()" class="retry-btn">다시 시도</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.heroes-section {
+    min-height: calc(100vh - 120px);
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f172a 100%);
+}
+
+.heroes-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.heroes-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.page-title {
+    font-size: 48px;
+    font-weight: 700;
+    color: #FFEFD7;
+    margin: 0 0 15px 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.page-description {
+    font-size: 18px;
+    color: #999;
+    margin: 0;
+}
+
+.heroes-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 20px;
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-left: 4px solid #63a2e2;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.heroes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 30px;
+    padding: 20px 0;
+}
+
+.hero-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-align: center;
+}
+
+.hero-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(99, 162, 226, 0.3);
+    border-color: rgba(99, 162, 226, 0.5);
+}
+
+.hero-image-container {
+    margin-bottom: 20px;
+}
+
+.hero-image {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #63a2e2;
+    transition: all 0.3s ease;
+}
+
+.hero-card:hover .hero-image {
+    border-color: #FFEFD7;
+    transform: scale(1.05);
+}
+
+.hero-name {
+    font-size: 24px;
+    font-weight: 700;
+    color: #FFEFD7;
+    margin-bottom: 15px;
+}
+
+.hero-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.hero-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.stat-value {
+    font-size: 20px;
+    font-weight: 700;
+    color: #63a2e2;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #999;
+    text-transform: uppercase;
+}
+
+.hero-winrate {
+    font-size: 18px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 20px;
+    margin-top: 10px;
+}
+
+.winrate-high {
+    background: rgba(76, 175, 80, 0.2);
+    color: #4CAF50;
+}
+
+.winrate-medium {
+    background: rgba(255, 193, 7, 0.2);
+    color: #FFC107;
+}
+
+.winrate-low {
+    background: rgba(244, 67, 54, 0.2);
+    color: #F44336;
+}
+
+.heroes-error {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.heroes-error h2 {
+    color: #FFEFD7;
+    margin-bottom: 15px;
+}
+
+.retry-btn {
+    background: #63a2e2;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-top: 20px;
+}
+
+.retry-btn:hover {
+    background: #5a91c8;
+}
+
+@media (max-width: 768px) {
+    .heroes-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .hero-card {
+        padding: 20px;
+    }
+    
+    .hero-image {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .page-title {
+        font-size: 36px;
+    }
+}
+</style>
+
+<script>
+async function loadHeroesData() {
+    const loading = document.getElementById('heroes-loading');
+    const grid = document.getElementById('heroes-grid');
+    const error = document.getElementById('heroes-error');
+    
+    loading.style.display = 'flex';
+    grid.style.display = 'none';
+    error.style.display = 'none';
+    
+    try {
+        console.log('🦸 영웅 데이터 로딩 시작...');
+        
+        const response = await fetch('/api/v1/heroes');
+        const heroes = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(heroes.error || '영웅 데이터를 불러올 수 없습니다');
+        }
+        
+        console.log('✅ 영웅 데이터 로딩 완료:', heroes.length);
+        displayHeroes(heroes);
+        
+        loading.style.display = 'none';
+        grid.style.display = 'grid';
+        
+    } catch (err) {
+        console.error('❌ 영웅 데이터 로딩 실패:', err);
+        loading.style.display = 'none';
+        error.style.display = 'block';
+    }
+}
+
+function displayHeroes(heroes) {
+    const grid = document.getElementById('heroes-grid');
+    
+    const heroCards = heroes.map(hero => {
+        const winRate = parseFloat(hero.winRate) || 50;
+        const winRateClass = winRate >= 52 ? 'winrate-high' : winRate >= 48 ? 'winrate-medium' : 'winrate-low';
+        
+        return `
+            <div class="hero-card" onclick="viewHeroDetails('${hero.name}')">
+                <div class="hero-image-container">
+                    <img src="${hero.image}" alt="${hero.name}" class="hero-image" 
+                         onerror="this.src='https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp'">
+                </div>
+                <div class="hero-name">${hero.name}</div>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="stat-value">${(hero.matches || 0).toLocaleString()}</div>
+                        <div class="stat-label">매치</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="stat-value">${(hero.players || 0).toLocaleString()}</div>
+                        <div class="stat-label">플레이어</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="stat-value">${(hero.kda || '0.0')}</div>
+                        <div class="stat-label">평균 KDA</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="stat-value">${Math.round(hero.pickRate || 0)}%</div>
+                        <div class="stat-label">픽률</div>
+                    </div>
+                </div>
+                <div class="hero-winrate ${winRateClass}">
+                    승률 ${winRate.toFixed(1)}%
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    grid.innerHTML = heroCards;
+}
+
+function viewHeroDetails(heroName) {
+    // 향후 영웅 상세 페이지로 이동
+    console.log('영웅 상세 보기:', heroName);
+    alert(`${heroName} 상세 페이지는 곧 추가될 예정입니다!`);
+}
+
+// 페이지 로드 시 영웅 데이터 로드
+document.addEventListener('DOMContentLoaded', () => {
+    loadHeroesData();
+});
+</script>
