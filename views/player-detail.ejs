@@ -445,9 +445,9 @@
 }
 
 .item-image {
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
+    width: 44px;
+    height: 44px;
+    border-radius: 6px;
     object-fit: cover;
     border: 1px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s;
@@ -691,8 +691,8 @@
     }
     
     .item-image {
-        width: 28px;
-        height: 28px;
+        width: 40px;
+        height: 40px;
     }
 }
 </style>
@@ -1032,34 +1032,49 @@ function updateMatchesList(matches) {
                 <span>팀 순위 ${match.teamRank}</span>
             </div>
             
-            ${match.items && match.items.length > 0 ? `
-                <div class="match-items">
-                    <div class="items-label">최종 아이템</div>
-                    <div class="items-grid">
-                        ${match.items.map(item => {
-                            const imageUrl = getItemImage(item.name);
-                            console.log('🖼️ 아이템 이미지 생성:', item.name, '→', imageUrl);
-                            return `<img src="${imageUrl}" alt="${item.name}" class="item-image" title="${item.name}" 
-                                         onload="console.log('✅ 아이템 이미지 로드 성공:', '${item.name}')" 
-                                         onerror="console.error('❌ 아이템 이미지 로드 실패:', '${item.name}', this.src); this.style.border='2px solid red';">`;
-                        }).join('')}
-                    </div>
+            <div class="match-items">
+                <div class="items-label">최종 아이템</div>
+                <div class="items-grid" id="match-items-${match.matchId}">
+                    <!-- 아이템은 JavaScript로 동적 생성 -->
                 </div>
-            ` : `
-                <div class="match-items">
-                    <div class="items-label">최종 아이템 (데이터 없음)</div>
-                    <div class="items-grid">
-                        <img src="${getItemImage('Basic Magazine')}" alt="Basic Magazine" class="item-image" title="Basic Magazine (예시)">
-                        <img src="${getItemImage('Extra Health')}" alt="Extra Health" class="item-image" title="Extra Health (예시)">
-                        <img src="${getItemImage('Extra Spirit')}" alt="Extra Spirit" class="item-image" title="Extra Spirit (예시)">
-                        <img src="${getItemImage('Improved Bullet Armor')}" alt="Improved Bullet Armor" class="item-image" title="Improved Bullet Armor (예시)">
-                        <img src="${getItemImage('Mystic Vulnerability')}" alt="Mystic Vulnerability" class="item-image" title="Mystic Vulnerability (예시)">
-                        <img src="${getItemImage('Leech')}" alt="Leech" class="item-image" title="Leech (예시)">
-                    </div>
-                </div>
-            `}
+            </div>
         </div>
     `).join('');
+    
+    // 각 매치의 아이템 이미지를 생성
+    matches.forEach(match => {
+        const itemsContainer = document.getElementById(`match-items-${match.matchId}`);
+        if (itemsContainer && match.items) {
+            console.log('🖼️ 매치', match.matchId, '아이템 생성:', match.items.length, '개');
+            
+            // 최대 12개 아이템까지 표시
+            const itemsToShow = match.items.slice(0, 12);
+            
+            itemsContainer.innerHTML = itemsToShow.map(item => {
+                const imageUrl = getItemImage(item.name);
+                console.log('🎯 아이템 이미지:', item.name, '→', imageUrl);
+                
+                return `<img src="${imageUrl}" 
+                            alt="${item.name}" 
+                            class="item-image" 
+                            title="${item.name}"
+                            onload="console.log('✅ 이미지 로드 성공: ${item.name}')"
+                            onerror="console.error('❌ 이미지 로드 실패: ${item.name}', this.src); this.style.border='2px solid red';">`;
+            }).join('');
+        } else if (itemsContainer) {
+            // 아이템 데이터가 없는 경우 예시 아이템 표시
+            console.log('⚠️ 매치', match.matchId, '아이템 데이터 없음, 예시 표시');
+            const exampleItems = ['Basic Magazine', 'Extra Health', 'Extra Spirit', 'Metal Skin', 'Mystic Burst', 'Colossus'];
+            itemsContainer.innerHTML = exampleItems.map(itemName => {
+                const imageUrl = getItemImage(itemName);
+                return `<img src="${imageUrl}" 
+                            alt="${itemName}" 
+                            class="item-image" 
+                            title="${itemName} (예시)"
+                            style="opacity: 0.6;">`;
+            }).join('');
+        }
+    });
 }
 
 async function loadPartyMembers() {
