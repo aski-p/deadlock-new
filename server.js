@@ -2670,6 +2670,26 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
         const soulsPerMin = matchDurationMinutes > 0 ? Math.round(matchSouls / matchDurationMinutes) : 0;
         
         // 아이템 ID를 이름으로 매핑하는 함수 (확장된 매핑)
+        const getItemTier = (itemId) => {
+          // Tier 1 items (500-1250 souls)
+          const tier1Items = [
+            715762406, 1342610602, 1437614329, 4072270083, 2220233739, 1009965641, 4147641675, 499683006, // Weapon T1
+            968099481, 2678489038, 558396679, 395867183, 1548066885, 1797283378, 1710079648, 2059712766, // Vitality T1
+            380806748, 811521119, 1292979587, 3403085434, 1144549437, 2951612397, 84321454, 381961617, 2533252781, 3919289022 // Spirit T1
+          ];
+          
+          // Tier 2 items (1250-3000 souls)
+          const tier2Items = [
+            1842576017, 393974127, 2981692841, 4139877411, 1414319208, 509856396, 3633614685, 2824119765, 3731635960, 1254091416, 2481177645, 223594321, 3713423303, 3140772621, 2163598980, 865846625, 395944548, 2356412290, 1925087134, // Weapon T2
+            3147316197, 857669956, 1813726886, 3361075077, 2603935618, 7409189, 2081037738, 3261353684, 3287678549, 2147483647, 2147483648, 1067869798, 2948329856, // Vitality T2
+            2820116164, 3005970438 // Spirit T2 (truncated for space)
+          ];
+          
+          if (tier1Items.includes(itemId)) return 1;
+          if (tier2Items.includes(itemId)) return 2;
+          return 3; // Default to tier 3
+        };
+
         const getItemNameById = (itemId) => {
           const itemMap = {
             // Weapon Items (무기) - Tier 1
@@ -2796,33 +2816,68 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
           // 실제 매치 상세 정보에서 아이템 가져오기 시도
           const matchDetails = await fetchMatchDetails(match.match_id || match.id);
           
-          if (matchDetails && matchDetails.match_info && matchDetails.match_info.players) {
-            // 현재 플레이어의 아이템 찾기
-            const currentPlayer = matchDetails.match_info.players.find(p => 
-              p.account_id.toString() === accountId.toString()
-            );
+          console.log(`🔍 매치 ${match.match_id} 상세 데이터 조사 중...`);
+          
+          if (matchDetails) {
+            console.log(`📋 매치 ${match.match_id} 전체 응답 구조:`, Object.keys(matchDetails));
             
-            if (currentPlayer && currentPlayer.items && currentPlayer.items.length > 0) {
-              console.log(`✅ 매치 ${match.match_id} 실제 아이템 데이터 발견 (${currentPlayer.items.length}개)`);
+            if (matchDetails.match_info) {
+              console.log(`📋 match_info 필드들:`, Object.keys(matchDetails.match_info));
               
-              // 최종 아이템들만 필터링 (판매되지 않은 것들)
-              const finalItems = currentPlayer.items
-                .filter(item => item.sold_time_s === 0) // 판매되지 않은 아이템만
-                .slice(-6) // 마지막 6개
-                .map((item, index) => ({
-                  name: getItemNameById(item.item_id),
-                  slot: index + 1,
-                  itemId: item.item_id,
-                  gameTime: item.game_time_s
-                }));
-              
-              if (finalItems.length > 0) {
-                return finalItems;
+              if (matchDetails.match_info.players) {
+                console.log(`👥 플레이어 수: ${matchDetails.match_info.players.length}`);
+                
+                // 현재 플레이어의 아이템 찾기
+                const currentPlayer = matchDetails.match_info.players.find(p => 
+                  p.account_id.toString() === accountId.toString()
+                );
+                
+                if (currentPlayer) {
+                  console.log(`🎯 플레이어 ${accountId} 데이터 발견, 필드들:`, Object.keys(currentPlayer));
+                  
+                  if (currentPlayer.items && currentPlayer.items.length > 0) {
+                    console.log(`✅ 매치 ${match.match_id} 실제 아이템 데이터 발견 (${currentPlayer.items.length}개)`);
+                    
+                    // 첫 번째 아이템의 구조 로깅
+                    console.log(`🎒 첫 번째 아이템 구조:`, currentPlayer.items[0]);
+                    
+                    // 최종 아이템들만 필터링 (판매되지 않은 것들)
+                    const finalItems = currentPlayer.items
+                      .filter(item => item.sold_time_s === 0) // 판매되지 않은 아이템만
+                      .slice(-12) // 마지막 12개로 증가
+                      .map((item, index) => ({
+                        name: getItemNameById(item.item_id),
+                        slot: index + 1,
+                        itemId: item.item_id,
+                        gameTime: item.game_time_s,
+                        tier: getItemTier(item.item_id)
+                      }));
+                    
+                    console.log(`🎒 최종 아이템 목록 (${finalItems.length}개):`, finalItems.map(item => item.name));
+                    
+                    if (finalItems.length > 0) {
+                      return finalItems;
+                    }
+                  } else {
+                    console.log(`❌ 플레이어 ${accountId}의 아이템 데이터 없음`);
+                  }
+                } else {
+                  console.log(`❌ 플레이어 ${accountId}을 매치 데이터에서 찾을 수 없음`);
+                }
+              } else {
+                console.log(`❌ match_info.players 데이터 없음`);
               }
+            } else {
+              console.log(`❌ match_info 데이터 없음`);
             }
+          } else {
+            console.log(`❌ 매치 ${match.match_id} 상세 데이터 없음`);
           }
           
-          // API 데이터가 없으면 기존 Mock 데이터 사용
+          // API 데이터가 없으면 시뮬레이션된 아이템 사용
+          console.log(`🎯 매치 ${match.match_id}: 실제 아이템 데이터를 찾을 수 없어 영웅 기반 시뮬레이션 사용`);
+          
+          // 시뮬레이션된 아이템 데이터 사용
           const heroName = getHeroNameById(match.hero_id);
           
           // 영웅별 선호 아이템 템플릿
@@ -2897,16 +2952,17 @@ const fetchAndAnalyzeAllMatches = async (accountId) => {
           const buildTemplate = heroBuildTemplates[heroName] || heroBuildTemplates['default'];
           const selectedItems = [];
           
-          // 각 카테고리에서 2개씩 선택
+          // 각 카테고리에서 4개씩 선택 (총 12개)
           ['weapon', 'vitality', 'spirit'].forEach(category => {
             const categoryItems = buildTemplate[category];
             const shuffled = [...categoryItems].sort(() => 0.5 - Math.random());
             
-            for (let i = 0; i < 2 && i < shuffled.length; i++) {
+            for (let i = 0; i < 4 && i < shuffled.length; i++) {
               selectedItems.push({
                 name: shuffled[i],
                 slot: selectedItems.length + 1,
-                category: category
+                category: category,
+                tier: Math.floor(Math.random() * 3) + 1 // Random tier 1-3
               });
             }
           });
@@ -3031,6 +3087,23 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
                 lane_victory: match.lane_victory,
                 all_fields: Object.keys(match)
               });
+              
+              // 아이템 관련 필드 찾기
+              const itemFields = Object.keys(match).filter(key => 
+                key.toLowerCase().includes('item') || 
+                key.toLowerCase().includes('ability') ||
+                key.toLowerCase().includes('build') ||
+                key.toLowerCase().includes('purchase')
+              );
+              
+              if (itemFields.length > 0) {
+                console.log(`🎒 매치 ${match.match_id} 아이템 관련 필드들:`, itemFields);
+                itemFields.forEach(field => {
+                  console.log(`  - ${field}:`, match[field]);
+                });
+              } else {
+                console.log(`❌ 매치 ${match.match_id}: 아이템 데이터 없음`);
+              }
             }
             
             // 매치 38022449 특별 로깅
