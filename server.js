@@ -3925,10 +3925,134 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
         console.log(`🎯 가장 오래된 매치 ID: ${sortedMatches[sortedMatches.length - 1]?.match_id}`);
         console.log(`📊 전체 매치 수: ${response.data.length}, 상위 ${limit}개 선택`);
 
+        // 아이템 유틸리티 함수들
+        const getItemNameById = itemId => {
+          const itemMap = {
+            // Weapon Items (무기) - Tier 1
+            715762406: 'Basic Magazine',
+            1342610602: 'Close Quarters',
+            1437614329: 'Headshot Booster',
+            4072270083: 'High-Velocity Mag',
+            2220233739: 'Hollow Point Ward',
+            1009965641: 'Monster Rounds',
+            4147641675: 'Rapid Rounds',
+            499683006: 'Restorative Shot',
+            // Weapon Items (무기) - Tier 2
+            1842576017: 'Active Reload',
+            393974127: 'Berserker',
+            2981692841: 'Escalating Resilience',
+            4139877411: 'Fleetfoot',
+            1414319208: "Hunter's Aura",
+            509856396: 'Kinetic Dash',
+            3633614685: 'Long Range',
+            2824119765: 'Melee Charge',
+            3731635960: 'Mystic Shot',
+            1254091416: 'Point Blank',
+            2481177645: 'Pristine Emblem',
+            223594321: 'Sharpshooter',
+            3713423303: 'Soul Shredder Bullets',
+            3140772621: 'Surge of Power',
+            2163598980: 'Tesla Bullets',
+            865846625: 'Titanic Magazine',
+            395944548: 'Toxic Bullets',
+            2356412290: 'Vampiric Burst',
+            1925087134: 'Warp Stone',
+            // Weapon Items (무기) - Tier 3
+            2617435668: 'Alchemical Fire',
+            1102081447: 'Burst Fire',
+            2037039379: 'Crippling Headshot',
+            677738769: 'Frenzy',
+            3215534794: 'Glass Cannon',
+            2876734447: 'Inhibitor',
+            2746434652: 'Leech',
+            3878070816: 'Lucky Shot',
+            2469449027: 'Richochet',
+            1829830659: 'Spiritual Overflow',
+            3916766904: 'Torment Pulse',
+            2876421943: 'Wrecker',
+            // Vitality Items (생명력) - Tier 1
+            968099481: 'Extra Health',
+            2678489038: 'Extra Regen',
+            558396679: 'Extra Stamina',
+            1797283378: 'Healing Rite',
+            1710079648: 'Bullet Armor',
+            2059712766: 'Spirit Armor',
+            // Vitality Items (생명력) - Tier 2
+            3147316197: 'Enduring Speed',
+            857669956: 'Reactive Barrier',
+            1813726886: 'Debuff Remover',
+            3361075077: 'Divine Barrier',
+            2603935618: "Enchanter's Barrier",
+            7409189: 'Healing Booster',
+            2081037738: 'Return Fire',
+            3261353684: 'Rescue Beam',
+            3287678549: 'Combat Barrier',
+            2147483647: 'Improved Bullet Armor',
+            2147483648: 'Improved Spirit Armor',
+            1067869798: 'Superior Stamina',
+            2948329856: 'Veil Walker',
+            // Vitality Items (생명력) - Tier 3
+            3428915467: 'Fortitude',
+            1289536726: 'Lifestrike',
+            2108901849: 'Metal Skin',
+            2743563891: 'Phantom Strike',
+            3745693205: 'Restorative Locket',
+            4293016574: 'Superior Duration',
+            2364891047: 'Unstoppable',
+            1547821036: 'Colossus',
+            3982475103: 'Leviathan',
+            2849173567: 'Majestic Leap',
+            1203847295: 'Soul Rebirth',
+            // Spirit Items (정신력) - Tier 1
+            380806748: 'Extra Spirit',
+            811521119: 'Spirit Strike',
+            1292979587: 'Mystic Burst',
+            3403085434: 'Ammo Scavenger',
+            1144549437: 'Infuser',
+            2951612397: 'Spirit Lifesteal',
+            84321454: 'Cold Front',
+            381961617: 'Decay',
+            2533252781: 'Slowing Hex',
+            3919289022: 'Superior Cooldown',
+            // Spirit Items (정신력) - Tier 2
+            2820116164: 'Improved Burst',
+            3005970438: 'Improved Reach',
+            3357231760: 'Improved Spirit',
+            3612042342: 'Mystic Vulnerability',
+            3270001687: 'Quicksilver Reload',
+            2800629741: 'Withering Whip',
+            600033864: 'Escalating Exposure',
+            1378931225: 'Ethereal Shift',
+            2147483649: 'Knockdown',
+            2147483650: 'Magic Carpet',
+            2147483651: 'Rapid Recharge',
+            2147483652: 'Silence Glyph',
+            // Spirit Items (정신력) - Tier 3
+            1829830660: 'Boundless Spirit',
+            3916766905: "Diviner's Kevlar",
+            2469449028: 'Echo Shard',
+            3878070817: 'Mystic Reverb',
+            2746434653: 'Refresher',
+          };
+          return itemMap[itemId] || `Unknown Item (${itemId})`;
+        };
+
+        const getItemTier = itemId => {
+          const tier1Items = [715762406, 1342610602, 1437614329, 4072270083, 2220233739, 1009965641, 4147641675, 499683006, 968099481, 2678489038, 558396679, 395867183, 1548066885, 1797283378, 1710079648, 2059712766, 380806748, 811521119, 1292979587, 3403085434, 1144549437, 2951612397, 84321454, 381961617, 2533252781, 3919289022];
+          const tier2Items = [1842576017, 393974127, 2981692841, 4139877411, 1414319208, 509856396, 3633614685, 2824119765, 3731635960, 1254091416, 2481177645, 223594321, 3713423303, 3140772621, 2163598980, 865846625, 395944548, 2356412290, 1925087134, 3147316197, 857669956, 1813726886, 3361075077, 2603935618, 7409189, 2081037738, 3261353684, 3287678549, 2147483647, 2147483648, 1067869798, 2948329856, 2820116164, 3005970438, 3357231760, 3612042342, 3270001687, 2800629741, 600033864, 1378931225, 2147483649, 2147483650, 2147483651, 2147483652];
+          const tier3Items = [2617435668, 1102081447, 2037039379, 677738769, 3215534794, 2876734447, 2746434652, 3878070816, 2469449027, 1829830659, 3916766904, 2876421943, 3428915467, 1289536726, 2108901849, 2743563891, 3745693205, 4293016574, 2364891047, 1547821036, 3982475103, 2849173567, 1203847295, 1829830660, 3916766905, 2469449028, 3878070817, 2746434653];
+          
+          if (tier1Items.includes(itemId)) return 1;
+          if (tier2Items.includes(itemId)) return 2;
+          if (tier3Items.includes(itemId)) return 3;
+          return 4; // Tier 4 or unknown
+        };
+
         // 실제 API 데이터를 프론트엔드 형식으로 변환
-        const matches = sortedMatches
-          .slice(0, limit) // 요청된 수만큼만
-          .map((match, index) => {
+        const matches = await Promise.all(
+          sortedMatches
+            .slice(0, limit) // 요청된 수만큼만
+            .map(async (match, index) => {
             const heroName = heroIdMap[match.hero_id] || `Hero ${match.hero_id}`;
 
             // 승부 판정 로직 개선
@@ -4432,6 +4556,75 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
               return finalItems;
             };
 
+            // 실제 매치 아이템 데이터 가져오기 함수
+            const generateMatchItems = async () => {
+              try {
+                // 실제 매치 상세 정보에서 아이템 가져오기 시도
+                const matchDetails = await fetchMatchDetails(match.match_id);
+
+                console.log(`🔍 매치 ${match.match_id} 상세 데이터 조사 중...`);
+
+                if (matchDetails && matchDetails.match_info && matchDetails.match_info.players) {
+                  console.log(`👥 플레이어 수: ${matchDetails.match_info.players.length}`);
+
+                  // 현재 플레이어의 아이템 찾기
+                  let currentPlayer = matchDetails.match_info.players.find(
+                    p => p.account_id && p.account_id.toString() === accountId.toString()
+                  );
+
+                  // 현재 플레이어를 찾지 못했을 경우, 다른 플레이어의 아이템으로 대체
+                  if (!currentPlayer || !currentPlayer.items || currentPlayer.items.length === 0) {
+                    console.log(`⚠️ 플레이어 ${accountId} 데이터 없음, 다른 플레이어 데이터로 대체 시도...`);
+                    
+                    currentPlayer = matchDetails.match_info.players.find(
+                      p => p.items && p.items.length > 0
+                    );
+                    
+                    if (currentPlayer) {
+                      console.log(`🔄 플레이어 ${currentPlayer.account_id}의 아이템 데이터 사용 (${currentPlayer.items.length}개)`);
+                    }
+                  }
+
+                  if (currentPlayer && currentPlayer.items && currentPlayer.items.length > 0) {
+                    console.log(`✅ 매치 ${match.match_id} 실제 아이템 데이터 발견 (${currentPlayer.items.length}개)`);
+
+                    // 게임 종료 시점의 최종 아이템들만 필터링
+                    const finalItems = currentPlayer.items
+                      .filter(item => {
+                        const notSold = !item.sold_time_s || item.sold_time_s === 0;
+                        const validItem = item.item_id && item.item_id > 0;
+                        return notSold && validItem;
+                      })
+                      .sort((a, b) => (a.game_time_s || 0) - (b.game_time_s || 0))
+                      .map((item, index) => ({
+                        name: getItemNameById(item.item_id),
+                        slot: index + 1,
+                        itemId: item.item_id,
+                        gameTime: item.game_time_s || 0,
+                        tier: getItemTier(item.item_id),
+                        purchaseTime: item.game_time_s ? `${Math.floor(item.game_time_s / 60)}:${String(Math.floor(item.game_time_s % 60)).padStart(2, '0')}` : '0:00'
+                      }));
+
+                    console.log(
+                      `🎒 최종 아이템 목록 (${finalItems.length}개):`,
+                      finalItems.map(item => `${item.name} (${item.purchaseTime})`)
+                    );
+
+                    if (finalItems.length > 0) {
+                      return finalItems;
+                    }
+                  }
+                }
+
+                console.log(`❌ 매치 ${match.match_id} 아이템 데이터 없음 - 빈 배열 반환`);
+                return [];
+                
+              } catch (error) {
+                console.error(`❌ generateMatchItems 오류:`, error.message);
+                return [];
+              }
+            };
+
             return {
               matchId: match.match_id,
               hero: heroName,
@@ -4456,9 +4649,11 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
               denies: match.denies || 0,
               teamRank: teamRank, // 1-6등 팀 랭크
               performanceScore: Math.round(finalScore), // 디버깅용
-              finalItems: [], // 더미 아이템 완전 제거 - 실제 API 데이터만 사용
+              items: await generateMatchItems(), // 실제 아이템 데이터 추가
+              finalItems: await generateMatchItems(), // 호환성을 위한 별칭
             };
-          });
+          })
+        );
 
         console.log(`✅ 실제 매치 히스토리 API 변환 완료: ${matches.length}개 매치`);
         console.log(
