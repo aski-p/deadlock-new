@@ -1009,13 +1009,23 @@ class DeadlockItemManager {
             return this.itemCache.get(itemName);
         }
 
+        // Unknown Item (ID) 형태 처리
+        let actualItemName = itemName;
+        if (itemName && itemName.startsWith('Unknown Item (') && itemName.endsWith(')')) {
+            const itemId = itemName.match(/Unknown Item \((\d+)\)/)?.[1];
+            if (itemId) {
+                actualItemName = this.getItemNameById(parseInt(itemId));
+                console.log(`🔄 아이템 ID 매핑: ${itemName} → ${actualItemName}`);
+            }
+        }
+
         // Fallback 데이터에서 검색
         for (const category of Object.values(this.fallbackItems)) {
-            if (category[itemName]) {
+            if (category[actualItemName]) {
                 const itemData = {
-                    name: itemName,
-                    ...category[itemName],
-                    image: this.getItemImageUrl(itemName)
+                    name: actualItemName,
+                    ...category[actualItemName],
+                    image: this.getItemImageUrl(actualItemName)
                 };
                 this.itemCache.set(itemName, itemData);
                 return itemData;
@@ -1024,7 +1034,7 @@ class DeadlockItemManager {
 
         // Unknown Item 처리
         const unknownItem = {
-            name: itemName,
+            name: actualItemName,
             type: 'unknown',
             tier: 1,
             color: '#666666',
@@ -1081,10 +1091,226 @@ class DeadlockItemManager {
             'Magic Carpet': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/magic_carpet.webp',
             'Echo Shard': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/echo_shard.webp',
             'Refresher': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/refresher.webp',
-            'Boundless Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/boundless_spirit.webp'
+            'Boundless Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/boundless_spirit.webp',
+            
+            // 추가된 아이템들의 이미지 URL들
+            'Berserker': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/berserker.webp',
+            'Hunter\'s Aura': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hunters_aura.webp',
+            'Titanic Magazine': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/titanic_magazine.webp',
+            'Mystic Shot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/mystic_shot.webp',
+            'Fleetfoot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/fleetfoot.webp',
+            'Kinetic Dash': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/kinetic_dash.webp',
+            'Long Range': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/long_range.webp',
+            'Sharpshooter': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/sharpshooter.webp',
+            'Point Blank': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/point_blank.webp',
+            'Active Reload': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/active_reload.webp',
+            'Lucky Shot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/lucky_shot.webp',
+            'Leech': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/leech.webp',
+            'Glass Cannon': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/glass_cannon.webp',
+            'Frenzy': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/frenzy.webp',
+            'Crippling Headshot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/crippling_headshot.webp',
+            'Burst Fire': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/burst_fire.webp',
+            'Alchemical Fire': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/alchemical_fire.webp',
+            'Spiritual Overflow': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/spiritual_overflow.webp',
+            'Inhibitor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/inhibitor.webp',
+            'Wrecker': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/wrecker.webp',
+            'Torment Pulse': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/torment_pulse.webp',
+            'Richochet': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/ricochet.webp',
+            'Vampiric Burst': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/vampiric_burst.webp',
+            'Warp Stone': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/warp_stone.webp',
+            'Soul Shredder Bullets': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/soul_shredder_bullets.webp',
+            'Surge of Power': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/surge_of_power.webp',
+            'Pristine Emblem': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/pristine_emblem.webp',
+            'Melee Charge': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/melee_charge.webp',
+            'Escalating Resilience': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/escalating_resilience.webp',
+            
+            // Vitality 아이템들
+            'Extra Regen': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_regen.webp',
+            'Extra Stamina': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_stamina.webp',
+            'Melee Lifesteal': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/melee_lifesteal.webp',
+            'Sprint Boots': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/sprint_boots.webp',
+            'Enduring Speed': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/enduring_speed.webp',
+            'Reactive Barrier': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/reactive_barrier.webp',
+            'Debuff Remover': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/debuff_remover.webp',
+            'Divine Barrier': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/divine_barrier.webp',
+            'Enchanter\'s Barrier': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/enchanters_barrier.webp',
+            'Healing Booster': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_booster.webp',
+            'Return Fire': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/return_fire.webp',
+            'Rescue Beam': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/rescue_beam.webp',
+            'Combat Barrier': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/combat_barrier.webp',
+            'Improved Bullet Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/improved_bullet_armor.webp',
+            'Improved Spirit Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/improved_spirit_armor.webp',
+            'Superior Stamina': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/superior_stamina.webp',
+            'Veil Walker': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/veil_walker.webp',
+            'Fortitude': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/fortitude.webp',
+            'Lifestrike': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/lifestrike.webp',
+            'Phantom Strike': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/phantom_strike.webp',
+            'Restorative Locket': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/restorative_locket.webp',
+            'Superior Duration': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/superior_duration.webp',
+            'Unstoppable': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/unstoppable.webp',
+            'Leviathan': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/leviathan.webp',
+            'Majestic Leap': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/majestic_leap.webp',
+            'Soul Rebirth': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/soul_rebirth.webp',
+            
+            // Spirit 아이템들
+            'Spirit Strike': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_strike.webp',
+            'Ammo Scavenger': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/ammo_scavenger.webp',
+            'Infuser': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/infuser.webp',
+            'Decay': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/decay.webp',
+            'Slowing Hex': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/slowing_hex.webp',
+            'Superior Cooldown': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/superior_cooldown.webp',
+            'Improved Burst': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_burst.webp',
+            'Improved Reach': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_reach.webp',
+            'Improved Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_spirit.webp',
+            'Mystic Vulnerability': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_vulnerability.webp',
+            'Quicksilver Reload': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/quicksilver_reload.webp',
+            'Withering Whip': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/withering_whip.webp',
+            'Escalating Exposure': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/escalating_exposure.webp',
+            'Knockdown': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/knockdown.webp',
+            'Magic Carpet': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/magic_carpet.webp',
+            'Rapid Recharge': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/rapid_recharge.webp',
+            'Silence Glyph': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/silence_glyph.webp',
+            'Diviner\'s Kevlar': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/diviners_kevlar.webp',
+            'Mystic Reverb': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_reverb.webp'
         };
         
         return itemImageMap[itemName] || 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp';
+    }
+
+    getItemNameById(itemId) {
+        const itemMap = {
+            // Weapon Items (무기) - Tier 1
+            715762406: 'Basic Magazine',
+            1342610602: 'Close Quarters',
+            1437614329: 'Headshot Booster',
+            4072270083: 'High-Velocity Mag',
+            2220233739: 'Hollow Point Ward',
+            1009965641: 'Monster Rounds',
+            4147641675: 'Rapid Rounds',
+            499683006: 'Restorative Shot',
+
+            // Weapon Items (무기) - Tier 2
+            1842576017: 'Active Reload',
+            393974127: 'Berserker',
+            2981692841: 'Escalating Resilience',
+            4139877411: 'Fleetfoot',
+            1414319208: "Hunter's Aura",
+            509856396: 'Kinetic Dash',
+            3633614685: 'Long Range',
+            2824119765: 'Melee Charge',
+            3731635960: 'Mystic Shot',
+            1254091416: 'Point Blank',
+            2481177645: 'Pristine Emblem',
+            223594321: 'Sharpshooter',
+            3713423303: 'Soul Shredder Bullets',
+            3140772621: 'Surge of Power',
+            2163598980: 'Tesla Bullets',
+            865846625: 'Titanic Magazine',
+            395944548: 'Toxic Bullets',
+            2356412290: 'Vampiric Burst',
+            1925087134: 'Warp Stone',
+
+            // Weapon Items (무기) - Tier 3
+            2617435668: 'Alchemical Fire',
+            1102081447: 'Burst Fire',
+            2037039379: 'Crippling Headshot',
+            677738769: 'Frenzy',
+            3215534794: 'Glass Cannon',
+            2876734447: 'Inhibitor',
+            2746434652: 'Leech',
+            3878070816: 'Lucky Shot',
+            2469449027: 'Richochet',
+            1829830659: 'Spiritual Overflow',
+            3916766904: 'Torment Pulse',
+            2876421943: 'Wrecker',
+
+            // Vitality Items (생명력) - Tier 1
+            968099481: 'Extra Health',
+            2678489038: 'Extra Regen',
+            558396679: 'Extra Stamina',
+            395867183: 'Melee Lifesteal',
+            1548066885: 'Sprint Boots',
+            1797283378: 'Healing Rite',
+            1710079648: 'Bullet Armor',
+            2059712766: 'Spirit Armor',
+
+            // Vitality Items (생명력) - Tier 2
+            3147316197: 'Enduring Speed',
+            857669956: 'Reactive Barrier',
+            1813726886: 'Debuff Remover',
+            3361075077: 'Divine Barrier',
+            2603935618: "Enchanter's Barrier",
+            7409189: 'Healing Booster',
+            2081037738: 'Return Fire',
+            3261353684: 'Rescue Beam',
+            3287678549: 'Combat Barrier',
+            2147483647: 'Improved Bullet Armor',
+            2147483648: 'Improved Spirit Armor',
+            1067869798: 'Superior Stamina',
+            2948329856: 'Veil Walker',
+
+            // Vitality Items (생명력) - Tier 3
+            3428915467: 'Fortitude',
+            1289536726: 'Lifestrike',
+            2108901849: 'Metal Skin',
+            2743563891: 'Phantom Strike',
+            3745693205: 'Restorative Locket',
+            4293016574: 'Superior Duration',
+            2364891047: 'Unstoppable',
+            1547821036: 'Colossus',
+            3982475103: 'Leviathan',
+            2849173567: 'Majestic Leap',
+            1203847295: 'Soul Rebirth',
+
+            // Spirit Items (정신력) - Tier 1
+            380806748: 'Extra Spirit',
+            811521119: 'Spirit Strike',
+            1292979587: 'Mystic Burst',
+            3403085434: 'Ammo Scavenger',
+            1144549437: 'Infuser',
+            2951612397: 'Spirit Lifesteal',
+            84321454: 'Cold Front',
+            381961617: 'Decay',
+            2533252781: 'Slowing Hex',
+            3919289022: 'Superior Cooldown',
+
+            // Spirit Items (정신력) - Tier 2
+            2820116164: 'Improved Burst',
+            3005970438: 'Improved Reach',
+            3357231760: 'Improved Spirit',
+            3612042342: 'Mystic Vulnerability',
+            3270001687: 'Quicksilver Reload',
+            2800629741: 'Withering Whip',
+            600033864: 'Escalating Exposure',
+            1378931225: 'Ethereal Shift',
+            2147483649: 'Knockdown',
+            2147483650: 'Magic Carpet',
+            2147483651: 'Rapid Recharge',
+            2147483652: 'Silence Glyph',
+
+            // Spirit Items (정신력) - Tier 3
+            1829830660: 'Boundless Spirit',
+            3916766905: "Diviner's Kevlar",
+            2469449028: 'Echo Shard',
+            3878070817: 'Mystic Reverb',
+            2746434653: 'Refresher',
+
+            // 추가된 아이템 ID들
+            2460791803: 'Berserker',
+            1458044103: 'Basic Magazine', 
+            1537272748: 'Extra Health',
+            1835738020: 'Monster Rounds',
+            3977876567: 'Tesla Bullets',
+            3970837787: 'Spirit Armor',
+            3791587546: 'Bullet Armor',
+            2095565695: 'Extra Spirit',
+            1282141666: 'Mystic Burst',
+            1955841979: 'Metal Skin',
+            339443430: 'Colossus',
+            673001892: 'Ethereal Shift',
+            3812615317: 'Echo Shard'
+        };
+        return itemMap[itemId] || `Unknown Item (${itemId})`;
     }
 }
 
