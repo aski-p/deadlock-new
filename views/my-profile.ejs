@@ -1511,25 +1511,44 @@ class DeadlockItemMatcher {
 
     getFallbackItems() {
         return {
-            715762406: { name: 'Basic Magazine', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp', type: 'weapon' },
-            1342610602: { name: 'Close Quarters', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/close_quarters.webp', type: 'weapon' },
-            2460791803: { name: 'Berserker', cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/berserker.webp', type: 'weapon' },
-            1458044103: { name: 'Basic Magazine', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp', type: 'weapon' },
-            1835738020: { name: 'Monster Rounds', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/monster_rounds.webp', type: 'weapon' },
-            3977876567: { name: 'Tesla Bullets', cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/tesla_bullets.webp', type: 'weapon' },
-            3731635960: { name: 'Mystic Shot', cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/mystic_shot.webp', type: 'weapon' },
-            865846625: { name: 'Titanic Magazine', cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/titanic_magazine.webp', type: 'weapon' },
-            1414319208: { name: "Hunter's Aura", cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hunters_aura.webp', type: 'weapon' },
-            1537272748: { name: 'Extra Health', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp', type: 'vitality' },
-            3970837787: { name: 'Spirit Armor', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/divine_barrier.webp', type: 'vitality' },
-            3791587546: { name: 'Bullet Armor', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/bullet_armor.webp', type: 'vitality' },
-            1955841979: { name: 'Metal Skin', cost: 3000, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/metal_skin.webp', type: 'vitality' },
-            339443430: { name: 'Colossus', cost: 3000, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/colossus.webp', type: 'vitality' },
-            2095565695: { name: 'Extra Spirit', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_spirit.webp', type: 'spirit' },
-            1282141666: { name: 'Mystic Burst', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_burst.webp', type: 'spirit' },
-            673001892: { name: 'Ethereal Shift', cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/ethereal_shift.webp', type: 'spirit' },
-            3812615317: { name: 'Echo Shard', cost: 3000, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/echo_shard.webp', type: 'spirit' },
-            1656913918: { name: 'Superior Cooldown', cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/superior_cooldown.webp', type: 'spirit' }
+            // 무기 아이템 (Weapon Items)
+            715762406: { name: '확장 탄창', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp', type: 'weapon' },
+            1342610602: { name: '고막력 탄환', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/high_velocity_mag.webp', type: 'weapon' },
+            1458044103: { name: '기본 탄창', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp', type: 'weapon' },
+            1835738020: { name: '몬스터 탄환', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/monster_rounds.webp', type: 'weapon' },
+            2460791803: { name: '광전사', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/berserker.webp', type: 'weapon' },
+            3977876567: { name: '테슬라 탄환', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/tesla_bullets.webp', type: 'weapon' },
+            3731635960: { name: '신비한 정확도', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/mystic_shot.webp', type: 'weapon' },
+            865846625: { name: '거대한 탄창', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/titanic_magazine.webp', type: 'weapon' },
+            1414319208: { name: '사냥꾼의 오라', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hunters_aura.webp', type: 'weapon' },
+            
+            // 생명력 아이템 (Vitality Items)
+            1537272748: { name: '추가 체력', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp', type: 'vitality' },
+            3970837787: { name: '정신력 갑옷', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/divine_barrier.webp', type: 'vitality' },
+            3791587546: { name: '총알 갑옷', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/bullet_armor.webp', type: 'vitality' },
+            2863754076: { name: '추가 재생', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_regen.webp', type: 'vitality' },
+            3675059374: { name: '추가 지구력', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_stamina.webp', type: 'vitality' },
+            2598983158: { name: '스프린트 부츠', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/sprint_boots.webp', type: 'vitality' },
+            3730717068: { name: '치유 의식', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_rite.webp', type: 'vitality' },
+            1845966100: { name: '지속 속도', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/enduring_speed.webp', type: 'vitality' },
+            4033043084: { name: '치유 증강기', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_booster.webp', type: 'vitality' },
+            1955841979: { name: '금속 피부', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/metal_skin.webp', type: 'vitality' },
+            339443430: { name: '거신상', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/colossus.webp', type: 'vitality' },
+            
+            // 정신력 아이템 (Spirit Items)
+            2095565695: { name: '추가 정신력', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_spirit.webp', type: 'spirit' },
+            1282141666: { name: '신비한 폭발', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_burst.webp', type: 'spirit' },
+            3677653320: { name: '정신력 타격', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_strike.webp', type: 'spirit' },
+            3702319013: { name: '한파', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/cold_front.webp', type: 'spirit' },
+            859037655: { name: '부패', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/decay.webp', type: 'spirit' },
+            3574779418: { name: '주입기', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/infuser.webp', type: 'spirit' },
+            1673325555: { name: '정신력 흡혈', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_lifesteal.webp', type: 'spirit' },
+            673001892: { name: '이더 변환', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/ethereal_shift.webp', type: 'spirit' },
+            1656913918: { name: '상급 쿨다운', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/superior_cooldown.webp', type: 'spirit' },
+            3754524659: { name: '향상된 쿨다운', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_cooldown.webp', type: 'spirit' },
+            3812615317: { name: '메아리 파편', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/echo_shard.webp', type: 'spirit' },
+            1729727717: { name: '신비한 잔향', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_reverb.webp', type: 'spirit' },
+            3802996421: { name: '리프레셔', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/refresher.webp', type: 'spirit' }
         };
     }
 
