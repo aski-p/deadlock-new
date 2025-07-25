@@ -680,6 +680,31 @@
     border-color: #8E44AD !important;
 }
 
+.item-cost {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #FFD700;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 1px 3px;
+    border-radius: 2px;
+    line-height: 1;
+}
+
+.item-time {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    font-size: 9px;
+    padding: 1px 2px;
+    border-radius: 2px;
+    line-height: 1;
+}
+
 /* 파티 스탯 스타일 */
 .party-stats-list {
     display: flex;
@@ -1459,7 +1484,204 @@ async function loadMatchHistory(accountId) {
     }
 }
 
-// 데드락 아이템 관리 시스템
+// 향상된 데드락 아이템 매처 시스템
+class DeadlockItemMatcher {
+    constructor() {
+        this.itemsCache = null;
+        this.initialized = false;
+        this.apiUrl = '/api/v1/items';
+    }
+
+    async fetchItemStats() {
+        if (this.itemsCache) {
+            return this.itemsCache;
+        }
+
+        try {
+            console.log('🎒 아이템 정보 API 호출 중...');
+            const response = await fetch(this.apiUrl);
+            const data = await response.json();
+            
+            if (data.success) {
+                this.itemsCache = data.data.items;
+                this.initialized = true;
+                console.log(`✅ ${data.data.totalItems}개 아이템 정보 로드 완료`);
+                return this.itemsCache;
+            } else {
+                throw new Error(data.error || '아이템 정보를 가져올 수 없습니다');
+            }
+        } catch (error) {
+            console.error('❌ 아이템 정보 로드 실패:', error);
+            
+            // 폴백 데이터 사용
+            this.itemsCache = this.getFallbackItems();
+            this.initialized = true;
+            return this.itemsCache;
+        }
+    }
+
+    getFallbackItems() {
+        return {
+            715762406: { name: 'Basic Magazine', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp', type: 'weapon' },
+            1342610602: { name: 'Close Quarters', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/close_quarters.webp', type: 'weapon' },
+            2460791803: { name: 'Berserker', cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/berserker.webp', type: 'weapon' },
+            1458044103: { name: 'Basic Magazine', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp', type: 'weapon' },
+            1835738020: { name: 'Monster Rounds', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/monster_rounds.webp', type: 'weapon' },
+            3977876567: { name: 'Tesla Bullets', cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/tesla_bullets.webp', type: 'weapon' },
+            3731635960: { name: 'Mystic Shot', cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/mystic_shot.webp', type: 'weapon' },
+            865846625: { name: 'Titanic Magazine', cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/titanic_magazine.webp', type: 'weapon' },
+            1414319208: { name: "Hunter's Aura", cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hunters_aura.webp', type: 'weapon' },
+            1537272748: { name: 'Extra Health', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp', type: 'vitality' },
+            3970837787: { name: 'Spirit Armor', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/divine_barrier.webp', type: 'vitality' },
+            3791587546: { name: 'Bullet Armor', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/bullet_armor.webp', type: 'vitality' },
+            1955841979: { name: 'Metal Skin', cost: 3000, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/metal_skin.webp', type: 'vitality' },
+            339443430: { name: 'Colossus', cost: 3000, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/colossus.webp', type: 'vitality' },
+            2095565695: { name: 'Extra Spirit', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_spirit.webp', type: 'spirit' },
+            1282141666: { name: 'Mystic Burst', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_burst.webp', type: 'spirit' },
+            673001892: { name: 'Ethereal Shift', cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/ethereal_shift.webp', type: 'spirit' },
+            3812615317: { name: 'Echo Shard', cost: 3000, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/echo_shard.webp', type: 'spirit' },
+            1656913918: { name: 'Superior Cooldown', cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/superior_cooldown.webp', type: 'spirit' }
+        };
+    }
+
+    getItemById(itemId) {
+        if (!this.initialized || !this.itemsCache) {
+            console.warn('⚠️ 아이템 매처가 초기화되지 않았습니다');
+            return null;
+        }
+
+        const numericId = parseInt(itemId);
+        const item = this.itemsCache[numericId];
+        
+        if (item) {
+            return {
+                ...item,
+                type: item.type || this.getItemTypeByName(item.name),
+                id: numericId
+            };
+        }
+
+        return null;
+    }
+
+    getItemTypeByName(itemName) {
+        const weaponItems = ['Basic Magazine', 'Close Quarters', 'Berserker', 'Monster Rounds', 'Tesla Bullets', 'Mystic Shot', 'Titanic Magazine', "Hunter's Aura", 'Headshot Booster', 'High-Velocity Mag', 'Hollow Point Ward', 'Rapid Rounds', 'Restorative Shot', 'Soul Shredder Bullets', 'Toxic Bullets'];
+        const vitalityItems = ['Extra Health', 'Spirit Armor', 'Bullet Armor', 'Metal Skin', 'Colossus', 'Extra Regen', 'Extra Stamina', 'Sprint Boots', 'Healing Rite'];
+        const spiritItems = ['Extra Spirit', 'Mystic Burst', 'Ethereal Shift', 'Echo Shard', 'Superior Cooldown', 'Spirit Strike', 'Cold Front', 'Decay', 'Infuser', 'Spirit Lifesteal'];
+        
+        if (weaponItems.includes(itemName)) return 'weapon';
+        if (vitalityItems.includes(itemName)) return 'vitality';
+        if (spiritItems.includes(itemName)) return 'spirit';
+        return 'weapon'; // 기본값
+    }
+
+    parseItemName(itemName) {
+        if (!itemName) return null;
+        
+        // Unknown Item (ID) 형태 파싱
+        const unknownItemMatch = itemName.match(/Unknown Item \((\d+)\)/);
+        if (unknownItemMatch) {
+            const itemId = parseInt(unknownItemMatch[1]);
+            const item = this.getItemById(itemId);
+            if (item) {
+                console.log(`🔄 아이템 ID 매핑: ${itemName} → ${item.name}`);
+                return item;
+            }
+        }
+
+        // 직접 아이템 이름으로 검색
+        if (this.itemsCache) {
+            for (const [id, item] of Object.entries(this.itemsCache)) {
+                if (item.name === itemName) {
+                    return {
+                        ...item,
+                        type: item.type || this.getItemTypeByName(item.name),
+                        id: parseInt(id)
+                    };
+                }
+            }
+        }
+
+        return null;
+    }
+
+    getItemData(itemName) {
+        const item = this.parseItemName(itemName);
+        
+        if (item) {
+            return {
+                name: item.name,
+                image: item.image,
+                type: item.type,
+                cost: item.cost || 0,
+                tier: item.tier || 1,
+                id: item.id
+            };
+        }
+
+        // 폴백 처리
+        return {
+            name: itemName,
+            image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp',
+            type: 'unknown',
+            cost: 0,
+            tier: 1,
+            id: null
+        };
+    }
+}
+
+// 아이템 매칭 초기화 함수
+async function initializeItemMatching() {
+    try {
+        console.log('🔄 아이템 매칭 시스템 초기화 중...');
+        
+        // 전역 아이템 매처 생성
+        window.itemMatcher = new DeadlockItemMatcher();
+        await window.itemMatcher.fetchItemStats();
+        
+        console.log('✅ 아이템 매칭 시스템 초기화 완료');
+        
+        // 기존 매치 리스트 업데이트
+        updateExistingMatches();
+        
+    } catch (error) {
+        console.error('❌ 아이템 매칭 시스템 초기화 실패:', error);
+    }
+}
+
+// 기존 매치의 아이템 슬롯 업데이트
+function updateExistingMatches() {
+    try {
+        const matchCards = document.querySelectorAll('.match-card');
+        console.log(`🔄 ${matchCards.length}개 매치 카드의 아이템 업데이트 중...`);
+        
+        matchCards.forEach((matchCard, matchIndex) => {
+            const itemsGrid = matchCard.querySelector('.items-grid');
+            if (itemsGrid && window.itemMatcher && window.itemMatcher.initialized) {
+                // 로딩 메시지가 있는 경우 아이템 데이터 재처리
+                const loadingMessage = itemsGrid.querySelector('[style*="grid-column: 1/-1"]');
+                if (loadingMessage && loadingMessage.textContent.includes('로딩 중')) {
+                    console.log(`🎒 매치 ${matchIndex} 아이템 재처리...`);
+                    
+                    // 실제 아이템 데이터가 있다면 다시 처리 (이 부분은 실제 매치 데이터에 따라 조정 필요)
+                    // 여기서는 예시로 빈 슬롯 메시지를 업데이트
+                    itemsGrid.innerHTML = `
+                        <div style="grid-column: 1/-1; text-align: center; color: #10B981; font-size: 11px; padding: 8px; border: 1px dashed #10B981; border-radius: 4px;">
+                            <i class="fas fa-check-circle"></i> 아이템 매칭 시스템 준비 완료
+                        </div>
+                    `;
+                }
+            }
+        });
+        
+        console.log('✅ 기존 매치 아이템 업데이트 완료');
+    } catch (error) {
+        console.error('❌ 기존 매치 업데이트 실패:', error);
+    }
+}
+
+// 데드락 아이템ㅇ관리 시스템 (호환성을 위해 유지)
 class DeadlockItemManager {
     constructor() {
         this.itemCache = new Map();
@@ -1837,8 +2059,8 @@ class DeadlockItemManager {
 function displayMatchHistory(matches) {
     const matchesList = document.getElementById('matches-list');
     
-    // 아이템 관리 시스템 초기화
-    const itemManager = new DeadlockItemManager();
+    // 향상된 아이템 매칭 시스템 사용 (전역에서 초기화됨)
+    const itemManager = window.itemMatcher || new DeadlockItemManager();
     
     try {
         console.log('📋 매치 히스토리 표시 시작:', matches);
@@ -2166,18 +2388,48 @@ function displayMatchHistory(matches) {
                     
                     // 실제 API 데이터가 있는 경우에만 표시
                     const itemsHTML = itemsData.slice(0, 12).map((item, itemIndex) => {
-                        const itemName = item.name || `Unknown Item (${item.itemId || item.id})`;
-                        const itemData = itemManager.getItemData(itemName);
+                        let itemName = item.name;
+                        let itemData;
+                        
+                        // 다양한 아이템 ID 소스 확인
+                        if (!itemName && (item.itemId || item.id)) {
+                            itemName = `Unknown Item (${item.itemId || item.id})`;
+                        }
+                        
+                        // 향상된 아이템 매처 사용
+                        if (window.itemMatcher && window.itemMatcher.initialized) {
+                            itemData = itemManager.getItemData(itemName);
+                            
+                            // 추가로 ID로 직접 시도
+                            if (itemData.type === 'unknown' && (item.itemId || item.id)) {
+                                const directItem = window.itemMatcher.getItemById(item.itemId || item.id);
+                                if (directItem) {
+                                    itemData = {
+                                        name: directItem.name,
+                                        image: directItem.image,
+                                        type: directItem.type,
+                                        cost: directItem.cost || 0,
+                                        tier: directItem.tier || 1
+                                    };
+                                }
+                            }
+                        } else {
+                            // 폴백: 기존 시스템 사용
+                            itemData = itemManager.getItemData(itemName);
+                        }
+                        
                         const purchaseTime = item.purchaseTime || (item.gameTime ? `${Math.floor(item.gameTime / 60)}:${String(Math.floor(item.gameTime % 60)).padStart(2, '0')}` : '');
+                        const costDisplay = itemData.cost > 0 ? ` (${itemData.cost}💰)` : '';
                         
                         return `
                             <div class="item-wrapper">
                                 <img src="${itemData.image}" 
                                      alt="${itemData.name}" 
                                      class="item-image real-item ${itemData.type}-item" 
-                                     title="${itemData.name} ${purchaseTime ? `(${purchaseTime})` : ''}"
+                                     title="${itemData.name}${costDisplay} ${purchaseTime ? `- 구매: ${purchaseTime}` : ''}"
                                      onerror="this.src='https://via.placeholder.com/48x48/444/fff?text=?';">
                                 ${purchaseTime ? `<div class="item-time">${purchaseTime}</div>` : ''}
+                                ${itemData.cost > 0 ? `<div class="item-cost">${itemData.cost}</div>` : ''}
                             </div>
                         `;
                     }).join('');
@@ -2318,5 +2570,11 @@ function displayPartyStats(partyStats) {
 
 
 // Load data when page loads
-document.addEventListener('DOMContentLoaded', loadMyProfileData);
+document.addEventListener('DOMContentLoaded', async () => {
+    // 아이템 매칭 시스템 먼저 초기화
+    await initializeItemMatching();
+    
+    // 프로필 데이터 로드
+    loadMyProfileData();
+});
 </script>

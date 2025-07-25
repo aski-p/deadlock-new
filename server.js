@@ -4831,6 +4831,81 @@ app.get('/api/player/:steamId/recent', async (req, res) => {
   }
 });
 
+// 아이템 정보 API
+app.get('/api/v1/items', async (req, res) => {
+  try {
+    console.log('🎒 아이템 정보 API 요청...');
+
+    // 실제 Deadlock 아이템 데이터 구성
+    const itemsData = {
+      weapons: {
+        715762406: { name: 'Basic Magazine', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp' },
+        1342610602: { name: 'Close Quarters', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/close_quarters.webp' },
+        2460791803: { name: 'Berserker', cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/berserker.webp' },
+        1458044103: { name: 'Basic Magazine', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp' },
+        1835738020: { name: 'Monster Rounds', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/monster_rounds.webp' },
+        3977876567: { name: 'Tesla Bullets', cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/tesla_bullets.webp' },
+        3731635960: { name: 'Mystic Shot', cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/mystic_shot.webp' },
+        865846625: { name: 'Titanic Magazine', cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/titanic_magazine.webp' },
+        1414319208: { name: "Hunter's Aura", cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hunters_aura.webp' },
+        2712976700: { name: 'Headshot Booster', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/headshot_booster.webp' },
+        1297326004: { name: 'High-Velocity Mag', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/high_velocity_mag.webp' },
+        4247951502: { name: 'Hollow Point Ward', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hollow_point_ward.webp' },
+        2464663797: { name: 'Rapid Rounds', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/rapid_rounds.webp' },
+        2789634532: { name: 'Restorative Shot', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/restorative_shot.webp' },
+        2829779411: { name: 'Soul Shredder Bullets', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/soul_shredder_bullets.webp' },
+        2502493491: { name: 'Toxic Bullets', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/toxic_bullets.webp' }
+      },
+      vitality: {
+        1537272748: { name: 'Extra Health', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp' },
+        3970837787: { name: 'Spirit Armor', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/divine_barrier.webp' },
+        3791587546: { name: 'Bullet Armor', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/bullet_armor.webp' },
+        1955841979: { name: 'Metal Skin', cost: 3000, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/metal_skin.webp' },
+        339443430: { name: 'Colossus', cost: 3000, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/colossus.webp' },
+        2863754076: { name: 'Extra Regen', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_regen.webp' },
+        3675059374: { name: 'Extra Stamina', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_stamina.webp' },
+        2598983158: { name: 'Sprint Boots', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/sprint_boots.webp' },
+        3730717068: { name: 'Healing Rite', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_rite.webp' }
+      },
+      spirit: {
+        2095565695: { name: 'Extra Spirit', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_spirit.webp' },
+        1282141666: { name: 'Mystic Burst', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_burst.webp' },
+        673001892: { name: 'Ethereal Shift', cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/ethereal_shift.webp' },
+        3812615317: { name: 'Echo Shard', cost: 3000, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/echo_shard.webp' },
+        1656913918: { name: 'Superior Cooldown', cost: 1250, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/superior_cooldown.webp' },
+        3677653320: { name: 'Spirit Strike', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_strike.webp' },
+        3702319013: { name: 'Cold Front', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/cold_front.webp' },
+        859037655: { name: 'Decay', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/decay.webp' },
+        3574779418: { name: 'Infuser', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/infuser.webp' },
+        1673325555: { name: 'Spirit Lifesteal', cost: 500, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_lifesteal.webp' }
+      }
+    };
+
+    // 모든 아이템을 하나의 객체로 통합
+    const allItems = {
+      ...itemsData.weapons,
+      ...itemsData.vitality,
+      ...itemsData.spirit
+    };
+
+    res.json({
+      success: true,
+      data: {
+        items: allItems,
+        categories: itemsData,
+        totalItems: Object.keys(allItems).length
+      }
+    });
+
+  } catch (error) {
+    console.error('❌ 아이템 정보 API 오류:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: '아이템 정보를 가져올 수 없습니다.' 
+    });
+  }
+});
+
 // 영웅 데이터 API
 app.get('/api/v1/heroes', async (req, res) => {
   try {
