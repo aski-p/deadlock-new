@@ -1459,9 +1459,386 @@ async function loadMatchHistory(accountId) {
     }
 }
 
+// 데드락 아이템 관리 시스템
+class DeadlockItemManager {
+    constructor() {
+        this.itemCache = new Map();
+        this.initialized = false;
+        this.fallbackItems = this.initializeFallbackItems();
+    }
+
+    initializeFallbackItems() {
+        return {
+            'weapon': {
+                'Basic Magazine': { type: 'weapon', tier: 1, color: '#FF6B35' },
+                'Close Quarters': { type: 'weapon', tier: 1, color: '#FF6B35' },
+                'Headshot Booster': { type: 'weapon', tier: 1, color: '#FF6B35' },
+                'High-Velocity Mag': { type: 'weapon', tier: 1, color: '#FF6B35' },
+                'Hollow Point Ward': { type: 'weapon', tier: 1, color: '#FF6B35' },
+                'Monster Rounds': { type: 'weapon', tier: 1, color: '#FF6B35' },
+                'Rapid Rounds': { type: 'weapon', tier: 1, color: '#FF6B35' },
+                'Restorative Shot': { type: 'weapon', tier: 1, color: '#FF6B35' },
+                'Soul Shredder Bullets': { type: 'weapon', tier: 1, color: '#FF6B35' },
+                'Titanic Magazine': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Toxic Bullets': { type: 'weapon', tier: 1, color: '#FF6B35' },
+                'Active Reload': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Berserker': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Burst Fire': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Escalating Resilience': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Fleetfoot': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                "Hunter's Aura": { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Intensifying Magazine': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Kinetic Dash': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Long Range': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Melee Lifesteal': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Mystic Shot': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Point Blank': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Pristine Emblem': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Sharpshooter': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Slowing Bullets': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Spiritual Overflow': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Tesla Bullets': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Warp Stone': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                'Alchemical Fire': { type: 'weapon', tier: 3, color: '#FFA500' },
+                'Crippling Headshot': { type: 'weapon', tier: 3, color: '#FFA500' },
+                'Frenzy': { type: 'weapon', tier: 3, color: '#FFA500' },
+                'Glass Cannon': { type: 'weapon', tier: 3, color: '#FFA500' },
+                'Heroic Aura': { type: 'weapon', tier: 3, color: '#FFA500' },
+                'Inhibitor': { type: 'weapon', tier: 3, color: '#FFA500' },
+                'Lucky Shot': { type: 'weapon', tier: 3, color: '#FFA500' },
+                'Phantom Strike': { type: 'weapon', tier: 3, color: '#FFA500' },
+                'Ricochet': { type: 'weapon', tier: 3, color: '#FFA500' },
+                'Shadow Weave': { type: 'weapon', tier: 3, color: '#FFA500' },
+                'Silencer': { type: 'weapon', tier: 3, color: '#FFA500' },
+                'Vampiric Burst': { type: 'weapon', tier: 3, color: '#FFA500' },
+                'Leech': { type: 'weapon', tier: 3, color: '#FFA500' }
+            },
+            'vitality': {
+                'Extra Health': { type: 'vitality', tier: 1, color: '#4CAF50' },
+                'Extra Regen': { type: 'vitality', tier: 1, color: '#4CAF50' },
+                'Extra Stamina': { type: 'vitality', tier: 1, color: '#4CAF50' },
+                'Sprint Boots': { type: 'vitality', tier: 1, color: '#4CAF50' },
+                'Healing Rite': { type: 'vitality', tier: 1, color: '#4CAF50' },
+                'Bullet Armor': { type: 'vitality', tier: 1, color: '#4CAF50' },
+                'Spirit Armor': { type: 'vitality', tier: 1, color: '#4CAF50' },
+                "Enchanter's Barrier": { type: 'vitality', tier: 2, color: '#66BB6A' },
+                'Enduring Speed': { type: 'vitality', tier: 2, color: '#66BB6A' },
+                'Healing Booster': { type: 'vitality', tier: 2, color: '#66BB6A' },
+                'Health Nova': { type: 'vitality', tier: 2, color: '#66BB6A' },
+                'Majestic Leap': { type: 'vitality', tier: 2, color: '#66BB6A' },
+                'Return Fire': { type: 'vitality', tier: 2, color: '#66BB6A' },
+                'Restorative Locket': { type: 'vitality', tier: 2, color: '#66BB6A' },
+                'Divine Barrier': { type: 'vitality', tier: 2, color: '#66BB6A' },
+                'Fortitude': { type: 'vitality', tier: 2, color: '#66BB6A' },
+                'Improved Bullet Armor': { type: 'vitality', tier: 2, color: '#66BB6A' },
+                'Improved Spirit Armor': { type: 'vitality', tier: 2, color: '#66BB6A' },
+                'Lifestrike': { type: 'vitality', tier: 2, color: '#66BB6A' },
+                'Metal Skin': { type: 'vitality', tier: 3, color: '#81C784' },
+                'Superior Stamina': { type: 'vitality', tier: 2, color: '#66BB6A' },
+                'Combat Barrier': { type: 'vitality', tier: 3, color: '#81C784' },
+                'Colossus': { type: 'vitality', tier: 3, color: '#81C784' },
+                'Soul Rebirth': { type: 'vitality', tier: 3, color: '#81C784' },
+                'Unstoppable': { type: 'vitality', tier: 3, color: '#81C784' }
+            },
+            'spirit': {
+                'Extra Spirit': { type: 'spirit', tier: 1, color: '#9C27B0' },
+                'Spirit Strike': { type: 'spirit', tier: 1, color: '#9C27B0' },
+                'Mystic Burst': { type: 'spirit', tier: 1, color: '#9C27B0' },
+                'Cold Front': { type: 'spirit', tier: 1, color: '#9C27B0' },
+                'Decay': { type: 'spirit', tier: 1, color: '#9C27B0' },
+                'Infuser': { type: 'spirit', tier: 1, color: '#9C27B0' },
+                'Spirit Lifesteal': { type: 'spirit', tier: 1, color: '#9C27B0' },
+                'Ammo Scavenger': { type: 'spirit', tier: 2, color: '#BA68C8' },
+                'Bullet Resist Shredder': { type: 'spirit', tier: 2, color: '#BA68C8' },
+                'Ethereal Shift': { type: 'spirit', tier: 2, color: '#BA68C8' },
+                'Improved Burst': { type: 'spirit', tier: 2, color: '#BA68C8' },
+                'Improved Cooldown': { type: 'spirit', tier: 2, color: '#BA68C8' },
+                'Improved Reach': { type: 'spirit', tier: 2, color: '#BA68C8' },
+                'Improved Spirit': { type: 'spirit', tier: 2, color: '#BA68C8' },
+                'Quicksilver Reload': { type: 'spirit', tier: 2, color: '#BA68C8' },
+                'Rapid Recharge': { type: 'spirit', tier: 2, color: '#BA68C8' },
+                'Superior Cooldown': { type: 'spirit', tier: 2, color: '#BA68C8' },
+                'Superior Duration': { type: 'spirit', tier: 2, color: '#BA68C8' },
+                'Torment Pulse': { type: 'spirit', tier: 2, color: '#BA68C8' },
+                'Boundless Spirit': { type: 'spirit', tier: 3, color: '#CE93D8' },
+                'Curse': { type: 'spirit', tier: 3, color: '#CE93D8' },
+                "Diviner's Kevlar": { type: 'spirit', tier: 3, color: '#CE93D8' },
+                'Echo Shard': { type: 'spirit', tier: 3, color: '#CE93D8' },
+                'Escalating Exposure': { type: 'spirit', tier: 3, color: '#CE93D8' },
+                'Frost Grenade': { type: 'spirit', tier: 3, color: '#CE93D8' },
+                'Knockdown': { type: 'spirit', tier: 3, color: '#CE93D8' },
+                'Magic Carpet': { type: 'spirit', tier: 3, color: '#CE93D8' },
+                'Mystic Reverb': { type: 'spirit', tier: 3, color: '#CE93D8' },
+                'Refresher': { type: 'spirit', tier: 3, color: '#CE93D8' },
+                'Silence Glyph': { type: 'spirit', tier: 3, color: '#CE93D8' },
+                'Slowing Hex': { type: 'spirit', tier: 3, color: '#CE93D8' },
+                'Surge of Power': { type: 'spirit', tier: 3, color: '#CE93D8' },
+                'Withering Whip': { type: 'spirit', tier: 3, color: '#CE93D8' }
+            }
+        };
+    }
+
+    getItemNameById(itemId) {
+        const itemMap = {
+            715762406: 'Basic Magazine',
+            1342610602: 'Close Quarters',
+            1458044103: 'Basic Magazine',
+            1537272748: 'Extra Health',
+            1656913918: 'Superior Cooldown',
+            1835738020: 'Monster Rounds',
+            2460791803: 'Berserker',
+            2095565695: 'Extra Spirit',
+            1282141666: 'Mystic Burst',
+            1955841979: 'Metal Skin',
+            339443430: 'Colossus',
+            673001892: 'Ethereal Shift',
+            3812615317: 'Echo Shard',
+            3731635960: 'Mystic Shot',
+            865846625: 'Titanic Magazine',
+            1414319208: "Hunter's Aura",
+            3977876567: 'Tesla Bullets',
+            3970837787: 'Spirit Armor',
+            3791587546: 'Bullet Armor',
+            2712976700: 'Headshot Booster',
+            1297326004: 'High-Velocity Mag',
+            4247951502: 'Hollow Point Ward',
+            2464663797: 'Rapid Rounds',
+            2789634532: 'Restorative Shot',
+            2829779411: 'Soul Shredder Bullets',
+            2502493491: 'Toxic Bullets',
+            2616956618: 'Active Reload',
+            3925892505: 'Burst Fire',
+            2928055866: 'Escalating Resilience',
+            4015163062: 'Fleetfoot',
+            1275334329: 'Intensifying Magazine',
+            3423715847: 'Kinetic Dash',
+            1831513066: 'Long Range',
+            3536999506: 'Melee Lifesteal',
+            2699888085: 'Point Blank',
+            3606745462: 'Pristine Emblem',
+            3508439251: 'Sharpshooter',
+            3600633316: 'Slowing Bullets',
+            3635659736: 'Spiritual Overflow',
+            2693100866: 'Warp Stone',
+            4181896897: 'Alchemical Fire',
+            3725728185: 'Crippling Headshot',
+            1890169084: 'Frenzy',
+            1825436633: 'Glass Cannon',
+            3726002346: 'Heroic Aura',
+            1549482179: 'Inhibitor',
+            2406133962: 'Lucky Shot',
+            2547346736: 'Phantom Strike',
+            3829306297: 'Ricochet',
+            3742624969: 'Shadow Weave',
+            3806203616: 'Silencer',
+            4245983209: 'Vampiric Burst',
+            2462996994: 'Leech',
+            2863754076: 'Extra Regen',
+            3675059374: 'Extra Stamina',
+            2598983158: 'Sprint Boots',
+            3730717068: 'Healing Rite',
+            2712654494: "Enchanter's Barrier",
+            1845966100: 'Enduring Speed',
+            4033043084: 'Healing Booster',
+            3965969966: 'Health Nova',
+            2549827618: 'Majestic Leap',
+            3738768485: 'Return Fire',
+            4194838994: 'Restorative Locket',
+            3986173616: 'Divine Barrier',
+            1774871043: 'Fortitude',
+            3537157157: 'Improved Bullet Armor',
+            3732493568: 'Improved Spirit Armor',
+            1751689003: 'Lifestrike',
+            1829488953: 'Superior Stamina',
+            3534253000: 'Combat Barrier',
+            3984996802: 'Soul Rebirth',
+            1743913723: 'Unstoppable',
+            3677653320: 'Spirit Strike',
+            3702319013: 'Cold Front',
+            859037655: 'Decay',
+            3574779418: 'Infuser',
+            1673325555: 'Spirit Lifesteal',
+            3655967536: 'Ammo Scavenger',
+            2978949851: 'Bullet Resist Shredder',
+            3704089726: 'Improved Burst',
+            3754524659: 'Improved Cooldown',
+            2944647108: 'Improved Reach',
+            3792327923: 'Improved Spirit',
+            4226924901: 'Quicksilver Reload',
+            3984263060: 'Rapid Recharge',
+            1723652463: 'Superior Duration',
+            3991092218: 'Torment Pulse',
+            1833936772: 'Boundless Spirit',
+            1845815269: 'Curse',
+            3701569419: "Diviner's Kevlar",
+            2978738440: 'Escalating Exposure',
+            3785419690: 'Frost Grenade',
+            1743013306: 'Knockdown',
+            3984079998: 'Magic Carpet',
+            1729727717: 'Mystic Reverb',
+            3802996421: 'Refresher',
+            1722829208: 'Silence Glyph',
+            3742779730: 'Slowing Hex',
+            3706103885: 'Surge of Power',
+            2995023008: 'Withering Whip'
+        };
+        return itemMap[itemId] || `Unknown Item (${itemId})`;
+    }
+
+    getItemData(itemName) {
+        if (this.itemCache.has(itemName)) {
+            return this.itemCache.get(itemName);
+        }
+
+        // Unknown Item (ID) 형태 처리
+        let actualItemName = itemName;
+        if (itemName && itemName.startsWith('Unknown Item (') && itemName.endsWith(')')) {
+            const itemId = itemName.match(/Unknown Item \((\d+)\)/)?.[1];
+            if (itemId) {
+                actualItemName = this.getItemNameById(parseInt(itemId));
+                console.log(`🔄 아이템 ID 매핑: ${itemName} → ${actualItemName}`);
+            }
+        }
+
+        // Fallback 데이터에서 검색
+        for (const category of Object.values(this.fallbackItems)) {
+            if (category[actualItemName]) {
+                const itemData = {
+                    name: actualItemName,
+                    ...category[actualItemName],
+                    image: this.getItemImageUrl(actualItemName)
+                };
+                this.itemCache.set(itemName, itemData);
+                return itemData;
+            }
+        }
+
+        // Unknown Item 처리
+        const unknownItem = {
+            name: actualItemName,
+            type: 'unknown',
+            tier: 1,
+            color: '#666666',
+            image: this.getItemImageUrl('Basic Magazine')
+        };
+        this.itemCache.set(itemName, unknownItem);
+        return unknownItem;
+    }
+
+    getItemImageUrl(itemName) {
+        const itemImageMap = {
+            'Basic Magazine': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp',
+            'Close Quarters': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/close_quarters.webp',
+            'Headshot Booster': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/headshot_booster.webp',
+            'High-Velocity Mag': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/high_velocity_mag.webp',
+            'Hollow Point Ward': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hollow_point_ward.webp',
+            'Monster Rounds': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/monster_rounds.webp',
+            'Rapid Rounds': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/rapid_rounds.webp',
+            'Restorative Shot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/restorative_shot.webp',
+            'Soul Shredder Bullets': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/soul_shredder_bullets.webp',
+            'Titanic Magazine': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/titanic_magazine.webp',
+            'Toxic Bullets': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/toxic_bullets.webp',
+            'Active Reload': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/active_reload.webp',
+            'Berserker': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/berserker.webp',
+            'Burst Fire': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/burst_fire.webp',
+            'Escalating Resilience': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/escalating_resilience.webp',
+            'Fleetfoot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/fleetfoot.webp',
+            "Hunter's Aura": 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hunters_aura.webp',
+            'Intensifying Magazine': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/intensifying_magazine.webp',
+            'Kinetic Dash': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/kinetic_dash.webp',
+            'Long Range': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/long_range.webp',
+            'Melee Lifesteal': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/melee_lifesteal.webp',
+            'Mystic Shot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/mystic_shot.webp',
+            'Point Blank': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/point_blank.webp',
+            'Pristine Emblem': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/pristine_emblem.webp',
+            'Sharpshooter': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/sharpshooter.webp',
+            'Slowing Bullets': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/slowing_bullets.webp',
+            'Spiritual Overflow': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/spiritual_overflow.webp',
+            'Tesla Bullets': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/tesla_bullets.webp',
+            'Warp Stone': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/warp_stone.webp',
+            'Alchemical Fire': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/alchemical_fire.webp',
+            'Crippling Headshot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/crippling_headshot.webp',
+            'Frenzy': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/frenzy.webp',
+            'Glass Cannon': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/glass_cannon.webp',
+            'Heroic Aura': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/heroic_aura.webp',
+            'Inhibitor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/inhibitor.webp',
+            'Lucky Shot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/lucky_shot.webp',
+            'Phantom Strike': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/phantom_strike.webp',
+            'Ricochet': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/ricochet.webp',
+            'Shadow Weave': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/shadow_weave.webp',
+            'Silencer': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/silencer.webp',
+            'Vampiric Burst': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/vampiric_burst.webp',
+            'Leech': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/leech.webp',
+            'Extra Health': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp',
+            'Extra Regen': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_regen.webp',
+            'Extra Stamina': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_stamina.webp',
+            'Sprint Boots': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/sprint_boots.webp',
+            'Healing Rite': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_rite.webp',
+            'Bullet Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/bullet_armor.webp',
+            'Spirit Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/divine_barrier.webp',
+            "Enchanter's Barrier": 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/enchanters_barrier.webp',
+            'Enduring Speed': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/enduring_speed.webp',
+            'Healing Booster': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_booster.webp',
+            'Health Nova': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/health_nova.webp',
+            'Majestic Leap': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/majestic_leap.webp',
+            'Return Fire': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/return_fire.webp',
+            'Restorative Locket': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/restorative_locket.webp',
+            'Divine Barrier': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/divine_barrier.webp',
+            'Fortitude': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/fortitude.webp',
+            'Improved Bullet Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/improved_bullet_armor.webp',
+            'Improved Spirit Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/improved_spirit_armor.webp',
+            'Lifestrike': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/lifestrike.webp',
+            'Metal Skin': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/metal_skin.webp',
+            'Superior Stamina': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/superior_stamina.webp',
+            'Combat Barrier': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/combat_barrier.webp',
+            'Colossus': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/colossus.webp',
+            'Soul Rebirth': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/soul_rebirth.webp',
+            'Unstoppable': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/unstoppable.webp',
+            'Extra Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_spirit.webp',
+            'Spirit Strike': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_strike.webp',
+            'Mystic Burst': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_burst.webp',
+            'Cold Front': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/cold_front.webp',
+            'Decay': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/decay.webp',
+            'Infuser': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/infuser.webp',
+            'Spirit Lifesteal': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_lifesteal.webp',
+            'Ammo Scavenger': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/ammo_scavenger.webp',
+            'Bullet Resist Shredder': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/bullet_resist_shredder.webp',
+            'Ethereal Shift': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/ethereal_shift.webp',
+            'Improved Burst': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_burst.webp',
+            'Improved Cooldown': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_cooldown.webp',
+            'Improved Reach': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_reach.webp',
+            'Improved Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_spirit.webp',
+            'Quicksilver Reload': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/quicksilver_reload.webp',
+            'Rapid Recharge': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/rapid_recharge.webp',
+            'Superior Cooldown': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/superior_cooldown.webp',
+            'Superior Duration': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/superior_duration.webp',
+            'Torment Pulse': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/torment_pulse.webp',
+            'Boundless Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/boundless_spirit.webp',
+            'Curse': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/curse.webp',
+            "Diviner's Kevlar": 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/diviners_kevlar.webp',
+            'Echo Shard': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/echo_shard.webp',
+            'Escalating Exposure': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/escalating_exposure.webp',
+            'Frost Grenade': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/frost_grenade.webp',
+            'Knockdown': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/knockdown.webp',
+            'Magic Carpet': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/magic_carpet.webp',
+            'Mystic Reverb': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_reverb.webp',
+            'Refresher': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/refresher.webp',
+            'Silence Glyph': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/silence_glyph.webp',
+            'Slowing Hex': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/slowing_hex.webp',
+            'Surge of Power': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/surge_of_power.webp',
+            'Withering Whip': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/withering_whip.webp'
+        };
+        
+        return itemImageMap[itemName] || 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp';
+    }
+}
+
 // 매치 히스토리 표시
 function displayMatchHistory(matches) {
     const matchesList = document.getElementById('matches-list');
+    
+    // 아이템 관리 시스템 초기화
+    const itemManager = new DeadlockItemManager();
     
     try {
         console.log('📋 매치 히스토리 표시 시작:', matches);
@@ -1790,16 +2167,15 @@ function displayMatchHistory(matches) {
                     // 실제 API 데이터가 있는 경우에만 표시
                     const itemsHTML = itemsData.slice(0, 12).map((item, itemIndex) => {
                         const itemName = item.name || `Unknown Item (${item.itemId || item.id})`;
-                        const itemImage = getItemImage(itemName);
-                        const itemCategory = getItemCategory(itemName);
+                        const itemData = itemManager.getItemData(itemName);
                         const purchaseTime = item.purchaseTime || (item.gameTime ? `${Math.floor(item.gameTime / 60)}:${String(Math.floor(item.gameTime % 60)).padStart(2, '0')}` : '');
                         
                         return `
                             <div class="item-wrapper">
-                                <img src="${itemImage}" 
-                                     alt="${itemName}" 
-                                     class="item-image real-item ${itemCategory}-item" 
-                                     title="${itemName} ${purchaseTime ? `(${purchaseTime})` : ''}"
+                                <img src="${itemData.image}" 
+                                     alt="${itemData.name}" 
+                                     class="item-image real-item ${itemData.type}-item" 
+                                     title="${itemData.name} ${purchaseTime ? `(${purchaseTime})` : ''}"
                                      onerror="this.src='https://via.placeholder.com/48x48/444/fff?text=?';">
                                 ${purchaseTime ? `<div class="item-time">${purchaseTime}</div>` : ''}
                             </div>
