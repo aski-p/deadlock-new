@@ -693,17 +693,6 @@
     line-height: 1;
 }
 
-.item-time {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    background: rgba(0, 0, 0, 0.8);
-    color: #fff;
-    font-size: 9px;
-    padding: 1px 2px;
-    border-radius: 2px;
-    line-height: 1;
-}
 
 /* 파티 스탯 스타일 */
 .party-stats-list {
@@ -2345,7 +2334,7 @@ function displayMatchHistory(matches) {
                             </div>
                         </div>
                         <div class="match-items">
-                            <div class="items-label">최종 아이템</div>
+                            <div class="items-label">게임 종료 시 아이템</div>
                             <div class="items-grid" id="match-items-${index}">
                                 <!-- 아이템 데이터는 안정적으로 로드 후 표시 -->
                                 <div style="grid-column: 1/-1; text-align: center; color: #999; font-size: 12px; padding: 20px;">
@@ -2380,8 +2369,25 @@ function displayMatchHistory(matches) {
         matches.forEach((match, index) => {
             const itemsContainer = document.getElementById(`match-items-${index}`);
             if (itemsContainer) {
-                // match.items 또는 match.finalItems에서 아이템 데이터 확인
-                const itemsData = match.items || match.finalItems || [];
+                // 게임 종료 시점의 최종 아이템만 표시 (finalItems 우선, 없으면 items의 마지막 상태)
+                let itemsData = match.finalItems || [];
+                
+                // finalItems가 없으면 items에서 가장 늦은 시간의 아이템들만 추출
+                if ((!itemsData || itemsData.length === 0) && match.items && match.items.length > 0) {
+                    // 각 슬롯별로 가장 마지막에 구매한 아이템만 남기기
+                    const finalItemsMap = new Map();
+                    match.items.forEach(item => {
+                        const slot = item.slot || item.slotIndex || 0;
+                        const gameTime = item.gameTime || item.purchaseTime || 0;
+                        
+                        if (!finalItemsMap.has(slot) || gameTime > (finalItemsMap.get(slot).gameTime || 0)) {
+                            finalItemsMap.set(slot, { ...item, gameTime });
+                        }
+                    });
+                    
+                    itemsData = Array.from(finalItemsMap.values())
+                        .sort((a, b) => (a.slot || 0) - (b.slot || 0)); // 슬롯 순서대로 정렬
+                }
                 
                 if (itemsData && itemsData.length > 0) {
                     console.log(`🎒 매치 ${index} 아이템 데이터:`, itemsData);
@@ -2418,7 +2424,6 @@ function displayMatchHistory(matches) {
                             itemData = itemManager.getItemData(itemName);
                         }
                         
-                        const purchaseTime = item.purchaseTime || (item.gameTime ? `${Math.floor(item.gameTime / 60)}:${String(Math.floor(item.gameTime % 60)).padStart(2, '0')}` : '');
                         const costDisplay = itemData.cost > 0 ? ` (${itemData.cost}💰)` : '';
                         
                         return `
@@ -2426,9 +2431,8 @@ function displayMatchHistory(matches) {
                                 <img src="${itemData.image}" 
                                      alt="${itemData.name}" 
                                      class="item-image real-item ${itemData.type}-item" 
-                                     title="${itemData.name}${costDisplay} ${purchaseTime ? `- 구매: ${purchaseTime}` : ''}"
+                                     title="${itemData.name}${costDisplay}"
                                      onerror="this.src='https://via.placeholder.com/48x48/444/fff?text=?';">
-                                ${purchaseTime ? `<div class="item-time">${purchaseTime}</div>` : ''}
                                 ${itemData.cost > 0 ? `<div class="item-cost">${itemData.cost}</div>` : ''}
                             </div>
                         `;
