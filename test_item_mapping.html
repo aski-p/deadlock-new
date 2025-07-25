@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이템 매핑 테스트</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #1a1a1a; color: #fff; }
+        .item { 
+            display: inline-block; 
+            margin: 10px; 
+            padding: 10px; 
+            border: 1px solid #333; 
+            border-radius: 8px;
+            background: #2a2a2a;
+        }
+        .item img { 
+            width: 50px; 
+            height: 50px; 
+            display: block; 
+            margin-bottom: 5px;
+        }
+        .item-name { font-size: 12px; max-width: 60px; word-wrap: break-word; }
+        .weapon-item { border-color: #FF6B35; }
+        .vitality-item { border-color: #4CAF50; }
+        .spirit-item { border-color: #9C27B0; }
+        .unknown-item { border-color: #ff6b6b; animation: pulse 2s infinite; }
+        @keyframes pulse {
+            0% { border-color: #ff6b6b; }
+            50% { border-color: #ff9999; }
+            100% { border-color: #ff6b6b; }
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 아이템 매핑 테스트</h1>
+    <div id="items-container"></div>
+
+    <script>
+        // 데드락 아이템 관리 시스템 (수정된 버전)
+        class DeadlockItemManager {
+            constructor() {
+                this.itemCache = new Map();
+                this.initialized = false;
+                this.fallbackItems = this.initializeFallbackItems();
+            }
+
+            initializeFallbackItems() {
+                return {
+                    'weapon': {
+                        'Basic Magazine': { type: 'weapon', tier: 1, color: '#FF6B35' },
+                        'Berserker': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                        'Tesla Bullets': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                        'Monster Rounds': { type: 'weapon', tier: 1, color: '#FF6B35' },
+                        "Hunter's Aura": { type: 'weapon', tier: 2, color: '#FF8C42' },
+                        'Mystic Shot': { type: 'weapon', tier: 2, color: '#FF8C42' },
+                        'Titanic Magazine': { type: 'weapon', tier: 2, color: '#FF8C42' }
+                    },
+                    'vitality': {
+                        'Extra Health': { type: 'vitality', tier: 1, color: '#4CAF50' },
+                        'Bullet Armor': { type: 'vitality', tier: 1, color: '#4CAF50' },
+                        'Spirit Armor': { type: 'vitality', tier: 1, color: '#4CAF50' },
+                        'Metal Skin': { type: 'vitality', tier: 3, color: '#81C784' },
+                        'Colossus': { type: 'vitality', tier: 3, color: '#81C784' }
+                    },
+                    'spirit': {
+                        'Extra Spirit': { type: 'spirit', tier: 1, color: '#9C27B0' },
+                        'Mystic Burst': { type: 'spirit', tier: 1, color: '#9C27B0' },
+                        'Ethereal Shift': { type: 'spirit', tier: 2, color: '#BA68C8' },
+                        'Echo Shard': { type: 'spirit', tier: 3, color: '#CE93D8' }
+                    }
+                };
+            }
+
+            getItemNameById(itemId) {
+                const itemMap = {
+                    2460791803: 'Berserker',
+                    1458044103: 'Basic Magazine', 
+                    1537272748: 'Extra Health',
+                    1835738020: 'Monster Rounds',
+                    3977876567: 'Tesla Bullets',
+                    3970837787: 'Spirit Armor',
+                    3791587546: 'Bullet Armor',
+                    2095565695: 'Extra Spirit',
+                    1282141666: 'Mystic Burst',
+                    1955841979: 'Metal Skin',
+                    339443430: 'Colossus',
+                    673001892: 'Ethereal Shift',
+                    3812615317: 'Echo Shard',
+                    3731635960: 'Mystic Shot',
+                    865846625: 'Titanic Magazine',
+                    1414319208: "Hunter's Aura"
+                };
+                return itemMap[itemId] || `Unknown Item (${itemId})`;
+            }
+
+            getItemData(itemName) {
+                if (this.itemCache.has(itemName)) {
+                    return this.itemCache.get(itemName);
+                }
+
+                // Unknown Item (ID) 형태 처리
+                let actualItemName = itemName;
+                if (itemName && itemName.startsWith('Unknown Item (') && itemName.endsWith(')')) {
+                    const itemId = itemName.match(/Unknown Item \((\d+)\)/)?.[1];
+                    if (itemId) {
+                        actualItemName = this.getItemNameById(parseInt(itemId));
+                        console.log(`🔄 아이템 ID 매핑: ${itemName} → ${actualItemName}`);
+                    }
+                }
+
+                // Fallback 데이터에서 검색
+                for (const category of Object.values(this.fallbackItems)) {
+                    if (category[actualItemName]) {
+                        const itemData = {
+                            name: actualItemName,
+                            ...category[actualItemName],
+                            image: this.getItemImageUrl(actualItemName)
+                        };
+                        this.itemCache.set(itemName, itemData);
+                        return itemData;
+                    }
+                }
+
+                // Unknown Item 처리
+                const unknownItem = {
+                    name: actualItemName,
+                    type: 'unknown',
+                    tier: 1,
+                    color: '#666666',
+                    image: this.getItemImageUrl('Basic Magazine')
+                };
+                this.itemCache.set(itemName, unknownItem);
+                return unknownItem;
+            }
+
+            getItemImageUrl(itemName) {
+                const itemImageMap = {
+                    'Basic Magazine': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp',
+                    'Berserker': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/berserker.webp',
+                    'Tesla Bullets': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/tesla_bullets.webp',
+                    'Monster Rounds': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/monster_rounds.webp',
+                    "Hunter's Aura": 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hunters_aura.webp',
+                    'Mystic Shot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/mystic_shot.webp',
+                    'Titanic Magazine': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/titanic_magazine.webp',
+                    'Extra Health': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp',
+                    'Bullet Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/bullet_armor.webp',
+                    'Spirit Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/divine_barrier.webp',
+                    'Metal Skin': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/metal_skin.webp',
+                    'Colossus': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/colossus.webp',
+                    'Extra Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_spirit.webp',
+                    'Mystic Burst': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_burst.webp',
+                    'Ethereal Shift': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/ethereal_shift.webp',
+                    'Echo Shard': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/echo_shard.webp'
+                };
+                
+                return itemImageMap[itemName] || 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp';
+            }
+        }
+
+        // 테스트 실행
+        const itemManager = new DeadlockItemManager();
+        const container = document.getElementById('items-container');
+
+        const testItems = [
+            'Unknown Item (2460791803)',
+            'Unknown Item (1458044103)',
+            'Unknown Item (1537272748)',
+            'Unknown Item (1835738020)',
+            'Unknown Item (3977876567)',
+            'Unknown Item (3970837787)',
+            'Unknown Item (3791587546)',
+            'Unknown Item (2095565695)',
+            'Unknown Item (1282141666)',
+            'Unknown Item (1955841979)',
+            'Unknown Item (339443430)',
+            'Unknown Item (673001892)',
+            'Unknown Item (3812615317)',
+            "Hunter's Aura",
+            'Mystic Shot',
+            'Titanic Magazine'
+        ];
+
+        console.log('🧪 아이템 매핑 테스트 시작...');
+
+        testItems.forEach(originalItem => {
+            const itemData = itemManager.getItemData(originalItem);
+            
+            const itemDiv = document.createElement('div');
+            itemDiv.className = `item ${itemData.type}-item`;
+            
+            itemDiv.innerHTML = `
+                <img src="${itemData.image}" alt="${itemData.name}" 
+                     onerror="this.style.border='2px solid red'">
+                <div class="item-name">${itemData.name}</div>
+                <div style="font-size: 10px; color: #999;">원본: ${originalItem}</div>
+            `;
+            
+            container.appendChild(itemDiv);
+            
+            console.log(`${originalItem} → ${itemData.name} (${itemData.type})`);
+        });
+
+        console.log('✅ 테스트 완료!');
+    </script>
+</body>
+</html>
