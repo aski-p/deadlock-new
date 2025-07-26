@@ -2192,14 +2192,7 @@ function getItemTier(itemId) {
 function displayMatchHistory(matches) {
     const matchesList = document.getElementById('matches-list');
     
-    // 향상된 아이템 매칭 시스템 사용 (전역에서 초기화됨)
-    // itemMatcher가 아직 초기화되지 않았다면 기다리기
-    if (!window.itemMatcher) {
-        console.log('⏳ itemMatcher 초기화 대기 중...');
-        // 짧은 딱레이 후 다시 시도
-        setTimeout(() => displayMatchHistory(matches), 500);
-        return;
-    }
+    console.log('🔄 매치 히스토리 표시 시작, itemMatcher 상태:', !!window.itemMatcher);
     
     try {
         console.log('📋 매치 히스토리 표시 시작:', matches);
