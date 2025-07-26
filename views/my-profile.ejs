@@ -2063,12 +2063,143 @@ class DeadlockItemManager {
     }
 }
 
+// 폴백 아이템 매핑 함수들
+function getKoreanItemName(itemId) {
+    const itemMap = {
+        // 무기 아이템 (Weapon Items)
+        715762406: '확장 탄창',
+        1342610602: '고마력 탄환',
+        1458044103: '기본 탄창',
+        1835738020: '몬스터 탄환',
+        2460791803: '광전사',
+        3977876567: '테슬라 탄환',
+        3731635960: '신비한 정확도',
+        865846625: '거대한 탄창',
+        1414319208: '사냥꾼의 오라',
+        
+        // 생명력 아이템 (Vitality Items)
+        1537272748: '추가 체력',
+        3970837787: '정신력 갑옷',
+        3791587546: '총알 갑옷',
+        2863754076: '추가 재생',
+        3675059374: '추가 지구력',
+        2598983158: '스프린트 부츠',
+        3730717068: '치유 의식',
+        1845966100: '지속 속도',
+        4033043084: '치유 증강기',
+        1955841979: '금속 피부',
+        339443430: '거신상',
+        
+        // 정신력 아이템 (Spirit Items)
+        2095565695: '추가 정신력',
+        1282141666: '신비한 폭발',
+        3677653320: '정신력 타격',
+        3702319013: '한파',
+        859037655: '부패',
+        3574779418: '주입기',
+        1673325555: '정신력 흡혈',
+        673001892: '이더 변환',
+        1656913918: '상급 쿨다운',
+        3754524659: '향상된 쿨다운',
+        3812615317: '메아리 파편',
+        1729727717: '신비한 잔향',
+        3802996421: '리프레셔'
+    };
+    return itemMap[itemId] || `Unknown Item (${itemId})`;
+}
+
+function getItemImageUrl(itemName) {
+    const imageMap = {
+        '확장 탄창': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp',
+        '고마력 탄환': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/high_velocity_mag.webp',
+        '기본 탄창': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp',
+        '몬스터 탄환': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/monster_rounds.webp',
+        '광전사': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/berserker.webp',
+        '테슬라 탄환': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/tesla_bullets.webp',
+        '신비한 정확도': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/mystic_shot.webp',
+        '거대한 탄창': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/titanic_magazine.webp',
+        '사냥꾼의 오라': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hunters_aura.webp',
+        '추가 체력': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp',
+        '정신력 갑옷': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/divine_barrier.webp',
+        '총알 갑옷': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/bullet_armor.webp',
+        '추가 재생': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_regen.webp',
+        '추가 지구력': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_stamina.webp',
+        '스프린트 부츠': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/sprint_boots.webp',
+        '치유 의식': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_rite.webp',
+        '지속 속도': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/enduring_speed.webp',
+        '치유 증강기': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_booster.webp',
+        '금속 피부': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/metal_skin.webp',
+        '거신상': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/colossus.webp',
+        '추가 정신력': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_spirit.webp',
+        '신비한 폭발': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_burst.webp',
+        '정신력 타격': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_strike.webp',
+        '한파': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/cold_front.webp',
+        '부패': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/decay.webp',
+        '주입기': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/infuser.webp',
+        '정신력 흡혈': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_lifesteal.webp',
+        '이더 변환': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/ethereal_shift.webp',
+        '상급 쿨다운': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/superior_cooldown.webp',
+        '향상된 쿨다운': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_cooldown.webp',
+        '메아리 파편': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/echo_shard.webp',
+        '신비한 잔향': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_reverb.webp',
+        '리프레셔': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/refresher.webp'
+    };
+    return imageMap[itemName] || 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp';
+}
+
+function getItemType(itemId) {
+    const weaponItems = [715762406, 1342610602, 1458044103, 1835738020, 2460791803, 3977876567, 3731635960, 865846625, 1414319208];
+    const vitalityItems = [1537272748, 3970837787, 3791587546, 2863754076, 3675059374, 2598983158, 3730717068, 1845966100, 4033043084, 1955841979, 339443430];
+    const spiritItems = [2095565695, 1282141666, 3677653320, 3702319013, 859037655, 3574779418, 1673325555, 673001892, 1656913918, 3754524659, 3812615317, 1729727717, 3802996421];
+    
+    if (weaponItems.includes(itemId)) return 'weapon';
+    if (vitalityItems.includes(itemId)) return 'vitality';
+    if (spiritItems.includes(itemId)) return 'spirit';
+    return 'weapon';
+}
+
+function getItemCost(itemId) {
+    const costs = {
+        // Tier 1 - 800 소울
+        715762406: 800, 1342610602: 800, 1458044103: 800, 1835738020: 800,
+        1537272748: 800, 3970837787: 800, 3791587546: 800, 2863754076: 800, 3675059374: 800, 2598983158: 800, 3730717068: 800,
+        2095565695: 800, 1282141666: 800, 3677653320: 800, 3702319013: 800, 859037655: 800, 3574779418: 800, 1673325555: 800,
+        
+        // Tier 2 - 1600 소울
+        2460791803: 1600, 3977876567: 1600, 3731635960: 1600, 865846625: 1600, 1414319208: 1600,
+        1845966100: 1600, 4033043084: 1600,
+        673001892: 1600, 1656913918: 1600, 3754524659: 1600,
+        
+        // Tier 3 - 3200 소울
+        1955841979: 3200, 339443430: 3200,
+        3812615317: 3200, 1729727717: 3200, 3802996421: 3200
+    };
+    return costs[itemId] || 0;
+}
+
+function getItemTier(itemId) {
+    const tier1 = [715762406, 1342610602, 1458044103, 1835738020, 1537272748, 3970837787, 3791587546, 2863754076, 3675059374, 2598983158, 3730717068, 2095565695, 1282141666, 3677653320, 3702319013, 859037655, 3574779418, 1673325555];
+    const tier2 = [2460791803, 3977876567, 3731635960, 865846625, 1414319208, 1845966100, 4033043084, 673001892, 1656913918, 3754524659];
+    const tier3 = [1955841979, 339443430, 3812615317, 1729727717, 3802996421];
+    
+    if (tier1.includes(itemId)) return 1;
+    if (tier2.includes(itemId)) return 2;
+    if (tier3.includes(itemId)) return 3;
+    return 1;
+}
+
 // 매치 히스토리 표시
 function displayMatchHistory(matches) {
     const matchesList = document.getElementById('matches-list');
     
     // 향상된 아이템 매칭 시스템 사용 (전역에서 초기화됨)
-    const itemManager = window.itemMatcher || new DeadlockItemManager();
+    // itemMatcher가 아직 초기화되지 않았다면 기다리기
+    if (!window.itemMatcher) {
+        console.log('⏳ itemMatcher 초기화 대기 중...');
+        // 짧은 딱레이 후 다시 시도
+        setTimeout(() => displayMatchHistory(matches), 500);
+        return;
+    }
     
     try {
         console.log('📋 매치 히스토리 표시 시작:', matches);
@@ -2421,14 +2552,21 @@ function displayMatchHistory(matches) {
                             itemName = `Unknown Item (${item.itemId || item.id})`;
                         }
                         
-                        // 향상된 아이템 매처 사용
+                        // 아이템 데이터 매칭 로직 개선
+                        itemData = null;
+                        
+                        // 1. window.itemMatcher 사용 시도
                         if (window.itemMatcher && window.itemMatcher.initialized) {
-                            itemData = itemManager.getItemData(itemName);
+                            console.log(`🔍 itemMatcher로 아이템 검색: ${itemName}`);
+                            itemData = window.itemMatcher.getItemData(itemName);
                             
-                            // 추가로 ID로 직접 시도
-                            if (itemData.type === 'unknown' && (item.itemId || item.id)) {
-                                const directItem = window.itemMatcher.getItemById(item.itemId || item.id);
+                            // ID로 직접 검색 시도
+                            if ((!itemData || itemData.name.includes('Unknown')) && (item.itemId || item.id)) {
+                                const itemId = item.itemId || item.id;
+                                console.log(`🎯 ID로 직접 검색: ${itemId}`);
+                                const directItem = window.itemMatcher.getItemById(itemId);
                                 if (directItem) {
+                                    console.log(`✅ ID 매칭 성공: ${itemId} → ${directItem.name}`);
                                     itemData = {
                                         name: directItem.name,
                                         image: directItem.image,
@@ -2438,9 +2576,37 @@ function displayMatchHistory(matches) {
                                     };
                                 }
                             }
-                        } else {
-                            // 폴백: 기존 시스템 사용
-                            itemData = itemManager.getItemData(itemName);
+                        }
+                        
+                        // 2. 폴백 - 직접 아이템 ID 매핑 사용
+                        if (!itemData || itemData.name.includes('Unknown')) {
+                            const itemId = item.itemId || item.id;
+                            if (itemId) {
+                                console.log(`🔄 폴백 ID 매핑 사용: ${itemId}`);
+                                const koreanName = getKoreanItemName(itemId);
+                                if (koreanName && !koreanName.includes('Unknown')) {
+                                    console.log(`✅ 폴백 매칭 성공: ${itemId} → ${koreanName}`);
+                                    itemData = {
+                                        name: koreanName,
+                                        image: getItemImageUrl(koreanName),
+                                        type: getItemType(itemId),
+                                        cost: getItemCost(itemId),
+                                        tier: getItemTier(itemId)
+                                    };
+                                }
+                            }
+                        }
+                        
+                        // 3. 최종 폴백
+                        if (!itemData) {
+                            console.log(`⚠️ 아이템 매칭 실패: ${itemName || item.itemId || item.id}`);
+                            itemData = {
+                                name: itemName || `Unknown Item (${item.itemId || item.id})`,
+                                image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp',
+                                type: 'unknown',
+                                cost: 0,
+                                tier: 1
+                            };
                         }
                         
                         const costDisplay = itemData.cost > 0 ? ` (${itemData.cost}💰)` : '';
