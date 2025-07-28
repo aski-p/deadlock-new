@@ -2479,10 +2479,7 @@ function displayMatchHistory(matches) {
                         <div class="match-items">
                             <div class="items-label">게임 종료 시 아이템</div>
                             <div class="items-grid" id="match-items-${index}">
-                                <!-- 아이템 데이터는 안정적으로 로드 후 표시 -->
-                                <div style="grid-column: 1/-1; text-align: center; color: #999; font-size: 12px; padding: 20px;">
-                                    매치 데이터 로딩 중...
-                                </div>
+                                <!-- 아이템 데이터는 JavaScript에서 즉시 로드됩니다 -->
                             </div>
                         </div>
                         <div class="match-time">
@@ -2508,131 +2505,56 @@ function displayMatchHistory(matches) {
         
         matchesList.innerHTML = matchCards.join('');
         
-        // 매치 아이템 데이터를 안정적으로 로드
+        // 매치 아이템 데이터를 즉시 로드하여 표시
         matches.forEach((match, index) => {
             const itemsContainer = document.getElementById(`match-items-${index}`);
             if (itemsContainer) {
-                // 게임 종료 시점의 최종 아이템만 표시 (finalItems 우선, 없으면 items의 마지막 상태)
-                let itemsData = match.finalItems || [];
+                console.log(`🎒 매치 ${index} 아이템 처리 시작:`, match);
                 
-                // finalItems가 없으면 items에서 가장 늦은 시간의 아이템들만 추출
-                if ((!itemsData || itemsData.length === 0) && match.items && match.items.length > 0) {
-                    // 각 슬롯별로 가장 마지막에 구매한 아이템만 남기기
-                    const finalItemsMap = new Map();
-                    match.items.forEach(item => {
-                        const slot = item.slot || item.slotIndex || 0;
-                        const gameTime = item.gameTime || item.purchaseTime || 0;
-                        
-                        if (!finalItemsMap.has(slot) || gameTime > (finalItemsMap.get(slot).gameTime || 0)) {
-                            finalItemsMap.set(slot, { ...item, gameTime });
-                        }
-                    });
-                    
-                    itemsData = Array.from(finalItemsMap.values())
-                        .sort((a, b) => (a.slot || 0) - (b.slot || 0)); // 슬롯 순서대로 정렬
-                }
+                // 백엔드에서 처리된 아이템 데이터 사용 (finalItems 우선, 없으면 items)
+                let itemsData = match.finalItems || match.items || [];
+                
+                console.log(`📦 매치 ${index} 사용할 아이템 데이터:`, itemsData);
                 
                 if (itemsData && itemsData.length > 0) {
-                    console.log(`🎒 매치 ${index} 아이템 데이터:`, itemsData);
-                    
-                    // 실제 API 데이터가 있는 경우에만 표시
+                    // 백엔드에서 이미 한국어로 처리된 아이템을 직접 표시
                     const itemsHTML = itemsData.slice(0, 12).map((item, itemIndex) => {
-                        let itemName = item.name;
-                        let itemData;
+                        const itemName = item.name || `알 수 없는 아이템 (${item.itemId || item.id || 'ID없음'})`;
+                        const itemTier = item.tier || 1;
+                        const itemId = item.itemId || item.id || 'unknown';
                         
-                        // 다양한 아이템 ID 소스 확인
-                        if (!itemName && (item.itemId || item.id)) {
-                            itemName = `Unknown Item (${item.itemId || item.id})`;
-                        }
+                        console.log(`🔍 아이템 ${itemIndex}: ${itemName} (ID: ${itemId}, Tier: ${itemTier})`);
                         
-                        // 아이템 데이터 매칭 로직 개선
-                        itemData = null;
-                        
-                        // 1. window.itemMatcher 사용 시도
-                        if (window.itemMatcher && window.itemMatcher.initialized) {
-                            console.log(`🔍 itemMatcher로 아이템 검색: ${itemName}`);
-                            itemData = window.itemMatcher.getItemData(itemName);
-                            
-                            // ID로 직접 검색 시도
-                            if ((!itemData || itemData.name.includes('Unknown')) && (item.itemId || item.id)) {
-                                const itemId = item.itemId || item.id;
-                                console.log(`🎯 ID로 직접 검색: ${itemId}`);
-                                const directItem = window.itemMatcher.getItemById(itemId);
-                                if (directItem) {
-                                    console.log(`✅ ID 매칭 성공: ${itemId} → ${directItem.name}`);
-                                    itemData = {
-                                        name: directItem.name,
-                                        image: directItem.image,
-                                        type: directItem.type,
-                                        cost: directItem.cost || 0,
-                                        tier: directItem.tier || 1
-                                    };
-                                }
-                            }
-                        }
-                        
-                        // 2. 폴백 - 직접 아이템 ID 매핑 사용
-                        if (!itemData || itemData.name.includes('Unknown')) {
-                            const itemId = item.itemId || item.id;
-                            if (itemId) {
-                                console.log(`🔄 폴백 ID 매핑 사용: ${itemId}`);
-                                const koreanName = getKoreanItemName(itemId);
-                                if (koreanName && !koreanName.includes('Unknown')) {
-                                    console.log(`✅ 폴백 매칭 성공: ${itemId} → ${koreanName}`);
-                                    itemData = {
-                                        name: koreanName,
-                                        image: getItemImageUrl(koreanName),
-                                        type: getItemType(itemId),
-                                        cost: getItemCost(itemId),
-                                        tier: getItemTier(itemId)
-                                    };
-                                }
-                            }
-                        }
-                        
-                        // 3. 최종 폴백
-                        if (!itemData) {
-                            console.log(`⚠️ 아이템 매칭 실패: ${itemName || item.itemId || item.id}`);
-                            itemData = {
-                                name: itemName || `Unknown Item (${item.itemId || item.id})`,
-                                image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp',
-                                type: 'unknown',
-                                cost: 0,
-                                tier: 1
-                            };
-                        }
-                        
-                        const costDisplay = itemData.cost > 0 ? ` (${itemData.cost}💰)` : '';
+                        // 기본 이미지 URL 생성
+                        const imageUrl = `https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp`;
                         
                         return `
                             <div class="item-wrapper">
-                                <img src="${itemData.image}" 
-                                     alt="${itemData.name}" 
-                                     class="item-image real-item ${itemData.type}-item" 
-                                     title="${itemData.name}${costDisplay}"
-                                     onerror="this.src='https://via.placeholder.com/48x48/444/fff?text=?';">
-                                ${itemData.cost > 0 ? `<div class="item-cost">${itemData.cost}</div>` : ''}
+                                <img src="${imageUrl}" 
+                                     alt="${itemName}" 
+                                     class="item-image tier-${itemTier}"
+                                     title="${itemName}"
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                <div class="item-placeholder tier-${itemTier}" style="display: none;">
+                                    <span class="item-text">${itemName.substring(0, 3)}</span>
+                                </div>
                             </div>
                         `;
                     }).join('');
                     
-                    // 빈 슬롯 추가 (최대 12개까지)
-                    const emptySlots = Math.max(0, 12 - itemsData.length);
-                    const emptyHTML = Array(emptySlots).fill().map(() => `
-                        <div class="item-wrapper empty-slot">
-                            <div class="empty-item-placeholder" title="아이템 슬롯 없음"></div>
-                        </div>
-                    `).join('');
-                    
-                    itemsContainer.innerHTML = itemsHTML + emptyHTML;
+                    itemsContainer.innerHTML = itemsHTML;
+                    console.log(`✅ 매치 ${index} 아이템 ${itemsData.length}개 표시 완료`);
                 } else {
-                    // API 데이터가 없는 경우
+                    // 아이템 데이터가 없는 경우
+                    console.log(`⚠️ 매치 ${index}: 아이템 데이터 없음`);
                     itemsContainer.innerHTML = `
-                        <div style="grid-column: 1/-1; text-align: center; color: #666; font-size: 11px; padding: 8px; border: 1px dashed #333; border-radius: 4px;">
-                            <i class="fas fa-info-circle"></i> 아이템 데이터 로딩 중 또는 없음
+                        <div style="grid-column: 1/-1; text-align: center; color: #666; font-size: 11px; padding: 15px;">
+                            <i class="fas fa-box-open"></i> 아이템 없음
                         </div>
                     `;
                 }
+            } else {
+                console.error(`❌ 매치 ${index}: items-container 요소를 찾을 수 없음`);
             }
         });
         
