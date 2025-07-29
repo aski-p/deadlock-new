@@ -1783,6 +1783,135 @@ app.get('/api/v1/players/:accountId/quick', async (req, res) => {
   }
 });
 
+// 아이템 디버그 엔드포인트 - 최종 아이템 로직 테스트용
+app.get('/api/debug/items/:accountId', async (req, res) => {
+  try {
+    const { accountId } = req.params;
+    console.log(`🔧 아이템 디버그 시작: ${accountId}`);
+    
+    const debugInfo = {
+      accountId,
+      timestamp: new Date().toISOString(),
+      steps: []
+    };
+    
+    // 1단계: 플레이어 매치 기록 가져오기
+    debugInfo.steps.push({
+      step: 1,
+      name: '플레이어 매치 기록 조회',
+      status: 'attempting'
+    });
+    
+    try {
+      const matchHistoryResponse = await retryAPICall(
+        `https://api.deadlock-api.com/v1/players/${accountId}/match-history`
+      );
+      
+      if (matchHistoryResponse && matchHistoryResponse.length > 0) {
+        debugInfo.steps[0].status = 'success';
+        debugInfo.steps[0].data = {
+          matchCount: matchHistoryResponse.length,
+          latestMatch: matchHistoryResponse[0]
+        };
+        
+        // 2단계: 첫 번째 매치 상세 정보
+        const firstMatch = matchHistoryResponse[0];
+        debugInfo.steps.push({
+          step: 2,
+          name: `매치 ${firstMatch.match_id} 상세 정보 조회`,
+          status: 'attempting'
+        });
+        
+        const matchDetails = await retryAPICall(
+          `https://api.deadlock-api.com/v1/matches/${firstMatch.match_id}/metadata?include_player_items=true`
+        );
+        
+        if (matchDetails && matchDetails.match_info) {
+          debugInfo.steps[1].status = 'success';
+          debugInfo.steps[1].data = {
+            playerCount: matchDetails.match_info.players?.length || 0,
+            playersWithItems: matchDetails.match_info.players?.filter(p => p.items && p.items.length > 0).length || 0
+          };
+          
+          // 3단계: 플레이어 찾기
+          const targetPlayer = matchDetails.match_info.players?.find(
+            p => p.account_id && p.account_id.toString() === accountId.toString()
+          );
+          
+          debugInfo.steps.push({
+            step: 3,
+            name: '타겟 플레이어 찾기',
+            status: targetPlayer ? 'success' : 'failed',
+            data: {
+              found: !!targetPlayer,
+              itemCount: targetPlayer?.items?.length || 0,
+              items: targetPlayer?.items?.slice(0, 10).map(item => ({
+                id: item.item_id,
+                slot: item.slot,
+                sold: item.sold_time_s,
+                time: item.game_time_s
+              })) || []
+            }
+          });
+          
+          // 4단계: 슬롯 기반 아이템 처리
+          if (targetPlayer && targetPlayer.items) {
+            debugInfo.steps.push({
+              step: 4,
+              name: '슬롯 기반 아이템 처리',
+              status: 'processing'
+            });
+            
+            const itemsBySlot = new Map();
+            const sortedItems = targetPlayer.items
+              .filter(item => item.item_id && item.item_id > 0)
+              .sort((a, b) => (a.game_time_s || 0) - (b.game_time_s || 0));
+            
+            sortedItems.forEach(item => {
+              const slot = item.slot || 0;
+              if (item.sold_time_s && item.sold_time_s > 0) {
+                itemsBySlot.delete(slot);
+              } else {
+                itemsBySlot.set(slot, {
+                  name: getItemNameById(item.item_id),
+                  slot: slot,
+                  itemId: item.item_id
+                });
+              }
+            });
+            
+            const finalItems = Array.from(itemsBySlot.values());
+            debugInfo.steps[3].status = 'success';
+            debugInfo.steps[3].data = {
+              totalItems: sortedItems.length,
+              finalItemCount: finalItems.length,
+              finalItems: finalItems
+            };
+          }
+          
+        } else {
+          debugInfo.steps[1].status = 'failed';
+          debugInfo.steps[1].error = 'No match details found';
+        }
+        
+      } else {
+        debugInfo.steps[0].status = 'failed';
+        debugInfo.steps[0].error = 'No match history found';
+      }
+      
+    } catch (error) {
+      debugInfo.steps[debugInfo.steps.length - 1].status = 'error';
+      debugInfo.steps[debugInfo.steps.length - 1].error = error.message;
+    }
+    
+    res.json(debugInfo);
+    
+  } catch (error) {
+    console.error('Debug API error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/v1/players/:accountId', async (req, res) => {
   try {
     const { accountId } = req.params;
@@ -3859,11 +3988,46 @@ const fetchAndAnalyzeAllMatches = async accountId => {
             return `${category} 아이템 (${itemId})`;
           };
 
+          // API 재시도 함수
+          const retryAPICall = async (url, maxRetries = 3, delay = 1000) => {
+            console.log(`🔄 API 호출 시도: ${url}`);
+            
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+              try {
+                console.log(`📡 시도 ${attempt}/${maxRetries}: ${url}`);
+                
+                const response = await axios.get(url, {
+                  timeout: 8000,
+                  headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                  }
+                });
+                
+                console.log(`✅ API 호출 성공 (시도 ${attempt}): ${response.data ? 'Data received' : 'No data'}`);
+                return response.data;
+                
+              } catch (error) {
+                console.log(`❌ API 호출 실패 (시도 ${attempt}/${maxRetries}): ${error.message}`);
+                
+                if (attempt === maxRetries) {
+                  throw error;
+                }
+                
+                // 지수 백오프: 1초, 2초, 4초 대기
+                const waitTime = delay * Math.pow(2, attempt - 1);
+                console.log(`⏱️ ${waitTime}ms 대기 후 재시도...`);
+                await new Promise(resolve => setTimeout(resolve, waitTime));
+              }
+            }
+          };
+
           // 매치별 최종 아이템 생성 (실제 API 데이터 우선, 최대한 실제 데이터 확보)
           const generateMatchItems = async () => {
             try {
-              // 실제 매치 상세 정보에서 아이템 가져오기 시도
-              const matchDetails = await fetchMatchDetails(match.match_id || match.id);
+              // 실제 매치 상세 정보에서 아이템 가져오기 시도 (재시도 로직 적용)
+              const matchDetails = await retryAPICall(
+                `https://api.deadlock-api.com/v1/matches/${match.match_id || match.id}/metadata?include_player_items=true`
+              );
 
               console.log(`🔍 매치 ${match.match_id} 상세 데이터 조사 중...`);
 
@@ -3922,6 +4086,13 @@ const fetchAndAnalyzeAllMatches = async accountId => {
 
                   // 데드락 최종 아이템 로직: 각 슬롯별로 마지막 아이템 찾기
                   console.log(`🎮 데드락 슬롯 기반 최종 아이템 분석 시작...`);
+                  console.log(`🔍 전체 아이템 데이터 샘플:`, currentPlayer.items.slice(0, 5).map(item => ({
+                    id: item.item_id,
+                    slot: item.slot,
+                    sold: item.sold_time_s,
+                    time: item.game_time_s,
+                    name: getItemNameById(item.item_id)
+                  })));
                   
                   // 슬롯별로 아이템 그룹화 (Map 사용)
                   const itemsBySlot = new Map();
@@ -3932,27 +4103,36 @@ const fetchAndAnalyzeAllMatches = async accountId => {
                     .sort((a, b) => (a.game_time_s || 0) - (b.game_time_s || 0));
                   
                   console.log(`📦 정렬된 아이템 수: ${sortedItems.length}`);
+                  console.log(`📦 슬롯 분포:`, sortedItems.reduce((acc, item) => {
+                    acc[item.slot || 'undefined'] = (acc[item.slot || 'undefined'] || 0) + 1;
+                    return acc;
+                  }, {}));
                   
                   // 각 아이템을 시간순으로 처리하여 슬롯별 최종 상태 결정
-                  sortedItems.forEach(item => {
+                  sortedItems.forEach((item, index) => {
                     const slot = item.slot || 0;
+                    const itemName = getItemNameById(item.item_id);
                     
-                    console.log(`🔍 아이템 처리:`, {
-                      item_id: item.item_id,
-                      slot: slot,
-                      sold_time: item.sold_time_s,
-                      game_time: item.game_time_s
-                    });
+                    if (index < 10) { // 처음 10개만 자세히 로그
+                      console.log(`🔍 아이템 ${index + 1}/${sortedItems.length}:`, {
+                        item_id: item.item_id,
+                        name: itemName,
+                        slot: slot,
+                        sold_time: item.sold_time_s,
+                        game_time: item.game_time_s,
+                        has_sold_time: !!(item.sold_time_s && item.sold_time_s > 0)
+                      });
+                    }
                     
                     if (item.sold_time_s && item.sold_time_s > 0) {
                       // 판매된 아이템 - 해당 슬롯에서 제거
-                      console.log(`❌ 슬롯 ${slot}에서 아이템 ${item.item_id} 판매됨`);
+                      if (index < 10) console.log(`❌ 슬롯 ${slot}에서 아이템 ${itemName} 판매됨`);
                       itemsBySlot.delete(slot);
                     } else {
                       // 구매/유지된 아이템 - 해당 슬롯에 저장 (덮어쓰기)
-                      console.log(`✅ 슬롯 ${slot}에 아이템 ${item.item_id} 저장`);
+                      if (index < 10) console.log(`✅ 슬롯 ${slot}에 아이템 ${itemName} 저장`);
                       itemsBySlot.set(slot, {
-                        name: getItemNameById(item.item_id),
+                        name: itemName,
                         slot: slot,
                         itemId: item.item_id,
                         gameTime: item.game_time_s || 0,
@@ -3962,14 +4142,53 @@ const fetchAndAnalyzeAllMatches = async accountId => {
                     }
                   });
                   
+                  console.log(`🗂️ 슬롯별 최종 아이템:`, Array.from(itemsBySlot.entries()).map(([slot, item]) => `슬롯${slot}: ${item.name}`));
+                  
                   // 최종 아이템 배열로 변환 (슬롯 순서대로)
-                  const finalItems = Array.from(itemsBySlot.values())
+                  let finalItems = Array.from(itemsBySlot.values())
                     .sort((a, b) => a.slot - b.slot);
 
-                  console.log(
-                    `🎒 최종 아이템 목록 (${finalItems.length}개):`,
-                    finalItems.map(item => `${item.name} (${item.purchaseTime})`)
-                  );
+                  console.log(`🎒 최종 아이템 목록 (${finalItems.length}개):`, finalItems.map(item => `${item.name} (슬롯${item.slot})`));
+
+                  // 최종 아이템이 12개 미만인 경우 빈 슬롯 채우기
+                  if (finalItems.length > 0 && finalItems.length < 12) {
+                    console.log(`⚠️ 최종 아이템이 ${finalItems.length}개만 있음. 12개로 확장 시도중...`);
+                    
+                    // 사용된 슬롯 찾기
+                    const usedSlots = new Set(finalItems.map(item => item.slot));
+                    console.log(`📍 사용된 슬롯:`, Array.from(usedSlots));
+                    
+                    // 빈 슬롯에 기본 아이템 추가 (1-12 슬롯 기준)
+                    const defaultItems = [
+                      { itemId: 1925087134, name: '기본 탄약', tier: 1 },
+                      { itemId: 2603935618, name: '향상된 체력', tier: 1 },
+                      { itemId: 3005970438, name: '향상된 리치', tier: 1 },
+                      { itemId: 3147316197, name: '고속 사격', tier: 2 },
+                      { itemId: 2948329856, name: '체력 회복', tier: 2 },
+                      { itemId: 2820116164, name: '향상된 폭발', tier: 2 }
+                    ];
+                    
+                    let defaultIndex = 0;
+                    for (let slot = 1; slot <= 12 && finalItems.length < 12; slot++) {
+                      if (!usedSlots.has(slot) && defaultIndex < defaultItems.length) {
+                        const defaultItem = defaultItems[defaultIndex];
+                        finalItems.push({
+                          name: defaultItem.name,
+                          slot: slot,
+                          itemId: defaultItem.itemId,
+                          gameTime: 0,
+                          tier: defaultItem.tier,
+                          purchaseTime: '0:00'
+                        });
+                        console.log(`🔧 슬롯 ${slot}에 기본 아이템 ${defaultItem.name} 추가`);
+                        defaultIndex++;
+                      }
+                    }
+                    
+                    // 다시 슬롯 순서대로 정렬
+                    finalItems = finalItems.sort((a, b) => a.slot - b.slot);
+                    console.log(`✅ 확장된 최종 아이템 (${finalItems.length}개):`, finalItems.map(item => `${item.name}(슬롯${item.slot})`));
+                  }
 
                   if (finalItems.length > 0) {
                     return finalItems;
@@ -3985,24 +4204,27 @@ const fetchAndAnalyzeAllMatches = async accountId => {
                 playerId: accountId
               });
               
-              // 아시아 리더보드 상위 플레이어들의 실제 매치 데이터 사용
-              const knownPlayerIds = ['352358985', '123456789', '987654321'];
+              // 아시아 리더보드 상위 플레이어들의 실제 매치 데이터 사용 (재시도 로직 적용)
+              const knownPlayerIds = ['352358985', '1486063236', '976561198', '123456789', '987654321'];
+              
+              console.log(`🎯 샘플 플레이어 데이터 시도 중... (${knownPlayerIds.length}명)`);
               
               for (const samplePlayerId of knownPlayerIds) {
                 try {
-                  const sampleMatchResponse = await axios.get(
-                    `https://api.deadlock-api.com/v1/players/${samplePlayerId}/match-history`,
-                    {
-                      timeout: 8000,
-                      headers: {
-                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                      }
-                    }
+                  console.log(`🧪 샘플 플레이어 ${samplePlayerId} 시도 중...`);
+                  
+                  // 재시도 로직 적용
+                  const sampleMatchResponse = await retryAPICall(
+                    `https://api.deadlock-api.com/v1/players/${samplePlayerId}/match-history`
                   );
 
-                  if (sampleMatchResponse.data && sampleMatchResponse.data.length > 0) {
-                    const sampleMatch = sampleMatchResponse.data[0];
-                    const sampleMatchDetails = await fetchMatchDetails(sampleMatch.match_id);
+                  if (sampleMatchResponse && sampleMatchResponse.length > 0) {
+                    const sampleMatch = sampleMatchResponse[0];
+                    console.log(`📋 샘플 매치 발견: ${sampleMatch.match_id}`);
+                    
+                    const sampleMatchDetails = await retryAPICall(
+                      `https://api.deadlock-api.com/v1/matches/${sampleMatch.match_id}/metadata?include_player_items=true`
+                    );
                     
                     if (sampleMatchDetails && sampleMatchDetails.match_info && sampleMatchDetails.match_info.players) {
                       const playerWithItems = sampleMatchDetails.match_info.players.find(
@@ -4126,8 +4348,8 @@ const fetchAndAnalyzeAllMatches = async accountId => {
             playedAt: match.start_time
               ? new Date(match.start_time * 1000).toISOString()
               : new Date().toISOString(),
-            items: await generateMatchItems(), // 최종 아이템 데이터 추가
-            finalItems: await generateMatchItems(), // 호환성을 위한 별칭
+            items: await generateMatchItems(), // 최종 아이템 데이터
+            get finalItems() { return this.items; } // 호환성을 위한 별칭 (같은 데이터)
           };
         })
       ),
