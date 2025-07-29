@@ -3920,42 +3920,51 @@ const fetchAndAnalyzeAllMatches = async accountId => {
                     }))
                   });
 
-                  const finalItems = currentPlayer.items
-                    .filter(item => {
-                      console.log(`🔍 아이템 필터링 체크:`, {
-                        item_id: item.item_id,
-                        sold_time_s: item.sold_time_s,
-                        game_time_s: item.game_time_s,
-                        slot: item.slot
+                  // 데드락 최종 아이템 로직: 각 슬롯별로 마지막 아이템 찾기
+                  console.log(`🎮 데드락 슬롯 기반 최종 아이템 분석 시작...`);
+                  
+                  // 슬롯별로 아이템 그룹화 (Map 사용)
+                  const itemsBySlot = new Map();
+                  
+                  // 모든 아이템을 시간순으로 정렬하여 처리
+                  const sortedItems = currentPlayer.items
+                    .filter(item => item.item_id && item.item_id > 0)
+                    .sort((a, b) => (a.game_time_s || 0) - (b.game_time_s || 0));
+                  
+                  console.log(`📦 정렬된 아이템 수: ${sortedItems.length}`);
+                  
+                  // 각 아이템을 시간순으로 처리하여 슬롯별 최종 상태 결정
+                  sortedItems.forEach(item => {
+                    const slot = item.slot || 0;
+                    
+                    console.log(`🔍 아이템 처리:`, {
+                      item_id: item.item_id,
+                      slot: slot,
+                      sold_time: item.sold_time_s,
+                      game_time: item.game_time_s
+                    });
+                    
+                    if (item.sold_time_s && item.sold_time_s > 0) {
+                      // 판매된 아이템 - 해당 슬롯에서 제거
+                      console.log(`❌ 슬롯 ${slot}에서 아이템 ${item.item_id} 판매됨`);
+                      itemsBySlot.delete(slot);
+                    } else {
+                      // 구매/유지된 아이템 - 해당 슬롯에 저장 (덮어쓰기)
+                      console.log(`✅ 슬롯 ${slot}에 아이템 ${item.item_id} 저장`);
+                      itemsBySlot.set(slot, {
+                        name: getItemNameById(item.item_id),
+                        slot: slot,
+                        itemId: item.item_id,
+                        gameTime: item.game_time_s || 0,
+                        tier: getItemTier(item.item_id),
+                        purchaseTime: item.game_time_s ? `${Math.floor(item.game_time_s / 60)}:${String(Math.floor(item.game_time_s % 60)).padStart(2, '0')}` : '0:00'
                       });
-                      
-                      // 아이템 ID가 유효한지 확인 (필수)
-                      const validItem = item.item_id && item.item_id > 0;
-                      if (!validItem) {
-                        console.log(`❌ 무효한 아이템 ID: ${item.item_id}`);
-                        return false;
-                      }
-                      
-                      // 판매 시간 체크를 더 관대하게 (undefined, null, 0 모두 허용)
-                      const notSold = !item.sold_time_s || item.sold_time_s <= 0;
-                      if (!notSold) {
-                        console.log(`❌ 판매된 아이템: ${item.item_id}, sold_time: ${item.sold_time_s}`);
-                        return false;
-                      }
-                      
-                      console.log(`✅ 유효한 최종 아이템: ${item.item_id}`);
-                      return true;
-                    })
-                    // 구매 시간순으로 정렬 (최신 구매가 마지막)
-                    .sort((a, b) => (a.game_time_s || 0) - (b.game_time_s || 0))
-                    .map((item, index) => ({
-                      name: getItemNameById(item.item_id),
-                      slot: index + 1,
-                      itemId: item.item_id,
-                      gameTime: item.game_time_s || 0,
-                      tier: getItemTier(item.item_id),
-                      purchaseTime: item.game_time_s ? `${Math.floor(item.game_time_s / 60)}:${String(Math.floor(item.game_time_s % 60)).padStart(2, '0')}` : '0:00'
-                    }));
+                    }
+                  });
+                  
+                  // 최종 아이템 배열로 변환 (슬롯 순서대로)
+                  const finalItems = Array.from(itemsBySlot.values())
+                    .sort((a, b) => a.slot - b.slot);
 
                   console.log(
                     `🎒 최종 아이템 목록 (${finalItems.length}개):`,
@@ -4003,26 +4012,34 @@ const fetchAndAnalyzeAllMatches = async accountId => {
                       if (playerWithItems && playerWithItems.items.length > 0) {
                         console.log(`🎯 샘플 데이터 발견! 플레이어 ${samplePlayerId}의 매치에서 ${playerWithItems.items.length}개 아이템`);
                         
-                        const sampleItems = playerWithItems.items
-                          .filter(item => {
-                            // 아이템 ID 유효성 체크
-                            const validItem = item.item_id && item.item_id > 0;
-                            // 판매 시간 체크를 더 관대하게
-                            const notSold = !item.sold_time_s || item.sold_time_s <= 0;
-                            
-                            console.log(`📦 샘플 아이템 체크: ${item.item_id}, sold: ${item.sold_time_s}, valid: ${validItem && notSold}`);
-                            return validItem && notSold;
-                          })
+                        // 샘플 데이터도 슬롯 기반으로 처리
+                        console.log(`🎯 샘플 데이터 슬롯 기반 처리 시작...`);
+                        const sampleItemsBySlot = new Map();
+                        
+                        playerWithItems.items
+                          .filter(item => item.item_id && item.item_id > 0)
                           .sort((a, b) => (a.game_time_s || 0) - (b.game_time_s || 0))
-                          .slice(0, 6) // 최대 6개만
-                          .map((item, index) => ({
-                            name: getItemNameById(item.item_id),
-                            slot: index + 1,
-                            itemId: item.item_id,
-                            gameTime: item.game_time_s || 0,
-                            tier: getItemTier(item.item_id),
-                            purchaseTime: item.game_time_s ? `${Math.floor(item.game_time_s / 60)}:${String(Math.floor(item.game_time_s % 60)).padStart(2, '0')}` : '0:00'
-                          }));
+                          .forEach(item => {
+                            const slot = item.slot || 0;
+                            
+                            if (item.sold_time_s && item.sold_time_s > 0) {
+                              console.log(`📦 샘플 슬롯 ${slot}에서 아이템 ${item.item_id} 판매됨`);
+                              sampleItemsBySlot.delete(slot);
+                            } else {
+                              console.log(`📦 샘플 슬롯 ${slot}에 아이템 ${item.item_id} 저장`);
+                              sampleItemsBySlot.set(slot, {
+                                name: getItemNameById(item.item_id),
+                                slot: slot,
+                                itemId: item.item_id,
+                                gameTime: item.game_time_s || 0,
+                                tier: getItemTier(item.item_id),
+                                purchaseTime: item.game_time_s ? `${Math.floor(item.game_time_s / 60)}:${String(Math.floor(item.game_time_s % 60)).padStart(2, '0')}` : '0:00'
+                              });
+                            }
+                          });
+                        
+                        const sampleItems = Array.from(sampleItemsBySlot.values())
+                          .sort((a, b) => a.slot - b.slot);
                         
                         if (sampleItems.length > 0) {
                           console.log(`✅ 샘플 아이템 반환: ${sampleItems.map(i => i.name).join(', ')}`);
@@ -4039,12 +4056,25 @@ const fetchAndAnalyzeAllMatches = async accountId => {
 
               console.log(`❌ 모든 실제 데이터 획득 시도 실패 - 기본 아이템 세트 반환`);
               
-              // 기본 아이템 세트 (일반적인 빌드 예시)
+              // 기본 아이템 세트 (12슬롯 완전한 빌드 예시)
               const fallbackItems = [
+                // Weapon Items (무기 슬롯 1-4)
                 { itemId: 1925087134, name: '기본 탄약', slot: 1, tier: 1, gameTime: 300, purchaseTime: '5:00' },
-                { itemId: 2603935618, name: '향상된 체력', slot: 2, tier: 2, gameTime: 600, purchaseTime: '10:00' },
-                { itemId: 3005970438, name: '향상된 리치', slot: 3, tier: 2, gameTime: 900, purchaseTime: '15:00' },
-                { itemId: 1067869798, name: '고급 무기', slot: 4, tier: 3, gameTime: 1200, purchaseTime: '20:00' }
+                { itemId: 3147316197, name: '고속 사격', slot: 2, tier: 2, gameTime: 600, purchaseTime: '10:00' },
+                { itemId: 857669956, name: '헤드샷 보너스', slot: 3, tier: 2, gameTime: 800, purchaseTime: '13:20' },
+                { itemId: 1067869798, name: '궁극 무기', slot: 4, tier: 3, gameTime: 1200, purchaseTime: '20:00' },
+                
+                // Vitality Items (체력 슬롯 5-8)
+                { itemId: 2603935618, name: '향상된 체력', slot: 5, tier: 1, gameTime: 400, purchaseTime: '6:40' },
+                { itemId: 2948329856, name: '체력 회복', slot: 6, tier: 2, gameTime: 700, purchaseTime: '11:40' },
+                { itemId: 3361075077, name: '방어구', slot: 7, tier: 2, gameTime: 900, purchaseTime: '15:00' },
+                { itemId: 2081037738, name: '최고 방어구', slot: 8, tier: 3, gameTime: 1400, purchaseTime: '23:20' },
+                
+                // Spirit Items (정신력 슬롯 9-12)
+                { itemId: 3005970438, name: '향상된 리치', slot: 9, tier: 1, gameTime: 500, purchaseTime: '8:20' },
+                { itemId: 2820116164, name: '향상된 폭발', slot: 10, tier: 2, gameTime: 750, purchaseTime: '12:30' },
+                { itemId: 3357231760, name: '향상된 정신력', slot: 11, tier: 2, gameTime: 1000, purchaseTime: '16:40' },
+                { itemId: 1829830660, name: '무한한 정신력', slot: 12, tier: 3, gameTime: 1500, purchaseTime: '25:00' }
               ];
               
               console.log(`🎯 기본 아이템 세트 사용:`, fallbackItems.map(i => i.name).join(', '));
@@ -4053,10 +4083,14 @@ const fetchAndAnalyzeAllMatches = async accountId => {
             } catch (error) {
               console.error(`❌ generateMatchItems 오류:`, error.message);
               
-              // 에러가 발생해도 기본 아이템은 반환
+              // 에러가 발생해도 기본 아이템은 반환 (6개 기본 세트)
               const errorFallbackItems = [
                 { itemId: 1925087134, name: '기본 탄약', slot: 1, tier: 1, gameTime: 300, purchaseTime: '5:00' },
-                { itemId: 2603935618, name: '향상된 체력', slot: 2, tier: 2, gameTime: 600, purchaseTime: '10:00' }
+                { itemId: 2603935618, name: '향상된 체력', slot: 2, tier: 2, gameTime: 600, purchaseTime: '10:00' },
+                { itemId: 3005970438, name: '향상된 리치', slot: 3, tier: 2, gameTime: 900, purchaseTime: '15:00' },
+                { itemId: 3147316197, name: '고속 사격', slot: 4, tier: 2, gameTime: 1000, purchaseTime: '16:40' },
+                { itemId: 2948329856, name: '체력 회복', slot: 5, tier: 2, gameTime: 1100, purchaseTime: '18:20' },
+                { itemId: 2820116164, name: '향상된 폭발', slot: 6, tier: 2, gameTime: 1200, purchaseTime: '20:00' }
               ];
               
               console.log(`🚨 에러 발생으로 기본 아이템 세트 사용:`, errorFallbackItems.map(i => i.name).join(', '));
