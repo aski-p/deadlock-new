@@ -594,7 +594,7 @@ const getUserTopHero = async (req, res, next) => {
         const heroImageMap = {
           Abrams: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp',
           Bebop: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp',
-          Dynamo: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/dynamo_card.webp',
+          Dynamo: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/sumo_card.webp',
           'Grey Talon': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/archer_card.webp',
           Haze: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/haze_card.webp',
           Infernus: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/inferno_card.webp',

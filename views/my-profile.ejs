@@ -75,10 +75,6 @@
                         <div class="stat-value" id="stat-endorsements">0</div>
                         <div class="stat-label">추천수</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-duration">0:00</div>
-                        <div class="stat-label">평균 매치 시간</div>
-                    </div>
                 </div>
             </div>
 
@@ -1328,10 +1324,6 @@ function updatePlayerUIFast(player, heroStats, matchHistory, partyStats) {
         document.getElementById('stat-denies').textContent = (typeof denies === 'number' ? denies : parseInt(denies) || 0).toLocaleString();
         document.getElementById('stat-endorsements').textContent = (typeof endorsements === 'number' ? endorsements : parseInt(endorsements) || 0).toLocaleString();
         
-        // 평균 매치 시간 업데이트 (avgMatchDuration이 있다면)
-        if (window.playerData && window.playerData.stats && window.playerData.stats.avgMatchDuration) {
-            document.getElementById('stat-duration').textContent = window.playerData.stats.avgMatchDuration;
-        }
         
         console.log('✅ 기본 UI 업데이트 완료');
         
@@ -1411,10 +1403,6 @@ function updatePlayerUI(player) {
     document.getElementById('stat-damage').textContent = player.stats.damagePerMin.toLocaleString();
     document.getElementById('stat-healing').textContent = player.stats.healingPerMin.toLocaleString();
     
-    // 평균 매치 시간 업데이트 (deadlock.coach 스타일)
-    if (player.stats.avgMatchDuration) {
-        document.getElementById('stat-duration').textContent = player.stats.avgMatchDuration;
-    }
     
     loadHeroStats(player.accountId);
     loadMatchHistory(player.accountId);
