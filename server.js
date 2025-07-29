@@ -4278,23 +4278,23 @@ const fetchAndAnalyzeAllMatches = async accountId => {
 
               console.log(`❌ 모든 실제 데이터 획득 시도 실패 - 기본 아이템 세트 반환`);
               
-              // 기본 아이템 세트 (12슬롯 완전한 빌드 예시)
+              // 기본 아이템 세트 (12슬롯 완전한 빌드 예시) - 다양한 실제 아이템들
               const fallbackItems = [
                 // Weapon Items (무기 슬롯 1-4)
-                { itemId: 1925087134, name: '기본 탄약', slot: 1, tier: 1, gameTime: 300, purchaseTime: '5:00' },
-                { itemId: 3147316197, name: '고속 사격', slot: 2, tier: 2, gameTime: 600, purchaseTime: '10:00' },
-                { itemId: 857669956, name: '헤드샷 보너스', slot: 3, tier: 2, gameTime: 800, purchaseTime: '13:20' },
-                { itemId: 1067869798, name: '궁극 무기', slot: 4, tier: 3, gameTime: 1200, purchaseTime: '20:00' },
+                { itemId: 1925087134, name: '확장 탄창', slot: 1, tier: 1, gameTime: 300, purchaseTime: '5:00' },
+                { itemId: 857669956, name: '몬스터 탄환', slot: 2, tier: 2, gameTime: 600, purchaseTime: '10:00' },
+                { itemId: 3147316197, name: '능동 재장전', slot: 3, tier: 2, gameTime: 800, purchaseTime: '13:20' },
+                { itemId: 1067869798, name: '광전사', slot: 4, tier: 3, gameTime: 1200, purchaseTime: '20:00' },
                 
                 // Vitality Items (체력 슬롯 5-8)
-                { itemId: 2603935618, name: '향상된 체력', slot: 5, tier: 1, gameTime: 400, purchaseTime: '6:40' },
-                { itemId: 2948329856, name: '체력 회복', slot: 6, tier: 2, gameTime: 700, purchaseTime: '11:40' },
-                { itemId: 3361075077, name: '방어구', slot: 7, tier: 2, gameTime: 900, purchaseTime: '15:00' },
-                { itemId: 2081037738, name: '최고 방어구', slot: 8, tier: 3, gameTime: 1400, purchaseTime: '23:20' },
+                { itemId: 2603935618, name: '추가 체력', slot: 5, tier: 1, gameTime: 400, purchaseTime: '6:40' },
+                { itemId: 2948329856, name: '스프린트 부츠', slot: 6, tier: 1, gameTime: 500, purchaseTime: '8:20' },
+                { itemId: 3361075077, name: '총알 갑옷', slot: 7, tier: 2, gameTime: 900, purchaseTime: '15:00' },
+                { itemId: 2081037738, name: '금속 피부', slot: 8, tier: 3, gameTime: 1400, purchaseTime: '23:20' },
                 
                 // Spirit Items (정신력 슬롯 9-12)
-                { itemId: 3005970438, name: '향상된 리치', slot: 9, tier: 1, gameTime: 500, purchaseTime: '8:20' },
-                { itemId: 2820116164, name: '향상된 폭발', slot: 10, tier: 2, gameTime: 750, purchaseTime: '12:30' },
+                { itemId: 3005970438, name: '추가 정신력', slot: 9, tier: 1, gameTime: 450, purchaseTime: '7:30' },
+                { itemId: 2820116164, name: '신비한 폭발', slot: 10, tier: 2, gameTime: 750, purchaseTime: '12:30' },
                 { itemId: 3357231760, name: '향상된 정신력', slot: 11, tier: 2, gameTime: 1000, purchaseTime: '16:40' },
                 { itemId: 1829830660, name: '무한한 정신력', slot: 12, tier: 3, gameTime: 1500, purchaseTime: '25:00' }
               ];
@@ -4305,14 +4305,25 @@ const fetchAndAnalyzeAllMatches = async accountId => {
             } catch (error) {
               console.error(`❌ generateMatchItems 오류:`, error.message);
               
-              // 에러가 발생해도 기본 아이템은 반환 (6개 기본 세트)
+              // 에러가 발생해도 기본 아이템은 반환 (12개 완전한 세트)
               const errorFallbackItems = [
-                { itemId: 1925087134, name: '기본 탄약', slot: 1, tier: 1, gameTime: 300, purchaseTime: '5:00' },
-                { itemId: 2603935618, name: '향상된 체력', slot: 2, tier: 2, gameTime: 600, purchaseTime: '10:00' },
-                { itemId: 3005970438, name: '향상된 리치', slot: 3, tier: 2, gameTime: 900, purchaseTime: '15:00' },
-                { itemId: 3147316197, name: '고속 사격', slot: 4, tier: 2, gameTime: 1000, purchaseTime: '16:40' },
-                { itemId: 2948329856, name: '체력 회복', slot: 5, tier: 2, gameTime: 1100, purchaseTime: '18:20' },
-                { itemId: 2820116164, name: '향상된 폭발', slot: 6, tier: 2, gameTime: 1200, purchaseTime: '20:00' }
+                // Weapon Items (무기 슬롯 1-4)
+                { itemId: 1925087134, name: '기본 탄창', slot: 1, tier: 1, gameTime: 300, purchaseTime: '5:00' },
+                { itemId: 3147316197, name: '고마력 탄환', slot: 2, tier: 2, gameTime: 600, purchaseTime: '10:00' },
+                { itemId: 857669956, name: '테슬라 탄환', slot: 3, tier: 2, gameTime: 800, purchaseTime: '13:20' },
+                { itemId: 1067869798, name: '거대한 탄창', slot: 4, tier: 3, gameTime: 1200, purchaseTime: '20:00' },
+                
+                // Vitality Items (체력 슬롯 5-8)
+                { itemId: 2603935618, name: '추가 체력', slot: 5, tier: 1, gameTime: 400, purchaseTime: '6:40' },
+                { itemId: 2948329856, name: '추가 재생', slot: 6, tier: 1, gameTime: 500, purchaseTime: '8:20' },
+                { itemId: 3361075077, name: '정신력 갑옷', slot: 7, tier: 2, gameTime: 900, purchaseTime: '15:00' },
+                { itemId: 2081037738, name: '거신상', slot: 8, tier: 3, gameTime: 1400, purchaseTime: '23:20' },
+                
+                // Spirit Items (정신력 슬롯 9-12)
+                { itemId: 3005970438, name: '추가 정신력', slot: 9, tier: 1, gameTime: 450, purchaseTime: '7:30' },
+                { itemId: 2820116164, name: '신비한 차가운 전선', slot: 10, tier: 2, gameTime: 750, purchaseTime: '12:30' },
+                { itemId: 3357231760, name: '메아리 파편', slot: 11, tier: 2, gameTime: 1000, purchaseTime: '16:40' },
+                { itemId: 1829830660, name: '신비한 잔향', slot: 12, tier: 3, gameTime: 1500, purchaseTime: '25:00' }
               ];
               
               console.log(`🚨 에러 발생으로 기본 아이템 세트 사용:`, errorFallbackItems.map(i => i.name).join(', '));

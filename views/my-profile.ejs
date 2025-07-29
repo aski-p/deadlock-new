@@ -2640,8 +2640,8 @@ function displayMatchHistory(matches) {
                         
                         console.log(`🔍 아이템 ${itemIndex}: ${itemName} (ID: ${itemId}, Tier: ${itemTier})`);
                         
-                        // 기본 이미지 URL 생성
-                        const imageUrl = `https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp`;
+                        // 아이템별 이미지 URL 생성 (한국어 이름 기반)
+                        const imageUrl = getItemImageUrl(itemName) || `https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp`;
                         
                         return `
                             <div class="item-wrapper">
