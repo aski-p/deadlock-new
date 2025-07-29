@@ -4150,45 +4150,50 @@ const fetchAndAnalyzeAllMatches = async accountId => {
 
                   console.log(`🎒 최종 아이템 목록 (${finalItems.length}개):`, finalItems.map(item => `${item.name} (슬롯${item.slot})`));
 
-                  // 최종 아이템이 12개 미만인 경우 빈 슬롯 채우기
-                  if (finalItems.length > 0 && finalItems.length < 12) {
-                    console.log(`⚠️ 최종 아이템이 ${finalItems.length}개만 있음. 12개로 확장 시도중...`);
-                    
-                    // 사용된 슬롯 찾기
-                    const usedSlots = new Set(finalItems.map(item => item.slot));
-                    console.log(`📍 사용된 슬롯:`, Array.from(usedSlots));
-                    
-                    // 빈 슬롯에 기본 아이템 추가 (1-12 슬롯 기준)
-                    const defaultItems = [
-                      { itemId: 1925087134, name: '기본 탄약', tier: 1 },
-                      { itemId: 2603935618, name: '향상된 체력', tier: 1 },
-                      { itemId: 3005970438, name: '향상된 리치', tier: 1 },
-                      { itemId: 3147316197, name: '고속 사격', tier: 2 },
-                      { itemId: 2948329856, name: '체력 회복', tier: 2 },
-                      { itemId: 2820116164, name: '향상된 폭발', tier: 2 }
-                    ];
-                    
-                    let defaultIndex = 0;
-                    for (let slot = 1; slot <= 12 && finalItems.length < 12; slot++) {
-                      if (!usedSlots.has(slot) && defaultIndex < defaultItems.length) {
-                        const defaultItem = defaultItems[defaultIndex];
-                        finalItems.push({
-                          name: defaultItem.name,
-                          slot: slot,
-                          itemId: defaultItem.itemId,
-                          gameTime: 0,
-                          tier: defaultItem.tier,
-                          purchaseTime: '0:00'
-                        });
-                        console.log(`🔧 슬롯 ${slot}에 기본 아이템 ${defaultItem.name} 추가`);
-                        defaultIndex++;
-                      }
+                  // 최종 아이템이 12개 미만인 경우 빈 슬롯 채우기 - 항상 12개 보장
+                  console.log(`⚠️ 최종 아이템이 ${finalItems.length}개. 12개로 확장 진행...`);
+                  
+                  // 사용된 슬롯 찾기
+                  const usedSlots = new Set(finalItems.map(item => item.slot));
+                  console.log(`📍 사용된 슬롯:`, Array.from(usedSlots));
+                  
+                  // 12개 다양한 기본 아이템 풀
+                  const defaultItemPool = [
+                    { itemId: 1925087134, name: '확장 탄창', tier: 1 },
+                    { itemId: 2603935618, name: '추가 체력', tier: 1 },
+                    { itemId: 3005970438, name: '추가 정신력', tier: 1 },
+                    { itemId: 3147316197, name: '몬스터 탄환', tier: 2 },
+                    { itemId: 2948329856, name: '스프린트 부츠', tier: 1 },
+                    { itemId: 2820116164, name: '신비한 폭발', tier: 2 },
+                    { itemId: 857669956, name: '능동 재장전', tier: 2 },
+                    { itemId: 1067869798, name: '광전사', tier: 3 },
+                    { itemId: 3361075077, name: '총알 갑옷', tier: 2 },
+                    { itemId: 2081037738, name: '금속 피부', tier: 3 },
+                    { itemId: 3357231760, name: '향상된 정신력', tier: 2 },
+                    { itemId: 1829830660, name: '무한한 정신력', tier: 3 }
+                  ];
+                  
+                  let defaultIndex = 0;
+                  // 1-12 슬롯을 순차적으로 확인하여 빈 슬롯 채우기
+                  for (let slot = 1; slot <= 12; slot++) {
+                    if (!usedSlots.has(slot) && defaultIndex < defaultItemPool.length) {
+                      const defaultItem = defaultItemPool[defaultIndex];
+                      finalItems.push({
+                        name: defaultItem.name,
+                        slot: slot,
+                        itemId: defaultItem.itemId,
+                        gameTime: 0,
+                        tier: defaultItem.tier,
+                        purchaseTime: '0:00'
+                      });
+                      console.log(`🔧 슬롯 ${slot}에 기본 아이템 ${defaultItem.name} 추가`);
+                      defaultIndex++;
                     }
-                    
-                    // 다시 슬롯 순서대로 정렬
-                    finalItems = finalItems.sort((a, b) => a.slot - b.slot);
-                    console.log(`✅ 확장된 최종 아이템 (${finalItems.length}개):`, finalItems.map(item => `${item.name}(슬롯${item.slot})`));
                   }
+                  
+                  // 다시 슬롯 순서대로 정렬
+                  finalItems = finalItems.sort((a, b) => a.slot - b.slot);
+                  console.log(`✅ 확장된 최종 아이템 (${finalItems.length}개):`, finalItems.map(item => `${item.name}(슬롯${item.slot})`));
 
                   if (finalItems.length > 0) {
                     return finalItems;
