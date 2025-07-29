@@ -1096,10 +1096,20 @@ function getCountryImage(countryFlag) {
 function populatePlayerData(data) {
     console.log('🎨 기본 프로필 데이터로 UI 업데이트:', data);
     
-    // 기본 정보 업데이트
-    document.getElementById('player-avatar').src = data.avatar || 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg';
-    document.getElementById('player-name').textContent = data.name || 'Unknown Player';
-    document.getElementById('player-country').innerHTML = getCountryImage(data.country || '🌍');
+    // 기본 정보 업데이트 (안전한 요소 체크)
+    const playerAvatar = document.getElementById('player-avatar');
+    const playerName = document.getElementById('player-name');
+    const playerCountry = document.getElementById('player-country');
+    
+    if (playerAvatar) {
+        playerAvatar.src = data.avatar || 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg';
+    }
+    if (playerName) {
+        playerName.textContent = data.name || 'Unknown Player';
+    }
+    if (playerCountry) {
+        playerCountry.innerHTML = getCountryImage(data.country || '🌍');
+    }
     
     // 랭크 정보 업데이트
     const rankMedal = document.getElementById('rank-medal');
@@ -1121,37 +1131,47 @@ function populatePlayerData(data) {
         rankScore.textContent = data.rank?.score || '0';
     }
     
-    // 기본 스탯 업데이트
+    // 기본 스탯 업데이트 (안전한 요소 체크)
     const stats = data.stats || {};
-    document.getElementById('stat-matches').textContent = stats.matches || '0';
-    document.getElementById('stat-winrate').textContent = `${stats.winRate || 0}%`;
-    document.getElementById('stat-lane-winrate').textContent = `${stats.laneWinRate || 0}%`;
-    document.getElementById('stat-kda').textContent = stats.kda || '0.0';
-    document.getElementById('stat-headshots').textContent = `${stats.headshotPct || 0}%`;
-    document.getElementById('stat-souls').textContent = stats.soulsPerMin || '0';
-    document.getElementById('stat-damage').textContent = stats.denies || '0';
-    document.getElementById('stat-healing').textContent = stats.endorsements || '0';
+    const statElements = [
+        { id: 'stat-matches', value: stats.matches || '0' },
+        { id: 'stat-winrate', value: `${stats.winRate || 0}%` },
+        { id: 'stat-lane-winrate', value: `${stats.laneWinRate || 0}%` },
+        { id: 'stat-kda', value: stats.kda || '0.0' },
+        { id: 'stat-headshots', value: `${stats.headshotPct || 0}%` },
+        { id: 'stat-souls', value: stats.soulsPerMin || '0' },
+        { id: 'stat-damage', value: stats.denies || '0' },
+        { id: 'stat-healing', value: stats.endorsements || '0' }
+    ];
+    
+    statElements.forEach(({ id, value }) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = value;
+        } else {
+            console.warn(`⚠️ 요소를 찾을 수 없음: ${id}`);
+        }
+    });
 }
 
 function showSkeletonLoading() {
     console.log('💀 스켈레톤 로딩 UI 표시');
     
-    // 영웅, 매치, 파티 섹션에 스켈레톤 UI 표시
-    const heroesGrid = document.getElementById('heroes-grid');
-    const matchesList = document.getElementById('matches-list');
-    const partyMembersList = document.getElementById('party-members-list');
+    // 영웅, 매치, 파티 섹션에 스켈레톤 UI 표시 (안전한 요소 체크)
+    const skeletonElements = [
+        { id: 'heroes-grid', message: '영웅 데이터 로딩 중...' },
+        { id: 'matches-list', message: '매치 데이터 로딩 중...' },
+        { id: 'party-members-list', message: '파티 데이터 로딩 중...' }
+    ];
     
-    if (heroesGrid) {
-        heroesGrid.innerHTML = '<div class="skeleton-loading">영웅 데이터 로딩 중...</div>';
-    }
-    
-    if (matchesList) {
-        matchesList.innerHTML = '<div class="skeleton-loading">매치 데이터 로딩 중...</div>';
-    }
-    
-    if (partyMembersList) {
-        partyMembersList.innerHTML = '<div class="skeleton-loading">파티 데이터 로딩 중...</div>';
-    }
+    skeletonElements.forEach(({ id, message }) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.innerHTML = `<div class="skeleton-loading">${message}</div>`;
+        } else {
+            console.warn(`⚠️ 스켈레톤 요소를 찾을 수 없음: ${id}`);
+        }
+    });
 }
 
 async function loadMyProfileData() {
@@ -1159,9 +1179,17 @@ async function loadMyProfileData() {
     const content = document.getElementById('player-content');
     const error = document.getElementById('profile-error');
     
+    // DOM 요소 존재 확인
+    if (!loading || !content) {
+        console.error('❌ 필수 DOM 요소를 찾을 수 없습니다');
+        return;
+    }
+    
     loading.style.display = 'flex';
     content.style.display = 'none';
-    error.style.display = 'none';
+    if (error) {
+        error.style.display = 'none';
+    }
     
     try {
         const accountId = '<%= accountId %>';
@@ -1172,25 +1200,10 @@ async function loadMyProfileData() {
             throw new Error('Account ID가 유효하지 않습니다. 다시 로그인해주세요.');
         }
         
-        // Progressive Loading 구현: 빠른 기본 정보 먼저 로드
-        console.log('⚡ 빠른 프로필 데이터 로드 시작...');
+        // Progressive Loading - 임시 비활성화 (안정성을 위해)
+        console.log('🔄 기본 프로필 데이터 로딩 시작...');
         
-        // 1단계: 빠른 기본 정보 로드하여 즉시 UI 표시
-        const quickResponse = await fetch(`/api/v1/players/${accountId}/quick`);
-        if (quickResponse.ok) {
-            const quickData = await quickResponse.json();
-            console.log('💨 빠른 데이터 로드 완료:', quickData);
-            
-            // 기본 정보로 UI 즉시 업데이트
-            populatePlayerData(quickData);
-            showSkeletonLoading();
-            
-            // 로딩 숨기고 컨텐츠 표시
-            loading.style.display = 'none';
-            content.style.display = 'block';
-        }
-        
-        // 2단계: 상세 데이터를 병렬로 로드 (백그라운드)
+        // 상세 데이터를 병렬로 로드
         console.log('🔄 상세 API 호출 시작...');
         const [playerResponse, heroStatsResponse, matchHistoryResponse, partyStatsResponse] = await Promise.all([
             fetch(`/api/v1/players/${accountId}`),
@@ -1221,23 +1234,32 @@ async function loadMyProfileData() {
         });
         
         if (playerResponse.ok && playerData) {
-            // 3단계: 상세 데이터로 UI 최종 업데이트
-            console.log('🎯 상세 데이터로 UI 최종 업데이트');
+            // UI 업데이트
+            console.log('🎯 프로필 데이터로 UI 업데이트');
             updatePlayerUIFast(playerData, heroStats, matchHistory, partyStats);
-            console.log('✅ Progressive Loading 완료 - 모든 데이터 로딩됨');
+            loading.style.display = 'none';
+            content.style.display = 'block';
+            console.log('✅ 프로필 데이터 로딩 완료');
         } else {
-            console.warn('⚠️ 상세 데이터 로딩 실패, 기본 데이터만 표시');
-            // 기본 데이터만으로도 UI는 이미 표시되었으므로 에러로 처리하지 않음
+            throw new Error(playerData?.error || `플레이어 데이터 로딩 실패 (상태: ${playerResponse.status})`);
         }
         
     } catch (err) {
         console.error('❌ 프로필 데이터 로딩 실패:', err);
-        loading.style.display = 'none';
-        error.style.display = 'block';
+        
+        // 안전한 요소 조작
+        if (loading) {
+            loading.style.display = 'none';
+        }
+        if (error) {
+            error.style.display = 'block';
+        }
         
         const errorMessageEl = document.getElementById('error-message');
         if (errorMessageEl) {
             errorMessageEl.textContent = `오류 상세: ${err.message || '알 수 없는 오류'}`;
+        } else {
+            console.error('❌ 에러 메시지 요소를 찾을 수 없음');
         }
     }
 }
