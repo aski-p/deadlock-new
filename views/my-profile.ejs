@@ -1032,6 +1032,31 @@
         min-width: auto;
     }
 }
+
+/* Skeleton Loading Styles for Progressive Loading */
+.skeleton-loading {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    animation: skeleton-pulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes skeleton-pulse {
+    0% {
+        opacity: 0.6;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+.skeleton-loading::before {
+    content: "⏳ ";
+    margin-right: 8px;
+}
 </style>
 
 <script>
@@ -1067,6 +1092,68 @@ function getCountryImage(countryFlag) {
     return flagImageMap[countryFlag] || '<img src="https://flagcdn.com/24x18/un.png" alt="알 수 없음" title="알 수 없음" class="flag-image">';
 }
 
+// Progressive Loading 지원 함수들
+function populatePlayerData(data) {
+    console.log('🎨 기본 프로필 데이터로 UI 업데이트:', data);
+    
+    // 기본 정보 업데이트
+    document.getElementById('player-avatar').src = data.avatar || 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg';
+    document.getElementById('player-name').textContent = data.name || 'Unknown Player';
+    document.getElementById('player-country').innerHTML = getCountryImage(data.country || '🌍');
+    
+    // 랭크 정보 업데이트
+    const rankMedal = document.getElementById('rank-medal');
+    const rankName = document.getElementById('rank-name');
+    const rankScore = document.getElementById('rank-score');
+    
+    if (rankMedal && rankName && rankScore) {
+        const getMedalImage = (medal, subrank) => {
+            const medalRankMap = {
+                'Eternus': 11, 'Phantom': 10, 'Oracle': 9, 'Ritualist': 8,
+                'Alchemist': 7, 'Arcanist': 6, 'Initiate': 5
+            };
+            const rankNumber = medalRankMap[medal] || 5;
+            return `https://cdn.deadlock.coach/vpk/panorama/images/ranked/badges/rank${rankNumber}/badge_sm_subrank${subrank || 1}.webp`;
+        };
+        
+        rankMedal.src = getMedalImage(data.rank?.medal || 'Initiate', data.rank?.subrank || 1);
+        rankName.textContent = data.rank?.medal || 'Initiate';
+        rankScore.textContent = data.rank?.score || '0';
+    }
+    
+    // 기본 스탯 업데이트
+    const stats = data.stats || {};
+    document.getElementById('stat-matches').textContent = stats.matches || '0';
+    document.getElementById('stat-winrate').textContent = `${stats.winRate || 0}%`;
+    document.getElementById('stat-lane-winrate').textContent = `${stats.laneWinRate || 0}%`;
+    document.getElementById('stat-kda').textContent = stats.kda || '0.0';
+    document.getElementById('stat-headshots').textContent = `${stats.headshotPct || 0}%`;
+    document.getElementById('stat-souls').textContent = stats.soulsPerMin || '0';
+    document.getElementById('stat-damage').textContent = stats.denies || '0';
+    document.getElementById('stat-healing').textContent = stats.endorsements || '0';
+}
+
+function showSkeletonLoading() {
+    console.log('💀 스켈레톤 로딩 UI 표시');
+    
+    // 영웅, 매치, 파티 섹션에 스켈레톤 UI 표시
+    const heroesGrid = document.getElementById('heroes-grid');
+    const matchesList = document.getElementById('matches-list');
+    const partyMembersList = document.getElementById('party-members-list');
+    
+    if (heroesGrid) {
+        heroesGrid.innerHTML = '<div class="skeleton-loading">영웅 데이터 로딩 중...</div>';
+    }
+    
+    if (matchesList) {
+        matchesList.innerHTML = '<div class="skeleton-loading">매치 데이터 로딩 중...</div>';
+    }
+    
+    if (partyMembersList) {
+        partyMembersList.innerHTML = '<div class="skeleton-loading">파티 데이터 로딩 중...</div>';
+    }
+}
+
 async function loadMyProfileData() {
     const loading = document.getElementById('player-loading');
     const content = document.getElementById('player-content');
@@ -1085,8 +1172,26 @@ async function loadMyProfileData() {
             throw new Error('Account ID가 유효하지 않습니다. 다시 로그인해주세요.');
         }
         
-        // 병렬로 모든 데이터를 동시에 로드 (캐시 활용으로 성능 최적화)
-        console.log('🔄 API 호출 시작...');
+        // Progressive Loading 구현: 빠른 기본 정보 먼저 로드
+        console.log('⚡ 빠른 프로필 데이터 로드 시작...');
+        
+        // 1단계: 빠른 기본 정보 로드하여 즉시 UI 표시
+        const quickResponse = await fetch(`/api/v1/players/${accountId}/quick`);
+        if (quickResponse.ok) {
+            const quickData = await quickResponse.json();
+            console.log('💨 빠른 데이터 로드 완료:', quickData);
+            
+            // 기본 정보로 UI 즉시 업데이트
+            populatePlayerData(quickData);
+            showSkeletonLoading();
+            
+            // 로딩 숨기고 컨텐츠 표시
+            loading.style.display = 'none';
+            content.style.display = 'block';
+        }
+        
+        // 2단계: 상세 데이터를 병렬로 로드 (백그라운드)
+        console.log('🔄 상세 API 호출 시작...');
         const [playerResponse, heroStatsResponse, matchHistoryResponse, partyStatsResponse] = await Promise.all([
             fetch(`/api/v1/players/${accountId}`),
             fetch(`/api/v1/players/${accountId}/hero-stats`),
@@ -1094,7 +1199,7 @@ async function loadMyProfileData() {
             fetch(`/api/v1/players/${accountId}/party-stats`)
         ]);
         
-        console.log('📡 API 응답 상태:', {
+        console.log('📡 상세 API 응답 상태:', {
             player: playerResponse.status,
             heroStats: heroStatsResponse.status,
             matchHistory: matchHistoryResponse.status,
@@ -1116,13 +1221,13 @@ async function loadMyProfileData() {
         });
         
         if (playerResponse.ok && playerData) {
-            // 빠른 UI 업데이트
+            // 3단계: 상세 데이터로 UI 최종 업데이트
+            console.log('🎯 상세 데이터로 UI 최종 업데이트');
             updatePlayerUIFast(playerData, heroStats, matchHistory, partyStats);
-            loading.style.display = 'none';
-            content.style.display = 'block';
-            console.log('✅ 프로필 데이터 로딩 완료');
+            console.log('✅ Progressive Loading 완료 - 모든 데이터 로딩됨');
         } else {
-            throw new Error(playerData?.error || `플레이어 데이터 로딩 실패 (상태: ${playerResponse.status})`);
+            console.warn('⚠️ 상세 데이터 로딩 실패, 기본 데이터만 표시');
+            // 기본 데이터만으로도 UI는 이미 표시되었으므로 에러로 처리하지 않음
         }
         
     } catch (err) {
