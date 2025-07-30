@@ -1,0 +1,790 @@
+<div class="items-section">
+    <div class="items-container">
+        <!-- Header with filters -->
+        <div class="items-header">
+            <h1 class="page-title">아이템 통계</h1>
+            <p class="page-description">현재 패치의 아이템 인기도와 승률을 확인하세요</p>
+            
+            <!-- Filter controls -->
+            <div class="filter-controls">
+                <div class="filter-group">
+                    <label>패치</label>
+                    <select id="patch-filter" class="filter-select">
+                        <option value="current">현재 패치</option>
+                        <option value="previous">이전 패치</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>영웅</label>
+                    <select id="hero-filter" class="filter-select">
+                        <option value="all-heroes">모든 영웅</option>
+                        <option value="abrams">Abrams</option>
+                        <option value="bebop">Bebop</option>
+                        <option value="dynamo">Dynamo</option>
+                        <option value="grey-talon">Grey Talon</option>
+                        <option value="haze">Haze</option>
+                        <option value="infernus">Infernus</option>
+                        <option value="ivy">Ivy</option>
+                        <option value="kelvin">Kelvin</option>
+                        <option value="lady-geist">Lady Geist</option>
+                        <option value="lash">Lash</option>
+                        <option value="mcginnis">McGinnis</option>
+                        <option value="mo-krill">Mo & Krill</option>
+                        <option value="paradox">Paradox</option>
+                        <option value="pocket">Pocket</option>
+                        <option value="seven">Seven</option>
+                        <option value="shiv">Shiv</option>
+                        <option value="vindicta">Vindicta</option>
+                        <option value="viscous">Viscous</option>
+                        <option value="warden">Warden</option>
+                        <option value="wraith">Wraith</option>
+                        <option value="yamato">Yamato</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label>게임 단계</label>
+                    <select id="game-stage-filter" class="filter-select">
+                        <option value="full-game">전체 게임</option>
+                        <option value="early-game">초반 (0-10분)</option>
+                        <option value="mid-game">중반 (10-25분)</option>
+                        <option value="late-game">후반 (25분+)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading State -->
+        <div class="items-loading" id="items-loading">
+            <div class="loading-spinner"></div>
+            <p>아이템 데이터를 불러오는 중...</p>
+        </div>
+
+        <!-- Item Categories -->
+        <div class="items-content" id="items-content" style="display: none;">
+            <!-- Weapon Items -->
+            <div class="item-category">
+                <div class="category-header">
+                    <img src="https://cdn.deadlock.coach/vpk/panorama/images/icons/bullet_damage.svg" alt="Weapon" class="category-icon">
+                    <h2>무기</h2>
+                    <span class="category-count" id="weapon-count">0개 아이템</span>
+                </div>
+                <div class="items-grid" id="weapon-items">
+                    <!-- Weapon items will be populated here -->
+                </div>
+            </div>
+
+            <!-- Vitality Items -->
+            <div class="item-category">
+                <div class="category-header">
+                    <img src="https://cdn.deadlock.coach/vpk/panorama/images/icons/max_health.svg" alt="Vitality" class="category-icon">
+                    <h2>활력</h2>
+                    <span class="category-count" id="vitality-count">0개 아이템</span>
+                </div>
+                <div class="items-grid" id="vitality-items">
+                    <!-- Vitality items will be populated here -->
+                </div>
+            </div>
+
+            <!-- Spirit Items -->
+            <div class="item-category">
+                <div class="category-header">
+                    <img src="https://cdn.deadlock.coach/vpk/panorama/images/icons/tech_damage.svg" alt="Spirit" class="category-icon">
+                    <h2>정신력</h2>
+                    <span class="category-count" id="spirit-count">0개 아이템</span>
+                </div>
+                <div class="items-grid" id="spirit-items">
+                    <!-- Spirit items will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div class="items-error" id="items-error" style="display: none;">
+            <h2>⚠️ 아이템 데이터를 불러올 수 없습니다</h2>
+            <p>데이터를 가져오는 중 문제가 발생했습니다.</p>
+            <button onclick="loadItemsData()" class="retry-btn">다시 시도</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.items-section {
+    min-height: calc(100vh - 120px);
+    padding: 40px 20px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f172a 100%);
+}
+
+.items-container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.items-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.page-title {
+    font-size: 48px;
+    font-weight: 700;
+    color: #FFEFD7;
+    margin: 0 0 15px 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.page-description {
+    font-size: 18px;
+    color: #999;
+    margin: 0 0 30px 0;
+}
+
+.filter-controls {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 30px;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-group label {
+    font-size: 14px;
+    color: #999;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.filter-select {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 16px;
+    min-width: 150px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-select:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(99, 162, 226, 0.5);
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #63a2e2;
+}
+
+.items-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 20px;
+}
+
+.loading-spinner {
+    width: 60px;
+    height: 60px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-left: 4px solid #63a2e2;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.item-category {
+    margin-bottom: 60px;
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.category-icon {
+    width: 32px;
+    height: 32px;
+    filter: brightness(0) saturate(100%) invert(95%) sepia(46%) saturate(1742%) hue-rotate(300deg) brightness(102%) contrast(101%);
+}
+
+.category-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #FFEFD7;
+    margin: 0;
+}
+
+.category-count {
+    font-size: 16px;
+    color: #999;
+    margin-left: auto;
+}
+
+.items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.item-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.item-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(99, 162, 226, 0.2);
+    border-color: rgba(99, 162, 226, 0.5);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.item-image {
+    width: 64px;
+    height: 64px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 8px;
+    flex-shrink: 0;
+}
+
+.item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.item-info {
+    flex: 1;
+}
+
+.item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 8px;
+}
+
+.item-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: #FFEFD7;
+    margin: 0;
+}
+
+.item-cost {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #FFD700;
+}
+
+.soul-icon {
+    width: 20px;
+    height: 20px;
+}
+
+.item-stats {
+    display: flex;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.stat-value {
+    font-size: 16px;
+    font-weight: 600;
+    color: #63a2e2;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #999;
+    text-transform: uppercase;
+}
+
+.winrate-high {
+    color: #4CAF50;
+}
+
+.winrate-medium {
+    color: #FFC107;
+}
+
+.winrate-low {
+    color: #F44336;
+}
+
+.items-error {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+
+.items-error h2 {
+    color: #FFEFD7;
+    margin-bottom: 15px;
+}
+
+.retry-btn {
+    background: #63a2e2;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-top: 20px;
+}
+
+.retry-btn:hover {
+    background: #5a91c8;
+}
+
+@media (max-width: 768px) {
+    .filter-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .filter-select {
+        width: 250px;
+    }
+    
+    .items-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .page-title {
+        font-size: 36px;
+    }
+    
+    .category-header {
+        flex-wrap: wrap;
+    }
+    
+    .category-count {
+        margin-left: 0;
+        width: 100%;
+        text-align: left;
+        margin-top: 5px;
+    }
+}
+</style>
+
+<script>
+// Sample item data - in production this would come from API
+const itemsData = {
+    weapon: [
+        {
+            name: "Basic Magazine",
+            cost: 500,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/magazine_size.png",
+            stats: {
+                pickRate: 78.5,
+                winRate: 51.2,
+                avgPurchaseTime: "5:30"
+            }
+        },
+        {
+            name: "High-Velocity Mag",
+            cost: 500,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/bullet_velocity.png",
+            stats: {
+                pickRate: 45.2,
+                winRate: 52.1,
+                avgPurchaseTime: "6:15"
+            }
+        },
+        {
+            name: "Headshot Booster",
+            cost: 500,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/headshot_booster.png",
+            stats: {
+                pickRate: 62.3,
+                winRate: 53.8,
+                avgPurchaseTime: "7:00"
+            }
+        },
+        {
+            name: "Close Quarters",
+            cost: 500,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/close_range.png",
+            stats: {
+                pickRate: 31.7,
+                winRate: 49.5,
+                avgPurchaseTime: "8:45"
+            }
+        },
+        {
+            name: "Berserker",
+            cost: 1250,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/berserker.png",
+            stats: {
+                pickRate: 58.9,
+                winRate: 54.2,
+                avgPurchaseTime: "12:30"
+            }
+        },
+        {
+            name: "Sharpshooter",
+            cost: 1250,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/long_range.png",
+            stats: {
+                pickRate: 42.1,
+                winRate: 55.6,
+                avgPurchaseTime: "14:20"
+            }
+        },
+        {
+            name: "Burst Fire",
+            cost: 1250,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/burst_fire_mod.png",
+            stats: {
+                pickRate: 36.8,
+                winRate: 51.9,
+                avgPurchaseTime: "11:45"
+            }
+        },
+        {
+            name: "Titanic Magazine",
+            cost: 3500,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/mega_magazine.png",
+            stats: {
+                pickRate: 71.4,
+                winRate: 56.3,
+                avgPurchaseTime: "22:10"
+            }
+        },
+        {
+            name: "Glass Cannon",
+            cost: 6200,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/glass_cannon.png",
+            stats: {
+                pickRate: 45.7,
+                winRate: 57.8,
+                avgPurchaseTime: "28:45"
+            }
+        }
+    ],
+    vitality: [
+        {
+            name: "Extra Health",
+            cost: 500,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/health.png",
+            stats: {
+                pickRate: 82.3,
+                winRate: 50.8,
+                avgPurchaseTime: "3:20"
+            }
+        },
+        {
+            name: "Extra Regen",
+            cost: 500,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/regen.png",
+            stats: {
+                pickRate: 65.1,
+                winRate: 51.5,
+                avgPurchaseTime: "4:45"
+            }
+        },
+        {
+            name: "Sprint Boots",
+            cost: 500,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/sprint_boots.png",
+            stats: {
+                pickRate: 71.8,
+                winRate: 52.3,
+                avgPurchaseTime: "5:10"
+            }
+        },
+        {
+            name: "Healing Rite",
+            cost: 500,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/healing_booster.png",
+            stats: {
+                pickRate: 48.2,
+                winRate: 50.1,
+                avgPurchaseTime: "6:30"
+            }
+        },
+        {
+            name: "Bullet Armor",
+            cost: 1250,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/bullet_armor.png",
+            stats: {
+                pickRate: 69.5,
+                winRate: 53.7,
+                avgPurchaseTime: "10:15"
+            }
+        },
+        {
+            name: "Spirit Armor",
+            cost: 1250,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/tech_armor.png",
+            stats: {
+                pickRate: 61.3,
+                winRate: 52.9,
+                avgPurchaseTime: "11:00"
+            }
+        },
+        {
+            name: "Enduring Speed",
+            cost: 1750,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/enduring_speed.png",
+            stats: {
+                pickRate: 55.7,
+                winRate: 54.1,
+                avgPurchaseTime: "13:45"
+            }
+        },
+        {
+            name: "Fortitude",
+            cost: 3000,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/fortitude.png",
+            stats: {
+                pickRate: 73.2,
+                winRate: 55.8,
+                avgPurchaseTime: "19:30"
+            }
+        },
+        {
+            name: "Colossus",
+            cost: 6200,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/colossus.png",
+            stats: {
+                pickRate: 38.9,
+                winRate: 58.2,
+                avgPurchaseTime: "27:15"
+            }
+        }
+    ],
+    spirit: [
+        {
+            name: "Extra Charge",
+            cost: 500,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/extra_charge.png",
+            stats: {
+                pickRate: 76.4,
+                winRate: 51.7,
+                avgPurchaseTime: "4:00"
+            }
+        },
+        {
+            name: "Mystic Burst",
+            cost: 500,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/burst_increase.png",
+            stats: {
+                pickRate: 58.2,
+                winRate: 52.4,
+                avgPurchaseTime: "5:45"
+            }
+        },
+        {
+            name: "Infuser",
+            cost: 500,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/infuser.png",
+            stats: {
+                pickRate: 43.6,
+                winRate: 50.9,
+                avgPurchaseTime: "7:20"
+            }
+        },
+        {
+            name: "Spirit Strike",
+            cost: 500,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/melee_charge.png",
+            stats: {
+                pickRate: 67.1,
+                winRate: 53.2,
+                avgPurchaseTime: "6:00"
+            }
+        },
+        {
+            name: "Quicksilver Reload",
+            cost: 1250,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/quicksilver_reload.png",
+            stats: {
+                pickRate: 72.8,
+                winRate: 54.5,
+                avgPurchaseTime: "12:00"
+            }
+        },
+        {
+            name: "Improved Cooldown",
+            cost: 1250,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/cooldown_reduction.png",
+            stats: {
+                pickRate: 81.3,
+                winRate: 55.1,
+                avgPurchaseTime: "10:30"
+            }
+        },
+        {
+            name: "Improved Reach",
+            cost: 1750,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/range_increase.png",
+            stats: {
+                pickRate: 64.5,
+                winRate: 53.8,
+                avgPurchaseTime: "13:15"
+            }
+        },
+        {
+            name: "Superior Cooldown",
+            cost: 3500,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/cd_reduction_2.png",
+            stats: {
+                pickRate: 77.9,
+                winRate: 56.7,
+                avgPurchaseTime: "20:45"
+            }
+        },
+        {
+            name: "Refresher",
+            cost: 6200,
+            image: "https://cdn.deadlock.coach/vpk/panorama/images/upgrades/refresher.png",
+            stats: {
+                pickRate: 52.3,
+                winRate: 59.1,
+                avgPurchaseTime: "26:30"
+            }
+        }
+    ]
+};
+
+// Load and display items data
+async function loadItemsData() {
+    const loading = document.getElementById('items-loading');
+    const content = document.getElementById('items-content');
+    const error = document.getElementById('items-error');
+    
+    loading.style.display = 'flex';
+    content.style.display = 'none';
+    error.style.display = 'none';
+    
+    try {
+        // Simulate API delay
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Display items by category
+        displayItemsByCategory('weapon', itemsData.weapon);
+        displayItemsByCategory('vitality', itemsData.vitality);
+        displayItemsByCategory('spirit', itemsData.spirit);
+        
+        loading.style.display = 'none';
+        content.style.display = 'block';
+        
+    } catch (err) {
+        console.error('Error loading items:', err);
+        loading.style.display = 'none';
+        error.style.display = 'block';
+    }
+}
+
+function displayItemsByCategory(category, items) {
+    const container = document.getElementById(`${category}-items`);
+    const countElement = document.getElementById(`${category}-count`);
+    
+    countElement.textContent = `${items.length}개 아이템`;
+    
+    const itemCards = items.map(item => {
+        const winRateClass = item.stats.winRate >= 54 ? 'winrate-high' : 
+                           item.stats.winRate >= 50 ? 'winrate-medium' : 'winrate-low';
+        
+        return `
+            <div class="item-card" onclick="viewItemDetails('${item.name}')">
+                <div class="item-image">
+                    <img src="${item.image}" alt="${item.name}" 
+                         onerror="this.src='https://cdn.deadlock.coach/vpk/panorama/images/upgrades/placeholder.png'">
+                </div>
+                <div class="item-info">
+                    <div class="item-header">
+                        <h3 class="item-name">${item.name}</h3>
+                        <div class="item-cost">
+                            <img src="https://cdn.deadlock.coach/vpk/panorama/images/hud/souls_icon.png" 
+                                 alt="Souls" class="soul-icon">
+                            <span>${item.cost.toLocaleString()}</span>
+                        </div>
+                    </div>
+                    <div class="item-stats">
+                        <div class="stat-item">
+                            <div class="stat-value">${item.stats.pickRate}%</div>
+                            <div class="stat-label">픽률</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value ${winRateClass}">${item.stats.winRate}%</div>
+                            <div class="stat-label">승률</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value">${item.stats.avgPurchaseTime}</div>
+                            <div class="stat-label">평균 구매</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    container.innerHTML = itemCards;
+}
+
+function viewItemDetails(itemName) {
+    console.log('View item details:', itemName);
+    alert(`${itemName} 상세 페이지는 곧 추가될 예정입니다!`);
+}
+
+// Filter event handlers
+document.addEventListener('DOMContentLoaded', () => {
+    loadItemsData();
+    
+    // Add filter change listeners
+    document.getElementById('patch-filter').addEventListener('change', (e) => {
+        console.log('Patch filter changed:', e.target.value);
+        loadItemsData(); // Reload with new filter
+    });
+    
+    document.getElementById('hero-filter').addEventListener('change', (e) => {
+        console.log('Hero filter changed:', e.target.value);
+        loadItemsData(); // Reload with new filter
+    });
+    
+    document.getElementById('game-stage-filter').addEventListener('change', (e) => {
+        console.log('Game stage filter changed:', e.target.value);
+        loadItemsData(); // Reload with new filter
+    });
+});
+</script>

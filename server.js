@@ -5589,7 +5589,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Dynamo',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/dynamo_card.webp',
+        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/astro_card.webp',
         matches: 87320,
         players: 63510,
         kda: '1.42',
@@ -5982,6 +5982,19 @@ app.get('/ko/board', getUserTopHero, (req, res) => {
     user: req.user,
     title: getDynamicTitle(req.user, '게시판'),
   });
+});
+
+// 아이템 페이지
+app.get('/ko/items', getUserTopHero, (req, res) => {
+  res.render('items', {
+    user: req.user,
+    title: getDynamicTitle(req.user, '아이템 통계'),
+  });
+});
+
+// 통계 페이지 (아이템으로 리디렉트)
+app.get('/ko/stats', getUserTopHero, (req, res) => {
+  res.redirect('/ko/items');
 });
 
 // 게시판 API - 글 목록 조회 (Supabase)
