@@ -1102,101 +1102,57 @@ class DeadlockItemManager {
     }
 
     getItemImageUrl(itemName) {
-        const itemImageMap = {
+        // 로컬 이미지 경로로 아이템 이름을 파일명으로 변환
+        const nameToFileName = {
             // Weapon Items
-            'Basic Magazine': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp',
-            'Close Quarters': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/close_quarters.webp',
-            'Headshot Booster': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/headshot_booster.webp',
-            'High-Velocity Mag': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/high_velocity_mag.webp',
-            'Monster Rounds': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/monster_rounds.webp',
-            'Rapid Rounds': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/rapid_rounds.webp',
-            'Active Reload': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/active_reload.webp',
-            'Berserker': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/berserker.webp',
-            'Kinetic Dash': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/kinetic_dash.webp',
-            'Long Range': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/long_range.webp',
-            'Sharpshooter': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/sharpshooter.webp',
-            'Tesla Bullets': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/tesla_bullets.webp',
-            'Toxic Bullets': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/toxic_bullets.webp',
-            'Glass Cannon': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/glass_cannon.webp',
-            'Leech': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/leech.webp',
-            'Lucky Shot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/lucky_shot.webp',
+            'Basic Magazine': 'basic_magazine',
+            'High-Velocity Mag': 'high_velocity_mag', 
+            'Headshot Booster': 'headshot_booster',
+            'Close Quarters': 'close_quarters',
+            'Berserker': 'berserker',
+            'Sharpshooter': 'sharpshooter',
+            'Burst Fire': 'burst_fire',
+            'Titanic Magazine': 'titanic_magazine',
+            'Glass Cannon': 'glass_cannon',
             
             // Vitality Items
-            'Extra Health': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp',
-            'Extra Stamina': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_stamina.webp',
-            'Sprint Boots': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/sprint_boots.webp',
-            'Bullet Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/bullet_armor.webp',
-            'Spirit Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/divine_barrier.webp',
-            'Healing Rite': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_rite.webp',
-            'Enduring Speed': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/enduring_speed.webp',
-            'Reactive Barrier': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/reactive_barrier.webp',
-            'Healing Booster': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_booster.webp',
-            'Return Fire': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/return_fire.webp',
-            'Metal Skin': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/metal_skin.webp',
-            'Colossus': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/colossus.webp',
-            'Unstoppable': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/unstoppable.webp',
+            'Extra Health': 'extra_health',
+            'Extra Regen': 'extra_regen',
+            'Sprint Boots': 'sprint_boots',
+            'Healing Rite': 'healing_rite',
+            'Bullet Armor': 'bullet_armor',
+            'Spirit Armor': 'spirit_armor',
+            'Enduring Speed': 'enduring_speed',
+            'Fortitude': 'fortitude',
+            'Colossus': 'colossus',
+            'Metal Skin': 'colossus', // 임시로 colossus 이미지 사용
             
             // Spirit Items
-            'Extra Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_spirit.webp',
-            'Mystic Burst': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_burst.webp',
-            'Spirit Lifesteal': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_lifesteal.webp',
-            'Cold Front': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/cold_front.webp',
-            'Superior Cooldown': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/superior_cooldown.webp',
-            'Improved Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_spirit.webp',
-            'Mystic Vulnerability': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_vulnerability.webp',
-            'Ethereal Shift': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/ethereal_shift.webp',
-            'Magic Carpet': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/magic_carpet.webp',
-            'Echo Shard': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/echo_shard.webp',
-            'Refresher': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/refresher.webp',
-            'Boundless Spirit': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/boundless_spirit.webp',
-            
-            // 추가된 아이템들의 이미지 URL들
-            'Berserker': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/berserker.webp',
-            'Hunter\'s Aura': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hunters_aura.webp',
-            'Titanic Magazine': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/titanic_magazine.webp',
-            'Mystic Shot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/mystic_shot.webp',
-            'Fleetfoot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/fleetfoot.webp',
-            'Kinetic Dash': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/kinetic_dash.webp',
-            'Long Range': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/long_range.webp',
-            'Sharpshooter': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/sharpshooter.webp',
-            'Point Blank': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/point_blank.webp',
-            'Active Reload': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/active_reload.webp',
-            'Lucky Shot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/lucky_shot.webp',
-            'Leech': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/leech.webp',
-            'Glass Cannon': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/glass_cannon.webp',
-            'Frenzy': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/frenzy.webp',
-            'Crippling Headshot': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/crippling_headshot.webp',
-            'Burst Fire': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/burst_fire.webp',
-            'Alchemical Fire': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/alchemical_fire.webp',
-            'Spiritual Overflow': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/spiritual_overflow.webp',
-            'Inhibitor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/inhibitor.webp',
-            'Wrecker': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/wrecker.webp',
-            'Torment Pulse': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/torment_pulse.webp',
-            'Richochet': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/ricochet.webp',
-            'Vampiric Burst': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/vampiric_burst.webp',
-            'Warp Stone': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/warp_stone.webp',
-            'Soul Shredder Bullets': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/soul_shredder_bullets.webp',
-            'Surge of Power': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/surge_of_power.webp',
-            'Pristine Emblem': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/pristine_emblem.webp',
-            'Melee Charge': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/melee_charge.webp',
-            'Escalating Resilience': 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/escalating_resilience.webp',
-            
-            // Vitality 아이템들
-            'Extra Regen': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_regen.webp',
-            'Extra Stamina': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_stamina.webp',
-            'Melee Lifesteal': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/melee_lifesteal.webp',
-            'Sprint Boots': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/sprint_boots.webp',
-            'Enduring Speed': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/enduring_speed.webp',
-            'Reactive Barrier': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/reactive_barrier.webp',
-            'Debuff Remover': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/debuff_remover.webp',
-            'Divine Barrier': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/divine_barrier.webp',
-            'Enchanter\'s Barrier': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/enchanters_barrier.webp',
-            'Healing Booster': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_booster.webp',
-            'Return Fire': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/return_fire.webp',
-            'Rescue Beam': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/rescue_beam.webp',
-            'Combat Barrier': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/combat_barrier.webp',
-            'Improved Bullet Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/improved_bullet_armor.webp',
-            'Improved Spirit Armor': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/improved_spirit_armor.webp',
+            'Extra Spirit': 'extra_charge', // Extra Charge와 동일한 이미지
+            'Mystic Burst': 'mystic_burst',
+            'Infuser': 'infuser',
+            'Spirit Strike': 'spirit_strike',
+            'Quicksilver Reload': 'quicksilver_reload',
+            'Improved Cooldown': 'improved_cooldown',
+            'Improved Reach': 'improved_reach',
+            'Superior Cooldown': 'superior_cooldown',
+            'Refresher': 'refresher'
+        };
+        
+        // 파일명이 매핑되어 있는 경우 로컬 이미지 경로 반환
+        const fileName = nameToFileName[itemName];
+        if (fileName) {
+            // 아이템 타입 결정 (기본값은 weapon)
+            let category = 'weapon';
+            if (this.fallbackItems.vitality[itemName]) {
+                category = 'vitality';
+            } else if (this.fallbackItems.spirit[itemName]) {
+                category = 'spirit';
+            }
+            return `/images/items/${category}/${fileName}.svg`;
+        }
+        
+        // 매핑되지 않은 아이템은 기본 이미지 반환
             'Superior Stamina': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/superior_stamina.webp',
             'Veil Walker': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/veil_walker.webp',
             'Fortitude': 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/fortitude.webp',
@@ -1231,7 +1187,7 @@ class DeadlockItemManager {
             'Mystic Reverb': 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_reverb.webp'
         };
         
-        return itemImageMap[itemName] || 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp';
+        return '/images/items/weapon/basic_magazine.svg';
     }
 
     getItemNameById(itemId) {
@@ -1534,7 +1490,33 @@ class DeadlockMatchProcessor {
     }
 
     generateFallbackItems(heroName = 'Default') {
-        const fallbackItems = [
+        // 영웅별 아이템 빌드 예시
+        const heroBuildMap = {
+            'Abrams': ['Basic Magazine', 'Extra Health', 'Berserker', 'Bullet Armor', 'Extra Spirit', 'Fortitude'],
+            'Bebop': ['High-Velocity Mag', 'Sprint Boots', 'Sharpshooter', 'Spirit Armor', 'Mystic Burst', 'Superior Cooldown'],
+            'Dynamo': ['Extra Spirit', 'Extra Health', 'Infuser', 'Healing Rite', 'Improved Cooldown', 'Refresher'],
+            'Grey Talon': ['Headshot Booster', 'Extra Health', 'Sharpshooter', 'Bullet Armor', 'Burst Fire', 'Glass Cannon'],
+            'Haze': ['Close Quarters', 'Sprint Boots', 'Berserker', 'Enduring Speed', 'Burst Fire', 'Glass Cannon'],
+            'Infernus': ['Basic Magazine', 'Extra Spirit', 'Spirit Strike', 'Spirit Armor', 'Improved Cooldown', 'Superior Cooldown'],
+            'Ivy': ['Extra Spirit', 'Healing Rite', 'Infuser', 'Spirit Armor', 'Improved Reach', 'Refresher'],
+            'Kelvin': ['Extra Health', 'Extra Spirit', 'Healing Rite', 'Bullet Armor', 'Spirit Strike', 'Colossus'],
+            'Lady Geist': ['Extra Spirit', 'Sprint Boots', 'Mystic Burst', 'Spirit Armor', 'Improved Cooldown', 'Superior Cooldown'],
+            'Lash': ['Extra Health', 'Extra Spirit', 'Spirit Strike', 'Enduring Speed', 'Improved Reach', 'Colossus'],
+            'McGinnis': ['Basic Magazine', 'Extra Health', 'Healing Rite', 'Bullet Armor', 'Spirit Armor', 'Fortitude'],
+            'Mo & Krill': ['Extra Health', 'Sprint Boots', 'Healing Rite', 'Bullet Armor', 'Enduring Speed', 'Colossus'],
+            'Paradox': ['Extra Spirit', 'Extra Health', 'Mystic Burst', 'Spirit Armor', 'Improved Cooldown', 'Refresher'],
+            'Pocket': ['Basic Magazine', 'Extra Spirit', 'Infuser', 'Bullet Armor', 'Quicksilver Reload', 'Superior Cooldown'],
+            'Seven': ['Extra Spirit', 'Extra Health', 'Mystic Burst', 'Spirit Armor', 'Improved Cooldown', 'Superior Cooldown'],
+            'Shiv': ['Basic Magazine', 'Sprint Boots', 'Close Quarters', 'Enduring Speed', 'Berserker', 'Glass Cannon'],
+            'Vindicta': ['Headshot Booster', 'Extra Health', 'Sharpshooter', 'Bullet Armor', 'Burst Fire', 'Titanic Magazine'],
+            'Viscous': ['Extra Health', 'Extra Spirit', 'Healing Rite', 'Spirit Armor', 'Spirit Strike', 'Colossus'],
+            'Warden': ['Basic Magazine', 'Extra Health', 'Healing Rite', 'Bullet Armor', 'Extra Spirit', 'Fortitude'],
+            'Wraith': ['Basic Magazine', 'Extra Spirit', 'Infuser', 'Spirit Armor', 'Quicksilver Reload', 'Superior Cooldown'],
+            'Yamato': ['Close Quarters', 'Sprint Boots', 'Spirit Strike', 'Enduring Speed', 'Improved Reach', 'Colossus']
+        };
+        
+        // 영웅별 아이템이 있으면 사용, 없으면 기본 아이템
+        const fallbackItems = heroBuildMap[heroName] || [
             'Basic Magazine', 'Extra Health', 'Extra Spirit',
             'Bullet Armor', 'Mystic Burst', 'Metal Skin'
         ];
@@ -1707,7 +1689,7 @@ function updateMatchesList(matches) {
                                      title="${item.name}${item.isUnknown ? ' (Unknown)' : ''}${item.isFallback ? ' (예시)' : ''}"
                                      style="border: 2px solid ${borderColor}; opacity: ${opacity};"
                                      onload="console.log('✅ 아이템 로드 성공:', '${item.name}')"
-                                     onerror="console.error('❌ 아이템 로드 실패:', '${item.name}'); this.src='https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp';">
+                                     onerror="console.error('❌ 아이템 로드 실패:', '${item.name}'); this.src='/images/items/weapon/basic_magazine.svg';">
                                 ${item.isUnknown ? '<div class="unknown-badge">?</div>' : ''}
                             </div>`;
                 }).join('');
