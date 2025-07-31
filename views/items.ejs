@@ -1,110 +1,152 @@
 <div class="items-section">
     <div class="items-container">
-        <!-- Header with filters -->
+        <!-- Header -->
         <div class="items-header">
-            <h1 class="page-title">아이템 통계</h1>
-            <p class="page-description">현재 패치의 아이템 인기도와 승률을 확인하세요</p>
+            <h1 class="page-title">완전한 아이템 목록을 확인하고 필터링하여 최적의 빌드를 완성하세요</h1>
+            <p class="page-description">데드락을 할 때 무엇을 구매해야 할지 잘 모르겠나요? 이 대화형 아이템 목록은 빌드를 향상시키는 올바른 아이템을 찾을 수 있게 도와줄 것입니다. 각 결과를 클릭하여 더 자세한 정보를 확인하세요.</p>
             
-            <!-- Filter controls -->
-            <div class="filter-controls">
-                <div class="filter-group">
-                    <label>패치</label>
-                    <select id="patch-filter" class="filter-select">
-                        <option value="current">현재 패치</option>
-                        <option value="previous">이전 패치</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label>영웅</label>
-                    <select id="hero-filter" class="filter-select">
-                        <option value="all-heroes">모든 영웅</option>
-                        <option value="abrams">Abrams</option>
-                        <option value="bebop">Bebop</option>
-                        <option value="dynamo">Dynamo</option>
-                        <option value="grey-talon">Grey Talon</option>
-                        <option value="haze">Haze</option>
-                        <option value="infernus">Infernus</option>
-                        <option value="ivy">Ivy</option>
-                        <option value="kelvin">Kelvin</option>
-                        <option value="lady-geist">Lady Geist</option>
-                        <option value="lash">Lash</option>
-                        <option value="mcginnis">McGinnis</option>
-                        <option value="mo-krill">Mo & Krill</option>
-                        <option value="paradox">Paradox</option>
-                        <option value="pocket">Pocket</option>
-                        <option value="seven">Seven</option>
-                        <option value="shiv">Shiv</option>
-                        <option value="vindicta">Vindicta</option>
-                        <option value="viscous">Viscous</option>
-                        <option value="warden">Warden</option>
-                        <option value="wraith">Wraith</option>
-                        <option value="yamato">Yamato</option>
-                    </select>
-                </div>
-                
-                <div class="filter-group">
-                    <label>게임 단계</label>
-                    <select id="game-stage-filter" class="filter-select">
-                        <option value="full-game">전체 게임</option>
-                        <option value="early-game">초반 (0-10분)</option>
-                        <option value="mid-game">중반 (10-25분)</option>
-                        <option value="late-game">후반 (25분+)</option>
-                    </select>
-                </div>
+            <!-- Search Bar -->
+            <div class="search-container">
+                <input type="text" id="item-search" placeholder="아이템 검색..." class="search-input">
             </div>
         </div>
 
-        <!-- Loading State -->
-        <div class="items-loading" id="items-loading">
-            <div class="loading-spinner"></div>
-            <p>아이템 데이터를 불러오는 중...</p>
-        </div>
-
         <!-- Item Categories -->
-        <div class="items-content" id="items-content" style="display: none;">
+        <div class="items-content">
             <!-- Weapon Items -->
-            <div class="item-category">
-                <div class="category-header">
-                    <img src="https://via.placeholder.com/32x32/E74C3C/ffffff?text=⚔" alt="Weapon" class="category-icon">
+            <div class="item-category weapon-category">
+                <div class="category-header weapon-header">
+                    <div class="category-icon weapon-icon">🎯</div>
                     <h2>무기</h2>
-                    <span class="category-count" id="weapon-count">0개 아이템</span>
                 </div>
-                <div class="items-grid" id="weapon-items">
-                    <!-- Weapon items will be populated here -->
+                
+                <!-- Price Tiers -->
+                <div class="price-tier" data-price="800">
+                    <div class="tier-label">
+                        <span class="price-amount">800</span>
+                    </div>
+                    <div class="items-grid tier-800" id="weapon-800">
+                        <!-- Tier 1 weapons -->
+                    </div>
+                </div>
+                
+                <div class="price-tier" data-price="1600">
+                    <div class="tier-label">
+                        <span class="price-amount">1600+</span>
+                    </div>
+                    <div class="items-grid tier-1600" id="weapon-1600">
+                        <!-- Tier 2 weapons -->
+                    </div>
+                </div>
+                
+                <div class="price-tier" data-price="3200">
+                    <div class="tier-label">
+                        <span class="price-amount">3200+</span>
+                    </div>
+                    <div class="items-grid tier-3200" id="weapon-3200">
+                        <!-- Tier 3 weapons -->
+                    </div>
+                </div>
+                
+                <div class="price-tier" data-price="6400">
+                    <div class="tier-label">
+                        <span class="price-amount">6400+</span>
+                    </div>
+                    <div class="items-grid tier-6400" id="weapon-6400">
+                        <!-- Tier 4 weapons -->
+                    </div>
                 </div>
             </div>
 
             <!-- Vitality Items -->
-            <div class="item-category">
-                <div class="category-header">
-                    <img src="https://via.placeholder.com/32x32/27AE60/ffffff?text=♥" alt="Vitality" class="category-icon">
+            <div class="item-category vitality-category">
+                <div class="category-header vitality-header">
+                    <div class="category-icon vitality-icon">➕</div>
                     <h2>활력</h2>
-                    <span class="category-count" id="vitality-count">0개 아이템</span>
                 </div>
-                <div class="items-grid" id="vitality-items">
-                    <!-- Vitality items will be populated here -->
+                
+                <!-- Price Tiers -->
+                <div class="price-tier" data-price="800">
+                    <div class="tier-label">
+                        <span class="price-amount">800</span>
+                    </div>
+                    <div class="items-grid tier-800" id="vitality-800">
+                        <!-- Tier 1 vitality -->
+                    </div>
+                </div>
+                
+                <div class="price-tier" data-price="1600">
+                    <div class="tier-label">
+                        <span class="price-amount">1600+</span>
+                    </div>
+                    <div class="items-grid tier-1600" id="vitality-1600">
+                        <!-- Tier 2 vitality -->
+                    </div>
+                </div>
+                
+                <div class="price-tier" data-price="3200">
+                    <div class="tier-label">
+                        <span class="price-amount">3200+</span>
+                    </div>
+                    <div class="items-grid tier-3200" id="vitality-3200">
+                        <!-- Tier 3 vitality -->
+                    </div>
+                </div>
+                
+                <div class="price-tier" data-price="6400">
+                    <div class="tier-label">
+                        <span class="price-amount">6400+</span>
+                    </div>
+                    <div class="items-grid tier-6400" id="vitality-6400">
+                        <!-- Tier 4 vitality -->
+                    </div>
                 </div>
             </div>
 
             <!-- Spirit Items -->
-            <div class="item-category">
-                <div class="category-header">
-                    <img src="https://via.placeholder.com/32x32/9B59B6/ffffff?text=✦" alt="Spirit" class="category-icon">
-                    <h2>정신력</h2>
-                    <span class="category-count" id="spirit-count">0개 아이템</span>
+            <div class="item-category spirit-category">
+                <div class="category-header spirit-header">
+                    <div class="category-icon spirit-icon">🔮</div>
+                    <h2>정신</h2>
                 </div>
-                <div class="items-grid" id="spirit-items">
-                    <!-- Spirit items will be populated here -->
+                
+                <!-- Price Tiers -->
+                <div class="price-tier" data-price="800">
+                    <div class="tier-label">
+                        <span class="price-amount">800</span>
+                    </div>
+                    <div class="items-grid tier-800" id="spirit-800">
+                        <!-- Tier 1 spirit -->
+                    </div>
+                </div>
+                
+                <div class="price-tier" data-price="1600">
+                    <div class="tier-label">
+                        <span class="price-amount">1600+</span>
+                    </div>
+                    <div class="items-grid tier-1600" id="spirit-1600">
+                        <!-- Tier 2 spirit -->
+                    </div>
+                </div>
+                
+                <div class="price-tier" data-price="3200">
+                    <div class="tier-label">
+                        <span class="price-amount">3200+</span>
+                    </div>
+                    <div class="items-grid tier-3200" id="spirit-3200">
+                        <!-- Tier 3 spirit -->
+                    </div>
+                </div>
+                
+                <div class="price-tier" data-price="6400">
+                    <div class="tier-label">
+                        <span class="price-amount">6400+</span>
+                    </div>
+                    <div class="items-grid tier-6400" id="spirit-6400">
+                        <!-- Tier 4 spirit -->
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Error State -->
-        <div class="items-error" id="items-error" style="display: none;">
-            <h2>⚠️ 아이템 데이터를 불러올 수 없습니다</h2>
-            <p>데이터를 가져오는 중 문제가 발생했습니다.</p>
-            <button onclick="loadItemsData()" class="retry-btn">다시 시도</button>
         </div>
     </div>
 </div>
@@ -114,161 +156,187 @@
     min-height: calc(100vh - 120px);
     padding: 40px 20px;
     background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f172a 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
 }
 
 .items-container {
-    max-width: 1400px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
 .items-header {
     text-align: center;
-    margin-bottom: 40px;
+    margin-bottom: 60px;
 }
 
 .page-title {
-    font-size: 48px;
+    font-size: 32px;
     font-weight: 700;
     color: #FFEFD7;
-    margin: 0 0 15px 0;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    margin: 0 0 20px 0;
+    line-height: 1.4;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .page-description {
-    font-size: 18px;
+    font-size: 16px;
     color: #999;
-    margin: 0 0 30px 0;
+    margin: 0 0 40px 0;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
 }
 
-.filter-controls {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
+.search-container {
     margin-top: 30px;
 }
 
-.filter-group {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.filter-group label {
-    font-size: 14px;
-    color: #999;
-    text-transform: uppercase;
-    font-weight: 600;
-}
-
-.filter-select {
+.search-input {
+    width: 100%;
+    max-width: 400px;
+    padding: 15px 20px;
     background: rgba(255, 255, 255, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 25px;
     color: #fff;
-    padding: 10px 15px;
-    border-radius: 8px;
     font-size: 16px;
-    min-width: 150px;
-    cursor: pointer;
     transition: all 0.3s ease;
+    text-align: center;
 }
 
-.filter-select:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(99, 162, 226, 0.5);
-}
-
-.filter-select:focus {
+.search-input:focus {
     outline: none;
     border-color: #63a2e2;
+    box-shadow: 0 0 20px rgba(99, 162, 226, 0.3);
 }
 
-.items-loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 400px;
-    gap: 20px;
+.search-input::placeholder {
+    color: #999;
 }
 
-.loading-spinner {
-    width: 60px;
-    height: 60px;
-    border: 4px solid rgba(255, 255, 255, 0.1);
-    border-left: 4px solid #63a2e2;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
+/* Category Headers */
 .item-category {
-    margin-bottom: 60px;
+    margin-bottom: 50px;
 }
 
 .category-header {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 15px;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 30px;
+    padding: 20px 40px;
+    border-radius: 15px;
+    position: relative;
+}
+
+.weapon-header {
+    background: linear-gradient(135deg, #E67E22, #D35400);
+}
+
+.vitality-header {
+    background: linear-gradient(135deg, #27AE60, #229954);
+}
+
+.spirit-header {
+    background: linear-gradient(135deg, #9B59B6, #8E44AD);
 }
 
 .category-icon {
-    width: 32px;
-    height: 32px;
+    font-size: 24px;
     filter: brightness(0) saturate(100%) invert(95%) sepia(46%) saturate(1742%) hue-rotate(300deg) brightness(102%) contrast(101%);
 }
 
 .category-header h2 {
-    font-size: 28px;
+    font-size: 24px;
     font-weight: 700;
     color: #FFEFD7;
     margin: 0;
 }
 
-.category-count {
-    font-size: 16px;
-    color: #999;
-    margin-left: auto;
+/* Price Tiers */
+.price-tier {
+    margin-bottom: 40px;
 }
 
+.tier-label {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.tier-label::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 60px;
+    height: 2px;
+    background: #444;
+}
+
+.tier-label::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: calc(100% - 120px);
+    height: 2px;
+    background: #444;
+}
+
+.price-amount {
+    display: inline-block;
+    background: #333;
+    color: #FFEFD7;
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 16px;
+    position: relative;
+    z-index: 1;
+    margin-left: 80px;
+}
+
+/* Items Grid */
 .items-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 15px;
+    padding: 0 20px;
 }
 
 .item-card {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(20, 20, 30, 0.8);
     border-radius: 12px;
-    padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border: 2px solid transparent;
     transition: all 0.3s ease;
     cursor: pointer;
+    aspect-ratio: 1;
     display: flex;
-    gap: 15px;
+    flex-direction: column;
     align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
 }
 
 .item-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(99, 162, 226, 0.2);
-    border-color: rgba(99, 162, 226, 0.5);
-    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-5px);
+    border-color: rgba(99, 162, 226, 0.6);
+    box-shadow: 0 10px 30px rgba(99, 162, 226, 0.3);
+    background: rgba(30, 30, 50, 0.9);
 }
 
 .item-image {
-    width: 64px;
-    height: 64px;
-    border-radius: 8px;
-    background: rgba(0, 0, 0, 0.3);
-    padding: 8px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 8px;
     flex-shrink: 0;
 }
 
@@ -276,516 +344,307 @@
     width: 100%;
     height: 100%;
     object-fit: contain;
-}
-
-.item-info {
-    flex: 1;
-}
-
-.item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 8px;
+    filter: brightness(1.1) contrast(1.1);
 }
 
 .item-name {
-    font-size: 18px;
-    font-weight: 600;
-    color: #FFEFD7;
-    margin: 0;
-}
-
-.item-cost {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    font-size: 16px;
-    font-weight: 700;
-    color: #FFD700;
-}
-
-.soul-icon {
-    width: 20px;
-    height: 20px;
-}
-
-.item-stats {
-    display: flex;
-    gap: 20px;
-    margin-top: 10px;
-}
-
-.stat-item {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-}
-
-.stat-value {
-    font-size: 16px;
-    font-weight: 600;
-    color: #63a2e2;
-}
-
-.stat-label {
     font-size: 12px;
-    color: #999;
-    text-transform: uppercase;
-}
-
-.winrate-high {
-    color: #4CAF50;
-}
-
-.winrate-medium {
-    color: #FFC107;
-}
-
-.winrate-low {
-    color: #F44336;
-}
-
-.items-error {
-    text-align: center;
-    padding: 60px 20px;
-    color: #999;
-}
-
-.items-error h2 {
-    color: #FFEFD7;
-    margin-bottom: 15px;
-}
-
-.retry-btn {
-    background: #63a2e2;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 8px;
-    font-size: 16px;
     font-weight: 600;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    margin-top: 20px;
+    color: #FFEFD7;
+    text-align: center;
+    line-height: 1.2;
+    margin: 0;
+    word-break: break-word;
+    hyphens: auto;
 }
 
-.retry-btn:hover {
-    background: #5a91c8;
-}
-
+/* Responsive Design */
 @media (max-width: 768px) {
-    .filter-controls {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .filter-select {
-        width: 250px;
+    .page-title {
+        font-size: 24px;
     }
     
     .items-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+        gap: 10px;
+        padding: 0 10px;
     }
     
-    .page-title {
-        font-size: 36px;
+    .item-card {
+        padding: 10px;
+    }
+    
+    .item-image {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .item-name {
+        font-size: 11px;
+    }
+    
+    .price-amount {
+        margin-left: 40px;
+    }
+    
+    .tier-label::before {
+        width: 30px;
+    }
+    
+    .tier-label::after {
+        width: calc(100% - 80px);
+    }
+}
+
+@media (max-width: 480px) {
+    .items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
     }
     
     .category-header {
-        flex-wrap: wrap;
+        padding: 15px 20px;
     }
     
-    .category-count {
-        margin-left: 0;
-        width: 100%;
-        text-align: left;
-        margin-top: 5px;
+    .category-header h2 {
+        font-size: 20px;
     }
 }
 </style>
 
 <script>
-// Sample item data - in production this would come from API
+// Enhanced item data with proper tier organization
 const itemsData = {
-    weapon: [
-        {
-            name: "Basic Magazine",
-            cost: 500,
-            image: "/images/items/weapon/basic_magazine.webp",
-            stats: {
-                pickRate: 78.5,
-                winRate: 51.2,
-                avgPurchaseTime: "5:30"
-            }
-        },
-        {
-            name: "High-Velocity Mag", 
-            cost: 500,
-            image: "/images/items/weapon/high_velocity_mag.svg",
-            stats: {
-                pickRate: 45.2,
-                winRate: 52.1,
-                avgPurchaseTime: "6:15"
-            }
-        },
-        {
-            name: "Headshot Booster",
-            cost: 500,
-            image: "/images/items/weapon/headshot_booster.webp",
-            stats: {
-                pickRate: 62.3,
-                winRate: 53.8,
-                avgPurchaseTime: "7:00"
-            }
-        },
-        {
-            name: "Close Quarters",
-            cost: 500,
-            image: "/images/items/weapon/close_quarters.webp",
-            stats: {
-                pickRate: 31.7,
-                winRate: 49.5,
-                avgPurchaseTime: "8:45"
-            }
-        },
-        {
-            name: "Berserker",
-            cost: 1250,
-            image: "/images/items/weapon/berserker.webp",
-            stats: {
-                pickRate: 58.9,
-                winRate: 54.2,
-                avgPurchaseTime: "12:30"
-            }
-        },
-        {
-            name: "Sharpshooter",
-            cost: 1250,
-            image: "/images/items/weapon/sharpshooter.svg",
-            stats: {
-                pickRate: 42.1,
-                winRate: 55.6,
-                avgPurchaseTime: "14:20"
-            }
-        },
-        {
-            name: "Burst Fire",
-            cost: 1250,
-            image: "/images/items/weapon/burst_fire.webp",
-            stats: {
-                pickRate: 36.8,
-                winRate: 51.9,
-                avgPurchaseTime: "11:45"
-            }
-        },
-        {
-            name: "Titanic Magazine",
-            cost: 3500,
-            image: "/images/items/weapon/titanic_magazine.webp",
-            stats: {
-                pickRate: 71.4,
-                winRate: 56.3,
-                avgPurchaseTime: "22:10"
-            }
-        },
-        {
-            name: "Glass Cannon",
-            cost: 6200,
-            image: "/images/items/weapon/glass_cannon.webp",
-            stats: {
-                pickRate: 45.7,
-                winRate: 57.8,
-                avgPurchaseTime: "28:45"
-            }
-        }
-    ],
-    vitality: [
-        {
-            name: "Extra Health",
-            cost: 500,
-            image: "/images/items/vitality/extra_health.webp",
-            stats: {
-                pickRate: 82.3,
-                winRate: 50.8,
-                avgPurchaseTime: "3:20"
-            }
-        },
-        {
-            name: "Extra Regen",
-            cost: 500,
-            image: "/images/items/vitality/extra_regen.webp",
-            stats: {
-                pickRate: 65.1,
-                winRate: 51.5,
-                avgPurchaseTime: "4:45"
-            }
-        },
-        {
-            name: "Sprint Boots",
-            cost: 500,
-            image: "/images/items/vitality/sprint_boots.webp",
-            stats: {
-                pickRate: 71.8,
-                winRate: 52.3,
-                avgPurchaseTime: "5:10"
-            }
-        },
-        {
-            name: "Healing Rite",
-            cost: 500,
-            image: "/images/items/vitality/healing_rite.webp",
-            stats: {
-                pickRate: 48.2,
-                winRate: 50.1,
-                avgPurchaseTime: "6:30"
-            }
-        },
-        {
-            name: "Bullet Armor",
-            cost: 1250,
-            image: "/images/items/vitality/bullet_armor.svg",
-            stats: {
-                pickRate: 69.5,
-                winRate: 53.7,
-                avgPurchaseTime: "10:15"
-            }
-        },
-        {
-            name: "Spirit Armor",
-            cost: 1250,
-            image: "/images/items/vitality/spirit_armor.svg",
-            stats: {
-                pickRate: 61.3,
-                winRate: 52.9,
-                avgPurchaseTime: "11:00"
-            }
-        },
-        {
-            name: "Enduring Speed",
-            cost: 1750,
-            image: "/images/items/vitality/enduring_speed.webp",
-            stats: {
-                pickRate: 55.7,
-                winRate: 54.1,
-                avgPurchaseTime: "13:45"
-            }
-        },
-        {
-            name: "Fortitude",
-            cost: 3000,
-            image: "/images/items/vitality/fortitude.webp",
-            stats: {
-                pickRate: 73.2,
-                winRate: 55.8,
-                avgPurchaseTime: "19:30"
-            }
-        },
-        {
-            name: "Colossus",
-            cost: 6200,
-            image: "/images/items/vitality/colossus.webp",
-            stats: {
-                pickRate: 38.9,
-                winRate: 58.2,
-                avgPurchaseTime: "27:15"
-            }
-        }
-    ],
-    spirit: [
-        {
-            name: "Extra Charge",
-            cost: 500,
-            image: "/images/items/spirit/extra_charge.webp",
-            stats: {
-                pickRate: 76.4,
-                winRate: 51.7,
-                avgPurchaseTime: "4:00"
-            }
-        },
-        {
-            name: "Mystic Burst",
-            cost: 500,
-            image: "/images/items/spirit/mystic_burst.webp",
-            stats: {
-                pickRate: 58.2,
-                winRate: 52.4,
-                avgPurchaseTime: "5:45"
-            }
-        },
-        {
-            name: "Infuser",
-            cost: 500,
-            image: "/images/items/spirit/infuser.svg",
-            stats: {
-                pickRate: 43.6,
-                winRate: 50.9,
-                avgPurchaseTime: "7:20"
-            }
-        },
-        {
-            name: "Spirit Strike",
-            cost: 500,
-            image: "/images/items/spirit/spirit_strike.webp",
-            stats: {
-                pickRate: 67.1,
-                winRate: 53.2,
-                avgPurchaseTime: "6:00"
-            }
-        },
-        {
-            name: "Quicksilver Reload",
-            cost: 1250,
-            image: "/images/items/spirit/quicksilver_reload.webp",
-            stats: {
-                pickRate: 72.8,
-                winRate: 54.5,
-                avgPurchaseTime: "12:00"
-            }
-        },
-        {
-            name: "Improved Cooldown",
-            cost: 1250,
-            image: "/images/items/spirit/improved_cooldown.webp",
-            stats: {
-                pickRate: 81.3,
-                winRate: 55.1,
-                avgPurchaseTime: "10:30"
-            }
-        },
-        {
-            name: "Improved Reach",
-            cost: 1750,
-            image: "/images/items/spirit/improved_reach.svg",
-            stats: {
-                pickRate: 64.5,
-                winRate: 53.8,
-                avgPurchaseTime: "13:15"
-            }
-        },
-        {
-            name: "Superior Cooldown",
-            cost: 3500,
-            image: "/images/items/spirit/superior_cooldown.webp",
-            stats: {
-                pickRate: 77.9,
-                winRate: 56.7,
-                avgPurchaseTime: "20:45"
-            }
-        },
-        {
-            name: "Refresher",
-            cost: 6200,
-            image: "/images/items/spirit/refresher.webp",
-            stats: {
-                pickRate: 52.3,
-                winRate: 59.1,
-                avgPurchaseTime: "26:30"
-            }
-        }
-    ]
+    weapon: {
+        800: [
+            { name: "기본 탄창", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine_sm.webp" },
+            { name: "헤드샷 부스터", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/headshot_booster_sm.webp" },
+            { name: "고속탄", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/high_velocity_rounds_sm.webp" },
+            { name: "몬스터 탄환", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/monster_rounds_sm.webp" },
+            { name: "고속 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/rapid_rounds_sm.webp" },
+            { name: "회복 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/restorative_shot_sm.webp" }
+        ],
+        1600: [
+            { name: "능동 재장전", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/active_reload_sm.webp" },
+            { name: "백스태버", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/backstabber_sm.webp" },
+            { name: "신속한 발", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/fleetfoot_sm.webp" },
+            { name: "강화 탄창", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/intensifying_magazine_sm.webp" },
+            { name: "역동적 돌진", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/kinetic_dash_sm.webp" },
+            { name: "장거리", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/long_range_sm.webp" },
+            { name: "근접 돌격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/melee_charge_sm.webp" },
+            { name: "신비한 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/mystic_shot_sm.webp" },
+            { name: "오프닝 라운드", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/opening_rounds_sm.webp" },
+            { name: "둔화 탄환", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/slowing_bullets_sm.webp" },
+            { name: "정신 파쇄탄", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/spirit_shredder_bullets_sm.webp" },
+            { name: "분산 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/split_shot_sm.webp" },
+            { name: "신속한 타격자", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/swift_striker_sm.webp" },
+            { name: "거대한 탄창", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/titanic_magazine_sm.webp" },
+            { name: "약화 헤드샷", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/weakening_headshot_sm.webp" }
+        ],
+        3200: [
+            { name: "연금술 화염", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/alchemical_fire_sm.webp" },
+            { name: "광전사", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/berserker_sm.webp" },
+            { name: "피의 공물", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/blood_tribute_sm.webp" },
+            { name: "점사", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/burst_fire_sm.webp" },
+            { name: "컬티스트 희생", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/cultist_sacrifice_sm.webp" },
+            { name: "확대되는 저항", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/escalating_resilience_sm.webp" },
+            { name: "고속 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/express_shot_sm.webp" },
+            { name: "헤드헌터", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/headhunter_sm.webp" },
+            { name: "영웅의 오라", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/heroic_aura_sm.webp" },
+            { name: "할로우 포인트", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hollow_point_sm.webp" },
+            { name: "사냥꾼의 오라", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hunters_aura_sm.webp" },
+            { name: "근거리 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/point_blank_sm.webp" },
+            { name: "명사수", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/sharp_shooter_sm.webp" },
+            { name: "주문술사 헤드샷", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/spellslinger_headshots_sm.webp" },
+            { name: "테슬라 탄환", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/tesla_bullets_sm.webp" },
+            { name: "독성 탄환", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/toxic_bullets_sm.webp" },
+            { name: "무거운 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/weighted_shots_sm.webp" }
+        ],
+        6400: [
+            { name: "방어 관통탄", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/armor_piercing_rounds_sm.webp" },
+            { name: "축전기", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/capacitor_sm.webp" },
+            { name: "치명적 헤드샷", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/crippling_headshot_sm.webp" },
+            { name: "분쇄하는 주먹", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/crushing_fists_sm.webp" },
+            { name: "광란", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/frenzy_sm.webp" },
+            { name: "유리 대포", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/glass_cannon_sm.webp" },
+            { name: "행운의 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/lucky_shot_sm.webp" },
+            { name: "도탄", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/ricochet_sm.webp" },
+            { name: "그림자 직조", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/shadow_weave_sm.webp" },
+            { name: "소음기", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/silencer_sm.webp" },
+            { name: "주문술사", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/spell_slinger_sm.webp" },
+            { name: "영적 넘침", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/spiritual_overflow_sm.webp" }
+        ]
+    },
+    vitality: {
+        800: [
+            { name: "추가 체력", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health_sm.webp" },
+            { name: "추가 재생", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_regen_sm.webp" },
+            { name: "추가 스태미나", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_stamina_sm.webp" },
+            { name: "치유 의식", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_rite_sm.webp" },
+            { name: "근접 흡혈", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/melee_lifesteal_sm.webp" },
+            { name: "반박", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/rebuttal_sm.webp" },
+            { name: "달리기 부츠", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/sprint_boots_sm.webp" }
+        ],
+        1600: [
+            { name: "전투 조끼", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/battle_vest_sm.webp" },
+            { name: "탄환 흡혈", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/bullet_lifesteal_sm.webp" },
+            { name: "디버프 감소기", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/debuff_reducer_sm.webp" },
+            { name: "마법사의 문장", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/enchanters_emblem_sm.webp" },
+            { name: "지속 속도", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/enduring_speed_sm.webp" },
+            { name: "수호 와드", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/guardian_ward_sm.webp" },
+            { name: "치유 차단", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healbane_sm.webp" },
+            { name: "치유 부스터", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_booster_sm.webp" },
+            { name: "반응 방벽", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/reactive_barrier_sm.webp" },
+            { name: "회복 목걸이", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/restorative_locket_sm.webp" },
+            { name: "반격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/return_fire_sm.webp" },
+            { name: "정신 흡혈", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/spirit_lifesteal_sm.webp" },
+            { name: "정신 보호막", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/spirit_shielding_sm.webp" },
+            { name: "무기 보호막", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/weapon_shielding_sm.webp" }
+        ],
+        3200: [
+            { name: "탄환 저항", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/bullet_resilience_sm.webp" },
+            { name: "주문 차단", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/counterspell_sm.webp" },
+            { name: "디버프 제거", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/debuff_remover_sm.webp" },
+            { name: "불굴", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/fortitude_sm.webp" },
+            { name: "분노 황홀", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/fury_trance_sm.webp" },
+            { name: "치유 노바", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_nova_sm.webp" },
+            { name: "생명력 강타", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/lifestrike_sm.webp" },
+            { name: "장엄한 도약", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/majestic_leap_sm.webp" },
+            { name: "금속 피부", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/metal_skin_sm.webp" },
+            { name: "구조 광선", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/rescue_beam_sm.webp" },
+            { name: "정신 저항", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/spirit_resilience_sm.webp" },
+            { name: "스태미나 숙련", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/stamina_mastery_sm.webp" },
+            { name: "트로피 수집가", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/trophy_collector_sm.webp" },
+            { name: "베일 워커", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/veil_walker_sm.webp" },
+            { name: "워프 스톤", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/warp_stone_sm.webp" }
+        ],
+        6400: [
+            { name: "죽음 속이기", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/cheat_death_sm.webp" },
+            { name: "거신", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/colossus_sm.webp" },
+            { name: "신성한 방벽", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/divine_barrier_sm.webp" },
+            { name: "점술사의 케블라", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/diviners_kevlar_sm.webp" },
+            { name: "치유 템포", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_tempo_sm.webp" },
+            { name: "주입기", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/infuser_sm.webp" },
+            { name: "억제제", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/inhibitor_sm.webp" },
+            { name: "저거너트", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/juggernaut_sm.webp" },
+            { name: "거머리", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/leech_sm.webp" },
+            { name: "팬텀 스트라이크", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/phantom_strike_sm.webp" },
+            { name: "장갑 갑옷", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/plated_armor_sm.webp" },
+            { name: "흡수 탄환", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/siphon_bullets_sm.webp" },
+            { name: "주문 차단기", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/spellbreaker_sm.webp" },
+            { name: "저지불가", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/unstoppable_sm.webp" },
+            { name: "흡혈 폭발", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/vampiric_burst_sm.webp" },
+            { name: "마녀 갑옷", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/witchmail_sm.webp" }
+        ]
+    },
+    spirit: {
+        800: [
+            { name: "추가 충전", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_charge_sm.webp" },
+            { name: "추가 정신력", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_spirit_sm.webp" },
+            { name: "신비한 폭발", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_burst_sm.webp" },
+            { name: "신비한 사거리", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_reach_sm.webp" },
+            { name: "신비한 재생", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_regen_sm.webp" },
+            { name: "녹슨 총신", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/rusted_barrel_sm.webp" },
+            { name: "정신 강타", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_strike_sm.webp" }
+        ],
+        1600: [
+            { name: "비전 쇄도", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/arcane_surge_sm.webp" },
+            { name: "탄환 저항 파쇄기", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/bullet_resist_shredder_sm.webp" },
+            { name: "한랭 전선", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/cold_front_sm.webp" },
+            { name: "개선된 재사용 대기시간", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_cooldown_sm.webp" },
+            { name: "지속시간 연장기", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/duration_extender_sm.webp" },
+            { name: "개선된 정신력", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_spirit_sm.webp" },
+            { name: "신비한 둔화", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_slow_sm.webp" },
+            { name: "신비한 취약", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_vulnerability_sm.webp" },
+            { name: "신속 재장전", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/quicksilver_reload_sm.webp" },
+            { name: "둔화 주문", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/slowing_hex_sm.webp" },
+            { name: "정신 흡수", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_sap_sm.webp" },
+            { name: "억제기", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/suppressor_sm.webp" }
+        ],
+        3200: [
+            { name: "부패", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/decay_sm.webp" },
+            { name: "무장 해제 주문", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/disarming_hex_sm.webp" },
+            { name: "거대한 확장", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/greater_expansion_sm.webp" },
+            { name: "넉다운", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/knockdown_sm.webp" },
+            { name: "빛나는 재생", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/radiant_regeneration_sm.webp" },
+            { name: "빠른 충전", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/rapid_recharge_sm.webp" },
+            { name: "침묵 문양", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/silence_glyph_sm.webp" },
+            { name: "정신 강탈", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_snatch_sm.webp" },
+            { name: "우월한 재사용 대기시간", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/superior_cooldown_sm.webp" },
+            { name: "우월한 지속시간", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/superior_duration_sm.webp" },
+            { name: "힘의 쇄도", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/surge_of_power_sm.webp" },
+            { name: "탱크버스터", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/tankbuster_sm.webp" },
+            { name: "고통 파동", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/torment_pulse_sm.webp" }
+        ],
+        6400: [
+            { name: "극지 돌풍", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/arctic_blast_sm.webp" },
+            { name: "무한한 정신력", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/boundless_spirit_sm.webp" },
+            { name: "저주", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/curse_sm.webp" },
+            { name: "메아리 파편", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/echo_shard_sm.webp" },
+            { name: "확대되는 노출", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/escalating_exposure_sm.webp" },
+            { name: "이더리얼 시프트", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/ethereal_shift_sm.webp" },
+            { name: "집중 렌즈", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/focus_lens_sm.webp" },
+            { name: "번개 두루마리", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/lightning_scroll_sm.webp" },
+            { name: "마법 카펫", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/magic_carpet_sm.webp" },
+            { name: "수은 대형 권총", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mercurial_magnum_sm.webp" },
+            { name: "신비한 잔향", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_reverb_sm.webp" },
+            { name: "리프레셔", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/refresher_sm.webp" },
+            { name: "재앙", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/scourge_sm.webp" },
+            { name: "정신 연소", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_burn_sm.webp" },
+            { name: "초월적 재사용 대기시간", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/transcendent_cooldown_sm.webp" },
+            { name: "소용돌이 거미줄", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/vortex_web_sm.webp" }
+        ]
+    }
 };
 
-// Load and display items data
-async function loadItemsData() {
-    const loading = document.getElementById('items-loading');
-    const content = document.getElementById('items-content');
-    const error = document.getElementById('items-error');
-    
-    loading.style.display = 'flex';
-    content.style.display = 'none';
-    error.style.display = 'none';
-    
-    try {
-        // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Display items by category
-        displayItemsByCategory('weapon', itemsData.weapon);
-        displayItemsByCategory('vitality', itemsData.vitality);
-        displayItemsByCategory('spirit', itemsData.spirit);
-        
-        loading.style.display = 'none';
-        content.style.display = 'block';
-        
-    } catch (err) {
-        console.error('Error loading items:', err);
-        loading.style.display = 'none';
-        error.style.display = 'block';
-    }
+// Function to display items by category and tier
+function displayItems() {
+    ['weapon', 'vitality', 'spirit'].forEach(category => {
+        [800, 1600, 3200, 6400].forEach(tier => {
+            const container = document.getElementById(`${category}-${tier}`);
+            if (container && itemsData[category][tier]) {
+                const itemsHTML = itemsData[category][tier].map(item => `
+                    <div class="item-card" onclick="viewItemDetails('${item.name}')">
+                        <div class="item-image">
+                            <img src="${item.image}" alt="${item.name}" 
+                                 onerror="this.src='https://via.placeholder.com/48x48/333333/ffffff?text=No+Image'">
+                        </div>
+                        <div class="item-name">${item.name}</div>
+                    </div>
+                `).join('');
+                container.innerHTML = itemsHTML;
+            }
+        });
+    });
 }
 
-function displayItemsByCategory(category, items) {
-    const container = document.getElementById(`${category}-items`);
-    const countElement = document.getElementById(`${category}-count`);
-    
-    countElement.textContent = `${items.length}개 아이템`;
-    
-    const itemCards = items.map(item => {
-        const winRateClass = item.stats.winRate >= 54 ? 'winrate-high' : 
-                           item.stats.winRate >= 50 ? 'winrate-medium' : 'winrate-low';
-        
-        return `
-            <div class="item-card" onclick="viewItemDetails('${item.name}')">
-                <div class="item-image">
-                    <img src="${item.image}" alt="${item.name}" 
-                         onerror="this.src='https://via.placeholder.com/64x64/333333/ffffff?text=No+Image'">
-                </div>
-                <div class="item-info">
-                    <div class="item-header">
-                        <h3 class="item-name">${item.name}</h3>
-                        <div class="item-cost">
-                            <img src="https://via.placeholder.com/20x20/F1C40F/ffffff?text=$" 
-                                 alt="Souls" class="soul-icon"
-                                 onerror="this.style.display='none'">
-                            <span>${item.cost.toLocaleString()}</span>
-                        </div>
-                    </div>
-                    <div class="item-stats">
-                        <div class="stat-item">
-                            <div class="stat-value">${item.stats.pickRate}%</div>
-                            <div class="stat-label">픽률</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value ${winRateClass}">${item.stats.winRate}%</div>
-                            <div class="stat-label">승률</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">${item.stats.avgPurchaseTime}</div>
-                            <div class="stat-label">평균 구매</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-    }).join('');
-    
-    container.innerHTML = itemCards;
+// Search functionality
+function setupSearch() {
+    const searchInput = document.getElementById('item-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const itemCards = document.querySelectorAll('.item-card');
+            
+            itemCards.forEach(card => {
+                const itemName = card.querySelector('.item-name').textContent.toLowerCase();
+                if (itemName.includes(searchTerm)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    }
 }
 
 function viewItemDetails(itemName) {
     console.log('View item details:', itemName);
-    alert(`${itemName} 상세 페이지는 곧 추가될 예정입니다!`);
+    alert(`${itemName} 상세 정보는 곧 추가될 예정입니다!`);
 }
 
-// Filter event handlers
+// Initialize when DOM loads
 document.addEventListener('DOMContentLoaded', () => {
-    loadItemsData();
-    
-    // Add filter change listeners
-    document.getElementById('patch-filter').addEventListener('change', (e) => {
-        console.log('Patch filter changed:', e.target.value);
-        loadItemsData(); // Reload with new filter
-    });
-    
-    document.getElementById('hero-filter').addEventListener('change', (e) => {
-        console.log('Hero filter changed:', e.target.value);
-        loadItemsData(); // Reload with new filter
-    });
-    
-    document.getElementById('game-stage-filter').addEventListener('change', (e) => {
-        console.log('Game stage filter changed:', e.target.value);
-        loadItemsData(); // Reload with new filter
-    });
+    displayItems();
+    setupSearch();
 });
 </script>
