@@ -1,7 +1,7 @@
 {
   "name": "deadlock-new",
   "version": "1.0.0",
-  "description": "Deadlock coach clone with Steam API integration",
+  "description": "Deadlock coach clone with Steam API integration and real game item images",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
