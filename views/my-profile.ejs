@@ -2429,7 +2429,65 @@ function getItemImageUrl(itemName) {
     if (unknownItemMatch) {
         // ID 기반으로 아이템 매핑 시도
         const itemId = parseInt(unknownItemMatch[1]);
-        console.log(`🔍 Unknown Item ID: ${itemId} - 아이템 페이지 API와 매핑 시도 중...`);
+        console.log(`🔍 Unknown Item ID: ${itemId} - 아이템 ID 기반 매핑 시도...`);
+        
+        // 아이템 ID와 한국어 이름 매핑 (서버에서 사용하는 것과 동일)
+        const itemIdToName = {
+            // 무기 아이템 (Weapon Items)
+            715762406: '기본 탄창',
+            1342610602: '근거리 전투',
+            1437614329: '헤드샷 부스터',
+            4072270083: '고속 탄창',
+            2220233739: '관통탄 보호막',
+            1009965641: '몬스터 탄환',
+            4147641675: '속사탄',
+            499683006: '회복탄',
+            1842576017: '능동 재장전',
+            393974127: '광전사',
+            2981692841: '점진적 회복력',
+            4139877411: '신속한 발놀림',
+            1414319208: '사냥꾼의 오라',
+            509856396: '운동 대시',
+            3633614685: '장거리',
+            2824119765: '근접 돌진',
+            3731635960: '신비한 사격',
+            865846625: '거대한 탄창',
+            3977876567: '테슬라 탄환',
+            
+            // 활력 아이템 (Vitality Items)
+            1537272748: '추가 체력',
+            3970837787: '정신 갑옷',
+            3791587546: '탄환 갑옷',
+            2863754076: '추가 재생',
+            3675059374: '추가 스태미나',
+            2598983158: '스프린트 부츠',
+            3730717068: '치유 의식',
+            1845966100: '지속 속도',
+            4033043084: '치유 부스터',
+            1955841979: '금속 피부',
+            339443430: '거신',
+            
+            // 정신 아이템 (Spirit Items)
+            2095565695: '추가 정신력',
+            1282141666: '신비한 폭발',
+            3677653320: '정신 강타',
+            3702319013: '한파',
+            859037655: '부패',
+            3574779418: '주입기',
+            1673325555: '정신 흡혈',
+            673001892: '이더 변환',
+            1656913918: '우월한 쿨다운',
+            3754524659: '향상된 쿨다운',
+            3812615317: '메아리 파편',
+            1729727717: '신비한 잔향',
+            3802996421: '리프레셔'
+        };
+        
+        const koreanName = itemIdToName[itemId];
+        if (koreanName && imageMap[koreanName]) {
+            console.log(`✅ ID ${itemId} → ${koreanName} → 이미지 매핑 성공`);
+            return imageMap[koreanName];
+        }
     }
     
     // 기본 폴백 이미지
@@ -2834,13 +2892,52 @@ function displayMatchHistory(matches) {
                     itemsContainer.innerHTML = itemsHTML;
                     console.log(`✅ 매치 ${index} 아이템 ${itemsData.length}개 표시 완료`);
                 } else {
-                    // 아이템 데이터가 없는 경우
-                    console.log(`⚠️ 매치 ${index}: 아이템 데이터 없음`);
-                    itemsContainer.innerHTML = `
-                        <div style="grid-column: 1/-1; text-align: center; color: #666; font-size: 11px; padding: 15px;">
-                            <i class="fas fa-box-open"></i> 아이템 없음
-                        </div>
-                    `;
+                    // 아이템 데이터가 없는 경우 - 더 나은 UI 제공
+                    console.log(`⚠️ 매치 ${index}: 아이템 데이터 없음, 로딩 재시도 중...`);
+                    
+                    // 매치 상세 정보를 다시 요청해서 아이템 가져오기 시도
+                    setTimeout(async () => {
+                        try {
+                            const matchDetailsResponse = await fetch(`/api/v1/matches/${match.matchId}/details`);
+                            if (matchDetailsResponse.ok) {
+                                const detailsData = await matchDetailsResponse.json();
+                                if (detailsData.items && detailsData.items.length > 0) {
+                                    // 아이템 데이터를 찾은 경우 다시 렌더링
+                                    const retryItemsHTML = detailsData.items.slice(0, 12).map((item, itemIndex) => {
+                                        const itemName = item.name || `알 수 없는 아이템 (${item.itemId || item.id || 'ID없음'})`;
+                                        const imageUrl = getItemImageUrl(itemName);
+                                        const itemTier = item.tier || 1;
+                                        
+                                        return `
+                                            <div class="item-wrapper">
+                                                <img src="${imageUrl}" 
+                                                     alt="${itemName}" 
+                                                     class="item-image tier-${itemTier}"
+                                                     title="${itemName}"
+                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                                <div class="item-placeholder tier-${itemTier}" style="display: none;">
+                                                    <span class="item-text">${itemName.substring(0, 3)}</span>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('');
+                                    
+                                    itemsContainer.innerHTML = retryItemsHTML;
+                                    console.log(`✅ 매치 ${index} 재시도로 아이템 ${detailsData.items.length}개 표시 완료`);
+                                    return;
+                                }
+                            }
+                        } catch (retryError) {
+                            console.error(`❌ 매치 ${index} 아이템 재시도 실패:`, retryError);
+                        }
+                        
+                        // 최종적으로 실패한 경우 빈 슬롯 표시
+                        itemsContainer.innerHTML = `
+                            <div style="grid-column: 1/-1; text-align: center; color: #666; font-size: 11px; padding: 15px;">
+                                <i class="fas fa-info-circle"></i> 게임 종료 시 아이템 정보 없음
+                            </div>
+                        `;
+                    }, 1000 + index * 200); // 각 매치마다 약간의 지연을 두어 API 부하 방지
                 }
             } else {
                 console.error(`❌ 매치 ${index}: items-container 요소를 찾을 수 없음`);

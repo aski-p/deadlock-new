@@ -353,9 +353,22 @@
     color: #FFEFD7;
     text-align: center;
     line-height: 1.2;
-    margin: 0;
+    margin: 0 0 6px 0;
     word-break: break-word;
     hyphens: auto;
+}
+
+.item-description {
+    font-size: 10px;
+    color: #999;
+    text-align: center;
+    line-height: 1.3;
+    margin: 0;
+    word-break: break-word;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
 }
 
 /* Responsive Design */
@@ -381,6 +394,11 @@
     
     .item-name {
         font-size: 11px;
+    }
+    
+    .item-description {
+        font-size: 9px;
+        -webkit-line-clamp: 2;
     }
     
     .price-amount {
@@ -416,29 +434,29 @@
 const itemsData = {
     weapon: {
         800: [
-            { name: "기본 탄창", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine_sm.webp" },
-            { name: "헤드샷 부스터", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/headshot_booster_sm.webp" },
-            { name: "고속탄", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/high_velocity_rounds_sm.webp" },
-            { name: "몬스터 탄환", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/monster_rounds_sm.webp" },
-            { name: "고속 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/rapid_rounds_sm.webp" },
-            { name: "회복 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/restorative_shot_sm.webp" }
+            { name: "기본 탄창", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine_sm.webp", description: "탄창 크기 +15% 증가" },
+            { name: "헤드샷 부스터", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/headshot_booster_sm.webp", description: "헤드샷 데미지 +15% 증가" },
+            { name: "고속탄", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/high_velocity_rounds_sm.webp", description: "탄환 속도 +20% 증가" },
+            { name: "몬스터 탄환", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/monster_rounds_sm.webp", description: "중립 몬스터에게 +30% 데미지" },
+            { name: "고속 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/rapid_rounds_sm.webp", description: "발사 속도 +10% 증가" },
+            { name: "회복 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/restorative_shot_sm.webp", description: "적 처치 시 체력 +60 회복" }
         ],
         1600: [
-            { name: "능동 재장전", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/active_reload_sm.webp" },
-            { name: "백스태버", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/backstabber_sm.webp" },
-            { name: "신속한 발", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/fleetfoot_sm.webp" },
-            { name: "강화 탄창", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/intensifying_magazine_sm.webp" },
-            { name: "역동적 돌진", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/kinetic_dash_sm.webp" },
-            { name: "장거리", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/long_range_sm.webp" },
-            { name: "근접 돌격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/melee_charge_sm.webp" },
-            { name: "신비한 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/mystic_shot_sm.webp" },
-            { name: "오프닝 라운드", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/opening_rounds_sm.webp" },
-            { name: "둔화 탄환", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/slowing_bullets_sm.webp" },
-            { name: "정신 파쇄탄", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/spirit_shredder_bullets_sm.webp" },
-            { name: "분산 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/split_shot_sm.webp" },
-            { name: "신속한 타격자", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/swift_striker_sm.webp" },
-            { name: "거대한 탄창", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/titanic_magazine_sm.webp" },
-            { name: "약화 헤드샷", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/weakening_headshot_sm.webp" }
+            { name: "능동 재장전", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/active_reload_sm.webp", description: "재장전 완료 시 데미지 +20%" },
+            { name: "백스태버", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/backstabber_sm.webp", description: "뒤에서 공격 시 +30% 데미지" },
+            { name: "신속한 발", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/fleetfoot_sm.webp", description: "이동 속도 +1.5m/s 증가" },
+            { name: "강화 탄창", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/intensifying_magazine_sm.webp", description: "연속 명중 시 데미지 누적 증가" },
+            { name: "역동적 돌진", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/kinetic_dash_sm.webp", description: "대시 후 근접 공격 강화" },
+            { name: "장거리", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/long_range_sm.webp", description: "총알 사거리 +10m 증가" },
+            { name: "근접 돌격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/melee_charge_sm.webp", description: "근접 공격이 전방으로 돌진" },
+            { name: "신비한 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/mystic_shot_sm.webp", description: "정신력에 비례하여 데미지 증가" },
+            { name: "오프닝 라운드", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/opening_rounds_sm.webp", description: "첫 번째 탄창 +25% 데미지" },
+            { name: "둔화 탄환", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/slowing_bullets_sm.webp", description: "적 명중 시 이동 속도 둔화" },
+            { name: "정신 파쇄탄", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/spirit_shredder_bullets_sm.webp", description: "정신 저항 -20% 감소 효과" },
+            { name: "분산 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/split_shot_sm.webp", description: "탄환이 2개로 분산되어 발사" },
+            { name: "신속한 타격자", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/swift_striker_sm.webp", description: "공격 속도 +15% 증가" },
+            { name: "거대한 탄창", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/titanic_magazine_sm.webp", description: "탄창 크기 +100% 증가" },
+            { name: "약화 헤드샷", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/weakening_headshot_sm.webp", description: "헤드샷 시 적 데미지 -30%" }
         ],
         3200: [
             { name: "연금술 화염", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/alchemical_fire_sm.webp" },
@@ -609,6 +627,7 @@ function displayItems() {
                                  onerror="this.src='https://via.placeholder.com/48x48/333333/ffffff?text=No+Image'">
                         </div>
                         <div class="item-name">${item.name}</div>
+                        <div class="item-description">${item.description || ''}</div>
                     </div>
                 `).join('');
                 container.innerHTML = itemsHTML;
