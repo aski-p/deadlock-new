@@ -1245,3 +1245,295 @@ footer {
         justify-content: center;
     }
 }
+
+/* 아이템 페이지 스타일 */
+.items-section {
+    padding: 120px 0 60px;
+    min-height: 100vh;
+}
+
+.items-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 40px;
+}
+
+.items-header {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.items-content {
+    display: flex;
+    flex-direction: column;
+    gap: 60px;
+}
+
+/* 아이템 카테고리 헤더 */
+.item-category {
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.category-header {
+    position: relative;
+    padding: 40px;
+    text-align: center;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 20px 20px 0 0;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.category-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(0, 0, 0, 0.7) 0%, 
+        rgba(0, 0, 0, 0.4) 50%, 
+        rgba(0, 0, 0, 0.7) 100%);
+    z-index: 1;
+}
+
+.category-header h2,
+.category-icon {
+    position: relative;
+    z-index: 2;
+}
+
+/* 무기 카테고리 - Haze 배경 */
+.weapon-header {
+    background-image: url('https://cdn.deadlock.coach/vpk/panorama/images/heroes/haze/haze_card.webp');
+    background-position: center 20%;
+}
+
+.weapon-header::before {
+    background: linear-gradient(135deg, 
+        rgba(139, 69, 19, 0.8) 0%, 
+        rgba(160, 82, 45, 0.6) 30%,
+        rgba(205, 133, 63, 0.4) 60%,
+        rgba(139, 69, 19, 0.8) 100%);
+}
+
+/* 활력 카테고리 - Abrams 배경 */
+.vitality-header {
+    background-image: url('https://cdn.deadlock.coach/vpk/panorama/images/heroes/atlas/atlas_card.webp');
+    background-position: center 30%;
+}
+
+.vitality-header::before {
+    background: linear-gradient(135deg, 
+        rgba(34, 139, 34, 0.8) 0%, 
+        rgba(50, 205, 50, 0.6) 30%,
+        rgba(144, 238, 144, 0.4) 60%,
+        rgba(34, 139, 34, 0.8) 100%);
+}
+
+/* 정신 카테고리 - Seven 배경 */
+.spirit-header {
+    background-image: url('https://cdn.deadlock.coach/vpk/panorama/images/heroes/chrono/chrono_card.webp');
+    background-position: center 25%;
+}
+
+.spirit-header::before {
+    background: linear-gradient(135deg, 
+        rgba(138, 43, 226, 0.8) 0%, 
+        rgba(147, 112, 219, 0.6) 30%,
+        rgba(221, 160, 221, 0.4) 60%,
+        rgba(138, 43, 226, 0.8) 100%);
+}
+
+.category-header h2 {
+    font-size: 42px;
+    font-weight: 800;
+    color: #ffffff;
+    text-shadow: 
+        2px 2px 4px rgba(0, 0, 0, 0.8),
+        0 0 20px rgba(255, 255, 255, 0.3);
+    margin: 0;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.category-icon {
+    font-size: 64px;
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8))
+            drop-shadow(0 0 20px rgba(255, 255, 255, 0.5));
+    animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8))
+                drop-shadow(0 0 20px rgba(255, 255, 255, 0.5));
+    }
+    50% {
+        transform: scale(1.1);
+        filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.9))
+                drop-shadow(0 0 30px rgba(255, 255, 255, 0.8));
+    }
+}
+
+/* 가격 티어 */
+.price-tier {
+    margin-bottom: 40px;
+    padding: 0 30px;
+}
+
+.tier-label {
+    text-align: center;
+    margin: 30px 0 20px 0;
+}
+
+.price-amount {
+    display: inline-block;
+    background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+    color: #000;
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 16px;
+    box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+    letter-spacing: 1px;
+}
+
+/* 아이템 그리드 */
+.items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.item-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.item-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.item-image {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.item-card:hover .item-image {
+    border-color: rgba(255, 255, 255, 0.6);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+}
+
+.item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.3s ease;
+}
+
+.item-card:hover .item-image img {
+    transform: scale(1.1);
+}
+
+.item-name {
+    font-weight: 600;
+    font-size: 16px;
+    color: #ffffff;
+    line-height: 1.3;
+    margin: 0;
+}
+
+.item-description {
+    font-size: 14px;
+    color: #cccccc;
+    line-height: 1.4;
+    margin: 0;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .items-container {
+        padding: 0 20px;
+    }
+    
+    .items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 15px;
+    }
+    
+    .category-header {
+        padding: 30px 20px;
+        min-height: 150px;
+    }
+    
+    .category-header h2 {
+        font-size: 28px;
+    }
+    
+    .category-icon {
+        font-size: 48px;
+    }
+    
+    .price-tier {
+        padding: 0 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+    }
+    
+    .item-card {
+        padding: 15px;
+    }
+    
+    .category-header {
+        padding: 25px 15px;
+        min-height: 120px;
+    }
+    
+    .category-header h2 {
+        font-size: 24px;
+    }
+    
+    .category-icon {
+        font-size: 40px;
+    }
+}
