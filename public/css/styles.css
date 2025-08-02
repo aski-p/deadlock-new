@@ -1414,22 +1414,23 @@ footer {
 /* 아이템 그리드 */
 .items-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-    padding: 20px 0;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 25px;
+    padding: 25px 0;
 }
 
 .item-card {
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: 20px;
+    border-radius: 16px;
+    padding: 30px 25px;
     text-align: center;
     transition: all 0.3s ease;
     border: 1px solid rgba(255, 255, 255, 0.1);
     cursor: pointer;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 20px;
+    min-height: 200px;
 }
 
 .item-card:hover {
@@ -1440,13 +1441,14 @@ footer {
 }
 
 .item-image {
-    width: 64px;
-    height: 64px;
+    width: 80px;
+    height: 80px;
     margin: 0 auto;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
     border: 2px solid rgba(255, 255, 255, 0.2);
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .item-card:hover .item-image {
@@ -1467,22 +1469,24 @@ footer {
 
 .item-name {
     font-weight: 600;
-    font-size: 16px;
+    font-size: 18px;
     color: #ffffff;
     line-height: 1.3;
     margin: 0;
+    flex-shrink: 0;
 }
 
 .item-description {
-    font-size: 14px;
+    font-size: 15px;
     color: #cccccc;
-    line-height: 1.4;
+    line-height: 1.5;
     margin: 0;
-    min-height: 40px;
+    min-height: 60px;
     display: flex;
     align-items: center;
     justify-content: center;
     text-align: center;
+    flex-grow: 1;
 }
 
 /* 반응형 */
@@ -1492,8 +1496,27 @@ footer {
     }
     
     .items-grid {
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 15px;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+    }
+    
+    .item-card {
+        min-height: 180px;
+        padding: 25px 20px;
+    }
+    
+    .item-image {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .item-name {
+        font-size: 16px;
+    }
+    
+    .item-description {
+        font-size: 14px;
+        min-height: 50px;
     }
     
     .category-header {
@@ -1516,12 +1539,27 @@ footer {
 
 @media (max-width: 480px) {
     .items-grid {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 12px;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
     }
     
     .item-card {
-        padding: 15px;
+        padding: 20px 15px;
+        min-height: 160px;
+    }
+    
+    .item-image {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .item-name {
+        font-size: 15px;
+    }
+    
+    .item-description {
+        font-size: 13px;
+        min-height: 45px;
     }
     
     .category-header {
