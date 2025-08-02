@@ -24,9 +24,12 @@
     "express-rate-limit": "^7.4.1",
     "express-session": "^1.18.1",
     "helmet": "^8.0.0",
+    "multer": "^2.0.2",
     "node-fetch": "^3.3.2",
     "passport": "^0.7.0",
-    "passport-steam": "^1.0.18"
+    "passport-steam": "^1.0.18",
+    "sharp": "^0.34.3",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
