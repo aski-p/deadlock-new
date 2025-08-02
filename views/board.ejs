@@ -3,7 +3,7 @@
         <div class="board-header">
             <h1 class="page-title">게시판</h1>
             <% if (user) { %>
-                <button class="write-post-btn" onclick="showWriteForm()">✏️ 글쓰기</button>
+                <button class="write-post-btn" id="writePostBtn">✏️ 글쓰기</button>
             <% } else { %>
                 <p class="login-notice">글쓰기와 댓글 작성을 위해서는 <a href="/auth/steam" class="steam-login-link">Steam 로그인</a>이 필요합니다.</p>
             <% } %>
@@ -24,7 +24,7 @@
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="submit-btn">작성하기</button>
-                        <button type="button" class="cancel-btn" onclick="hideWriteForm()">취소</button>
+                        <button type="button" class="cancel-btn" id="cancelWriteBtn">취소</button>
                     </div>
                 </form>
             </div>
@@ -56,9 +56,9 @@
             </div>
             
             <div class="pagination" id="pagination" style="display: none;">
-                <button class="page-btn" id="prevBtn" onclick="changePage(-1)">이전</button>
+                <button class="page-btn" id="prevBtn">이전</button>
                 <span class="page-info" id="pageInfo">1 / 1</span>
-                <button class="page-btn" id="nextBtn" onclick="changePage(1)">다음</button>
+                <button class="page-btn" id="nextBtn">다음</button>
             </div>
         </div>
     </div>
@@ -71,10 +71,10 @@
             <h2 id="modalTitle">게시글 제목</h2>
             <div class="modal-actions">
                 <div class="post-actions" id="postActions" style="display: none;">
-                    <button class="edit-btn" onclick="editPost()">수정</button>
-                    <button class="delete-btn" onclick="deletePost()">삭제</button>
+                    <button class="edit-btn" id="editPostBtn">수정</button>
+                    <button class="delete-btn" id="deletePostBtn">삭제</button>
                 </div>
-                <button class="close-btn" onclick="closePostModal()">&times;</button>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
             </div>
         </div>
         <div class="modal-body">
@@ -104,8 +104,8 @@
                     <textarea id="editContent" rows="8" maxlength="2000" required></textarea>
                 </div>
                 <div class="form-actions">
-                    <button onclick="saveEdit()" class="submit-btn">저장</button>
-                    <button onclick="cancelEdit()" class="cancel-btn">취소</button>
+                    <button id="saveEditBtn" class="submit-btn">저장</button>
+                    <button id="cancelEditBtn" class="cancel-btn">취소</button>
                 </div>
             </div>
             
@@ -119,7 +119,7 @@
                 <% if (user) { %>
                 <div class="comment-form">
                     <textarea id="commentInput" placeholder="댓글을 입력하세요..." rows="3"></textarea>
-                    <button onclick="addComment()" class="comment-submit-btn">댓글 작성</button>
+                    <button id="addCommentBtn" class="comment-submit-btn">댓글 작성</button>
                 </div>
                 <% } else { %>
                 <p class="login-notice">댓글 작성을 위해서는 <a href="/auth/steam">Steam 로그인</a>이 필요합니다.</p>
@@ -625,7 +625,79 @@ let currentPostId = null;
 // 페이지 로드 시 게시글 목록 불러오기
 document.addEventListener('DOMContentLoaded', () => {
     loadPosts();
+    setupEventListeners();
 });
+
+// 이벤트 리스너 설정
+function setupEventListeners() {
+    // 글쓰기 버튼
+    const writePostBtn = document.getElementById('writePostBtn');
+    if (writePostBtn) {
+        writePostBtn.addEventListener('click', showWriteForm);
+    }
+    
+    // 글쓰기 취소 버튼
+    const cancelWriteBtn = document.getElementById('cancelWriteBtn');
+    if (cancelWriteBtn) {
+        cancelWriteBtn.addEventListener('click', hideWriteForm);
+    }
+    
+    // 페이지네이션 버튼
+    const prevBtn = document.getElementById('prevBtn');
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => changePage(-1));
+    }
+    
+    const nextBtn = document.getElementById('nextBtn');
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => changePage(1));
+    }
+    
+    // 모달 관련 버튼
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', closePostModal);
+    }
+    
+    const editPostBtn = document.getElementById('editPostBtn');
+    if (editPostBtn) {
+        editPostBtn.addEventListener('click', editPost);
+    }
+    
+    const deletePostBtn = document.getElementById('deletePostBtn');
+    if (deletePostBtn) {
+        deletePostBtn.addEventListener('click', deletePost);
+    }
+    
+    const saveEditBtn = document.getElementById('saveEditBtn');
+    if (saveEditBtn) {
+        saveEditBtn.addEventListener('click', saveEdit);
+    }
+    
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    if (cancelEditBtn) {
+        cancelEditBtn.addEventListener('click', cancelEdit);
+    }
+    
+    const addCommentBtn = document.getElementById('addCommentBtn');
+    if (addCommentBtn) {
+        addCommentBtn.addEventListener('click', addComment);
+    }
+    
+    // 게시글 테이블 클릭 이벤트 (이벤트 위임)
+    const postsTableBody = document.getElementById('postsTableBody');
+    if (postsTableBody) {
+        postsTableBody.addEventListener('click', (e) => {
+            const row = e.target.closest('.post-row');
+            if (row) {
+                const postId = parseInt(row.dataset.postId);
+                if (postId) {
+                    openPostModal(postId);
+                }
+            }
+        });
+    }
+}
 
 // 게시글 목록 불러오기 (50개씩)
 async function loadPosts(page = 1) {
@@ -678,7 +750,7 @@ function displayPostsTable(posts, totalCount, currentPage) {
     tableBody.innerHTML = posts.map((post, index) => {
         const sequenceNumber = startNumber - index;
         return `
-        <tr onclick="openPostModal(${post.id})" style="cursor: pointer;">
+        <tr data-post-id="${post.id}" class="post-row" style="cursor: pointer;">
             <td class="seq-column" style="text-align: center;">
                 ${sequenceNumber}
             </td>
@@ -690,8 +762,7 @@ function displayPostsTable(posts, totalCount, currentPage) {
             </td>
             <td class="author-column">
                 <div class="post-author">
-                    <img src="${post.author_avatar}" alt="${post.author_username}" class="author-avatar" 
-                         onerror="this.src='data:image/svg+xml;charset=utf-8,${encodeURIComponent('<svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"24\\\" height=\\\"24\\\" viewBox=\\\"0 0 24 24\\\"><circle cx=\\\"12\\\" cy=\\\"12\\\" r=\\\"10\\\" fill=\\\"#666\\\" stroke=\\\"#fff\\\" stroke-width=\\\"2\\\"/><circle cx=\\\"12\\\" cy=\\\"10\\\" r=\\\"3\\\" fill=\\\"#fff\\\"/><path d=\\\"M6.5 17.5 Q12 15 17.5 17.5\\\" stroke=\\\"#fff\\\" stroke-width=\\\"2\\\" fill=\\\"none\\\"/></svg>')}'">
+                    <img src="${post.author_avatar}" alt="${post.author_username}" class="author-avatar post-author-avatar">
                     <span>${escapeHtml(post.author_username)}</span>
                     ${post.rank_image ? `<img src="/images/ranks/${post.rank_image}" alt="${post.rank_name}" class="rank-badge" title="${post.rank_name} (${post.points || 0}점)">` : ''}
                 </div>
@@ -705,6 +776,9 @@ function displayPostsTable(posts, totalCount, currentPage) {
         </tr>
         `;
     }).join('');
+    
+    // 새로 추가된 이미지들에 오류 핸들러 추가
+    setupImageErrorHandlers();
 }
 
 // 페이지네이션 업데이트
@@ -919,6 +993,19 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// 이미지 오류 처리
+function handleImageError(img) {
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#666" stroke="#fff" stroke-width="2"/><circle cx="12" cy="10" r="3" fill="#fff"/><path d="M6.5 17.5 Q12 15 17.5 17.5" stroke="#fff" stroke-width="2" fill="none"/></svg>');
+}
+
+// 이미지에 오류 핸들러 추가
+function setupImageErrorHandlers() {
+    // 모든 프로필 아바타에 오류 핸들러 추가
+    document.querySelectorAll('.author-avatar, .comment-author-avatar, .post-author-avatar').forEach(img => {
+        img.onerror = () => handleImageError(img);
+    });
 }
 
 // 게시글 수정
