@@ -389,6 +389,23 @@ app.use(
 );
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Multer 설정 - 이미지 업로드용
+const storage = multer.memoryStorage();
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB 제한
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('이미지 파일만 업로드 가능합니다.'), false);
+    }
+  }
+});
+
 app.use(
   express.static('public', {
     maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
@@ -6000,6 +6017,56 @@ app.get('/ko/items', getUserTopHero, (req, res) => {
 // 통계 페이지 (아이템으로 리디렉트)
 app.get('/ko/stats', getUserTopHero, (req, res) => {
   res.redirect('/ko/items');
+});
+
+// 이미지 업로드 API - Supabase Storage 사용
+app.post('/api/v1/upload/image', upload.single('image'), async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Steam 로그인이 필요합니다' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: '이미지 파일이 필요합니다' });
+    }
+
+    // 이미지 최적화 (Sharp 사용)
+    const optimizedImage = await sharp(req.file.buffer)
+      .resize({ width: 1200, height: 800, fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 85 })
+      .toBuffer();
+
+    // 파일명 생성 (고유한 이름)
+    const fileName = `board-images/${uuidv4()}.jpg`;
+
+    // Supabase Storage에 업로드
+    const { data, error } = await supabase.storage
+      .from('uploads')
+      .upload(fileName, optimizedImage, {
+        contentType: 'image/jpeg',
+        cacheControl: '3600'
+      });
+
+    if (error) {
+      console.error('이미지 업로드 오류:', error);
+      return res.status(500).json({ error: '이미지 업로드에 실패했습니다' });
+    }
+
+    // 공개 URL 생성
+    const { data: publicData } = supabase.storage
+      .from('uploads')
+      .getPublicUrl(fileName);
+
+    res.json({ 
+      success: true, 
+      url: publicData.publicUrl,
+      fileName: fileName
+    });
+
+  } catch (error) {
+    console.error('이미지 업로드 처리 오류:', error);
+    res.status(500).json({ error: '이미지 업로드 중 오류가 발생했습니다' });
+  }
 });
 
 // 게시판 API - 글 목록 조회 (Supabase)
