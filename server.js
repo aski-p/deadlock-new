@@ -592,6 +592,50 @@ const steamAPI = {
   },
 };
 
+// 아이템 데이터를 카테고리별로 정리하는 함수
+function organizeItemsByCategory(itemsApiData) {
+  const organizedItems = {
+    weapon: [],
+    vitality: [],
+    spirit: []
+  };
+
+  // Slot 매핑: Wiki의 Slot을 우리 카테고리로 변환
+  const slotMapping = {
+    'Weapon': 'weapon',
+    'Armor': 'vitality', 
+    'Tech': 'spirit'
+  };
+
+  Object.values(itemsApiData).forEach(item => {
+    if (item && item.Name && item.Slot && item.Cost) {
+      const category = slotMapping[item.Slot];
+      const cost = parseInt(item.Cost);
+      
+      if (category && !isNaN(cost) && cost > 0) {
+        const itemData = {
+          name: item.Name,
+          tier: item.Tier || "I",
+          price: cost,
+          stats: item.Description ? [item.Description.split('\n')[0]] : [],
+          description: item.Description || ''
+        };
+        
+        organizedItems[category].push(itemData);
+      }
+    }
+  });
+
+  // 가격순으로 정렬
+  Object.keys(organizedItems).forEach(category => {
+    organizedItems[category].sort((a, b) => a.price - b.price);
+  });
+
+  console.log(`📊 정리된 아이템 수: 무기 ${organizedItems.weapon.length}, 활력 ${organizedItems.vitality.length}, 정신 ${organizedItems.spirit.length}`);
+  
+  return organizedItems;
+}
+
 // 사용자의 주요 영웅을 가져오는 미들웨어
 const getUserTopHero = async (req, res, next) => {
   if (req.user && req.user.accountId) {
@@ -6007,14 +6051,43 @@ app.get('/ko/board', getUserTopHero, (req, res) => {
 });
 
 // 아이템 페이지
-app.get('/ko/items', getUserTopHero, (req, res) => {
-  const deadlockItems = require('./data/items');
-  
-  res.render('items', {
-    user: req.user,
-    title: getDynamicTitle(req.user, '아이템 통계'),
-    items: deadlockItems
-  });
+app.get('/ko/items', getUserTopHero, async (req, res) => {
+  try {
+    console.log('🎒 아이템 페이지 요청, 외부 API에서 데이터 가져오는 중...');
+    
+    // Deadlock Wiki API에서 아이템 데이터 가져오기
+    const response = await axios.get('https://deadlock.wiki/Data:ItemData.json', {
+      timeout: 10000, // 10초 타임아웃
+      headers: {
+        'User-Agent': 'DeadlockWebApp/1.0'
+      }
+    });
+    
+    const itemsApiData = response.data;
+    console.log(`📦 외부 API에서 ${Object.keys(itemsApiData).length}개 아이템 정보 수신`);
+    
+    // 아이템 데이터를 카테고리와 가격별로 정리
+    const organizedItems = organizeItemsByCategory(itemsApiData);
+    
+    res.render('items', {
+      user: req.user,
+      title: getDynamicTitle(req.user, '아이템 통계'),
+      items: organizedItems
+    });
+    
+  } catch (error) {
+    console.error('❌ 아이템 API 요청 실패:', error.message);
+    
+    // 실패 시 로컬 데이터 사용
+    console.log('📂 로컬 아이템 데이터로 폴백');
+    const deadlockItems = require('./data/items');
+    
+    res.render('items', {
+      user: req.user,
+      title: getDynamicTitle(req.user, '아이템 통계'),
+      items: deadlockItems
+    });
+  }
 });
 
 // 통계 페이지 (아이템으로 리디렉트)

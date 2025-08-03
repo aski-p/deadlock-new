@@ -348,6 +348,59 @@
     filter: brightness(1.1) contrast(1.1);
 }
 
+.item-icon {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #4A5568 0%, #2D3748 100%);
+    border: 2px solid rgba(99, 162, 226, 0.3);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 700;
+    color: #FFEFD7;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+.item-card:hover .item-icon {
+    background: linear-gradient(135deg, #5A6578 0%, #3D4758 100%);
+    border-color: rgba(99, 162, 226, 0.6);
+    transform: scale(1.05);
+}
+
+/* Category-specific icon colors */
+.weapon-category .item-icon {
+    background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%);
+    border-color: rgba(220, 38, 38, 0.3);
+}
+
+.weapon-category .item-card:hover .item-icon {
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+    border-color: rgba(220, 38, 38, 0.6);
+}
+
+.vitality-category .item-icon {
+    background: linear-gradient(135deg, #16A34A 0%, #15803D 100%);
+    border-color: rgba(22, 163, 74, 0.3);
+}
+
+.vitality-category .item-card:hover .item-icon {
+    background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%);
+    border-color: rgba(22, 163, 74, 0.6);
+}
+
+.spirit-category .item-icon {
+    background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
+    border-color: rgba(124, 58, 237, 0.3);
+}
+
+.spirit-category .item-card:hover .item-icon {
+    background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+    border-color: rgba(124, 58, 237, 0.6);
+}
+
 .item-name {
     font-size: 18px;
     font-weight: 600;
@@ -451,6 +504,9 @@
 </style>
 
 <script>
+// Get server data from EJS
+const serverItems = <%-JSON.stringify(items)%>;
+
 // Enhanced item data with proper tier organization
 const itemsData = {
     weapon: {
@@ -605,21 +661,36 @@ const itemsData = {
 
 // Function to display items by category and tier
 function displayItems() {
+    console.log('📦 서버에서 받은 아이템 데이터:', serverItems);
+    
     ['weapon', 'vitality', 'spirit'].forEach(category => {
         [800, 1600, 3200, 6400].forEach(tier => {
             const container = document.getElementById(`${category}-${tier}`);
-            if (container && itemsData[category][tier]) {
-                const itemsHTML = itemsData[category][tier].map(item => `
+            if (container && serverItems[category]) {
+                // 서버 데이터에서 해당 가격대의 아이템들 필터링
+                const tierItems = serverItems[category].filter(item => {
+                    const price = parseInt(item.price);
+                    if (tier === 800) return price >= 500 && price < 1250;
+                    if (tier === 1600) return price >= 1250 && price < 2750;
+                    if (tier === 3200) return price >= 2750 && price < 5000;
+                    if (tier === 6400) return price >= 5000;
+                    return false;
+                });
+                
+                const itemsHTML = tierItems.map(item => `
                     <div class="item-card" onclick="viewItemDetails('${item.name}')">
                         <div class="item-image">
-                            <img src="${item.image}" alt="${item.name}" 
-                                 onerror="this.src='https://via.placeholder.com/48x48/333333/ffffff?text=No+Image'">
+                            <div class="item-icon">
+                                ${item.name.substring(0, 2)}
+                            </div>
                         </div>
                         <div class="item-name">${item.name}</div>
                         <div class="item-description">${item.description || ''}</div>
                     </div>
                 `).join('');
                 container.innerHTML = itemsHTML;
+                
+                console.log(`📊 ${category} ${tier} 티어: ${tierItems.length}개 아이템 표시`);
             }
         });
     });
