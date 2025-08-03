@@ -305,25 +305,26 @@
 /* Items Grid */
 .items-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
     padding: 0 20px;
 }
 
 .item-card {
     background: rgba(20, 20, 30, 0.8);
     border-radius: 12px;
-    padding: 15px;
+    padding: 30px 25px;
     border: 2px solid transparent;
     transition: all 0.3s ease;
     cursor: pointer;
-    aspect-ratio: 1;
+    min-height: 250px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
+    gap: 15px;
 }
 
 .item-card:hover {
@@ -334,9 +335,9 @@
 }
 
 .item-image {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 8px;
+    width: 100px;
+    height: 100px;
+    margin-bottom: 15px;
     flex-shrink: 0;
 }
 
@@ -348,27 +349,27 @@
 }
 
 .item-name {
-    font-size: 12px;
+    font-size: 18px;
     font-weight: 600;
     color: #FFEFD7;
     text-align: center;
-    line-height: 1.2;
-    margin: 0 0 6px 0;
+    line-height: 1.3;
+    margin: 0 0 10px 0;
     word-break: break-word;
     hyphens: auto;
 }
 
 .item-description {
-    font-size: 10px;
+    font-size: 14px;
     color: #999;
     text-align: center;
-    line-height: 1.3;
+    line-height: 1.4;
     margin: 0;
     word-break: break-word;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
+    overflow: visible;
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
 }
 
 /* Responsive Design */
@@ -378,27 +379,27 @@
     }
     
     .items-grid {
-        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-        gap: 10px;
-        padding: 0 10px;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 15px;
+        padding: 0 15px;
     }
     
     .item-card {
-        padding: 10px;
+        padding: 25px 20px;
+        min-height: 220px;
     }
     
     .item-image {
-        width: 40px;
-        height: 40px;
+        width: 80px;
+        height: 80px;
     }
     
     .item-name {
-        font-size: 11px;
+        font-size: 16px;
     }
     
     .item-description {
-        font-size: 9px;
-        -webkit-line-clamp: 2;
+        font-size: 13px;
     }
     
     .price-amount {
@@ -416,7 +417,27 @@
 
 @media (max-width: 480px) {
     .items-grid {
-        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+        padding: 0 10px;
+    }
+    
+    .item-card {
+        padding: 20px 15px;
+        min-height: 200px;
+    }
+    
+    .item-image {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .item-name {
+        font-size: 15px;
+    }
+    
+    .item-description {
+        font-size: 12px;
     }
     
     .category-header {
