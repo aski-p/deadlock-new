@@ -231,17 +231,14 @@
     position: relative;
 }
 
-.category-icon-small {
-    font-size: 16px;
-    margin-bottom: 2px;
-    opacity: 0.8;
+.main-item-icon {
+    font-size: 24px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    transition: transform 0.2s ease;
 }
 
-.item-initial {
-    font-size: 14px;
-    font-weight: bold;
-    color: #ffffff;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+.item-card:hover .main-item-icon {
+    transform: scale(1.1);
 }
 
 .item-name {
@@ -350,7 +347,33 @@
 // 서버에서 전달된 아이템 데이터 사용
 const items = <%- JSON.stringify(items) %>;
 
-// 카테고리별 아이콘 맵핑
+// 아이템별 전용 아이콘 맵핑
+function getItemIcon(itemName, category) {
+    const itemIcons = {
+        // 무기 아이콘
+        '근접전': '🗡️', '확장 탄창': '📦', '헤드샷 부스터': '🎯', '고속탄': '💨',
+        '괴수탄': '💥', '급속탄': '⚡', '회복탄': '❤️', '급속 재장전': '🔄',
+        '후방 기습': '🦾', '민첩 걸음': '👟', '강화 탄창': '📦', '반응성 대시': '💨',
+        '장거리 사격': '🔭', '근거리 돌격': '💪', '신비탄': '✨', '개방탄': '🔓',
+        '둔화탄': '🐌', '마법 분쇄탄': '🔥', '분할탄': '🔀', '고속 연사': '⚡',
+        '대형 탄창': '📦', '감쇠 헤드샷': '🎯', '화염 연금술': '🔥', '광전사': '😤',
+        '피의 공물': '🩸', '급속 사격': '⚡', '희생 제물': '⚱️', '저항 증대': '🛡️',
+        
+        // 생명 아이콘
+        '추가 체력': '❤️', '추가 재생': '💚', '추가 활력': '🌱', '방탄복': '🦺',
+        '치유 붕대': '🩹', '치유 권총': '💉', '격화': '🔥', '회복 샷': '💊',
+        '메딕 큐브': '⚕️', '헤비 아머': '🛡️', '저항의 갑옷': '🛡️', '생명력 증대': '💪',
+        
+        // 마법 아이콘
+        '추가 충전': '🔋', '추가 마법': '✨', '신비의 폭발': '💥', '신비 용사': '🧙',
+        '정신 공진': '🔮', '마법 실드': '🛡️', '영혼 폭발': '💀', '정신 재생': '🧠',
+        '마법 강화': '⭐', '무한 정신': '♾️'
+    };
+    
+    return itemIcons[itemName] || getCategoryIcon(category);
+}
+
+// 카테고리별 기본 아이콘
 function getCategoryIcon(category) {
     const icons = {
         weapon: '⚔️',
@@ -370,25 +393,23 @@ function createItemCard(item, category) {
     const card = document.createElement('div');
     card.className = `item-card tier-${item.tier ? item.tier.toLowerCase() : 'i'}`;
     
-    const categoryIcon = getCategoryIcon(category);
-    const itemInitial = getItemInitial(item.name);
+    const itemIcon = getItemIcon(item.name, category);
     
     card.innerHTML = `
         <div class="tier-indicator">${item.tier || 'I'}</div>
         <div class="item-icon">
-            <div class="category-icon-small">${categoryIcon}</div>
-            <div class="item-initial">${itemInitial}</div>
+            <div class="main-item-icon">${itemIcon}</div>
         </div>
         <div class="item-name">${item.name}</div>
         <div class="tooltip">
             <div class="tooltip-header">
-                <div class="tooltip-title">${item.name}</div>
+                <div class="tooltip-title">${itemIcon} ${item.name}</div>
                 <div class="tooltip-price">${item.price}</div>
             </div>
             <div class="tooltip-stats">
                 ${item.stats.map(stat => `
                     <div class="tooltip-stat">
-                        <div class="stat-icon"></div>
+                        <div class="stat-icon">📊</div>
                         <span>${stat}</span>
                     </div>
                 `).join('')}
