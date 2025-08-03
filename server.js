@@ -6008,9 +6008,12 @@ app.get('/ko/board', getUserTopHero, (req, res) => {
 
 // 아이템 페이지
 app.get('/ko/items', getUserTopHero, (req, res) => {
+  const deadlockItems = require('./data/items');
+  
   res.render('items', {
     user: req.user,
     title: getDynamicTitle(req.user, '아이템 통계'),
+    items: deadlockItems
   });
 });
 
@@ -6030,6 +6033,12 @@ app.post('/api/v1/upload/image', upload.single('image'), async (req, res) => {
       return res.status(400).json({ error: '이미지 파일이 필요합니다' });
     }
 
+    // Supabase 클라이언트가 없는 경우
+    if (!supabase) {
+      console.error('Supabase 클라이언트가 초기화되지 않았습니다');
+      return res.status(500).json({ error: 'Storage 서비스를 사용할 수 없습니다' });
+    }
+
     // 이미지 최적화 (Sharp 사용)
     const optimizedImage = await sharp(req.file.buffer)
       .resize({ width: 1200, height: 800, fit: 'inside', withoutEnlargement: true })
@@ -6038,6 +6047,30 @@ app.post('/api/v1/upload/image', upload.single('image'), async (req, res) => {
 
     // 파일명 생성 (고유한 이름)
     const fileName = `board-images/${uuidv4()}.jpg`;
+
+    // uploads bucket이 존재하는지 확인하고 없으면 생성
+    const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+    
+    if (listError) {
+      console.error('Bucket 목록 조회 오류:', listError);
+    } else {
+      const uploadsExists = buckets.some(bucket => bucket.name === 'uploads');
+      
+      if (!uploadsExists) {
+        console.log('uploads bucket이 존재하지 않음, 생성 시도...');
+        const { data: createData, error: createError } = await supabase.storage.createBucket('uploads', {
+          public: true,
+          fileSizeLimit: 5242880, // 5MB
+          allowedMimeTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+        });
+        
+        if (createError) {
+          console.error('Bucket 생성 실패:', createError);
+        } else {
+          console.log('uploads bucket 생성 성공');
+        }
+      }
+    }
 
     // Supabase Storage에 업로드
     const { data, error } = await supabase.storage
@@ -6049,13 +6082,23 @@ app.post('/api/v1/upload/image', upload.single('image'), async (req, res) => {
 
     if (error) {
       console.error('이미지 업로드 오류:', error);
-      return res.status(500).json({ error: '이미지 업로드에 실패했습니다' });
+      console.error('에러 세부사항:', {
+        message: error.message,
+        statusCode: error.statusCode,
+        error: error.error
+      });
+      return res.status(500).json({ 
+        error: '이미지 업로드에 실패했습니다',
+        details: error.message 
+      });
     }
 
     // 공개 URL 생성
     const { data: publicData } = supabase.storage
       .from('uploads')
       .getPublicUrl(fileName);
+
+    console.log('이미지 업로드 성공:', fileName, '→', publicData.publicUrl);
 
     res.json({ 
       success: true, 
@@ -6065,7 +6108,10 @@ app.post('/api/v1/upload/image', upload.single('image'), async (req, res) => {
 
   } catch (error) {
     console.error('이미지 업로드 처리 오류:', error);
-    res.status(500).json({ error: '이미지 업로드 중 오류가 발생했습니다' });
+    res.status(500).json({ 
+      error: '이미지 업로드 중 오류가 발생했습니다',
+      details: error.message 
+    });
   }
 });
 

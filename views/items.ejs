@@ -1,9 +1,10 @@
-<div class="items-section">
-    <div class="items-container">
+<div class="main-container">
+    <div class="items-section">
+        <div class="items-container">
         <!-- Header -->
         <div class="items-header">
-            <h1 class="page-title">완전한 아이템 목록을 확인하고 필터링하여 최적의 빌드를 완성하세요</h1>
-            <p class="page-description">데드락을 할 때 무엇을 구매해야 할지 잘 모르겠나요? 이 대화형 아이템 목록은 빌드를 향상시키는 올바른 아이템을 찾을 수 있게 도와줄 것입니다. 각 결과를 클릭하여 더 자세한 정보를 확인하세요.</p>
+            <h1 class="page-title">데드락 아이템 전체 목록</h1>
+            <p class="page-description">데드락의 모든 아이템을 카테고리별로 정리해 놓았습니다. 전체 아이템 목록을 탐색하고 필터링해서 최적의 빌드를 완성해 보세요.</p>
             
             <!-- Search Bar -->
             <div class="search-container">
@@ -14,154 +15,69 @@
         <!-- Item Categories -->
         <div class="items-content">
             <!-- Weapon Items -->
-            <div class="item-category weapon-category">
+            <div class="category-section">
                 <div class="category-header weapon-header">
-                    <div class="category-icon weapon-icon">🎯</div>
-                    <h2>무기</h2>
-                </div>
-                
-                <!-- Price Tiers -->
-                <div class="price-tier" data-price="800">
-                    <div class="tier-label">
-                        <span class="price-amount">800</span>
-                    </div>
-                    <div class="items-grid tier-800" id="weapon-800">
-                        <!-- Tier 1 weapons -->
+                    <div class="category-icon category-무기">⚔️</div>
+                    <div class="category-title">무기</div>
+                    <div class="price-range">
+                        <span class="price">800</span>
                     </div>
                 </div>
-                
-                <div class="price-tier" data-price="1600">
-                    <div class="tier-label">
-                        <span class="price-amount">1600+</span>
-                    </div>
-                    <div class="items-grid tier-1600" id="weapon-1600">
-                        <!-- Tier 2 weapons -->
-                    </div>
-                </div>
-                
-                <div class="price-tier" data-price="3200">
-                    <div class="tier-label">
-                        <span class="price-amount">3200+</span>
-                    </div>
-                    <div class="items-grid tier-3200" id="weapon-3200">
-                        <!-- Tier 3 weapons -->
-                    </div>
-                </div>
-                
-                <div class="price-tier" data-price="6400">
-                    <div class="tier-label">
-                        <span class="price-amount">6400+</span>
-                    </div>
-                    <div class="items-grid tier-6400" id="weapon-6400">
-                        <!-- Tier 4 weapons -->
-                    </div>
+                <div class="items-grid" id="weapon-grid">
+                    <!-- 무기 아이템들 -->
                 </div>
             </div>
 
             <!-- Vitality Items -->
-            <div class="item-category vitality-category">
+            <div class="category-section">
                 <div class="category-header vitality-header">
-                    <div class="category-icon vitality-icon">➕</div>
-                    <h2>활력</h2>
-                </div>
-                
-                <!-- Price Tiers -->
-                <div class="price-tier" data-price="800">
-                    <div class="tier-label">
-                        <span class="price-amount">800</span>
-                    </div>
-                    <div class="items-grid tier-800" id="vitality-800">
-                        <!-- Tier 1 vitality -->
+                    <div class="category-icon category-생명">💚</div>
+                    <div class="category-title">생명</div>
+                    <div class="price-range">
+                        <span class="price">800</span>
                     </div>
                 </div>
-                
-                <div class="price-tier" data-price="1600">
-                    <div class="tier-label">
-                        <span class="price-amount">1600+</span>
-                    </div>
-                    <div class="items-grid tier-1600" id="vitality-1600">
-                        <!-- Tier 2 vitality -->
-                    </div>
-                </div>
-                
-                <div class="price-tier" data-price="3200">
-                    <div class="tier-label">
-                        <span class="price-amount">3200+</span>
-                    </div>
-                    <div class="items-grid tier-3200" id="vitality-3200">
-                        <!-- Tier 3 vitality -->
-                    </div>
-                </div>
-                
-                <div class="price-tier" data-price="6400">
-                    <div class="tier-label">
-                        <span class="price-amount">6400+</span>
-                    </div>
-                    <div class="items-grid tier-6400" id="vitality-6400">
-                        <!-- Tier 4 vitality -->
-                    </div>
+                <div class="items-grid" id="vitality-grid">
+                    <!-- 생명 아이템들 -->
                 </div>
             </div>
 
             <!-- Spirit Items -->
-            <div class="item-category spirit-category">
+            <div class="category-section">
                 <div class="category-header spirit-header">
-                    <div class="category-icon spirit-icon">🔮</div>
-                    <h2>정신</h2>
-                </div>
-                
-                <!-- Price Tiers -->
-                <div class="price-tier" data-price="800">
-                    <div class="tier-label">
-                        <span class="price-amount">800</span>
-                    </div>
-                    <div class="items-grid tier-800" id="spirit-800">
-                        <!-- Tier 1 spirit -->
+                    <div class="category-icon category-마법">🔮</div>
+                    <div class="category-title">마법</div>
+                    <div class="price-range">
+                        <span class="price">800</span>
                     </div>
                 </div>
-                
-                <div class="price-tier" data-price="1600">
-                    <div class="tier-label">
-                        <span class="price-amount">1600+</span>
-                    </div>
-                    <div class="items-grid tier-1600" id="spirit-1600">
-                        <!-- Tier 2 spirit -->
-                    </div>
-                </div>
-                
-                <div class="price-tier" data-price="3200">
-                    <div class="tier-label">
-                        <span class="price-amount">3200+</span>
-                    </div>
-                    <div class="items-grid tier-3200" id="spirit-3200">
-                        <!-- Tier 3 spirit -->
-                    </div>
-                </div>
-                
-                <div class="price-tier" data-price="6400">
-                    <div class="tier-label">
-                        <span class="price-amount">6400+</span>
-                    </div>
-                    <div class="items-grid tier-6400" id="spirit-6400">
-                        <!-- Tier 4 spirit -->
-                    </div>
+                <div class="items-grid" id="spirit-grid">
+                    <!-- 마법 아이템들 -->
                 </div>
             </div>
         </div>
     </div>
 </div>
+</div>
 
 <style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 .items-section {
-    min-height: calc(100vh - 120px);
-    padding: 40px 20px;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f172a 100%);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    padding: 120px 0 60px;
+    min-height: 100vh;
+    position: relative;
+    z-index: 2;
 }
 
 .items-container {
-    max-width: 1200px;
+    max-width: 1400px;
     margin: 0 auto;
+    padding: 0 40px;
 }
 
 .items-header {
@@ -172,12 +88,9 @@
 .page-title {
     font-size: 32px;
     font-weight: 700;
-    color: #FFEFD7;
+    color: #ffffff;
     margin: 0 0 20px 0;
     line-height: 1.4;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .page-description {
@@ -217,423 +130,275 @@
     color: #999;
 }
 
-/* Category Headers */
-.item-category {
-    margin-bottom: 50px;
+.category-section {
+    margin-bottom: 40px;
 }
 
 .category-header {
     display: flex;
     align-items: center;
-    justify-content: center;
+    margin-bottom: 20px;
     gap: 15px;
-    margin-bottom: 30px;
-    padding: 20px 40px;
-    border-radius: 15px;
-    position: relative;
-}
-
-.weapon-header {
-    background: linear-gradient(135deg, #E67E22, #D35400);
-}
-
-.vitality-header {
-    background: linear-gradient(135deg, #27AE60, #229954);
-}
-
-.spirit-header {
-    background: linear-gradient(135deg, #9B59B6, #8E44AD);
 }
 
 .category-icon {
+    width: 40px;
+    height: 40px;
+    background-color: #333;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.category-title {
     font-size: 24px;
-    filter: brightness(0) saturate(100%) invert(95%) sepia(46%) saturate(1742%) hue-rotate(300deg) brightness(102%) contrast(101%);
+    font-weight: bold;
+    color: #ffffff;
 }
 
-.category-header h2 {
-    font-size: 24px;
-    font-weight: 700;
-    color: #FFEFD7;
-    margin: 0;
+.price-range {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px;
+    background-color: #2a2a2a;
+    border-radius: 4px;
 }
 
-/* Price Tiers */
-.price-tier {
-    margin-bottom: 40px;
+.price-range .price {
+    color: #ffaa00;
+    font-weight: bold;
 }
 
-.tier-label {
-    position: relative;
+.items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 8px;
     margin-bottom: 20px;
 }
 
-.tier-label::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 60px;
-    height: 2px;
-    background: #444;
-}
-
-.tier-label::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    width: calc(100% - 120px);
-    height: 2px;
-    background: #444;
-}
-
-.price-amount {
-    display: inline-block;
-    background: #333;
-    color: #FFEFD7;
-    padding: 8px 20px;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 16px;
-    position: relative;
-    z-index: 1;
-    margin-left: 80px;
-}
-
-/* Items Grid */
-.items-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-    padding: 0 20px;
-}
-
 .item-card {
-    background: rgba(20, 20, 30, 0.8);
-    border-radius: 12px;
-    padding: 30px 25px;
-    border: 2px solid transparent;
-    transition: all 0.3s ease;
+    position: relative;
+    background-color: #3a3a3a;
+    border: 2px solid #555;
+    border-radius: 8px;
+    padding: 8px;
     cursor: pointer;
-    min-height: 250px;
+    transition: all 0.2s ease;
+    aspect-ratio: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    position: relative;
-    overflow: visible;
-    gap: 15px;
 }
 
 .item-card:hover {
-    transform: translateY(-5px);
-    border-color: rgba(99, 162, 226, 0.6);
-    box-shadow: 0 10px 30px rgba(99, 162, 226, 0.3);
-    background: rgba(30, 30, 50, 0.9);
+    border-color: #888;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
-.item-image {
-    width: 100px;
-    height: 100px;
-    margin-bottom: 15px;
-    flex-shrink: 0;
+.item-card.tier-i { border-color: #8B7355; background-color: #3d342a; }
+.item-card.tier-ii { border-color: #5a7a5a; background-color: #2a3a2a; }
+.item-card.tier-iii { border-color: #6a5a8a; background-color: #352a4a; }
+.item-card.tier-iv { border-color: #8a5a5a; background-color: #4a2a2a; }
+
+.tier-indicator {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background-color: rgba(0,0,0,0.7);
+    color: #ffaa00;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
 }
 
-.item-image img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    filter: brightness(1.1) contrast(1.1);
+.item-icon {
+    width: 50px;
+    height: 50px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin-bottom: 4px;
+    background-color: #666;
+    border-radius: 4px;
 }
 
 .item-name {
-    font-size: 18px;
-    font-weight: 600;
-    color: #FFEFD7;
+    font-size: 11px;
     text-align: center;
-    line-height: 1.3;
-    margin: 0 0 10px 0;
-    word-break: break-word;
-    hyphens: auto;
+    line-height: 1.2;
+    word-break: keep-all;
+    color: #ffffff;
 }
 
-.item-description {
-    font-size: 14px;
-    color: #999;
-    text-align: center;
-    line-height: 1.4;
-    margin: 0;
-    word-break: break-word;
-    overflow: visible;
-    flex-grow: 1;
+.tooltip {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.95);
+    border: 2px solid #666;
+    border-radius: 8px;
+    padding: 16px;
+    min-width: 280px;
+    z-index: 1000;
+    margin-top: 10px;
+    pointer-events: none;
+}
+
+.item-card:hover .tooltip {
+    display: block;
+}
+
+.tooltip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #444;
+}
+
+.tooltip-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+.tooltip-price {
+    color: #ffaa00;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.tooltip-stats {
+    margin-bottom: 12px;
+}
+
+.tooltip-stat {
     display: flex;
     align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 14px;
+    color: #ffffff;
 }
 
-/* Responsive Design */
+.stat-icon {
+    width: 16px;
+    height: 16px;
+    background-color: #666;
+    border-radius: 3px;
+}
+
+.tooltip-description {
+    font-size: 13px;
+    line-height: 1.5;
+    color: #ccc;
+    margin-bottom: 12px;
+}
+
+/* 카테고리별 색상 */
+.category-무기 { background-color: #b8860b; }
+.category-생명 { background-color: #228b22; }
+.category-마법 { background-color: #8a2be2; }
+
+/* 반응형 */
 @media (max-width: 768px) {
+    .items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+    }
+    
     .page-title {
         font-size: 24px;
     }
     
-    .items-grid {
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-        gap: 15px;
-        padding: 0 15px;
-    }
-    
-    .item-card {
-        padding: 25px 20px;
-        min-height: 220px;
-    }
-    
-    .item-image {
-        width: 80px;
-        height: 80px;
+    .item-icon {
+        width: 40px;
+        height: 40px;
     }
     
     .item-name {
-        font-size: 16px;
-    }
-    
-    .item-description {
-        font-size: 13px;
-    }
-    
-    .price-amount {
-        margin-left: 40px;
-    }
-    
-    .tier-label::before {
-        width: 30px;
-    }
-    
-    .tier-label::after {
-        width: calc(100% - 80px);
-    }
-}
-
-@media (max-width: 480px) {
-    .items-grid {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 12px;
-        padding: 0 10px;
-    }
-    
-    .item-card {
-        padding: 20px 15px;
-        min-height: 200px;
-    }
-    
-    .item-image {
-        width: 70px;
-        height: 70px;
-    }
-    
-    .item-name {
-        font-size: 15px;
-    }
-    
-    .item-description {
-        font-size: 12px;
-    }
-    
-    .category-header {
-        padding: 15px 20px;
-    }
-    
-    .category-header h2 {
-        font-size: 20px;
+        font-size: 10px;
     }
 }
 </style>
 
 <script>
-// Enhanced item data with proper tier organization
-const itemsData = {
-    weapon: {
-        800: [
-            { name: "근접전", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/close_quarters_sm.webp", description: "+6 총알 방어력\n+14% 총알 저항력\n+6% 탄환 흡혈\n+7% 근접 피해량" },
-            { name: "확장 탄창", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine_sm.webp", description: "+26% 탄창 크기\n+15% 재장전 시간" },
-            { name: "헤드샷 부스터", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/headshot_booster_sm.webp", description: "+40% 헤드샷 피해량" },
-            { name: "고속탄", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/high_velocity_rounds_sm.webp", description: "+20% 탄환 속도\n+15% 탄환 방어력 관통\n+1m 총알 사거리" },
-            { name: "괴수탄", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/monster_rounds_sm.webp", description: "+30% 크립에게 총알 피해량\n+30% 크립에게 능력 피해량" },
-            { name: "급속탄", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/rapid_rounds_sm.webp", description: "+13% 화력\n+10% 탄환 속도" },
-            { name: "회복탄", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/restorative_shot_sm.webp", description: "+8% 탄환 흡혈\n영웅 처치 후 체력 +60" }
-        ],
-        1600: [
-            { name: "능동 재장전", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/active_reload_sm.webp", description: "+15% 재장전 속도\n재장전 시 다음 탄창의 첫 번째 탄환은 +25% 화력" },
-            { name: "후방타격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/backstabber_sm.webp", description: "+10% 화력\n뒤쪽에서 총알을 맞힌 적은 +35% 총알 피해량" },
-            { name: "둔화 실탄", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/fleetfoot_sm.webp", description: "+1 m/s 이동 속도\n총알 명중 시 적에게 35% 둔화를 2.5초간 적용" },
-            { name: "강화 탄창", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/intensifying_magazine_sm.webp", description: "+18% 화력\n+15% 재장전 속도\n연속 명중 시 피해량이 누적 증가 (최대 35%)" },
-            { name: "역학적 돌진", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/kinetic_dash_sm.webp", description: "+10% 화력\n대시 후 다음 근접 공격이 +70% 피해량" },
-            { name: "장거리", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/long_range_sm.webp", description: "+15% 화력\n+10m 총알 사거리" },
-            { name: "근접 충전", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/melee_charge_sm.webp", description: "+10% 화력\n+7% 근접 피해량\n근접 공격이 전방으로 5m 돌진" },
-            { name: "신비한 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/mystic_shot_sm.webp", description: "+6% 화력\n총알은 영혼력 +0.6당 +1 피해량" },
-            { name: "질주", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/fleetfoot_sm.webp", description: "+12% 화력\n+1 m/s 이동 속도" },
-            { name: "충격실탄", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/slowing_bullets_sm.webp", description: "+15% 화력\n총알 명중 시 적에게 35% 둔화를 2.5초간 적용" },
-            { name: "정신 파쇄탄", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/spirit_shredder_bullets_sm.webp", description: "+6% 화력\n적 명중 시 영혼 저항 -12%를 6초간 적용" },
-            { name: "탄환 분산", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/split_shot_sm.webp", description: "탄환이 2갈래로 분산되어 발사됨 (분산된 탄환은 -35% 피해량)" },
-            { name: "신속 타격수", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/swift_striker_sm.webp", description: "+6% 화력\n+15% 화력 증가율" },
-            { name: "거대 탄창", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/titanic_magazine_sm.webp", description: "+85% 탄창 크기\n-17% 화력 증가율" },
-            { name: "약화 헤드샷", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/weakening_headshot_sm.webp", description: "+6% 화력\n헤드샷 명중 시 적이 입히는 피해량 -40%를 4초간 적용" }
-        ],
-        3200: [
-            { name: "연금술 화염", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/alchemical_fire_sm.webp", description: "적에게 화상 효과 추가, 지속 데미지" },
-            { name: "광전사", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/berserker_sm.webp", description: "체력이 낮을수록 더 높은 데미지" },
-            { name: "피의 공물", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/blood_tribute_sm.webp", description: "처치 시 주변 적에게 데미지 및 디버프" },
-            { name: "점사", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/burst_fire_sm.webp", description: "3발을 빠르게 연사하는 점사 모드" },
-            { name: "컬티스트 희생", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/cultist_sacrifice_sm.webp", description: "체력 소모로 데미지 대폭 증가" },
-            { name: "확대되는 저항", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/escalating_resilience_sm.webp", description: "공격받을 때마다 저항력 증가" },
-            { name: "고속 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/express_shot_sm.webp", description: "사격 속도 대폭 증가" },
-            { name: "헤드헌터", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/headhunter_sm.webp", description: "헤드샷 시 추가 데미지와 관통 효과" },
-            { name: "영웅의 오라", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/heroic_aura_sm.webp", description: "주변 아군에게 데미지 증가 오라" },
-            { name: "할로우 포인트", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hollow_point_sm.webp", description: "탄환이 적을 관통하여 연쇄 데미지" },
-            { name: "사냥꾼의 오라", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hunters_aura_sm.webp", description: "주변 아군의 사거리와 시야 증가" },
-            { name: "근거리 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/point_blank_sm.webp", description: "근거리에서 치명적 데미지 증가" },
-            { name: "명사수", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/sharp_shooter_sm.webp", description: "장거리 사격 시 데미지 증가" },
-            { name: "주문술사 헤드샷", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/spellslinger_headshots_sm.webp", description: "헤드샷 시 주문 쿨다운 감소" },
-            { name: "테슬라 탄환", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/tesla_bullets_sm.webp", description: "전기 충격으로 주변 적 연쇄 타격" },
-            { name: "독성 탄환", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/toxic_bullets_sm.webp", description: "중독 효과로 지속 데미지" },
-            { name: "무거운 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/weighted_shots_sm.webp", description: "무거운 타격으로 적을 뒤로 밀어냄" }
-        ],
-        6400: [
-            { name: "방어 관통탄", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/armor_piercing_rounds_sm.webp", description: "모든 방어력을 관통하는 강력한 탄환" },
-            { name: "축전기", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/capacitor_sm.webp", description: "일정 시간마다 전기 방전 공격" },
-            { name: "치명적 헤드샷", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/crippling_headshot_sm.webp", description: "헤드샷으로 적을 무력화" },
-            { name: "분쇄하는 주먹", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/crushing_fists_sm.webp", description: "근접 공격 시 강력한 충격파" },
-            { name: "광란", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/frenzy_sm.webp", description: "처치 시 공격 속도 극대화" },
-            { name: "유리 대포", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/glass_cannon_sm.webp", description: "최대 데미지, 최소 방어력" },
-            { name: "행운의 사격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/lucky_shot_sm.webp", description: "확률적 치명타와 특수 효과" },
-            { name: "도탄", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/ricochet_sm.webp", description: "탄환이 튕겨서 여러 적 타격" },
-            { name: "그림자 직조", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/shadow_weave_sm.webp", description: "공격 시 은신 효과 획득" },
-            { name: "소음기", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/silencer_sm.webp", description: "무음 공격과 치명타 증가" },
-            { name: "주문술사", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/spell_slinger_sm.webp", description: "탄환 공격이 주문 효과 발동" },
-            { name: "영적 넘침", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/spiritual_overflow_sm.webp", description: "정신력 과충전 시 폭발적 데미지" }
-        ]
-    },
-    vitality: {
-        800: [
-            { name: "추가 체력", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health_sm.webp", description: "+125 최대 체력" },
-            { name: "추가 재생", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_regen_sm.webp", description: "+2.5 체력 재생" },
-            { name: "추가 활력", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_stamina_sm.webp", description: "+1 활력\n+15% 활력 재생" },
-            { name: "치유 의식", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_rite_sm.webp", description: "사용 시: 체력을 335 회복하고 11초 동안 +11 체력 재생" },
-            { name: "근거리 치유", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/melee_lifesteal_sm.webp", description: "+12% 근접 피해량\n+24% 근접 치유" },
-            { name: "반격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/rebuttal_sm.webp", description: "+75 최대 체력\n적이 근접 공격을 할 때 40의 피해를 입음" },
-            { name: "쾌속 장화", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/sprint_boots_sm.webp", description: "+1 m/s 이동 속도\n+75 최대 체력" }
-        ],
-        1600: [
-            { name: "대피소", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/sanctuary_sm.webp", description: "+175 최대 체력\n+3 체력 재생\n+15% 총알 저항력" },
-            { name: "탄환 흡혈", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/bullet_lifesteal_sm.webp", description: "+8% 탄환 흡혈\n+75 최대 체력" },
-            { name: "디버프 감소기", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/debuff_reducer_sm.webp", description: "+125 최대 체력\n+3 체력 재생\n-30% 디버프 지속시간" },
-            { name: "신령 장교", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/enchanters_emblem_sm.webp", description: "+125 최대 체력\n+8 영혼력\n+2.5 체력 재생\n+0.3 영혼력 재생" },
-            { name: "지구력", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/enduring_speed_sm.webp", description: "+125 최대 체력\n+1.5 m/s 이동 속도\n+25% 활력 재생" },
-            { name: "치유 감쇠", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healbane_sm.webp", description: "+125 최대 체력\n+8% 탄환 흡혈\n적 명중 시 -65% 치유 효율을 6초간 적용" },
-            { name: "치유 부스터", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_booster_sm.webp", description: "+125 최대 체력\n+30% 치유 효율\n+15% 체력 재생" },
-            { name: "향상된 활력", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/improved_stamina_sm.webp", description: "+125 최대 체력\n+2 활력\n+25% 활력 재생\n+2 m/s 슬라이드 거리" },
-            { name: "리턴 파이어", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/return_fire_sm.webp", description: "+125 최대 체력\n+8% 탄환 흡혈\n당신을 공격한 적들은 반사 피해량을 받음" },
-            { name: "정신 흡혈", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/spirit_lifesteal_sm.webp", description: "+125 최대 체력\n+8 영혼력\n+8% 정신 흡혈" },
-            { name: "혈투 흉갑", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/combat_barrier_sm.webp", description: "+11 총알 방어력\n+11 영혼 저항력\n+2.5 체력 재생" }
-        ],
-        3200: [
-            { name: "탄환 저항", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/bullet_armor_sm.webp", description: "+20 총알 방어력\n+250 최대 체력\n+20% 총알 저항력" },
-            { name: "사기 진작", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/morale_boost_sm.webp", description: "+250 최대 체력\n+3 m/s 이동 속도\n+50% 슬라이드 거리\n사용 시: 주변 팀원들에게 이동 속도 버프" },
-            { name: "디버프 제거", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/debuff_remover_sm.webp", description: "+250 최대 체력\n+5 체력 재생\n사용 시: 모든 디버프 제거 및 면역 (3초)" },
-            { name: "불굴", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/fortitude_sm.webp", description: "+425 최대 체력\n+14 영혼 저항력\n+20% 디버프 저항력" },
-            { name: "생명력 타격", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/lifestrike_sm.webp", description: "+250 최대 체력\n+12% 탄환 흡혈\n+12% 정신 흡혈\n처치 시 체력 100% 회복" },
-            { name: "장엄한 도약", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/majestic_leap_sm.webp", description: "+250 최대 체력\n+1 m/s 이동 속도\n사용 시: 높이 점프, 착지 시 피해 및 둔화" },
-            { name: "금속 피부", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/metal_skin_sm.webp", description: "+250 최대 체력\n+8 체력 재생\n사용 시: 4초간 완전 면역 (60초 쿨다운)" },
-            { name: "구조 광선", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/rescue_beam_sm.webp", description: "+200 최대 체력\n+15 영혼력\n아군 대상 사용: 즉시 이동시키고 250 체력 회복" },
-            { name: "정신 저항", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/spirit_armor_sm.webp", description: "+20 영혼 저항력\n+250 최대 체력\n+20% 영혼 저항력" },
-            { name: "우월한 활력", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/superior_stamina_sm.webp", description: "+250 최대 체력\n+4 활력\n+100% 활력 재생\n+4 m/s 슬라이드 거리\n+25% 대시 거리" },
-            { name: "워프 스톤", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/warp_stone_sm.webp", description: "+200 최대 체력\n+4 체력 재생\n사용 시: 즉시 순간이동 (23초 쿨다운)" }
-        ],
-        6400: [
-            { name: "거신", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/colossus_sm.webp", description: "+1000 최대 체력\n+20% 총알 저항력\n+20% 영혼 저항력\n+4 m/s 이동 속도\n사용 시: 거대화 (18초간)" },
-            { name: "저거너트", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/juggernaut_sm.webp", description: "+500 최대 체력\n+40% 총알 저항력\n+40% 영혼 저항력\n사용 시: 14초간 둔화 면역 및 이동 속도 증가" },
-            { name: "거머리", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/leech_sm.webp", description: "+350 최대 체력\n+35% 탄환 흡혈\n+35% 정신 흡혈\n주변 아군도 흡혈 효과 공유" },
-            { name: "팬텀 스트라이크", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/phantom_strike_sm.webp", description: "+300 최대 체력\n+15 영혼력\n사용 시: 적에게 순간이동하여 침묵 및 피해 (35초)" },
-            { name: "저지불가", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/unstoppable_sm.webp", description: "+400 최대 체력\n+8 체력 재생\n사용 시: 6초간 디버프 면역 및 둔화 면역" }
-        ]
-    },
-    spirit: {
-        800: [
-            { name: "추가 충전", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_charge_sm.webp", description: "+1 능력 충전" },
-            { name: "추가 영혼력", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_spirit_sm.webp", description: "+6 영혼력" },
-            { name: "신비한 폭발", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_burst_sm.webp", description: "+4 영혼력\n능력 적중 시 주변에 65 정신 피해" },
-            { name: "신비한 사거리", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_reach_sm.webp", description: "+4 영혼력\n+15% 능력 사거리" },
-            { name: "신비한 취약점", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_vulnerability_sm.webp", description: "+4 영혼력\n능력 적중 시 -15% 영혼 저항력을 7초간 적용" },
-            { name: "정신 강타", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_strike_sm.webp", description: "+4 영혼력\n근접 공격이 +32 정신 피해" }
-        ],
-        1600: [
-            { name: "비전 쇄도", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/arcane_surge_sm.webp", description: "+8 영혼력\n+75 최대 체력\n능력 사용 시 +3 m/s 이동 속도 (4초)" },
-            { name: "총알 저항 파쇄기", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/bullet_resist_shredder_sm.webp", description: "+8 영혼력\n+75 최대 체력\n능력 적중 시 -24% 총알 저항력을 6초간 적용" },
-            { name: "한랭 전선", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/cold_front_sm.webp", description: "+8 영혼력\n+75 최대 체력\n능력 적중 시 40% 둔화를 3초간 적용" },
-            { name: "개선된 재사용 대기시간", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_cooldown_sm.webp", description: "+8 영혼력\n+75 최대 체력\n-12% 능력 재사용 대기시간" },
-            { name: "지속시간 연장기", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/duration_extender_sm.webp", description: "+8 영혼력\n+75 최대 체력\n+25% 능력 지속시간" },
-            { name: "개선된 영혼력", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_spirit_sm.webp", description: "+12 영혼력\n+75 최대 체력" },
-            { name: "신비한 둔화", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_slow_sm.webp", description: "+8 영혼력\n+75 최대 체력\n능력 적중 시 35% 둔화를 2.5초간 적용" },
-            { name: "신속 재장전", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/quicksilver_reload_sm.webp", description: "+8 영혼력\n+75 최대 체력\n능력 사용 시 즉시 재장전" },
-            { name: "둔화 저주", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/slowing_hex_sm.webp", description: "+8 영혼력\n+75 최대 체력\n사용 시: 적에게 -3 m/s 이동 속도 (3초)" },
-            { name: "억제기", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/suppressor_sm.webp", description: "+8 영혼력\n+75 최대 체력\n능력 적중 시 -30% 화력을 5초간 적용" }
-        ],
-        3200: [
-            { name: "부패", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/decay_sm.webp", description: "+16 영혼력\n+150 최대 체력\n능력 적중 시 적에게 DPS 지속 피해 (6초)" },
-            { name: "무장 해제 저주", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/disarming_hex_sm.webp", description: "+16 영혼력\n+150 최대 체력\n사용 시: 적 무장해제 및 침묵 (3.5초)" },
-            { name: "마법 범위 확장", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/magic_carpet_sm.webp", description: "+16 영혼력\n+150 최대 체력\n+40% 능력 범위" },
-            { name: "넉다운", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/knockdown_sm.webp", description: "+16 영혼력\n+150 최대 체력\n능력 적중 시 적을 기절시킴 (0.8초)" },
-            { name: "신속 재충전", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/rapid_recharge_sm.webp", description: "+16 영혼력\n+150 최대 체력\n-35% 능력 재사용 대기시간" },
-            { name: "침묵 문양", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/silence_glyph_sm.webp", description: "+16 영혼력\n+150 최대 체력\n사용 시: 범위 침묵 (3초)" },
-            { name: "우월한 재사용 대기시간", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/superior_cooldown_sm.webp", description: "+20 영혼력\n+150 최대 체력\n-45% 능력 재사용 대기시간" },
-            { name: "우월한 지속시간", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/superior_duration_sm.webp", description: "+20 영혼력\n+150 최대 체력\n+50% 능력 지속시간" },
-            { name: "힘의 쇄도", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/surge_of_power_sm.webp", description: "+20 영혼력\n+150 최대 체력\n능력 사용 시 +40 영혼력 (6초)" },
-            { name: "고통의 파동", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/torment_pulse_sm.webp", description: "+20 영혼력\n+150 최대 체력\n주변 적에게 DPS 정신 피해 (지속적)" }
-        ],
-        6400: [
-            { name: "무한한 영혼력", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/boundless_spirit_sm.webp", description: "+40 영혼력\n+300 최대 체력\n-60% 능력 재사용 대기시간" },
-            { name: "저주", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/curse_sm.webp", description: "+30 영혼력\n+200 최대 체력\n사용 시: 적에게 침묵, 무력화, 둔화 (3.5초)" },
-            { name: "메아리 파편", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/echo_shard_sm.webp", description: "+25 영혼력\n+200 최대 체력\n사용 시: 정신 능력 2배 시전 (25초)" },
-            { name: "확대되는 노출", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/escalating_exposure_sm.webp", description: "+25 영혼력\n+200 최대 체력\n적 명중 시 지속적 데미지 증가 (누적)" },
-            { name: "이더리얼 시프트", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/ethereal_shift_sm.webp", description: "+25 영혼력\n+200 최대 체력\n사용 시: 무적 상태 (3초)" },
-            { name: "신비한 잔향", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_reverb_sm.webp", description: "+35 영혼력\n+200 최대 체력\n+50% 정신 피해\n능력이 근처 적에게 전파" },
-            { name: "리프레셔", image: "https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/refresher_sm.webp", description: "+20 영혼력\n+200 최대 체력\n사용 시: 모든 능력 즉시 재충전" }
-        ]
-    }
-};
+// 서버에서 전달된 아이템 데이터 사용
+const items = <%- JSON.stringify(items) %>;
 
-// Function to display items by category and tier
-function displayItems() {
-    ['weapon', 'vitality', 'spirit'].forEach(category => {
-        [800, 1600, 3200, 6400].forEach(tier => {
-            const container = document.getElementById(`${category}-${tier}`);
-            if (container && itemsData[category][tier]) {
-                const itemsHTML = itemsData[category][tier].map(item => `
-                    <div class="item-card" onclick="viewItemDetails('${item.name}')">
-                        <div class="item-image">
-                            <img src="${item.image}" alt="${item.name}" 
-                                 onerror="this.src='https://via.placeholder.com/48x48/333333/ffffff?text=No+Image'">
-                        </div>
-                        <div class="item-name">${item.name}</div>
-                        <div class="item-description">${item.description || ''}</div>
+// 아이템 카드 생성 함수
+function createItemCard(item, category) {
+    const card = document.createElement('div');
+    card.className = `item-card tier-${item.tier ? item.tier.toLowerCase() : 'i'}`;
+    
+    card.innerHTML = `
+        <div class="tier-indicator">${item.tier || 'I'}</div>
+        <div class="item-icon" style="background-color: #666;"></div>
+        <div class="item-name">${item.name}</div>
+        <div class="tooltip">
+            <div class="tooltip-header">
+                <div class="tooltip-title">${item.name}</div>
+                <div class="tooltip-price">${item.price}</div>
+            </div>
+            <div class="tooltip-stats">
+                ${item.stats.map(stat => `
+                    <div class="tooltip-stat">
+                        <div class="stat-icon"></div>
+                        <span>${stat}</span>
                     </div>
-                `).join('');
-                container.innerHTML = itemsHTML;
-            }
-        });
-    });
+                `).join('')}
+            </div>
+            <div class="tooltip-description">${item.description}</div>
+        </div>
+    `;
+    
+    return card;
 }
 
-// Search functionality
-function setupSearch() {
+// 아이템 렌더링
+function renderItems() {
+    // 무기 아이템
+    const weaponGrid = document.getElementById('weapon-grid');
+    if (weaponGrid) {
+        items.weapon.forEach(item => {
+            weaponGrid.appendChild(createItemCard(item, 'weapon'));
+        });
+    }
+
+    // 생명 아이템
+    const vitalityGrid = document.getElementById('vitality-grid');
+    if (vitalityGrid) {
+        items.vitality.forEach(item => {
+            vitalityGrid.appendChild(createItemCard(item, 'vitality'));
+        });
+    }
+
+    // 마법 아이템
+    const spiritGrid = document.getElementById('spirit-grid');
+    if (spiritGrid) {
+        items.spirit.forEach(item => {
+            spiritGrid.appendChild(createItemCard(item, 'spirit'));
+        });
+    }
+}
+
+// 검색 기능
+function initializeSearch() {
     const searchInput = document.getElementById('item-search');
     if (searchInput) {
-        searchInput.addEventListener('input', (e) => {
+        searchInput.addEventListener('input', function(e) {
             const searchTerm = e.target.value.toLowerCase();
-            const itemCards = document.querySelectorAll('.item-card');
+            const allCards = document.querySelectorAll('.item-card');
             
-            itemCards.forEach(card => {
+            allCards.forEach(card => {
                 const itemName = card.querySelector('.item-name').textContent.toLowerCase();
                 if (itemName.includes(searchTerm)) {
                     card.style.display = 'flex';
@@ -645,14 +410,17 @@ function setupSearch() {
     }
 }
 
-function viewItemDetails(itemName) {
-    console.log('View item details:', itemName);
-    alert(`${itemName} 상세 정보는 곧 추가될 예정입니다!`);
-}
+// 페이지 로드 시 초기화
+document.addEventListener('DOMContentLoaded', function() {
+    renderItems();
+    initializeSearch();
+});
 
-// Initialize when DOM loads
-document.addEventListener('DOMContentLoaded', () => {
-    displayItems();
-    setupSearch();
+// 호환성을 위한 window 로드 이벤트도 추가
+window.addEventListener('load', function() {
+    if (!document.getElementById('weapon-grid').hasChildNodes()) {
+        renderItems();
+        initializeSearch();
+    }
 });
 </script>
