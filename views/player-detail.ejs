@@ -27,8 +27,8 @@
                     <div class="rank-badge">
                         <img class="rank-medal" id="rank-medal" alt="Rank Medal">
                         <div class="rank-info">
-                            <span class="rank-name" id="rank-name">Oracle</span>
-                            <span class="rank-score" id="rank-score">3500</span>
+                            <span class="rank-name" id="rank-name">랭크 정보 없음</span>
+                            <span class="rank-score" id="rank-score">-</span>
                         </div>
                     </div>
                 </div>
@@ -915,9 +915,15 @@ function updatePlayerUI(player) {
         return medalTranslation[englishMedal] || englishMedal;
     };
     
-    document.getElementById('rank-medal').src = getMedalImage(player.rank.medal, player.rank.subrank);
-    document.getElementById('rank-name').textContent = `${getKoreanMedal(player.rank.medal)} ${player.rank.subrank}`;
-    document.getElementById('rank-score').textContent = player.rank.score.toLocaleString();
+    if (player.rank?.medal && player.rank?.subrank && player.rank?.score) {
+        document.getElementById('rank-medal').src = getMedalImage(player.rank.medal, player.rank.subrank);
+        document.getElementById('rank-name').textContent = `${getKoreanMedal(player.rank.medal)} ${player.rank.subrank}`;
+        document.getElementById('rank-score').textContent = player.rank.score.toLocaleString();
+    } else {
+        document.getElementById('rank-medal').src = getMedalImage('Initiate', 1);
+        document.getElementById('rank-name').textContent = '랭크 정보 없음';
+        document.getElementById('rank-score').textContent = '-';
+    }
     
     // Stats
     console.log('Player stats:', player.stats);
