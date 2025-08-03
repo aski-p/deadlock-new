@@ -372,6 +372,18 @@
     text-decoration: underline;
 }
 
+.image-indicator {
+    color: #63a2e2;
+    font-size: 14px;
+    margin-left: 8px;
+    vertical-align: middle;
+    opacity: 0.8;
+}
+
+.image-indicator:hover {
+    opacity: 1;
+}
+
 .post-author {
     display: flex;
     align-items: center;
@@ -759,6 +771,13 @@ async function loadPosts(page = 1) {
     }
 }
 
+// 이미지 포함 여부 확인 함수
+function hasImage(content) {
+    if (!content) return false;
+    // 마크다운 이미지 패턴 ![alt](url) 확인
+    return /!\[([^\]]*)\]\(([^)]+)\)/g.test(content);
+}
+
 // 게시글 테이블 표시
 function displayPostsTable(posts, totalCount, currentPage) {
     const tableBody = document.getElementById('postsTableBody');
@@ -774,6 +793,7 @@ function displayPostsTable(posts, totalCount, currentPage) {
     
     tableBody.innerHTML = posts.map((post, index) => {
         const sequenceNumber = startNumber - index;
+        const imageIndicator = hasImage(post.content) ? '<span class="image-indicator" title="이미지 포함">📷</span>' : '';
         return `
         <tr data-post-id="${post.id}" class="post-row" style="cursor: pointer;">
             <td class="seq-column" style="text-align: center;">
@@ -783,7 +803,10 @@ function displayPostsTable(posts, totalCount, currentPage) {
                 <div class="post-date">${formatDate(post.created_at)}</div>
             </td>
             <td class="title-column">
-                <div class="post-title-link">${escapeHtml(post.title)}</div>
+                <div class="post-title-link">
+                    ${escapeHtml(post.title)}
+                    ${imageIndicator}
+                </div>
             </td>
             <td class="author-column">
                 <div class="post-author">
