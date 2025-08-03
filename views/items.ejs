@@ -70,6 +70,7 @@
 .items-section {
     padding: 120px 0 60px;
     min-height: 100vh;
+    background-color: #FFEFD7;
     position: relative;
     z-index: 2;
 }
@@ -88,14 +89,14 @@
 .page-title {
     font-size: 32px;
     font-weight: 700;
-    color: #ffffff;
+    color: #1a1a1a;
     margin: 0 0 20px 0;
     line-height: 1.4;
 }
 
 .page-description {
     font-size: 16px;
-    color: #999;
+    color: #666;
     margin: 0 0 40px 0;
     max-width: 900px;
     margin-left: auto;
@@ -111,10 +112,10 @@
     width: 100%;
     max-width: 400px;
     padding: 15px 20px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.2);
     border-radius: 25px;
-    color: #fff;
+    color: #1a1a1a;
     font-size: 16px;
     transition: all 0.3s ease;
     text-align: center;
@@ -127,7 +128,7 @@
 }
 
 .search-input::placeholder {
-    color: #999;
+    color: #666;
 }
 
 .category-section {
@@ -155,7 +156,7 @@
 .category-title {
     font-size: 24px;
     font-weight: bold;
-    color: #ffffff;
+    color: #1a1a1a;
 }
 
 .price-range {
@@ -163,7 +164,7 @@
     align-items: center;
     gap: 10px;
     padding: 8px 16px;
-    background-color: #2a2a2a;
+    background-color: #e0e0e0;
     border-radius: 4px;
 }
 
@@ -220,25 +221,12 @@
 .item-icon {
     width: 50px;
     height: 50px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
     margin-bottom: 4px;
-    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 6px;
-    position: relative;
-}
-
-.main-item-icon {
-    font-size: 24px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-    transition: transform 0.2s ease;
-}
-
-.item-card:hover .main-item-icon {
-    transform: scale(1.1);
+    background-color: #666;
+    border-radius: 4px;
 }
 
 .item-name {
@@ -347,69 +335,24 @@
 // 서버에서 전달된 아이템 데이터 사용
 const items = <%- JSON.stringify(items) %>;
 
-// 아이템별 전용 아이콘 맵핑
-function getItemIcon(itemName, category) {
-    const itemIcons = {
-        // 무기 아이콘
-        '근접전': '🗡️', '확장 탄창': '📦', '헤드샷 부스터': '🎯', '고속탄': '💨',
-        '괴수탄': '💥', '급속탄': '⚡', '회복탄': '❤️', '급속 재장전': '🔄',
-        '후방 기습': '🦾', '민첩 걸음': '👟', '강화 탄창': '📦', '반응성 대시': '💨',
-        '장거리 사격': '🔭', '근거리 돌격': '💪', '신비탄': '✨', '개방탄': '🔓',
-        '둔화탄': '🐌', '마법 분쇄탄': '🔥', '분할탄': '🔀', '고속 연사': '⚡',
-        '대형 탄창': '📦', '감쇠 헤드샷': '🎯', '화염 연금술': '🔥', '광전사': '😤',
-        '피의 공물': '🩸', '급속 사격': '⚡', '희생 제물': '⚱️', '저항 증대': '🛡️',
-        
-        // 생명 아이콘
-        '추가 체력': '❤️', '추가 재생': '💚', '추가 활력': '🌱', '방탄복': '🦺',
-        '치유 붕대': '🩹', '치유 권총': '💉', '격화': '🔥', '회복 샷': '💊',
-        '메딕 큐브': '⚕️', '헤비 아머': '🛡️', '저항의 갑옷': '🛡️', '생명력 증대': '💪',
-        
-        // 마법 아이콘
-        '추가 충전': '🔋', '추가 마법': '✨', '신비의 폭발': '💥', '신비 용사': '🧙',
-        '정신 공진': '🔮', '마법 실드': '🛡️', '영혼 폭발': '💀', '정신 재생': '🧠',
-        '마법 강화': '⭐', '무한 정신': '♾️'
-    };
-    
-    return itemIcons[itemName] || getCategoryIcon(category);
-}
-
-// 카테고리별 기본 아이콘
-function getCategoryIcon(category) {
-    const icons = {
-        weapon: '⚔️',
-        vitality: '💚', 
-        spirit: '🔮'
-    };
-    return icons[category] || '🔸';
-}
-
-// 아이템 첫 글자 추출
-function getItemInitial(itemName) {
-    return itemName.charAt(0);
-}
-
 // 아이템 카드 생성 함수
 function createItemCard(item, category) {
     const card = document.createElement('div');
     card.className = `item-card tier-${item.tier ? item.tier.toLowerCase() : 'i'}`;
     
-    const itemIcon = getItemIcon(item.name, category);
-    
     card.innerHTML = `
         <div class="tier-indicator">${item.tier || 'I'}</div>
-        <div class="item-icon">
-            <div class="main-item-icon">${itemIcon}</div>
-        </div>
+        <div class="item-icon" style="background-color: #666;"></div>
         <div class="item-name">${item.name}</div>
         <div class="tooltip">
             <div class="tooltip-header">
-                <div class="tooltip-title">${itemIcon} ${item.name}</div>
+                <div class="tooltip-title">${item.name}</div>
                 <div class="tooltip-price">${item.price}</div>
             </div>
             <div class="tooltip-stats">
                 ${item.stats.map(stat => `
                     <div class="tooltip-stat">
-                        <div class="stat-icon">📊</div>
+                        <div class="stat-icon"></div>
                         <span>${stat}</span>
                     </div>
                 `).join('')}
