@@ -601,9 +601,8 @@
 }
 
 .items-grid {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
     gap: 4px;
     max-width: 240px;
 }
@@ -2897,18 +2896,34 @@ function displayMatchHistory(matches) {
                 console.log(`📦 매치 ${index} 사용할 아이템 데이터:`, itemsData);
                 
                 if (itemsData && itemsData.length > 0) {
-                    // 게임 종료 시 마지막 구매한 아이템만 표시
-                    // gameTime이 가장 높은 아이템을 찾아서 1개만 표시
-                    const lastItem = itemsData.reduce((latest, current) => {
-                        const currentTime = current.gameTime || current.game_time_s || 0;
-                        const latestTime = latest.gameTime || latest.game_time_s || 0;
-                        return currentTime > latestTime ? current : latest;
+                    // 게임 종료 시 최종 보유한 모든 아이템 표시
+                    // sold_time이 없거나 0인 아이템들만 필터링 (판매되지 않은 아이템)
+                    const finalItems = itemsData.filter(item => {
+                        const soldTime = item.sold_time_s || item.soldTime || 0;
+                        return !soldTime || soldTime === 0;
                     });
                     
-                    console.log(`🏆 게임 종료 시 마지막 아이템:`, lastItem);
+                    console.log(`🏆 게임 종료 시 최종 보유 아이템 ${finalItems.length}개:`, finalItems.map(i => i.name));
                     
-                    const itemsHTML = [lastItem].map((item, itemIndex) => {
-                        const itemName = item.name || `알 수 없는 아이템 (${item.itemId || item.id || 'ID없음'})`;
+                    const itemsHTML = finalItems.map((item, itemIndex) => {
+                        // Unknown Item인 경우 아이템 ID로 다시 매핑 시도
+                        let itemName = item.name;
+                        if (!itemName || itemName.includes('Unknown Item') || itemName.includes('알 수 없는 아이템')) {
+                            const itemId = item.itemId || item.id;
+                            // window.itemMatcher가 있으면 사용
+                            if (window.itemMatcher && itemId) {
+                                const itemData = window.itemMatcher.getItemById(itemId);
+                                if (itemData && itemData.name && !itemData.name.includes('Unknown')) {
+                                    itemName = itemData.name;
+                                }
+                            }
+                        }
+                        
+                        // 여전히 Unknown이면 기본 이름 사용
+                        if (!itemName || itemName.includes('Unknown Item') || itemName.includes('알 수 없는 아이템')) {
+                            itemName = `아이템 ${item.itemId || item.id || 'ID없음'}`;
+                        }
+                        
                         const itemTier = item.tier || 1;
                         const itemId = item.itemId || item.id || 'unknown';
                         
@@ -2932,7 +2947,7 @@ function displayMatchHistory(matches) {
                     }).join('');
                     
                     itemsContainer.innerHTML = itemsHTML;
-                    console.log(`✅ 매치 ${index} 게임 종료 시 마지막 아이템 1개 표시 완료 (전체 ${itemsData.length}개 중)`);
+                    console.log(`✅ 매치 ${index} 게임 종료 시 최종 보유 아이템 ${finalItems.length}개 표시 완료 (전체 ${itemsData.length}개 중)`);
                 } else {
                     // 아이템 데이터가 없는 경우 - 더 나은 UI 제공
                     console.log(`⚠️ 매치 ${index}: 아이템 데이터 없음, 로딩 재시도 중...`);
@@ -2944,15 +2959,29 @@ function displayMatchHistory(matches) {
                             if (matchDetailsResponse.ok) {
                                 const detailsData = await matchDetailsResponse.json();
                                 if (detailsData.items && detailsData.items.length > 0) {
-                                    // 재시도에서도 마지막 아이템만 표시
-                                    const lastItem = detailsData.items.reduce((latest, current) => {
-                                        const currentTime = current.gameTime || current.game_time_s || 0;
-                                        const latestTime = latest.gameTime || latest.game_time_s || 0;
-                                        return currentTime > latestTime ? current : latest;
+                                    // 재시도에서도 최종 보유 아이템들 표시
+                                    const finalItems = detailsData.items.filter(item => {
+                                        const soldTime = item.sold_time_s || item.soldTime || 0;
+                                        return !soldTime || soldTime === 0;
                                     });
                                     
-                                    const retryItemsHTML = [lastItem].map((item, itemIndex) => {
-                                        const itemName = item.name || `알 수 없는 아이템 (${item.itemId || item.id || 'ID없음'})`;
+                                    const retryItemsHTML = finalItems.map((item, itemIndex) => {
+                                        // Unknown Item인 경우 아이템 ID로 다시 매핑 시도
+                                        let itemName = item.name;
+                                        if (!itemName || itemName.includes('Unknown Item') || itemName.includes('알 수 없는 아이템')) {
+                                            const itemId = item.itemId || item.id;
+                                            if (window.itemMatcher && itemId) {
+                                                const itemData = window.itemMatcher.getItemById(itemId);
+                                                if (itemData && itemData.name && !itemData.name.includes('Unknown')) {
+                                                    itemName = itemData.name;
+                                                }
+                                            }
+                                        }
+                                        
+                                        if (!itemName || itemName.includes('Unknown Item') || itemName.includes('알 수 없는 아이템')) {
+                                            itemName = `아이템 ${item.itemId || item.id || 'ID없음'}`;
+                                        }
+                                        
                                         const imageUrl = getItemImageUrl(itemName);
                                         const itemTier = item.tier || 1;
                                         
@@ -2971,7 +3000,7 @@ function displayMatchHistory(matches) {
                                     }).join('');
                                     
                                     itemsContainer.innerHTML = retryItemsHTML;
-                                    console.log(`✅ 매치 ${index} 재시도로 마지막 아이템 1개 표시 완료 (전체 ${detailsData.items.length}개 중)`);
+                                    console.log(`✅ 매치 ${index} 재시도로 최종 보유 아이템 ${finalItems.length}개 표시 완료 (전체 ${detailsData.items.length}개 중)`);
                                     return;
                                 }
                             }
