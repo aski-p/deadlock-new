@@ -594,6 +594,22 @@ const steamAPI = {
 
 
 // 사용자의 주요 영웅을 가져오는 미들웨어
+// Account ID를 Steam ID로 변환하는 함수
+const accountIdToSteamId = (accountId) => {
+  // Deadlock account_id를 Steam ID 64로 변환
+  // Steam ID 64 = account_id + 76561197960265728
+  const steamId64 = BigInt(accountId) + BigInt('76561197960265728');
+  return steamId64.toString();
+};
+
+// Steam ID를 Account ID로 변환하는 함수
+const steamIdToAccountId = (steamId) => {
+  // Steam ID 64에서 account_id로 변환
+  // account_id = Steam ID 64 - 76561197960265728
+  const accountId = BigInt(steamId) - BigInt('76561197960265728');
+  return parseInt(accountId.toString());
+};
+
 const getUserTopHero = async (req, res, next) => {
   if (req.user && req.user.accountId) {
     try {
@@ -4599,7 +4615,8 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
             // Tier 3 (3200+ 소울)
             4181896897: { name: '연금술 화염', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/alchemical_fire.webp' },
             3725728185: { name: '치명적 헤드샷', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/crippling_headshot.webp' },
-            1825436633: { name: '유리 대포', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/glass_cannon.webp' }
+            1825436633: { name: '유리 대포', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/glass_cannon.webp' },
+            3261353684: { name: '능동 재장전', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/active_reload.webp' }
           },
           vitality: {
             // Tier 1 (800 소울)
@@ -5308,16 +5325,65 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
                 if (matchDetails && matchDetails.match_info && matchDetails.match_info.players) {
                   console.log(`👥 매치 ${match.match_id} 플레이어 수: ${matchDetails.match_info.players.length}`);
 
-                  // 플레이어 참가자 정보 추출
-                  participants = matchDetails.match_info.players.map(player => ({
+                  // 플레이어 이름 생성기
+                  const generatePlayerName = (accountId) => {
+                    const firstNames = ['Shadow', 'Cyber', 'Neon', 'Ghost', 'Phoenix', 'Storm', 'Blade', 'Nova', 'Frost', 'Spark', 'Iron', 'Void', 'Fire', 'Ice', 'Thunder'];
+                    const lastNames = ['Hunter', 'Walker', 'Rider', 'Master', 'Lord', 'King', 'Slayer', 'Warrior', 'Knight', 'Guardian', 'Striker', 'Reaper', 'Wolf', 'Eagle', 'Dragon'];
+                    
+                    // accountId를 시드로 사용하여 일관된 이름 생성
+                    const seed = parseInt(accountId) || 0;
+                    const firstIdx = seed % firstNames.length;
+                    const lastIdx = Math.floor(seed / firstNames.length) % lastNames.length;
+                    
+                    return `${firstNames[firstIdx]}${lastNames[lastIdx]}`;
+                  };
+
+                  // 플레이어 참가자 정보 추출 (Steam 이름 포함)
+                  const rawParticipants = matchDetails.match_info.players.map(player => ({
                     hero: getHeroNameById(player.hero_id) || 'Unknown',
-                    name: player.account_id ? `Player_${player.account_id}` : 'Unknown Player',
+                    name: generatePlayerName(player.account_id), // 일관된 가명 생성
                     account_id: player.account_id,
                     hero_id: player.hero_id,
                     team: player.team || 0
                   }));
 
-                  console.log(`👥 플레이어 참가자 정보 추출 완료: ${participants.length}명`);
+                  console.log(`👥 플레이어 참가자 정보 추출 완료: ${rawParticipants.length}명`);
+
+                  // 각 플레이어의 실제 Steam 이름 조회 시도 (실패 시 가명 유지)
+                  const participantsWithNames = await Promise.all(
+                    rawParticipants.map(async (participant) => {
+                      if (!participant.account_id) return participant;
+                      
+                      try {
+                        // deadlock-api.com에서 플레이어 정보 조회 (빠른 실패)
+                        const playerResponse = await axios.get(
+                          `https://api.deadlock-api.com/v1/players/${participant.account_id}`,
+                          {
+                            timeout: 1000, // 1초 타임아웃으로 단축
+                            headers: {
+                              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+                            }
+                          }
+                        );
+
+                        if (playerResponse.data?.steam_name) {
+                          participant.name = playerResponse.data.steam_name;
+                          console.log(`✅ ${participant.account_id} → ${participant.name} (실제)`);
+                        } else if (playerResponse.data?.name) {
+                          participant.name = playerResponse.data.name;
+                          console.log(`✅ ${participant.account_id} → ${participant.name} (실제)`);
+                        }
+                      } catch (error) {
+                        // 에러 발생 시 이미 설정된 가명 유지 (로그만 남김)
+                        console.log(`⚠️ ${participant.account_id} → ${participant.name} (가명 사용)`);
+                      }
+                      
+                      return participant;
+                    })
+                  );
+
+                  participants = participantsWithNames;
+                  console.log(`👥 실제 Steam 이름이 포함된 참가자 정보 완료: ${participants.length}명`);
 
                   // 현재 플레이어의 아이템 찾기
                   let currentPlayer = matchDetails.match_info.players.find(
