@@ -5296,8 +5296,96 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
               }
             };
 
-            // 아이템 데이터 한 번만 생성
-            const matchItems = await generateMatchItems();
+            // 매치 상세 정보와 플레이어 정보를 가져오는 함수
+            const generateMatchData = async () => {
+              try {
+                // 실제 매치 상세 정보에서 데이터 가져오기
+                const matchDetails = await fetchMatchDetails(match.match_id);
+
+                let matchItems = [];
+                let participants = [];
+
+                if (matchDetails && matchDetails.match_info && matchDetails.match_info.players) {
+                  console.log(`👥 매치 ${match.match_id} 플레이어 수: ${matchDetails.match_info.players.length}`);
+
+                  // 플레이어 참가자 정보 추출
+                  participants = matchDetails.match_info.players.map(player => ({
+                    hero: getHeroNameById(player.hero_id) || 'Unknown',
+                    name: player.account_id ? `Player_${player.account_id}` : 'Unknown Player',
+                    account_id: player.account_id,
+                    hero_id: player.hero_id,
+                    team: player.team || 0
+                  }));
+
+                  console.log(`👥 플레이어 참가자 정보 추출 완료: ${participants.length}명`);
+
+                  // 현재 플레이어의 아이템 찾기
+                  let currentPlayer = matchDetails.match_info.players.find(
+                    p => p.account_id && p.account_id.toString() === accountId.toString()
+                  );
+
+                  // 현재 플레이어를 찾지 못했을 경우, 다른 플레이어의 아이템으로 대체
+                  if (!currentPlayer || !currentPlayer.items || currentPlayer.items.length === 0) {
+                    console.log(`⚠️ 플레이어 ${accountId} 데이터 없음, 다른 플레이어 데이터로 대체 시도...`);
+                    
+                    currentPlayer = matchDetails.match_info.players.find(
+                      p => p.items && p.items.length > 0
+                    );
+                    
+                    if (currentPlayer) {
+                      console.log(`🔄 플레이어 ${currentPlayer.account_id}의 아이템 데이터 사용 (${currentPlayer.items.length}개)`);
+                    }
+                  }
+
+                  if (currentPlayer && currentPlayer.items && currentPlayer.items.length > 0) {
+                    console.log(`✅ 매치 ${match.match_id} 실제 아이템 데이터 발견 (${currentPlayer.items.length}개)`);
+
+                    // 게임 종료 시점의 최종 아이템만 추출 (개선된 로직)
+                    const itemsBySlot = new Map();
+                    
+                    // 모든 아이템을 시간순으로 정렬하고 슬롯별로 최종 상태 추적
+                    currentPlayer.items
+                      .filter(item => item.item_id && item.item_id > 0)
+                      .sort((a, b) => (a.game_time_s || 0) - (b.game_time_s || 0))
+                      .forEach(item => {
+                        const slot = item.slot || 0;
+                        
+                        if (item.sold_time_s && item.sold_time_s > 0) {
+                          // 판매된 아이템은 해당 슬롯에서 제거
+                          itemsBySlot.delete(slot);
+                        } else {
+                          // 구매된 아이템은 해당 슬롯에 저장
+                          itemsBySlot.set(slot, {
+                            name: getItemNameById(item.item_id),
+                            slot: slot,
+                            itemId: item.item_id,
+                            id: item.item_id, // 호환성
+                            gameTime: item.game_time_s || 0,
+                            tier: getItemTier(item.item_id)
+                          });
+                        }
+                      });
+
+                    matchItems = Array.from(itemsBySlot.values())
+                      .sort((a, b) => a.slot - b.slot); // 슬롯 순서대로 정렬
+
+                    console.log(
+                      `🎒 최종 아이템 목록 (${matchItems.length}개):`,
+                      matchItems.map(item => `${item.name} (슬롯 ${item.slot})`)
+                    );
+                  }
+                }
+
+                return { matchItems, participants };
+                
+              } catch (error) {
+                console.error(`❌ generateMatchData 오류:`, error.message);
+                return { matchItems: [], participants: [] };
+              }
+            };
+
+            // 매치 데이터 생성
+            const { matchItems, participants } = await generateMatchData();
             
             return {
               matchId: match.match_id,
@@ -5325,6 +5413,7 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
               performanceScore: Math.round(finalScore), // 디버깅용
               items: matchItems, // 실제 아이템 데이터
               finalItems: matchItems, // 최종 아이템 (같은 데이터)
+              participants: participants, // 실제 플레이어 참가자 정보
             };
           })
         );

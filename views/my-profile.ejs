@@ -3549,34 +3549,17 @@ function displayMatchHistory(matches) {
             if (playersContainer) {
                 console.log(`🎮 매치 ${index} 플레이어 데이터 확인:`, match);
                 
-                // 실제 매치 데이터에서 플레이어 정보 추출 시도
+                // 실제 매치 데이터에서 플레이어 정보 추출
                 let players = [];
                 if (match.participants && match.participants.length > 0) {
+                    console.log(`✅ 매치 ${index}: 실제 participants 데이터 사용 (${match.participants.length}명)`);
                     players = match.participants.map(p => ({
-                        hero: p.hero || p.character_name || 'Unknown',
-                        name: p.player_name || p.name || p.steam_name || 'Unknown Player'
-                    }));
-                } else if (match.players && match.players.length > 0) {
-                    players = match.players.map(p => ({
-                        hero: p.hero || p.character_name || 'Unknown',
-                        name: p.player_name || p.name || p.steam_name || 'Unknown Player'
+                        hero: p.hero || 'Unknown',
+                        name: p.name || p.player_name || p.steam_name || 'Unknown Player'
                     }));
                 } else {
-                    // 백업: deadlock-api.com에서 가져온 더미 플레이어 데이터
-                    players = [
-                        { hero: 'Infernus', name: 'hutonya' },
-                        { hero: 'Yamato', name: 'Chambers' },
-                        { hero: 'Holliday', name: 'Glaso' },
-                        { hero: 'Haze', name: '구극무적우자거' },
-                        { hero: 'Lash', name: 'aski' },
-                        { hero: 'Vindicta', name: '무당백면우모' },
-                        { hero: 'Bebop', name: '동먵리' },
-                        { hero: 'Shiv', name: 'Asher' },
-                        { hero: 'Paradox', name: '유기불굶과' },
-                        { hero: 'Calico', name: '< blank >' },
-                        { hero: 'Ivy', name: 'LOVE&PEACE♡' },
-                        { hero: 'Abrams', name: 'farrel🌹🌹💔💔' }
-                    ];
+                    console.log(`⚠️ 매치 ${index}: participants 데이터가 없어 빈 배열 사용`);
+                    players = []; // 빈 배열로 설정, 더미 데이터 사용 안함
                 }
                 
                 console.log(`👥 매치 ${index} 사용할 플레이어 데이터:`, players);
@@ -3600,26 +3583,37 @@ function displayMatchHistory(matches) {
                     return `https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/${heroKey}_mm.webp`;
                 };
                 
-                const playersHTML = players.map(player => `
-                    <div class="flex items-center gap-2">
-                        <picture>
-                            <source srcset="${getHeroApiUrl(player.hero)}" type="image/webp">
-                            <source srcset="${getHeroApiUrl(player.hero).replace('.webp', '.png')}" type="image/png">
-                            <img loading="lazy" alt="${player.hero}" title="${player.hero}" 
-                                 class="size-8 aspect-square w-6 h-6 rounded-full border border-border" 
-                                 src="${getHeroApiUrl(player.hero)}">
-                        </picture>
-                        <span class="player-name-text w-32 truncate text-xs text-muted-foreground" title="${player.name}">${player.name}</span>
-                    </div>
-                `).join('');
-                
-                playersContainer.innerHTML = `
-                    <div class="bg-muted flex items-start p-3 rounded">
-                        <div class="grid grid-cols-2 gap-x-5 gap-y-1.5 w-full">
-                            ${playersHTML}
+                if (players.length > 0) {
+                    const playersHTML = players.map(player => `
+                        <div class="flex items-center gap-2">
+                            <picture>
+                                <source srcset="${getHeroApiUrl(player.hero)}" type="image/webp">
+                                <source srcset="${getHeroApiUrl(player.hero).replace('.webp', '.png')}" type="image/png">
+                                <img loading="lazy" alt="${player.hero}" title="${player.hero}" 
+                                     class="size-8 aspect-square w-6 h-6 rounded-full border border-border" 
+                                     src="${getHeroApiUrl(player.hero)}">
+                            </picture>
+                            <span class="player-name-text w-32 truncate text-xs text-muted-foreground" title="${player.name}">${player.name}</span>
                         </div>
-                    </div>
-                `;
+                    `).join('');
+                    
+                    playersContainer.innerHTML = `
+                        <div class="bg-muted flex items-start p-3 rounded">
+                            <div class="grid grid-cols-2 gap-x-5 gap-y-1.5 w-full">
+                                ${playersHTML}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // 플레이어 데이터가 없을 경우 로딩 메시지 표시
+                    playersContainer.innerHTML = `
+                        <div class="bg-muted flex items-start p-3 rounded">
+                            <div class="w-full text-center text-xs text-muted-foreground py-2">
+                                플레이어 정보 로딩 중...
+                            </div>
+                        </div>
+                    `;
+                }
             }
             
             if (itemsContainer) {
