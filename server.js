@@ -5325,23 +5325,10 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
                 if (matchDetails && matchDetails.match_info && matchDetails.match_info.players) {
                   console.log(`👥 매치 ${match.match_id} 플레이어 수: ${matchDetails.match_info.players.length}`);
 
-                  // 플레이어 이름 생성기
-                  const generatePlayerName = (accountId) => {
-                    const firstNames = ['Shadow', 'Cyber', 'Neon', 'Ghost', 'Phoenix', 'Storm', 'Blade', 'Nova', 'Frost', 'Spark', 'Iron', 'Void', 'Fire', 'Ice', 'Thunder'];
-                    const lastNames = ['Hunter', 'Walker', 'Rider', 'Master', 'Lord', 'King', 'Slayer', 'Warrior', 'Knight', 'Guardian', 'Striker', 'Reaper', 'Wolf', 'Eagle', 'Dragon'];
-                    
-                    // accountId를 시드로 사용하여 일관된 이름 생성
-                    const seed = parseInt(accountId) || 0;
-                    const firstIdx = seed % firstNames.length;
-                    const lastIdx = Math.floor(seed / firstNames.length) % lastNames.length;
-                    
-                    return `${firstNames[firstIdx]}${lastNames[lastIdx]}`;
-                  };
-
-                  // 플레이어 참가자 정보 추출 (Steam 이름 포함)
+                  // 플레이어 참가자 정보 추출 (실제 이름 우선 사용)
                   const rawParticipants = matchDetails.match_info.players.map(player => ({
                     hero: getHeroNameById(player.hero_id) || 'Unknown',
-                    name: generatePlayerName(player.account_id), // 일관된 가명 생성
+                    name: `Player_${player.account_id}`, // 임시 이름
                     account_id: player.account_id,
                     hero_id: player.hero_id,
                     team: player.team || 0
@@ -5349,17 +5336,17 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
 
                   console.log(`👥 플레이어 참가자 정보 추출 완료: ${rawParticipants.length}명`);
 
-                  // 각 플레이어의 실제 Steam 이름 조회 시도 (실패 시 가명 유지)
+                  // 각 플레이어의 실제 Steam 이름 조회 (deadlock-api.com 우선)
                   const participantsWithNames = await Promise.all(
                     rawParticipants.map(async (participant) => {
                       if (!participant.account_id) return participant;
                       
                       try {
-                        // deadlock-api.com에서 플레이어 정보 조회 (빠른 실패)
+                        // 1. deadlock-api.com에서 플레이어 정보 조회
                         const playerResponse = await axios.get(
                           `https://api.deadlock-api.com/v1/players/${participant.account_id}`,
                           {
-                            timeout: 1000, // 1초 타임아웃으로 단축
+                            timeout: 3000, // 3초 타임아웃
                             headers: {
                               'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
                             }
@@ -5368,14 +5355,33 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
 
                         if (playerResponse.data?.steam_name) {
                           participant.name = playerResponse.data.steam_name;
-                          console.log(`✅ ${participant.account_id} → ${participant.name} (실제)`);
+                          console.log(`✅ ${participant.account_id} → ${participant.name} (deadlock-api)`);
                         } else if (playerResponse.data?.name) {
                           participant.name = playerResponse.data.name;
-                          console.log(`✅ ${participant.account_id} → ${participant.name} (실제)`);
+                          console.log(`✅ ${participant.account_id} → ${participant.name} (deadlock-api)`);
+                        } else {
+                          throw new Error('No name found in deadlock-api');
                         }
                       } catch (error) {
-                        // 에러 발생 시 이미 설정된 가명 유지 (로그만 남김)
-                        console.log(`⚠️ ${participant.account_id} → ${participant.name} (가명 사용)`);
+                        try {
+                          // 2. Steam API에서 직접 조회 시도
+                          const steamId = BigInt(participant.account_id) + 76561197960265728n;
+                          const steamResponse = await axios.get(
+                            `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${process.env.STEAM_API_KEY}&steamids=${steamId}`,
+                            { timeout: 2000 }
+                          );
+                          
+                          if (steamResponse.data?.response?.players?.[0]?.personaname) {
+                            participant.name = steamResponse.data.response.players[0].personaname;
+                            console.log(`✅ ${participant.account_id} → ${participant.name} (Steam API)`);
+                          } else {
+                            throw new Error('No Steam name found');
+                          }
+                        } catch (steamError) {
+                          // 3. 실패 시 계정 ID 기반 이름 사용
+                          participant.name = `Player_${participant.account_id}`;
+                          console.log(`⚠️ ${participant.account_id} → ${participant.name} (fallback)`);
+                        }
                       }
                       
                       return participant;
