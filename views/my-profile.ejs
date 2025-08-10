@@ -1054,6 +1054,134 @@
     white-space: nowrap;
 }
 
+/* deadlock-api.com 스타일 추가 CSS */
+.rank-badge-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.rank-badge-img {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+}
+
+.rank-text-fallback {
+    font-weight: bold;
+    color: #ffd700;
+    font-size: 16px;
+}
+
+.bg-muted {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.border-border {
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.text-muted-foreground {
+    color: #999;
+}
+
+.player-name-text {
+    font-size: 12px;
+    color: #ccc;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.grid {
+    display: grid;
+}
+
+.grid-cols-6 {
+    grid-template-columns: repeat(6, 1fr);
+}
+
+.grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.gap-2 {
+    gap: 8px;
+}
+
+.gap-x-5 {
+    column-gap: 20px;
+}
+
+.gap-y-1_5 {
+    row-gap: 6px;
+}
+
+.w-fit {
+    width: fit-content;
+}
+
+.mb-1 {
+    margin-bottom: 4px;
+}
+
+.size-8, .w-8, .h-8 {
+    width: 32px;
+    height: 32px;
+}
+
+.w-6, .h-6 {
+    width: 24px;
+    height: 24px;
+}
+
+.rounded {
+    border-radius: 4px;
+}
+
+.rounded-full {
+    border-radius: 50%;
+}
+
+.aspect-square {
+    aspect-ratio: 1 / 1;
+}
+
+.w-32 {
+    width: 128px;
+}
+
+.truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.text-xs {
+    font-size: 12px;
+}
+
+.items-start {
+    align-items: flex-start;
+}
+
+.p-3 {
+    padding: 12px;
+}
+
+.flex {
+    display: flex;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.w-full {
+    width: 100%;
+}
+
 /* 기존 매치 스타일 숨김 */
 .match-card {
     display: none;
@@ -3116,7 +3244,14 @@ function displayMatchHistory(matches) {
                         
                         <div class="match-main-info">
                             <div class="rank-hero-section">
-                                <span class="match-rank">${rankName} ${teamRank}</span>
+                                <div class="rank-badge-container">
+                                    <img src="https://cdn.deadlock.coach/vpk/panorama/images/ranked/badges/rank${teamRank > 3 ? Math.max(1, 7-teamRank) : teamRank}/badge_sm_subrank${teamRank}.webp" 
+                                         alt="${rankName} ${teamRank}" 
+                                         class="rank-badge-img"
+                                         title="${rankName} ${teamRank}"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                                    <span class="rank-text-fallback" style="display: none;">${rankName} ${teamRank}</span>
+                                </div>
                                 <div class="hero-info">
                                     <img src="${getHeroImage(hero)}" alt="${hero}" class="hero-portrait">
                                     <span class="hero-name">${hero}</span>
@@ -3166,9 +3301,69 @@ function displayMatchHistory(matches) {
         
         matchesList.innerHTML = matchCards.join('');
         
-        // 매치 아이템 데이터를 즉시 로드하여 표시
+        // 매치 아이템 데이터와 플레이어 데이터를 즉시 로드하여 표시
         matches.forEach((match, index) => {
             const itemsContainer = document.getElementById(`match-items-${index}`);
+            const playersContainer = document.getElementById(`match-players-${index}`);
+            
+            // 플레이어 목록 표시 (더미 데이터)
+            if (playersContainer) {
+                const dummyPlayers = [
+                    { hero: 'Infernus', name: 'hutonya' },
+                    { hero: 'Yamato', name: 'Chambers' },
+                    { hero: 'Holliday', name: 'Glaso' },
+                    { hero: 'Haze', name: '구극무적우자거' },
+                    { hero: 'Lash', name: 'aski' },
+                    { hero: 'Vindicta', name: '무당백면우모' },
+                    { hero: 'Bebop', name: '동먵리' },
+                    { hero: 'Shiv', name: 'Asher' },
+                    { hero: 'Paradox', name: '유기불굶과' },
+                    { hero: 'Calico', name: '< blank >' },
+                    { hero: 'Ivy', name: 'LOVE&PEACE♡' },
+                    { hero: 'Abrams', name: 'farrel🌹🌹💔💔' }
+                ];
+                
+                const getHeroApiUrl = (heroName) => {
+                    const heroMap = {
+                        'Infernus': 'inferno',
+                        'Yamato': 'yamato',
+                        'Holliday': 'astro',
+                        'Haze': 'haze',
+                        'Lash': 'lash',
+                        'Vindicta': 'hornet',
+                        'Bebop': 'bebop', 
+                        'Shiv': 'shiv',
+                        'Paradox': 'chrono',
+                        'Calico': 'nano',
+                        'Ivy': 'tengu',
+                        'Abrams': 'bull'
+                    };
+                    const heroKey = heroMap[heroName] || 'bull';
+                    return `https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/${heroKey}_mm.webp`;
+                };
+                
+                const playersHTML = dummyPlayers.map(player => `
+                    <div class="flex items-center gap-2">
+                        <picture>
+                            <source srcset="${getHeroApiUrl(player.hero)}" type="image/webp">
+                            <source srcset="${getHeroApiUrl(player.hero).replace('.webp', '.png')}" type="image/png">
+                            <img loading="lazy" alt="${player.hero}" title="${player.hero}" 
+                                 class="size-8 aspect-square w-6 h-6 rounded-full border border-border" 
+                                 src="${getHeroApiUrl(player.hero)}">
+                        </picture>
+                        <span class="player-name-text w-32 truncate text-xs text-muted-foreground" title="${player.name}">${player.name}</span>
+                    </div>
+                `).join('');
+                
+                playersContainer.innerHTML = `
+                    <div class="bg-muted flex items-start p-3 rounded">
+                        <div class="grid grid-cols-2 gap-x-5 gap-y-1.5 w-full">
+                            ${playersHTML}
+                        </div>
+                    </div>
+                `;
+            }
+            
             if (itemsContainer) {
                 console.log(`🎒 매치 ${index} 아이템 처리 시작:`, match);
                 
@@ -3187,53 +3382,80 @@ function displayMatchHistory(matches) {
                     
                     console.log(`🏆 게임 종료 시 최종 보유 아이템 ${finalItems.length}개:`, finalItems.map(i => i.name));
                     
-                    // deadlock-api.com 스타일로 아이템 표시
-                    const itemsHTML = finalItems.map((item, itemIndex) => {
-                        // 아이템 이름 처리
-                        let itemName = item.name;
-                        if (!itemName || itemName.includes('Unknown Item') || itemName.includes('알 수 없는 아이템')) {
-                            const itemId = item.itemId || item.id;
-                            if (window.itemMatcher && itemId) {
-                                const itemData = window.itemMatcher.getItemById(itemId);
-                                if (itemData && itemData.name && !itemData.name.includes('Unknown')) {
-                                    itemName = itemData.name;
-                                }
-                            }
-                        }
+                    // deadlock-api.com 스타일로 아이템 표시 (정확한 6x2 그리드)
+                    const getDeadlockApiItemUrl = (itemName) => {
+                        // 한글 → 영어 아이템명 매핑
+                        const itemNameMap = {
+                            '구조 빔': 'rescue_beam',
+                            '확장 탄창': 'extended_magazine', 
+                            '추가 체력': 'extra_health',
+                            '추가 정신력': 'extra_spirit',
+                            '몬스터 탄환': 'monster_rounds',
+                            '스프린트 부츠': 'sprint_boots',
+                            '신비한 폭발': 'mystic_burst',
+                            '능동 재장전': 'active_reload',
+                            '광전사': 'berserker',
+                            '총알 갑옷': 'bullet_armor',
+                            '금속 피부': 'metal_skin',
+                            '향상된 정신력': 'improved_spirit',
+                            '무한한 정신력': 'boundless_spirit',
+                            'Mystic Burst': 'mystic_burst',
+                            'Mystic Shot': 'mystic_shot',
+                            'Enchanter\'s Emblem': 'enchanters_emblem',
+                            'Greater Expansion': 'greater_expansion',
+                            'Superior Cooldown': 'superior_cooldown',
+                            'Cold Front': 'cold_front',
+                            'Arcane Surge': 'arcane_surge',
+                            'Trophy Collector': 'trophy_collector',
+                            'Rapid Recharge': 'rapid_recharge',
+                            'Boundless Spirit': 'boundless_spirit'
+                        };
                         
-                        if (!itemName || itemName.includes('Unknown Item') || itemName.includes('알 수 없는 아이템')) {
-                            itemName = `아이템 ${item.itemId || item.id || 'ID없음'}`;
-                        }
+                        const englishName = itemNameMap[itemName] || itemName.toLowerCase().replace(/[^a-z0-9]/g, '_');
                         
-                        const itemTier = item.tier || 1;
-                        const imageUrl = getItemImageUrl(itemName) || `https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp`;
+                        // 아이템 카테고리 결정 (spirit/weapon/vitality)
+                        const spiritItems = ['mystic_burst', 'mystic_shot', 'greater_expansion', 'superior_cooldown', 'cold_front', 'arcane_surge', 'rapid_recharge', 'boundless_spirit', 'improved_spirit', 'extra_spirit'];
+                        const vitalityItems = ['enchanters_emblem', 'trophy_collector', 'extra_health', 'bullet_armor', 'metal_skin', 'rescue_beam'];
+                        const weaponItems = ['extended_magazine', 'monster_rounds', 'active_reload', 'berserker', 'sprint_boots'];
                         
-                        return `<img src="${imageUrl}" alt="${itemName}" class="item-icon tier-${itemTier}" title="${itemName}">`;
-                    }).join('');
+                        let category = 'weapon';
+                        if (spiritItems.includes(englishName)) category = 'spirit';
+                        else if (vitalityItems.includes(englishName)) category = 'vitality';
+                        
+                        return `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/${category}/${englishName}_sm.png`;
+                    };
                     
-                    // 아이템 이름들도 표시
-                    const itemNames = finalItems.map(item => {
-                        let itemName = item.name;
-                        if (!itemName || itemName.includes('Unknown Item') || itemName.includes('알 수 없는 아이템')) {
-                            const itemId = item.itemId || item.id;
-                            if (window.itemMatcher && itemId) {
-                                const itemData = window.itemMatcher.getItemById(itemId);
-                                if (itemData && itemData.name && !itemData.name.includes('Unknown')) {
-                                    itemName = itemData.name;
-                                }
-                            }
-                        }
-                        if (!itemName || itemName.includes('Unknown Item') || itemName.includes('알 수 없는 아이템')) {
-                            itemName = `Item ${item.itemId || item.id || 'Unknown'}`;
-                        }
-                        return itemName;
+                    // 12슬롯 배치 (6x2 그리드)
+                    const itemSlots = new Array(12).fill(null);
+                    finalItems.forEach((item, idx) => {
+                        if (idx < 12) itemSlots[idx] = item;
                     });
                     
-                    const itemNamesHTML = itemNames.map(name => `<span class="item-name">${name}</span>`).join('');
+                    const itemGridHTML = itemSlots.map((item, slotIndex) => {
+                        if (!item) {
+                            return `<div class="w-8 h-8 rounded border border-border bg-muted"></div>`;
+                        }
+                        
+                        let itemName = item.name || `Item ${item.itemId || item.id || 'Unknown'}`;
+                        const itemUrl = getDeadlockApiItemUrl(itemName);
+                        
+                        return `
+                            <div>
+                                <picture>
+                                    <source srcset="${itemUrl.replace('.png', '.webp')}" type="image/webp">
+                                    <source srcset="${itemUrl}" type="image/png">
+                                    <img loading="lazy" alt="${itemName}" title="${itemName}" 
+                                         class="size-8 aspect-square w-8 h-8 rounded border border-border" 
+                                         src="${itemUrl}">
+                                </picture>
+                            </div>
+                        `;
+                    }).join('');
                     
                     itemsContainer.innerHTML = `
-                        <div class="items-icons">${itemsHTML}</div>
-                        <div class="items-names">${itemNamesHTML}</div>
+                        <div class="grid grid-cols-6 gap-2 w-fit mb-1">
+                            ${itemGridHTML}
+                        </div>
                     `;
                     console.log(`✅ 매치 ${index} 게임 종료 시 최종 보유 아이템 ${finalItems.length}개 표시 완료 (전체 ${itemsData.length}개 중)`);
                 } else {
