@@ -91,10 +91,10 @@
                 </div>
             </div>
 
-            <!-- Recent Matches -->
+            <!-- Recent Matches - deadlock-api.com 스타일 -->
             <div class="player-section">
                 <h2 class="section-title">최근 매치</h2>
-                <div class="matches-list" id="matches-list">
+                <div class="deadlock-matches-container" id="matches-list">
                     <!-- Matches will be populated by JavaScript -->
                 </div>
             </div>
@@ -130,21 +130,207 @@
 </div>
 
 <style>
-/* deadlock-api.com 스타일 매치 카드 */
-.deadlock-api-match {
-    background: rgba(0, 0, 0, 0.4);
+/* deadlock-api.com 정확한 매치 카드 스타일 */
+.deadlock-matches-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.deadlock-match-card {
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(71, 85, 105, 0.3);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.deadlock-match-card:hover {
+    border-color: rgba(71, 85, 105, 0.5);
+    background: rgba(15, 23, 42, 0.8);
+}
+
+/* 매치 카드 헤더 */
+.deadlock-match-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px 12px;
+    background: rgba(15, 23, 42, 0.4);
+    border-bottom: 1px solid rgba(71, 85, 105, 0.2);
+}
+
+.match-outcome-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.match-result-badge {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.match-result-badge.win {
+    background: rgba(34, 197, 94, 0.15);
+    color: #22c55e;
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.match-result-badge.loss {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.match-meta-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 14px;
+    color: #94a3b8;
+}
+
+.match-duration-rank {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.match-rank-img {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+}
+
+/* 매치 카드 메인 콘텐츠 */
+.deadlock-match-content {
+    padding: 16px 24px;
+}
+
+.match-main-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+}
+
+.match-hero-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.match-hero-img {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.match-stats-section {
+    text-align: right;
+}
+
+.match-kda {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    justify-content: flex-end;
+}
+
+.kda-numbers {
+    font-size: 18px;
+    font-weight: 600;
+    color: #f8fafc;
+}
+
+.kda-ratio {
+    color: #22c55e;
+    font-weight: 600;
+}
+
+.match-performance {
+    display: flex;
+    gap: 16px;
+    justify-content: flex-end;
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+/* 아이템 그리드 */
+.match-items-section {
+    margin-bottom: 16px;
+}
+
+.deadlock-items-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 32px);
+    gap: 8px;
+    width: fit-content;
+}
+
+.deadlock-item-slot {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid rgba(71, 85, 105, 0.3);
+    background: rgba(15, 23, 42, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.deadlock-item-img {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+}
+
+/* 플레이어 목록 */
+.match-players-section {
+    background: rgba(15, 23, 42, 0.4);
     border-radius: 8px;
     padding: 16px;
-    margin-bottom: 12px;
-    border-left: 4px solid #2d5a87;
 }
 
-.deadlock-api-match.win {
-    border-left-color: #4caf50;
+.deadlock-players-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px 32px;
 }
 
-.deadlock-api-match.loss {
-    border-left-color: #f44336;
+.deadlock-player-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+}
+
+.deadlock-player-hero {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid rgba(71, 85, 105, 0.3);
+}
+
+.deadlock-player-name {
+    font-size: 13px;
+    color: #e2e8f0;
+    cursor: pointer;
+    transition: color 0.2s;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.deadlock-player-name:hover {
+    color: #22c55e;
 }
 
 .match-header {
@@ -3220,17 +3406,15 @@ function getItemTier(itemId) {
     return 1;
 }
 
-// 매치 히스토리 표시
+// 매치 히스토리 표시 - deadlock-api.com 스타일
 function displayMatchHistory(matches) {
     const matchesList = document.getElementById('matches-list');
     
-    console.log('🔄 매치 히스토리 표시 시작, itemMatcher 상태:', !!window.itemMatcher);
+    console.log('🔄 deadlock-api.com 스타일 매치 표시 시작:', matches.length, '개');
     
     try {
-        console.log('📋 매치 히스토리 표시 시작:', matches);
-        
         if (!Array.isArray(matches) || matches.length === 0) {
-            matchesList.innerHTML = '<p style="color: #999; text-align: center;">최근 매치 데이터가 없습니다.</p>';
+            matchesList.innerHTML = '<p style="color: #94a3b8; text-align: center;">최근 매치 데이터가 없습니다.</p>';
             return;
         }
         
@@ -3454,6 +3638,7 @@ function displayMatchHistory(matches) {
             return 'weapon'; // 기본값
         };
         
+        // deadlock-api.com 스타일 매치 카드 생성
         const matchCards = matches.map((match, index) => {
             try {
                 // 안전한 데이터 추출
@@ -3512,8 +3697,8 @@ function displayMatchHistory(matches) {
                 const rankUrlNumber = getRankUrlNumber(rankName);
                 
                 return `
-                    <div class="deadlock-api-match ${isWin ? 'win' : 'loss'}">
-                        <div class="match-header">
+                    <div class="deadlock-match-card">
+                        <div class="deadlock-match-header">
                             <div class="match-outcome-info">
                                 <span class="match-result-text ${isWin ? 'win' : 'loss'}">${isWin ? 'Win' : 'Loss'}</span>
                                 <span class="match-type">Normal</span>
