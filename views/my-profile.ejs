@@ -130,6 +130,228 @@
 </div>
 
 <style>
+/* deadlock-api.com 스타일 매치 카드 */
+.deadlock-api-match {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border-left: 4px solid #2d5a87;
+}
+
+.deadlock-api-match.win {
+    border-left-color: #4caf50;
+}
+
+.deadlock-api-match.loss {
+    border-left-color: #f44336;
+}
+
+.match-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.match-outcome-info {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.match-result-text.win {
+    color: #4caf50;
+    font-weight: bold;
+}
+
+.match-result-text.loss {
+    color: #f44336;
+    font-weight: bold;
+}
+
+.match-type {
+    color: #999;
+}
+
+.match-date {
+    color: #ccc;
+}
+
+.match-id-info {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    color: #999;
+    font-size: 13px;
+}
+
+.match-main-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.rank-hero-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.rank-badge-img {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+}
+
+.hero-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hero-portrait {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.hero-name {
+    font-weight: bold;
+    color: #fff;
+    font-size: 16px;
+}
+
+.stats-section {
+    text-align: right;
+}
+
+.kda-stats {
+    margin-bottom: 4px;
+}
+
+.kda-numbers {
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    margin-right: 8px;
+}
+
+.kda-ratio {
+    color: #4caf50;
+    font-weight: bold;
+}
+
+.performance-stats {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    font-size: 13px;
+    color: #ccc;
+}
+
+.stat-item {
+    white-space: nowrap;
+}
+
+.match-items-section {
+    margin-bottom: 16px;
+}
+
+.grid {
+    display: grid;
+}
+
+.grid-cols-6 {
+    grid-template-columns: repeat(6, 1fr);
+}
+
+.gap-2 {
+    gap: 8px;
+}
+
+.w-fit {
+    width: fit-content;
+}
+
+.mb-1 {
+    margin-bottom: 4px;
+}
+
+.w-8, .h-8 {
+    width: 32px;
+    height: 32px;
+}
+
+.rounded {
+    border-radius: 4px;
+}
+
+.border-border {
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.bg-muted {
+    background-color: rgba(100, 100, 100, 0.3);
+}
+
+.match-players {
+    margin-top: 12px;
+}
+
+.grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.gap-x-5 {
+    column-gap: 20px;
+}
+
+.gap-y-1_5 {
+    row-gap: 6px;
+}
+
+.w-6, .h-6 {
+    width: 24px;
+    height: 24px;
+}
+
+.rounded-full {
+    border-radius: 50%;
+}
+
+.player-name-text {
+    font-size: 12px;
+    color: #ccc;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 128px;
+}
+
+.flex {
+    display: flex;
+}
+
+.items-center {
+    align-items: center;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.p-3 {
+    padding: 12px;
+}
+
+.items-start {
+    align-items: flex-start;
+}
+
 /* Welcome Message Styles */
 .welcome-message {
     text-align: center;
