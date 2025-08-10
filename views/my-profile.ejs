@@ -3228,6 +3228,23 @@ function displayMatchHistory(matches) {
                 
                 const rankName = getRankName(teamRank);
                 
+                // 랭크 번호 매핑 (deadlock-api.com URL 구조에 맞춤)
+                const getRankUrlNumber = (rankName) => {
+                    const rankUrlMap = {
+                        'Eternus': '1',
+                        'Phantom': '1', 
+                        'Oracle': '1',
+                        'Ritualist': '4',
+                        'Alchemist': '3',
+                        'Arcanist': '4',
+                        'Seeker': '2',
+                        'Initiate': '8'
+                    };
+                    return rankUrlMap[rankName] || '4';
+                };
+                
+                const rankUrlNumber = getRankUrlNumber(rankName);
+                
                 return `
                     <div class="deadlock-api-match ${isWin ? 'win' : 'loss'}">
                         <div class="match-header">
@@ -3245,7 +3262,7 @@ function displayMatchHistory(matches) {
                         <div class="match-main-info">
                             <div class="rank-hero-section">
                                 <div class="rank-badge-container">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/ranks/${rankName.toLowerCase()}_${teamRank}_sm.webp" 
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/ranks/rank${rankUrlNumber}/badge_sm_subrank${teamRank}.png" 
                                          alt="${rankName} ${teamRank}" 
                                          class="rank-badge-img"
                                          title="${rankName} ${teamRank}"
@@ -3306,22 +3323,41 @@ function displayMatchHistory(matches) {
             const itemsContainer = document.getElementById(`match-items-${index}`);
             const playersContainer = document.getElementById(`match-players-${index}`);
             
-            // 플레이어 목록 표시 (더미 데이터)
+            // 플레이어 목록 표시 (실제 매치 데이터 사용)
             if (playersContainer) {
-                const dummyPlayers = [
-                    { hero: 'Infernus', name: 'hutonya' },
-                    { hero: 'Yamato', name: 'Chambers' },
-                    { hero: 'Holliday', name: 'Glaso' },
-                    { hero: 'Haze', name: '구극무적우자거' },
-                    { hero: 'Lash', name: 'aski' },
-                    { hero: 'Vindicta', name: '무당백면우모' },
-                    { hero: 'Bebop', name: '동먵리' },
-                    { hero: 'Shiv', name: 'Asher' },
-                    { hero: 'Paradox', name: '유기불굶과' },
-                    { hero: 'Calico', name: '< blank >' },
-                    { hero: 'Ivy', name: 'LOVE&PEACE♡' },
-                    { hero: 'Abrams', name: 'farrel🌹🌹💔💔' }
-                ];
+                console.log(`🎮 매치 ${index} 플레이어 데이터 확인:`, match);
+                
+                // 실제 매치 데이터에서 플레이어 정보 추출 시도
+                let players = [];
+                if (match.participants && match.participants.length > 0) {
+                    players = match.participants.map(p => ({
+                        hero: p.hero || p.character_name || 'Unknown',
+                        name: p.player_name || p.name || p.steam_name || 'Unknown Player'
+                    }));
+                } else if (match.players && match.players.length > 0) {
+                    players = match.players.map(p => ({
+                        hero: p.hero || p.character_name || 'Unknown',
+                        name: p.player_name || p.name || p.steam_name || 'Unknown Player'
+                    }));
+                } else {
+                    // 백업: deadlock-api.com에서 가져온 더미 플레이어 데이터
+                    players = [
+                        { hero: 'Infernus', name: 'hutonya' },
+                        { hero: 'Yamato', name: 'Chambers' },
+                        { hero: 'Holliday', name: 'Glaso' },
+                        { hero: 'Haze', name: '구극무적우자거' },
+                        { hero: 'Lash', name: 'aski' },
+                        { hero: 'Vindicta', name: '무당백면우모' },
+                        { hero: 'Bebop', name: '동먵리' },
+                        { hero: 'Shiv', name: 'Asher' },
+                        { hero: 'Paradox', name: '유기불굶과' },
+                        { hero: 'Calico', name: '< blank >' },
+                        { hero: 'Ivy', name: 'LOVE&PEACE♡' },
+                        { hero: 'Abrams', name: 'farrel🌹🌹💔💔' }
+                    ];
+                }
+                
+                console.log(`👥 매치 ${index} 사용할 플레이어 데이터:`, players);
                 
                 const getHeroApiUrl = (heroName) => {
                     const heroMap = {
@@ -3342,7 +3378,7 @@ function displayMatchHistory(matches) {
                     return `https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/${heroKey}_mm.webp`;
                 };
                 
-                const playersHTML = dummyPlayers.map(player => `
+                const playersHTML = players.map(player => `
                     <div class="flex items-center gap-2">
                         <picture>
                             <source srcset="${getHeroApiUrl(player.hero)}" type="image/webp">
