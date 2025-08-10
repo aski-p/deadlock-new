@@ -325,6 +325,37 @@
     grid-template-columns: repeat(2, 1fr);
 }
 
+.grid-cols-1 {
+    grid-template-columns: repeat(1, 1fr);
+}
+
+/* md: 768px 이상에서 auto 1fr auto 레이아웃 */
+@media (min-width: 768px) {
+    .md\\:grid-cols-\\[auto_1fr_auto\\] {
+        grid-template-columns: auto 1fr auto;
+    }
+}
+
+.gap-x-4 {
+    column-gap: 1rem;
+}
+
+.gap-y-8 {
+    row-gap: 2rem;
+}
+
+.bg-card {
+    background-color: var(--card-bg, rgba(0, 0, 0, 0.2));
+}
+
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.w-full {
+    width: 100%;
+}
+
 .gap-x-5 {
     column-gap: 20px;
 }
@@ -2074,6 +2105,8 @@ function displayHeroStats(heroStats) {
                 'Infernus': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/inferno_card.webp',
                 'Ivy': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/tengu_card.webp',
                 'Kelvin': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kelvin_card.webp',
+                'Viper': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/slork_card.webp',
+                'Vyper': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/slork_card.webp',
                 'Lady Geist': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/spectre_card.webp',
                 'Lash': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/lash_card.webp',
                 'McGinnis': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/engineer_card.webp',
@@ -3197,6 +3230,8 @@ function displayMatchHistory(matches) {
                 'Infernus': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/inferno_card.webp',
                 'Ivy': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/tengu_card.webp',
                 'Kelvin': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kelvin_card.webp',
+                'Viper': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/slork_card.webp',
+                'Vyper': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/slork_card.webp',
                 'Lady Geist': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/spectre_card.webp',
                 'Lash': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/lash_card.webp',
                 'McGinnis': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/engineer_card.webp',
@@ -3475,7 +3510,7 @@ function displayMatchHistory(matches) {
                             </div>
                         </div>
                         
-                        <div class="match-body">
+                        <div class="match-body grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-x-4 gap-y-8 bg-card overflow-hidden w-full">
                             <div class="match-left-content">
                                 <div class="match-main-info">
                                     <div class="rank-hero-section">
@@ -3506,7 +3541,10 @@ function displayMatchHistory(matches) {
                                         </div>
                                     </div>
                                 </div>
-                                
+                            </div>
+                            
+                            <!-- 가운데: 아이템 영역 -->
+                            <div class="match-center-content">
                                 <div class="match-items-section">
                                     <div class="items-row" id="match-items-${index}">
                                         <!-- 아이템들이 여기 표시됩니다 -->
@@ -3584,6 +3622,7 @@ function displayMatchHistory(matches) {
                         'Grey Talon': 'grey_talon',
                         'Pocket': 'synth',
                         'Viper': 'slork',
+                        'Vyper': 'slork', // Viper의 대체 철자
                         'Dynamo': 'dynamo',
                         'Kelvin': 'kelvin',
                         'Lady Geist': 'ghost',
