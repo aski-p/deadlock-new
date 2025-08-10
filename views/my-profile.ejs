@@ -151,8 +151,27 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     font-size: 14px;
+}
+
+.match-body {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.match-left-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-width: 0;
+}
+
+.match-right-content {
+    width: 420px;
+    flex-shrink: 0;
 }
 
 .match-outcome-info {
@@ -1054,31 +1073,6 @@
     width: 100% !important;
     height: 400px !important;
     background: transparent;
-}
-
-/* deadlock-api.com 스타일 매치 카드 */
-.deadlock-api-match {
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 12px;
-    border-left: 4px solid #2d5a87;
-}
-
-.deadlock-api-match.win {
-    border-left-color: #4caf50;
-}
-
-.deadlock-api-match.loss {
-    border-left-color: #f44336;
-}
-
-.match-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-    font-size: 14px;
 }
 
 .match-outcome-info {
@@ -3481,44 +3475,50 @@ function displayMatchHistory(matches) {
                             </div>
                         </div>
                         
-                        <div class="match-main-info">
-                            <div class="rank-hero-section">
-                                <div class="rank-badge-container">
-                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/ranks/rank${rankUrlNumber}/badge_sm_subrank${teamRank}.png" 
-                                         alt="${rankName} ${teamRank}" 
-                                         class="rank-badge-img"
-                                         title="${rankName} ${teamRank}"
-                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-                                    <span class="rank-text-fallback" style="display: none;">${rankName} ${teamRank}</span>
+                        <div class="match-body">
+                            <div class="match-left-content">
+                                <div class="match-main-info">
+                                    <div class="rank-hero-section">
+                                        <div class="rank-badge-container">
+                                            <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/ranks/rank${rankUrlNumber}/badge_sm_subrank${teamRank}.png" 
+                                                 alt="${rankName} ${teamRank}" 
+                                                 class="rank-badge-img"
+                                                 title="${rankName} ${teamRank}"
+                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                                            <span class="rank-text-fallback" style="display: none;">${rankName} ${teamRank}</span>
+                                        </div>
+                                        <div class="hero-info">
+                                            <img src="${getHeroImage(hero)}" alt="${hero}" class="hero-portrait">
+                                            <span class="hero-name">${hero}</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="stats-section">
+                                        <div class="kda-stats">
+                                            <span class="kda-numbers">${kills} / ${deaths} / ${assists}</span>
+                                            <span class="kda-ratio">${kda} KDA</span>
+                                        </div>
+                                        
+                                        <div class="performance-stats">
+                                            <span class="stat-item">SPM ${soulsPerMin}</span>
+                                            <span class="stat-item">Net Worth ${netWorth}K</span>
+                                            <span class="stat-item">Denies ${denies}</span>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="hero-info">
-                                    <img src="${getHeroImage(hero)}" alt="${hero}" class="hero-portrait">
-                                    <span class="hero-name">${hero}</span>
+                                
+                                <div class="match-items-section">
+                                    <div class="items-row" id="match-items-${index}">
+                                        <!-- 아이템들이 여기 표시됩니다 -->
+                                    </div>
                                 </div>
                             </div>
                             
-                            <div class="stats-section">
-                                <div class="kda-stats">
-                                    <span class="kda-numbers">${kills} / ${deaths} / ${assists}</span>
-                                    <span class="kda-ratio">${kda} KDA</span>
-                                </div>
-                                
-                                <div class="performance-stats">
-                                    <span class="stat-item">SPM ${soulsPerMin}</span>
-                                    <span class="stat-item">Net Worth ${netWorth}K</span>
-                                    <span class="stat-item">Denies ${denies}</span>
+                            <div class="match-right-content">
+                                <div class="match-players" id="match-players-${index}">
+                                    <!-- 플레이어 목록이 여기 표시됩니다 -->
                                 </div>
                             </div>
-                        </div>
-                        
-                        <div class="match-items-section">
-                            <div class="items-row" id="match-items-${index}">
-                                <!-- 아이템들이 여기 표시됩니다 -->
-                            </div>
-                        </div>
-                        
-                        <div class="match-players" id="match-players-${index}">
-                            <!-- 플레이어 목록이 여기 표시됩니다 -->
                         </div>
                     </div>
                 `;
@@ -3577,7 +3577,21 @@ function displayMatchHistory(matches) {
                         'Paradox': 'chrono',
                         'Calico': 'nano',
                         'Ivy': 'tengu',
-                        'Abrams': 'bull'
+                        'Abrams': 'bull',
+                        'Mo & Krill': 'krill',
+                        'McGinnis': 'mcginnis',
+                        'Mirage': 'mirage',
+                        'Grey Talon': 'grey_talon',
+                        'Pocket': 'synth',
+                        'Viper': 'slork',
+                        'Dynamo': 'dynamo',
+                        'Kelvin': 'kelvin',
+                        'Lady Geist': 'ghost',
+                        'Seven': 'seven',
+                        'Warden': 'warden',
+                        'Wraith': 'wraith',
+                        'Viscous': 'viscous',
+                        'Sinclair': 'atlas'
                     };
                     const heroKey = heroMap[heroName] || 'bull';
                     return `https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/${heroKey}_mm.webp`;

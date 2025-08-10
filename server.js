@@ -5328,7 +5328,7 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
                   // 플레이어 참가자 정보 추출 (실제 이름 우선 사용)
                   const rawParticipants = matchDetails.match_info.players.map(player => ({
                     hero: getHeroNameById(player.hero_id) || 'Unknown',
-                    name: `Player_${player.account_id}`, // 임시 이름
+                    name: player.player_name || player.persona_name || player.name || `Player_${player.account_id}`, // 매치 데이터에서 직접 이름 사용
                     account_id: player.account_id,
                     hero_id: player.hero_id,
                     team: player.team || 0
