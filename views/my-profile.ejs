@@ -834,6 +834,231 @@
     background: transparent;
 }
 
+/* deadlock-api.com 스타일 매치 카드 */
+.deadlock-api-match {
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    border-left: 4px solid #2d5a87;
+}
+
+.deadlock-api-match.win {
+    border-left-color: #4caf50;
+}
+
+.deadlock-api-match.loss {
+    border-left-color: #f44336;
+}
+
+.match-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+.match-outcome-info {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.match-result-text.win {
+    color: #4caf50;
+    font-weight: bold;
+}
+
+.match-result-text.loss {
+    color: #f44336;
+    font-weight: bold;
+}
+
+.match-type {
+    color: #999;
+}
+
+.match-date {
+    color: #ccc;
+}
+
+.match-id-info {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    color: #999;
+    font-size: 13px;
+}
+
+.match-main-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.rank-hero-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.match-rank {
+    font-weight: bold;
+    color: #ffd700;
+    font-size: 16px;
+}
+
+.hero-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hero-portrait {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.hero-name {
+    font-weight: bold;
+    color: #fff;
+    font-size: 16px;
+}
+
+.stats-section {
+    text-align: right;
+}
+
+.kda-stats {
+    margin-bottom: 4px;
+}
+
+.kda-numbers {
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    margin-right: 8px;
+}
+
+.kda-ratio {
+    color: #4caf50;
+    font-weight: bold;
+}
+
+.performance-stats {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    font-size: 13px;
+    color: #ccc;
+}
+
+.stat-item {
+    white-space: nowrap;
+}
+
+.match-items-section {
+    margin-bottom: 16px;
+}
+
+.items-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.items-icons {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.item-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.item-icon.tier-1 {
+    border: 1px solid #8B7355;
+}
+
+.item-icon.tier-2 {
+    border: 1px solid #4A90E2;
+}
+
+.item-icon.tier-3 {
+    border: 1px solid #9B59B6;
+}
+
+.item-icon.tier-4 {
+    border: 1px solid #FFD700;
+}
+
+.items-names {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 12px;
+    color: #999;
+}
+
+.item-name {
+    white-space: nowrap;
+}
+
+.match-players {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    font-size: 13px;
+}
+
+.team {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.team-header {
+    font-weight: bold;
+    color: #ccc;
+    margin-bottom: 8px;
+}
+
+.player-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.player-hero-small {
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    object-fit: cover;
+}
+
+.player-name {
+    flex: 1;
+    color: #fff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 기존 매치 스타일 숨김 */
+.match-card {
+    display: none;
+}
+
 /* 에러 및 로딩 스타일 */
 .profile-error {
     text-align: center;
@@ -2841,64 +3066,85 @@ function displayMatchHistory(matches) {
                 const hero = match?.hero || 'Unknown';
                 const result = match?.result || '알 수 없음';
                 const isWin = result === '승리';
-                const matchResult = match?.matchResult || (isWin ? 'Match won' : 'Match lost');
-                const laneResult = match?.laneResult || 'Lane unknown';
                 const duration = match?.durationFormatted || match?.duration ? `${Math.floor(match.duration / 60)}:${(match.duration % 60).toString().padStart(2, '0')}` : '0:00';
                 const kills = parseInt(match?.kills) || 0;
                 const deaths = parseInt(match?.deaths) || 0;
                 const assists = parseInt(match?.assists) || 0;
                 const kda = match?.kda || '0.0';
                 const souls = parseInt(match?.souls) || 0;
-                const damage = parseInt(match?.damage) || 0;
+                const soulsPerMin = match?.soulsPerMin || Math.round(souls / (match?.duration || 1800) * 60);
                 const playedAt = match?.playedAt || new Date().toISOString();
                 const matchId = match?.matchId || 'Unknown';
                 const teamRank = parseInt(match?.teamRank) || 6;
+                const denies = parseInt(match?.denies) || 0;
+                const netWorth = Math.round(souls / 1000 * 10) / 10; // 소울을 네트워스로 변환
+                
+                // 날짜 포맷팅 (deadlock-api.com 스타일: 08/10 03:25)
+                const dateObj = new Date(playedAt);
+                const dateStr = `${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getDate().toString().padStart(2, '0')} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
+                
+                // 랭크 이름 변환 (팀 랭크를 실제 랭크로)
+                const getRankName = (rank) => {
+                    const rankMap = {
+                        1: 'Eternus',
+                        2: 'Phantom', 
+                        3: 'Oracle',
+                        4: 'Ritualist',
+                        5: 'Alchemist',
+                        6: 'Arcanist',
+                        7: 'Seeker',
+                        8: 'Initiate'
+                    };
+                    return rankMap[rank] || 'Arcanist';
+                };
+                
+                const rankName = getRankName(teamRank);
                 
                 return `
-                    <div class="match-card ${isWin ? 'win' : 'loss'}">
-                        <div class="match-hero">
-                            <img src="${getHeroImage(hero)}" alt="${hero}" class="match-hero-image">
-                            <span class="match-hero-name">${hero}</span>
-                        </div>
-                        <div class="match-result">
-                            <div class="match-outcomes">
-                                <span class="match-outcome ${isWin ? 'win-text' : 'loss-text'}">${matchResult}</span>
-                                <span class="lane-outcome ${laneResult.includes('won') ? 'win-text' : laneResult.includes('lost') ? 'loss-text' : 'unknown-text'}">${laneResult}</span>
+                    <div class="deadlock-api-match ${isWin ? 'win' : 'loss'}">
+                        <div class="match-header">
+                            <div class="match-outcome-info">
+                                <span class="match-result-text ${isWin ? 'win' : 'loss'}">${isWin ? 'Win' : 'Loss'}</span>
+                                <span class="match-type">Normal</span>
+                                <span class="match-date">${dateStr}</span>
                             </div>
-                            <div class="match-meta-info">
+                            <div class="match-id-info">
+                                <span class="match-id-label">Match ID: ${matchId}</span>
                                 <span class="match-duration">${duration}</span>
-                                <div class="team-rank-badge">
-                                    <img src="https://cdn.deadlock.coach/vpk/panorama/images/ranked/badges/rank${teamRank > 3 ? Math.max(1, 7-teamRank) : teamRank}/badge_sm_subrank${teamRank}.webp" 
-                                         alt="Team Rank ${teamRank}" 
-                                         class="rank-badge-image"
-                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-                                    <span class="rank-fallback" style="display: none;">${teamRank}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="match-main-info">
+                            <div class="rank-hero-section">
+                                <span class="match-rank">${rankName} ${teamRank}</span>
+                                <div class="hero-info">
+                                    <img src="${getHeroImage(hero)}" alt="${hero}" class="hero-portrait">
+                                    <span class="hero-name">${hero}</span>
                                 </div>
                             </div>
-                            <span class="match-id">매치 #${matchId}</span>
-                        </div>
-                        <div class="match-stats">
-                            <span class="kda">${kills}/${deaths}/${assists}</span>
-                            <span class="kda-ratio">KDA: ${kda}</span>
-                        </div>
-                        <div class="match-performance">
-                            <div class="performance-item">
-                                <span class="performance-label">소울</span>
-                                <span class="performance-value">${souls.toLocaleString()}</span>
-                            </div>
-                            <div class="performance-item">
-                                <span class="performance-label">데미지</span>
-                                <span class="performance-value">${damage.toLocaleString()}</span>
+                            
+                            <div class="stats-section">
+                                <div class="kda-stats">
+                                    <span class="kda-numbers">${kills} / ${deaths} / ${assists}</span>
+                                    <span class="kda-ratio">${kda} KDA</span>
+                                </div>
+                                
+                                <div class="performance-stats">
+                                    <span class="stat-item">SPM ${soulsPerMin}</span>
+                                    <span class="stat-item">Net Worth ${netWorth}K</span>
+                                    <span class="stat-item">Denies ${denies}</span>
+                                </div>
                             </div>
                         </div>
-                        <div class="match-items">
-                            <div class="items-label">게임 종료 시 아이템</div>
-                            <div class="items-grid" id="match-items-${index}">
-                                <!-- 아이템 데이터는 JavaScript에서 즉시 로드됩니다 -->
+                        
+                        <div class="match-items-section">
+                            <div class="items-row" id="match-items-${index}">
+                                <!-- 아이템들이 여기 표시됩니다 -->
                             </div>
                         </div>
-                        <div class="match-time">
-                            ${formatDate(playedAt)}
+                        
+                        <div class="match-players" id="match-players-${index}">
+                            <!-- 플레이어 목록이 여기 표시됩니다 -->
                         </div>
                     </div>
                 `;
@@ -2941,12 +3187,12 @@ function displayMatchHistory(matches) {
                     
                     console.log(`🏆 게임 종료 시 최종 보유 아이템 ${finalItems.length}개:`, finalItems.map(i => i.name));
                     
+                    // deadlock-api.com 스타일로 아이템 표시
                     const itemsHTML = finalItems.map((item, itemIndex) => {
-                        // Unknown Item인 경우 아이템 ID로 다시 매핑 시도
+                        // 아이템 이름 처리
                         let itemName = item.name;
                         if (!itemName || itemName.includes('Unknown Item') || itemName.includes('알 수 없는 아이템')) {
                             const itemId = item.itemId || item.id;
-                            // window.itemMatcher가 있으면 사용
                             if (window.itemMatcher && itemId) {
                                 const itemData = window.itemMatcher.getItemById(itemId);
                                 if (itemData && itemData.name && !itemData.name.includes('Unknown')) {
@@ -2955,34 +3201,40 @@ function displayMatchHistory(matches) {
                             }
                         }
                         
-                        // 여전히 Unknown이면 기본 이름 사용
                         if (!itemName || itemName.includes('Unknown Item') || itemName.includes('알 수 없는 아이템')) {
                             itemName = `아이템 ${item.itemId || item.id || 'ID없음'}`;
                         }
                         
                         const itemTier = item.tier || 1;
-                        const itemId = item.itemId || item.id || 'unknown';
-                        
-                        console.log(`🔍 아이템 ${itemIndex}: ${itemName} (ID: ${itemId}, Tier: ${itemTier})`);
-                        
-                        // 아이템별 이미지 URL 생성 (한국어 이름 기반)
                         const imageUrl = getItemImageUrl(itemName) || `https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp`;
                         
-                        return `
-                            <div class="item-wrapper">
-                                <img src="${imageUrl}" 
-                                     alt="${itemName}" 
-                                     class="item-image tier-${itemTier}"
-                                     title="${itemName}"
-                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                                <div class="item-placeholder tier-${itemTier}" style="display: none;">
-                                    <span class="item-text">${itemName.substring(0, 3)}</span>
-                                </div>
-                            </div>
-                        `;
+                        return `<img src="${imageUrl}" alt="${itemName}" class="item-icon tier-${itemTier}" title="${itemName}">`;
                     }).join('');
                     
-                    itemsContainer.innerHTML = itemsHTML;
+                    // 아이템 이름들도 표시
+                    const itemNames = finalItems.map(item => {
+                        let itemName = item.name;
+                        if (!itemName || itemName.includes('Unknown Item') || itemName.includes('알 수 없는 아이템')) {
+                            const itemId = item.itemId || item.id;
+                            if (window.itemMatcher && itemId) {
+                                const itemData = window.itemMatcher.getItemById(itemId);
+                                if (itemData && itemData.name && !itemData.name.includes('Unknown')) {
+                                    itemName = itemData.name;
+                                }
+                            }
+                        }
+                        if (!itemName || itemName.includes('Unknown Item') || itemName.includes('알 수 없는 아이템')) {
+                            itemName = `Item ${item.itemId || item.id || 'Unknown'}`;
+                        }
+                        return itemName;
+                    });
+                    
+                    const itemNamesHTML = itemNames.map(name => `<span class="item-name">${name}</span>`).join('');
+                    
+                    itemsContainer.innerHTML = `
+                        <div class="items-icons">${itemsHTML}</div>
+                        <div class="items-names">${itemNamesHTML}</div>
+                    `;
                     console.log(`✅ 매치 ${index} 게임 종료 시 최종 보유 아이템 ${finalItems.length}개 표시 완료 (전체 ${itemsData.length}개 중)`);
                 } else {
                     // 아이템 데이터가 없는 경우 - 더 나은 UI 제공
