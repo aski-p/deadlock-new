@@ -99,6 +99,14 @@
                 </div>
             </div>
 
+            <!-- MMR Graph -->
+            <div class="player-section">
+                <h2 class="section-title">MMR 히스토리</h2>
+                <div class="mmr-graph-container" id="mmr-graph-container">
+                    <canvas id="mmr-chart" width="800" height="400"></canvas>
+                </div>
+            </div>
+
             <!-- Party Stats -->
             <div class="player-section">
                 <h2 class="section-title">파티 통계 (함께 플레이한 팀원)</h2>
@@ -811,6 +819,21 @@
     text-align: right;
 }
 
+/* MMR 그래프 스타일 */
+.mmr-graph-container {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 15px;
+    padding: 25px;
+    margin: 20px 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#mmr-chart {
+    width: 100% !important;
+    height: 400px !important;
+    background: transparent;
+}
+
 /* 에러 및 로딩 스타일 */
 .profile-error {
     text-align: center;
@@ -1207,38 +1230,42 @@ async function loadMyProfileData() {
         
         // 상세 데이터를 병렬로 로드
         console.log('🔄 상세 API 호출 시작...');
-        const [playerResponse, heroStatsResponse, matchHistoryResponse, partyStatsResponse] = await Promise.all([
+        const [playerResponse, heroStatsResponse, matchHistoryResponse, partyStatsResponse, mmrResponse] = await Promise.all([
             fetch(`/api/v1/players/${accountId}`),
             fetch(`/api/v1/players/${accountId}/hero-stats`),
             fetch(`/api/v1/players/${accountId}/match-history?limit=10`),
-            fetch(`/api/v1/players/${accountId}/party-stats`)
+            fetch(`/api/v1/players/${accountId}/party-stats`),
+            fetch(`/api/v1/players/${accountId}/mmr`)
         ]);
         
         console.log('📡 상세 API 응답 상태:', {
             player: playerResponse.status,
             heroStats: heroStatsResponse.status,
             matchHistory: matchHistoryResponse.status,
-            partyStats: partyStatsResponse.status
+            partyStats: partyStatsResponse.status,
+            mmr: mmrResponse.status
         });
         
-        const [playerData, heroStats, matchHistory, partyStats] = await Promise.all([
+        const [playerData, heroStats, matchHistory, partyStats, mmrData] = await Promise.all([
             playerResponse.json(),
             heroStatsResponse.json(),
             matchHistoryResponse.json(),
-            partyStatsResponse.json()
+            partyStatsResponse.json(),
+            mmrResponse.json()
         ]);
         
         console.log('📊 받은 데이터:', {
             player: !!playerData,
             heroStats: heroStats?.length || 0,
             matchHistory: matchHistory?.length || 0,
-            partyStats: partyStats?.length || 0
+            partyStats: partyStats?.length || 0,
+            mmr: mmrData?.length || 0
         });
         
         if (playerResponse.ok && playerData) {
             // UI 업데이트
             console.log('🎯 프로필 데이터로 UI 업데이트');
-            updatePlayerUIFast(playerData, heroStats, matchHistory, partyStats);
+            updatePlayerUIFast(playerData, heroStats, matchHistory, partyStats, mmrData);
             loading.style.display = 'none';
             content.style.display = 'block';
             console.log('✅ 프로필 데이터 로딩 완료');
@@ -1267,7 +1294,7 @@ async function loadMyProfileData() {
 }
 
 // 빠른 UI 업데이트 - 모든 데이터를 한 번에 처리
-function updatePlayerUIFast(player, heroStats, matchHistory, partyStats) {
+function updatePlayerUIFast(player, heroStats, matchHistory, partyStats, mmrData) {
     console.log('🎨 UI 업데이트 시작, 플레이어 데이터:', player);
     
     try {
@@ -1363,6 +1390,15 @@ function updatePlayerUIFast(player, heroStats, matchHistory, partyStats) {
         } else {
             console.log('⚠️ 파티 스탯 없음');
             document.getElementById('party-stats-list').innerHTML = '<p style="color: #999; text-align: center;">파티 데이터가 없습니다.</p>';
+        }
+        
+        // MMR 그래프 표시
+        if (mmrData && Array.isArray(mmrData) && mmrData.length > 0) {
+            console.log('📈 MMR 그래프 표시:', mmrData.length, '개 데이터');
+            displayMMRGraph(mmrData);
+        } else {
+            console.log('⚠️ MMR 데이터 없음');
+            document.getElementById('mmr-graph-container').innerHTML = '<p style="color: #999; text-align: center;">MMR 데이터가 없습니다.</p>';
         }
         
         console.log('🎉 모든 UI 업데이트 완료');
@@ -3135,6 +3171,151 @@ function displayPartyStats(partyStats) {
     }
 }
 
+// MMR 그래프 표시
+function displayMMRGraph(mmrData) {
+    try {
+        console.log('📈 MMR 그래프 생성 시작:', mmrData);
+        
+        const ctx = document.getElementById('mmr-chart').getContext('2d');
+        
+        // 기존 차트가 있으면 제거
+        if (window.mmrChart) {
+            window.mmrChart.destroy();
+        }
+        
+        // 데이터 포맷팅
+        const labels = mmrData.map(entry => {
+            const date = new Date(entry.date);
+            return date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+        });
+        
+        const mmrValues = mmrData.map(entry => entry.mmr);
+        
+        // 등급별 색상과 레벨 정의 (deadlock-api.com 기준)
+        const rankColors = {
+            'Initiate': '#8B4513',
+            'Seeker': '#CD853F', 
+            'Arcanist': '#4682B4',
+            'Alchemist': '#32CD32',
+            'Ritualist': '#9932CC',
+            'Oracle': '#FF6347',
+            'Phantom': '#FF1493',
+            'Eternus': '#FFD700'
+        };
+        
+        const rankLevels = {
+            'Initiate': 1,
+            'Seeker': 2,
+            'Arcanist': 3,
+            'Alchemist': 4,
+            'Ritualist': 5,
+            'Oracle': 6,
+            'Phantom': 7,
+            'Eternus': 8
+        };
+        
+        // 현재 등급 결정
+        const currentRank = mmrData.length > 0 ? mmrData[mmrData.length - 1].rank : 'Seeker';
+        const currentColor = rankColors[currentRank] || '#CD853F';
+        
+        window.mmrChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'MMR',
+                    data: mmrValues,
+                    borderColor: currentColor,
+                    backgroundColor: currentColor + '20',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: currentColor,
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#FFEFD7',
+                            font: {
+                                size: 14,
+                                family: 'system-ui, -apple-system, sans-serif'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                        titleColor: '#FFEFD7',
+                        bodyColor: '#FFEFD7',
+                        borderColor: currentColor,
+                        borderWidth: 1,
+                        titleFont: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 13
+                        },
+                        callbacks: {
+                            label: function(context) {
+                                const index = context.dataIndex;
+                                const mmr = mmrValues[index];
+                                const rank = mmrData[index].rank;
+                                const tier = mmrData[index].tier;
+                                return [`MMR: ${mmr}`, `등급: ${rank} ${tier}`];
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#999',
+                            font: {
+                                size: 12
+                            }
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: 'rgba(255, 255, 255, 0.1)'
+                        },
+                        ticks: {
+                            color: '#999',
+                            font: {
+                                size: 12
+                            },
+                            callback: function(value) {
+                                return Math.round(value);
+                            }
+                        },
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+        
+        console.log('✅ MMR 그래프 생성 완료');
+        
+    } catch (error) {
+        console.error('❌ MMR 그래프 생성 오류:', error);
+        document.getElementById('mmr-graph-container').innerHTML = '<p style="color: #ff6b6b; text-align: center;">MMR 그래프를 표시할 수 없습니다.</p>';
+    }
+}
 
 // Load data when page loads
 document.addEventListener('DOMContentLoaded', async () => {
