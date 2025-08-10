@@ -1992,13 +1992,28 @@ function updatePlayerUIFast(player, heroStats, matchHistory, partyStats, mmrData
             document.getElementById('party-stats-list').innerHTML = '<p style="color: #999; text-align: center;">파티 데이터가 없습니다.</p>';
         }
         
-        // MMR 그래프 표시
-        if (mmrData && Array.isArray(mmrData) && mmrData.length > 0) {
-            console.log('📈 MMR 그래프 표시:', mmrData.length, '개 데이터');
-            displayMMRGraph(mmrData);
+        // MMR 그래프 표시 - 매치 히스토리에서 랭크 데이터 추출
+        if (matchHistory && Array.isArray(matchHistory) && matchHistory.length > 0) {
+            // 매치 히스토리에서 랭크 정보 추출하여 MMR 그래프 생성
+            const mmrDataFromMatches = matchHistory
+                .filter(match => match.teamRank && match.playedAt)
+                .map(match => ({
+                    date: match.playedAt,
+                    rank: match.teamRank,
+                    mmr: (9 - match.teamRank) * 1000 // 랭크를 대략적인 MMR로 변환 (임시)
+                }))
+                .reverse(); // 시간순으로 정렬
+                
+            if (mmrDataFromMatches.length > 0) {
+                console.log('📈 매치 히스토리에서 MMR 그래프 생성:', mmrDataFromMatches.length, '개 데이터');
+                displayMMRGraph(mmrDataFromMatches);
+            } else {
+                console.log('⚠️ 랭크 데이터가 있는 매치가 없음');
+                document.getElementById('mmr-graph-container').innerHTML = '<p style="color: #999; text-align: center;">랭크 데이터를 찾을 수 없습니다.</p>';
+            }
         } else {
-            console.log('⚠️ MMR 데이터 없음');
-            document.getElementById('mmr-graph-container').innerHTML = '<p style="color: #999; text-align: center;">MMR 데이터가 없습니다.</p>';
+            console.log('⚠️ 매치 히스토리 없음');
+            document.getElementById('mmr-graph-container').innerHTML = '<p style="color: #999; text-align: center;">매치 데이터가 없어 MMR 그래프를 표시할 수 없습니다.</p>';
         }
         
         console.log('🎉 모든 UI 업데이트 완료');
@@ -3773,10 +3788,29 @@ function displayMatchHistory(matches) {
                         return `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/mystic_burst_sm.png`;
                     };
                     
-                    // 12슬롯 배치 (6x2 그리드)
+                    // 12슬롯 배치 (6x2 그리드) - 실제 게임 슬롯을 UI 그리드로 매핑
                     const itemSlots = new Array(12).fill(null);
-                    finalItems.forEach((item, idx) => {
-                        if (idx < 12) itemSlots[idx] = item;
+                    
+                    finalItems.forEach(item => {
+                        const gameSlot = item.slot || 0;
+                        let uiSlot = -1;
+                        
+                        // 게임 슬롯을 UI 그리드 위치로 변환
+                        if (gameSlot >= 0 && gameSlot <= 11) {
+                            // Weapon items: 게임 슬롯 0-11 → UI 그리드 0-3 (상단 4칸)
+                            uiSlot = Math.floor(gameSlot / 3); // 0-3
+                        } else if (gameSlot >= 12 && gameSlot <= 23) {
+                            // Vitality items: 게임 슬롯 12-23 → UI 그리드 4-7 (중간 4칸)
+                            uiSlot = 4 + Math.floor((gameSlot - 12) / 3); // 4-7
+                        } else if (gameSlot >= 24 && gameSlot <= 35) {
+                            // Spirit items: 게임 슬롯 24-35 → UI 그리드 8-11 (하단 4칸)  
+                            uiSlot = 8 + Math.floor((gameSlot - 24) / 3); // 8-11
+                        }
+                        
+                        // UI 슬롯이 유효하고 비어있으면 아이템 배치
+                        if (uiSlot >= 0 && uiSlot < 12 && !itemSlots[uiSlot]) {
+                            itemSlots[uiSlot] = item;
+                        }
                     });
                     
                     const itemGridHTML = itemSlots.map((item, slotIndex) => {
