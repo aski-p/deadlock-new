@@ -3616,10 +3616,10 @@ function displayMatchHistory(matches) {
                         'Calico': 'nano',
                         'Ivy': 'tengu',
                         'Abrams': 'bull',
-                        'Mo & Krill': 'krill',
-                        'McGinnis': 'mcginnis',  // 다시 mcginnis로 변경
+                        'Mo & Krill': 'digger',  // digger가 정확한 매핑
+                        'McGinnis': 'engineer',  // engineer가 정확한 매핑
                         'Mirage': 'mirage',
-                        'Grey Talon': 'grey_talon',
+                        'Grey Talon': 'archer',  // archer가 정확한 매핑
                         'Pocket': 'synth',
                         'Viper': 'slork',
                         'Vyper': 'slork', // Viper의 대체 철자
@@ -3637,9 +3637,13 @@ function displayMatchHistory(matches) {
                 };
                 
                 if (players.length > 0) {
-                    // 현재 사용자(aski)의 팀을 찾기
-                    const currentUserPlayer = players.find(p => p.name === 'aski');
-                    const currentUserTeam = currentUserPlayer ? currentUserPlayer.team : 0;
+                    // 현재 사용자(aski)의 팀을 찾기 - account_id로도 확인
+                    const currentUserPlayer = players.find(p => 
+                        p.name === 'aski' || 
+                        p.account_id === 54776284 || 
+                        (p.name && p.name.includes('54776284'))
+                    );
+                    const currentUserTeam = currentUserPlayer ? currentUserPlayer.team : 1;
                     
                     // 팀별로 나누기
                     const myTeam = players.filter(p => p.team === currentUserTeam);
@@ -3739,6 +3743,12 @@ function displayMatchHistory(matches) {
                             '향상된 정신력': 'spirit/improved_spirit_sm',
                             '무한한 정신력': 'spirit/boundless_spirit_sm',
                             '생명력 아이템': 'vitality/extra_health_sm',
+                            // 매치 데이터에서 확인된 실제 아이템들
+                            '근접 흡혈': 'weapon/melee_lifesteal_sm',
+                            '정신력 갑옷': 'vitality/spirit_armor_sm',
+                            '신비한 정확도': 'weapon/mystic_shot_sm',
+                            '거대한 탄창': 'weapon/high_velocity_mag_sm',
+                            '메아리 파편': 'spirit/echo_shard_sm',
                             'Mystic Burst': 'spirit/mystic_burst_sm',
                             'Mystic Shot': 'weapon/mystic_shot_sm',
                             'Enchanter\'s Emblem': 'vitality/enchanters_emblem_sm',
@@ -3756,7 +3766,10 @@ function displayMatchHistory(matches) {
                             return `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/${itemPath}.png`;
                         }
                         
-                        // 매핑이 없으면 기본 이미지 사용
+                        // 매핑이 없으면 Unknown Item인지 확인하고 적절한 기본 이미지 사용
+                        if (itemName && itemName.includes('Unknown Item')) {
+                            return `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/basic_magazine_sm.png`;
+                        }
                         return `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/mystic_burst_sm.png`;
                     };
                     
