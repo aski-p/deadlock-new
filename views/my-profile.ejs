@@ -3617,7 +3617,7 @@ function displayMatchHistory(matches) {
                         'Ivy': 'tengu',
                         'Abrams': 'bull',
                         'Mo & Krill': 'krill',
-                        'McGinnis': 'mcginnis',
+                        'McGinnis': 'mcginnis',  // 다시 mcginnis로 변경
                         'Mirage': 'mirage',
                         'Grey Talon': 'grey_talon',
                         'Pocket': 'synth',
@@ -3637,7 +3637,18 @@ function displayMatchHistory(matches) {
                 };
                 
                 if (players.length > 0) {
-                    const playersHTML = players.map(player => `
+                    // 현재 사용자(aski)의 팀을 찾기
+                    const currentUserPlayer = players.find(p => p.name === 'aski');
+                    const currentUserTeam = currentUserPlayer ? currentUserPlayer.team : 0;
+                    
+                    // 팀별로 나누기
+                    const myTeam = players.filter(p => p.team === currentUserTeam);
+                    const enemyTeam = players.filter(p => p.team !== currentUserTeam);
+                    
+                    console.log(`👥 현재 사용자 팀: ${currentUserTeam}, 우리팀: ${myTeam.length}명, 상대팀: ${enemyTeam.length}명`);
+                    
+                    // 우리팀 HTML 생성
+                    const myTeamHTML = myTeam.map(player => `
                         <div class="flex items-center gap-2">
                             <picture>
                                 <source srcset="${getHeroApiUrl(player.hero)}" type="image/webp">
@@ -3646,14 +3657,37 @@ function displayMatchHistory(matches) {
                                      class="size-8 aspect-square w-6 h-6 rounded-full border border-border" 
                                      src="${getHeroApiUrl(player.hero)}">
                             </picture>
-                            <span class="player-name-text w-32 truncate text-xs text-muted-foreground" title="${player.name}">${player.name}</span>
+                            <span class="player-name-text w-32 truncate text-xs text-green-400" title="${player.name}">${player.name}</span>
+                        </div>
+                    `).join('');
+                    
+                    // 상대팀 HTML 생성
+                    const enemyTeamHTML = enemyTeam.map(player => `
+                        <div class="flex items-center gap-2">
+                            <picture>
+                                <source srcset="${getHeroApiUrl(player.hero)}" type="image/webp">
+                                <source srcset="${getHeroApiUrl(player.hero).replace('.webp', '.png')}" type="image/png">
+                                <img loading="lazy" alt="${player.hero}" title="${player.hero}" 
+                                     class="size-8 aspect-square w-6 h-6 rounded-full border border-border" 
+                                     src="${getHeroApiUrl(player.hero)}">
+                            </picture>
+                            <span class="player-name-text w-32 truncate text-xs text-red-400" title="${player.name}">${player.name}</span>
                         </div>
                     `).join('');
                     
                     playersContainer.innerHTML = `
                         <div class="bg-muted flex items-start p-3 rounded">
-                            <div class="grid grid-cols-2 gap-x-5 gap-y-1.5 w-full">
-                                ${playersHTML}
+                            <div class="grid grid-cols-2 gap-x-5 gap-y-2 w-full">
+                                <!-- 왼쪽: 우리팀 -->
+                                <div class="space-y-1">
+                                    <div class="text-xs font-semibold text-green-400 mb-2">우리팀</div>
+                                    ${myTeamHTML}
+                                </div>
+                                <!-- 오른쪽: 상대팀 -->
+                                <div class="space-y-1">
+                                    <div class="text-xs font-semibold text-red-400 mb-2">상대팀</div>
+                                    ${enemyTeamHTML}
+                                </div>
                             </div>
                         </div>
                     `;

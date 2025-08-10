@@ -5331,52 +5331,21 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
                 if (matchDetails && matchDetails.match_info && matchDetails.match_info.players) {
                   console.log(`👥 매치 ${match.match_id} 플레이어 수: ${matchDetails.match_info.players.length}`);
 
-                  // 특정 매치에 대한 실제 플레이어 매핑 (사용자 제공 정보 기반)
-                  const knownMatchPlayers = {
-                    38684243: [
-                      { account_id: 54776284, name: 'aski', hero: 'Lash', hero_id: 31 },
-                      { account_id: 135980686, name: 'atgzcah', hero: 'Bebop', hero_id: 2 },
-                      { account_id: 126513692, name: 'evilplushie', hero: 'Mo & Krill', hero_id: 47 },
-                      { account_id: 1554436228, name: 'Riptide_gamingyt', hero: 'Mirage', hero_id: 15 },
-                      { account_id: 106968300, name: '亚当重锤', hero: 'Viper', hero_id: 48 },
-                      { account_id: 80507460, name: 'ztkP', hero: 'Shiv', hero_id: 44 },
-                      { account_id: 75635412, name: 'catsup', hero: 'McGinnis', hero_id: 23 },
-                      { account_id: 76506176, name: '328', hero: 'Infernus', hero_id: 1 },
-                      { account_id: 1565963152, name: 'Zyxx', hero: 'Haze', hero_id: 25 },
-                      { account_id: 202117896, name: 'ASD', hero: 'Grey Talon', hero_id: 27 },
-                      { account_id: 125094936, name: 'Dume', hero: 'Abrams', hero_id: 7 },
-                      { account_id: 1620503868, name: 'cropss123', hero: 'Pocket', hero_id: 48 }
-                    ]
-                  };
+                  // 하드코딩 제거 - 실제 API 데이터만 사용
+                  // 플레이어 참가자 정보 추출 (실제 이름 우선 사용)
+                  const rawParticipants = matchDetails.match_info.players.map(player => ({
+                    hero: getHeroNameById(player.hero_id) || 'Unknown',
+                    name: player.player_name || player.persona_name || player.name || `Player_${player.account_id}`, // 매치 데이터에서 직접 이름 사용
+                    account_id: player.account_id,
+                    hero_id: player.hero_id,
+                    team: player.team || 0
+                  }));
 
-                  // 현재 매치에 대한 알려진 플레이어 정보가 있는지 확인
-                  console.log(`🔍 매치 ID ${match.match_id} 확인 중... knownMatchPlayers에 존재: ${!!knownMatchPlayers[match.match_id]}`);
-                  if (knownMatchPlayers[match.match_id]) {
-                    console.log(`✅ 매치 ${match.match_id}에 대한 실제 플레이어 데이터 사용`);
-                    const rawParticipants = knownMatchPlayers[match.match_id].map(player => ({
-                      hero: player.hero,
-                      name: player.name,
-                      account_id: player.account_id,
-                      hero_id: player.hero_id,
-                      team: player.account_id === 54776284 ? 0 : (player.account_id % 2) // 간단한 팀 구분
-                    }));
-                    participants = rawParticipants;
-                    console.log(`👥 실제 플레이어 정보 로드 완료: ${participants.length}명`);
-                  } else {
-                    // 플레이어 참가자 정보 추출 (실제 이름 우선 사용)
-                    const rawParticipants = matchDetails.match_info.players.map(player => ({
-                      hero: getHeroNameById(player.hero_id) || 'Unknown',
-                      name: player.player_name || player.persona_name || player.name || `Player_${player.account_id}`, // 매치 데이터에서 직접 이름 사용
-                      account_id: player.account_id,
-                      hero_id: player.hero_id,
-                      team: player.team || 0
-                    }));
+                  console.log(`👥 플레이어 참가자 정보 추출 완료: ${rawParticipants.length}명`);
 
-                    console.log(`👥 플레이어 참가자 정보 추출 완료: ${rawParticipants.length}명`);
-
-                    // 각 플레이어의 실제 Steam 이름 조회 (deadlock-api.com 우선)
-                    const participantsWithNames = await Promise.all(
-                      rawParticipants.map(async (participant) => {
+                  // 각 플레이어의 실제 Steam 이름 조회 (deadlock-api.com 우선)
+                  const participantsWithNames = await Promise.all(
+                    rawParticipants.map(async (participant) => {
                       if (!participant.account_id) return participant;
                       
                       try {
@@ -5426,9 +5395,8 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
                     })
                   );
 
-                    participants = participantsWithNames;
-                    console.log(`👥 실제 Steam 이름이 포함된 참가자 정보 완료: ${participants.length}명`);
-                  }
+                  participants = participantsWithNames;
+                  console.log(`👥 실제 Steam 이름이 포함된 참가자 정보 완료: ${participants.length}명`);
 
                   // 현재 플레이어의 아이템 찾기
                   let currentPlayer = matchDetails.match_info.players.find(
