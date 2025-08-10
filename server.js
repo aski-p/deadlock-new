@@ -383,7 +383,7 @@ app.use(
     origin:
       process.env.NODE_ENV === 'production'
         ? ['https://deadlock-new-production.up.railway.app']
-        : ['http://localhost:3000'],
+        : ['http://localhost:3000', 'http://127.0.0.1:3000', 'null'], // file:// origin을 위해 'null' 추가
     credentials: true,
   })
 );

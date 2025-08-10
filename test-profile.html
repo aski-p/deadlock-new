@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>테스트 프로필 - deadlock-api.com 스타일</title>
+    <style>
+        body {
+            background: #1a1a2e;
+            color: #fff;
+            font-family: system-ui, sans-serif;
+            padding: 20px;
+        }
+        
+        /* deadlock-api.com 스타일 매치 카드 */
+        .deadlock-api-match {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid #2d5a87;
+        }
+        
+        .deadlock-api-match.win {
+            border-left-color: #4caf50;
+        }
+        
+        .deadlock-api-match.loss {
+            border-left-color: #f44336;
+        }
+        
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        
+        .match-outcome-info {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .match-result-text.win {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        
+        .match-result-text.loss {
+            color: #f44336;
+            font-weight: bold;
+        }
+        
+        .match-type {
+            color: #999;
+        }
+        
+        .match-date {
+            color: #ccc;
+        }
+        
+        .match-id-info {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            color: #999;
+            font-size: 13px;
+        }
+        
+        .match-main-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .rank-hero-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .rank-badge-img {
+            width: 32px;
+            height: 32px;
+            object-fit: cover;
+        }
+        
+        .hero-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .hero-portrait {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        
+        .hero-name {
+            font-weight: bold;
+            color: #fff;
+            font-size: 16px;
+        }
+        
+        .stats-section {
+            text-align: right;
+        }
+        
+        .kda-stats {
+            margin-bottom: 4px;
+        }
+        
+        .kda-numbers {
+            font-size: 18px;
+            font-weight: bold;
+            color: #fff;
+            margin-right: 8px;
+        }
+        
+        .kda-ratio {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        
+        .performance-stats {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            font-size: 13px;
+            color: #ccc;
+        }
+        
+        .stat-item {
+            white-space: nowrap;
+        }
+        
+        .match-items-section {
+            margin-bottom: 16px;
+        }
+        
+        .grid {
+            display: grid;
+        }
+        
+        .grid-cols-6 {
+            grid-template-columns: repeat(6, 1fr);
+        }
+        
+        .gap-2 {
+            gap: 8px;
+        }
+        
+        .w-fit {
+            width: fit-content;
+        }
+        
+        .mb-1 {
+            margin-bottom: 4px;
+        }
+        
+        .w-8, .h-8 {
+            width: 32px;
+            height: 32px;
+        }
+        
+        .rounded {
+            border-radius: 4px;
+        }
+        
+        .border-border {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .bg-muted {
+            background-color: rgba(100, 100, 100, 0.3);
+        }
+        
+        .match-players {
+            margin-top: 12px;
+        }
+        
+        .grid-cols-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .gap-x-5 {
+            column-gap: 20px;
+        }
+        
+        .gap-y-1_5 {
+            row-gap: 6px;
+        }
+        
+        .w-6, .h-6 {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .rounded-full {
+            border-radius: 50%;
+        }
+        
+        .player-name-text {
+            font-size: 12px;
+            color: #ccc;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 128px;
+        }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .items-center {
+            align-items: center;
+        }
+        
+        .w-full {
+            width: 100%;
+        }
+        
+        .p-3 {
+            padding: 12px;
+        }
+        
+        .items-start {
+            align-items: flex-start;
+        }
+    </style>
+</head>
+<body>
+    <h1>deadlock-api.com 스타일 매치 표시 테스트</h1>
+    
+    <div id="matches-container">
+        <!-- 매치들이 여기에 동적으로 로드됩니다 -->
+    </div>
+
+    <script>
+        // 매치 데이터 로드 및 표시
+        async function loadMatches() {
+            try {
+                const response = await fetch('http://localhost:3000/api/v1/players/54776284');
+                const data = await response.json();
+                
+                console.log('플레이어 데이터:', data);
+                
+                const matches = data.recentMatches.slice(0, 3); // 처음 3개만 표시
+                displayMatches(matches);
+                
+            } catch (error) {
+                console.error('매치 로드 실패:', error);
+                document.getElementById('matches-container').innerHTML = '<p>매치 데이터를 불러올 수 없습니다.</p>';
+            }
+        }
+        
+        function displayMatches(matches) {
+            const container = document.getElementById('matches-container');
+            
+            const matchCards = matches.map((match, index) => {
+                const hero = match.hero || 'Unknown';
+                const result = match.result || '알 수 없음';
+                const isWin = result === '승리';
+                const duration = match.duration ? `${Math.floor(match.duration / 60)}:${(match.duration % 60).toString().padStart(2, '0')}` : '0:00';
+                const kills = parseInt(match.kills) || 0;
+                const deaths = parseInt(match.deaths) || 0;
+                const assists = parseInt(match.assists) || 0;
+                const kda = match.kda || '0.0';
+                const souls = parseInt(match.souls) || 0;
+                const soulsPerMin = match.soulsPerMin || Math.round(souls / (match.duration || 1800) * 60);
+                const playedAt = match.playedAt || new Date().toISOString();
+                const matchId = match.matchId || 'Unknown';
+                const teamRank = parseInt(match.teamRank) || 6;
+                const denies = parseInt(match.denies) || 0;
+                const netWorth = Math.round(souls / 1000 * 10) / 10;
+                
+                // 날짜 포맷팅
+                const dateObj = new Date(playedAt);
+                const dateStr = `${(dateObj.getMonth() + 1).toString().padStart(2, '0')}/${dateObj.getDate().toString().padStart(2, '0')} ${dateObj.getHours().toString().padStart(2, '0')}:${dateObj.getMinutes().toString().padStart(2, '0')}`;
+                
+                // 랭크 이름 변환
+                const getRankName = (rank) => {
+                    const rankMap = {
+                        1: 'Eternus', 2: 'Phantom', 3: 'Oracle', 4: 'Ritualist',
+                        5: 'Alchemist', 6: 'Arcanist', 7: 'Seeker', 8: 'Initiate'
+                    };
+                    return rankMap[rank] || 'Arcanist';
+                };
+                
+                const rankName = getRankName(teamRank);
+                
+                // 영웅 이미지
+                const getHeroImage = (heroName) => {
+                    const heroMap = {
+                        'Lash': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/lash_card.webp',
+                        'Shiv': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/shiv_card.webp',
+                        'Yamato': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/yamato_card.webp'
+                    };
+                    return heroMap[heroName] || 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/lash_card.webp';
+                };
+                
+                // 아이템 매핑 (한국어 -> 영어 URL)
+                const getItemUrl = (itemName, itemId) => {
+                    const itemMapping = {
+                        '구조 빔': 'weapon/rescue_beam_sm',
+                        '확장 탄창': 'weapon/high_capacity_magazine_sm', 
+                        '추가 체력': 'vitality/extra_health_sm',
+                        '추가 정신력': 'spirit/extra_spirit_sm',
+                        '몬스터 탄환': 'weapon/monster_rounds_sm',
+                        '스프린트 부츠': 'vitality/sprint_boots_sm',
+                        '신비한 폭발': 'spirit/mystic_burst_sm',
+                        '능동 재장전': 'weapon/active_reload_sm',
+                        '광전사': 'weapon/berserker_sm',
+                        '총알 갑옷': 'vitality/bullet_armor_sm',
+                        '금속 피부': 'vitality/metal_skin_sm',
+                        '향상된 정신력': 'spirit/improved_spirit_sm',
+                        '무한한 정신력': 'spirit/boundless_spirit_sm',
+                        '생명력 아이템': 'vitality/extra_health_sm'
+                    };
+                    
+                    const itemPath = itemMapping[itemName];
+                    if (itemPath) {
+                        return `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/${itemPath}.png`;
+                    }
+                    
+                    // 매핑이 없으면 기본 이미지 사용
+                    return `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/mystic_burst_sm.png`;
+                };
+
+                // 아이템 처리
+                const finalItems = match.finalItems || match.items || [];
+                const itemSlots = new Array(12).fill(null);
+                finalItems.forEach((item, idx) => {
+                    if (idx < 12) itemSlots[idx] = item;
+                });
+                
+                const itemGridHTML = itemSlots.map((item, slotIndex) => {
+                    if (!item) {
+                        return `<div class="w-8 h-8 rounded border-border bg-muted"></div>`;
+                    }
+                    
+                    const itemName = item.name || `Item ${item.itemId || 'Unknown'}`;
+                    const itemUrl = getItemUrl(itemName, item.itemId);
+                    
+                    return `
+                        <div>
+                            <picture>
+                                <source srcset="${itemUrl.replace('.png', '.webp')}" type="image/webp">
+                                <source srcset="${itemUrl}" type="image/png">
+                                <img loading="lazy" alt="${itemName}" title="${itemName}" 
+                                     class="w-8 h-8 rounded border-border" 
+                                     src="${itemUrl}">
+                            </picture>
+                        </div>
+                    `;
+                }).join('');
+                
+                // 더미 플레이어 데이터
+                const dummyPlayers = [
+                    { hero: 'Infernus', name: 'hutonya' },
+                    { hero: 'Yamato', name: 'Chambers' },
+                    { hero: 'Holliday', name: 'Glaso' },
+                    { hero: 'Haze', name: '구극무적우자거' },
+                    { hero: 'Lash', name: 'aski' },
+                    { hero: 'Vindicta', name: '무당백면우모' }
+                ];
+                
+                const playersHTML = dummyPlayers.map(player => `
+                    <div class="flex items-center gap-2">
+                        <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/inferno_mm.webp" 
+                             alt="${player.hero}" title="${player.hero}" 
+                             class="w-6 h-6 rounded-full border-border">
+                        <span class="player-name-text" title="${player.name}">${player.name}</span>
+                    </div>
+                `).join('');
+                
+                return `
+                    <div class="deadlock-api-match ${isWin ? 'win' : 'loss'}">
+                        <div class="match-header">
+                            <div class="match-outcome-info">
+                                <span class="match-result-text ${isWin ? 'win' : 'loss'}">${isWin ? 'Win' : 'Loss'}</span>
+                                <span class="match-type">Normal</span>
+                                <span class="match-date">${dateStr}</span>
+                            </div>
+                            <div class="match-id-info">
+                                <span>Match ID: ${matchId}</span>
+                                <span>${duration}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="match-main-info">
+                            <div class="rank-hero-section">
+                                <div class="rank-badge-container">
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/ranks/${rankName.toLowerCase()}_${teamRank}_sm.webp" 
+                                         alt="${rankName} ${teamRank}" 
+                                         class="rank-badge-img"
+                                         title="${rankName} ${teamRank}">
+                                </div>
+                                <div class="hero-info">
+                                    <img src="${getHeroImage(hero)}" alt="${hero}" class="hero-portrait">
+                                    <span class="hero-name">${hero}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="stats-section">
+                                <div class="kda-stats">
+                                    <span class="kda-numbers">${kills} / ${deaths} / ${assists}</span>
+                                    <span class="kda-ratio">${kda} KDA</span>
+                                </div>
+                                
+                                <div class="performance-stats">
+                                    <span class="stat-item">SPM ${soulsPerMin}</span>
+                                    <span class="stat-item">Net Worth ${netWorth}K</span>
+                                    <span class="stat-item">Denies ${denies}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="match-items-section">
+                            <div class="grid grid-cols-6 gap-2 w-fit mb-1">
+                                ${itemGridHTML}
+                            </div>
+                        </div>
+                        
+                        <div class="match-players">
+                            <div class="bg-muted flex items-start p-3 rounded">
+                                <div class="grid grid-cols-2 gap-x-5 gap-y-1_5 w-full">
+                                    ${playersHTML}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = matchCards.join('');
+        }
+        
+        // 페이지 로드시 매치 데이터 로드
+        loadMatches();
+    </script>
+</body>
+</html>

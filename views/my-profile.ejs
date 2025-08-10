@@ -3245,7 +3245,7 @@ function displayMatchHistory(matches) {
                         <div class="match-main-info">
                             <div class="rank-hero-section">
                                 <div class="rank-badge-container">
-                                    <img src="https://cdn.deadlock.coach/vpk/panorama/images/ranked/badges/rank${teamRank > 3 ? Math.max(1, 7-teamRank) : teamRank}/badge_sm_subrank${teamRank}.webp" 
+                                    <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/ranks/${rankName.toLowerCase()}_${teamRank}_sm.webp" 
                                          alt="${rankName} ${teamRank}" 
                                          class="rank-badge-img"
                                          title="${rankName} ${teamRank}"
@@ -3384,45 +3384,41 @@ function displayMatchHistory(matches) {
                     
                     // deadlock-api.com 스타일로 아이템 표시 (정확한 6x2 그리드)
                     const getDeadlockApiItemUrl = (itemName) => {
-                        // 한글 → 영어 아이템명 매핑
-                        const itemNameMap = {
-                            '구조 빔': 'rescue_beam',
-                            '확장 탄창': 'extended_magazine', 
-                            '추가 체력': 'extra_health',
-                            '추가 정신력': 'extra_spirit',
-                            '몬스터 탄환': 'monster_rounds',
-                            '스프린트 부츠': 'sprint_boots',
-                            '신비한 폭발': 'mystic_burst',
-                            '능동 재장전': 'active_reload',
-                            '광전사': 'berserker',
-                            '총알 갑옷': 'bullet_armor',
-                            '금속 피부': 'metal_skin',
-                            '향상된 정신력': 'improved_spirit',
-                            '무한한 정신력': 'boundless_spirit',
-                            'Mystic Burst': 'mystic_burst',
-                            'Mystic Shot': 'mystic_shot',
-                            'Enchanter\'s Emblem': 'enchanters_emblem',
-                            'Greater Expansion': 'greater_expansion',
-                            'Superior Cooldown': 'superior_cooldown',
-                            'Cold Front': 'cold_front',
-                            'Arcane Surge': 'arcane_surge',
-                            'Trophy Collector': 'trophy_collector',
-                            'Rapid Recharge': 'rapid_recharge',
-                            'Boundless Spirit': 'boundless_spirit'
+                        // 한글 → deadlock-api.com URL 직접 매핑
+                        const itemMapping = {
+                            '구조 빔': 'weapon/rescue_beam_sm',
+                            '확장 탄창': 'weapon/high_capacity_magazine_sm', 
+                            '추가 체력': 'vitality/extra_health_sm',
+                            '추가 정신력': 'spirit/extra_spirit_sm',
+                            '몬스터 탄환': 'weapon/monster_rounds_sm',
+                            '스프린트 부츠': 'vitality/sprint_boots_sm',
+                            '신비한 폭발': 'spirit/mystic_burst_sm',
+                            '능동 재장전': 'weapon/active_reload_sm',
+                            '광전사': 'weapon/berserker_sm',
+                            '총알 갑옷': 'vitality/bullet_armor_sm',
+                            '금속 피부': 'vitality/metal_skin_sm',
+                            '향상된 정신력': 'spirit/improved_spirit_sm',
+                            '무한한 정신력': 'spirit/boundless_spirit_sm',
+                            '생명력 아이템': 'vitality/extra_health_sm',
+                            'Mystic Burst': 'spirit/mystic_burst_sm',
+                            'Mystic Shot': 'weapon/mystic_shot_sm',
+                            'Enchanter\'s Emblem': 'vitality/enchanters_emblem_sm',
+                            'Greater Expansion': 'spirit/greater_expansion_sm',
+                            'Superior Cooldown': 'spirit/superior_cooldown_sm',
+                            'Cold Front': 'spirit/cold_front_sm',
+                            'Arcane Surge': 'spirit/arcane_surge_sm',
+                            'Trophy Collector': 'vitality/trophy_collector_sm',
+                            'Rapid Recharge': 'spirit/rapid_recharge_sm',
+                            'Boundless Spirit': 'spirit/boundless_spirit_sm'
                         };
                         
-                        const englishName = itemNameMap[itemName] || itemName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                        const itemPath = itemMapping[itemName];
+                        if (itemPath) {
+                            return `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/${itemPath}.png`;
+                        }
                         
-                        // 아이템 카테고리 결정 (spirit/weapon/vitality)
-                        const spiritItems = ['mystic_burst', 'mystic_shot', 'greater_expansion', 'superior_cooldown', 'cold_front', 'arcane_surge', 'rapid_recharge', 'boundless_spirit', 'improved_spirit', 'extra_spirit'];
-                        const vitalityItems = ['enchanters_emblem', 'trophy_collector', 'extra_health', 'bullet_armor', 'metal_skin', 'rescue_beam'];
-                        const weaponItems = ['extended_magazine', 'monster_rounds', 'active_reload', 'berserker', 'sprint_boots'];
-                        
-                        let category = 'weapon';
-                        if (spiritItems.includes(englishName)) category = 'spirit';
-                        else if (vitalityItems.includes(englishName)) category = 'vitality';
-                        
-                        return `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/${category}/${englishName}_sm.png`;
+                        // 매핑이 없으면 기본 이미지 사용
+                        return `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/mystic_burst_sm.png`;
                     };
                     
                     // 12슬롯 배치 (6x2 그리드)
