@@ -4007,10 +4007,24 @@ function displayMatchHistory(matches) {
                         'Wraith': 'wraith',
                         'Viscous': 'viscous',
                         'Sinclair': 'atlas',
+                        'Atlas': 'atlas',
+                        // 새로운 영웅들 추가
+                        'Trapper': 'trapper',
+                        'Magician': 'magician', 
+                        'Fathom': 'fathom',
+                        'Wrecker': 'wrecker',
+                        'Savage': 'savage',
+                        'Forge': 'forge',
+                        'Buttercup': 'buttercup',
+                        'Cadence': 'cadence',
                         // Player나 Unknown 처리
                         'Player': 'bull',
                         'Unknown': 'bull',
+                        'player': 'bull',
+                        'unknown': 'bull',
                         '': 'bull',
+                        null: 'bull',
+                        undefined: 'bull',
                         // 대소문자 변형
                         'infernus': 'inferno',
                         'yamato': 'yamato',
@@ -4035,23 +4049,56 @@ function displayMatchHistory(matches) {
                         'wraith': 'wraith',
                         'viscous': 'viscous'
                     };
-                    const normalizedName = heroName?.toString().trim();
-                    const heroKey = heroMap[normalizedName] || heroMap[normalizedName?.toLowerCase()] || 'bull';
+                    // 영웅 이름 정규화 및 fallback 처리
+                    let normalizedName = '';
+                    if (heroName && heroName !== null && heroName !== undefined) {
+                        normalizedName = heroName.toString().trim();
+                    }
+                    
+                    // 빈 문자열이나 "Player"인 경우 처리
+                    if (!normalizedName || normalizedName === 'Player' || normalizedName === 'Unknown') {
+                        normalizedName = 'Player';
+                    }
+                    
+                    const heroKey = heroMap[normalizedName] || heroMap[normalizedName.toLowerCase()] || 'bull';
                     return `https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/${heroKey}_mm.webp`;
                 };
                 
                 if (players.length > 0) {
                     // 현재 사용자(aski)의 팀을 찾기 - account_id로도 확인
-                    const currentUserPlayer = players.find(p => 
-                        p.name === 'aski' || 
-                        p.account_id === 54776284 || 
-                        (p.name && p.name.includes('54776284'))
-                    );
-                    const currentUserTeam = currentUserPlayer ? currentUserPlayer.team : 1;
+                    let currentUserTeam = 1;
+                    let currentUserIndex = -1;
                     
-                    // 팀별로 나누기
-                    const myTeam = players.filter(p => p.team === currentUserTeam);
-                    const enemyTeam = players.filter(p => p.team !== currentUserTeam);
+                    // aski 사용자 찾기
+                    for (let i = 0; i < players.length; i++) {
+                        const p = players[i];
+                        if (p.name === 'aski' || 
+                            p.account_id === 54776284 || 
+                            p.account_id === '54776284' ||
+                            (p.name && p.name.includes('54776284'))) {
+                            currentUserIndex = i;
+                            currentUserTeam = p.team;
+                            break;
+                        }
+                    }
+                    
+                    // 사용자를 못찾으면 인덱스 기반으로 팀 구분 (강제로 6:6 분리)
+                    if (currentUserIndex === -1) {
+                        console.log('⚠️ 현재 사용자를 찾을 수 없음, 강제로 6:6 분리');
+                        const myTeam = players.slice(0, 6);  // 첫 6명
+                        const enemyTeam = players.slice(6, 12); // 나머지 6명
+                    } else {
+                        // 사용자를 찾았으면 팀 기반으로 분리
+                        var myTeam = players.filter(p => p.team === currentUserTeam);
+                        var enemyTeam = players.filter(p => p.team !== currentUserTeam);
+                        
+                        // 만약 팀 분리가 이상하면 (한 팀에 12명 등) 강제로 6:6 분리
+                        if (myTeam.length === 12 || enemyTeam.length === 12 || myTeam.length === 0 || enemyTeam.length === 0) {
+                            console.log('⚠️ 팀 분리 이상, 강제로 6:6 분리');
+                            myTeam = players.slice(0, 6);
+                            enemyTeam = players.slice(6, 12);
+                        }
+                    }
                     
                     console.log(`👥 현재 사용자 팀: ${currentUserTeam}, 우리팀: ${myTeam.length}명, 상대팀: ${enemyTeam.length}명`);
                     
