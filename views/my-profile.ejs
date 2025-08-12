@@ -3965,9 +3965,11 @@ function displayMatchHistory(matches) {
                 let players = [];
                 if (match.participants && match.participants.length > 0) {
                     console.log(`✅ 매치 ${index}: 실제 participants 데이터 사용 (${match.participants.length}명)`);
-                    players = match.participants.map(p => ({
+                    players = match.participants.map((p, idx) => ({
                         hero: p.hero || 'Unknown',
-                        name: p.name || p.player_name || p.steam_name || 'Unknown Player'
+                        name: p.name || p.player_name || p.steam_name || 'Unknown Player',
+                        team: p.team || (idx < 6 ? 1 : 2), // 0-5번은 팀1, 6-11번은 팀2
+                        account_id: p.account_id || p.steam_id
                     }));
                 } else {
                     console.log(`⚠️ 매치 ${index}: participants 데이터가 없어 빈 배열 사용`);
@@ -4004,9 +4006,37 @@ function displayMatchHistory(matches) {
                         'Warden': 'warden',
                         'Wraith': 'wraith',
                         'Viscous': 'viscous',
-                        'Sinclair': 'atlas'
+                        'Sinclair': 'atlas',
+                        // Player나 Unknown 처리
+                        'Player': 'bull',
+                        'Unknown': 'bull',
+                        '': 'bull',
+                        // 대소문자 변형
+                        'infernus': 'inferno',
+                        'yamato': 'yamato',
+                        'holliday': 'astro',
+                        'haze': 'haze',
+                        'lash': 'lash',
+                        'vindicta': 'hornet',
+                        'bebop': 'bebop',
+                        'shiv': 'shiv',
+                        'paradox': 'chrono',
+                        'calico': 'nano',
+                        'ivy': 'tengu',
+                        'abrams': 'bull',
+                        'mcginnis': 'engineer',
+                        'mirage': 'mirage',
+                        'pocket': 'synth',
+                        'viper': 'slork',
+                        'dynamo': 'dynamo',
+                        'kelvin': 'kelvin',
+                        'seven': 'seven',
+                        'warden': 'warden',
+                        'wraith': 'wraith',
+                        'viscous': 'viscous'
                     };
-                    const heroKey = heroMap[heroName] || 'bull';
+                    const normalizedName = heroName?.toString().trim();
+                    const heroKey = heroMap[normalizedName] || heroMap[normalizedName?.toLowerCase()] || 'bull';
                     return `https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/${heroKey}_mm.webp`;
                 };
                 
