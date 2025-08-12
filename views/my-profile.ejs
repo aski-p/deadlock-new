@@ -347,6 +347,166 @@
     align-items: flex-start;
 }
 
+/* 새로운 매치 카드 레이아웃 */
+.match-content-grid {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 24px;
+    width: 100%;
+    align-items: flex-start;
+}
+
+/* 개인 스탯 영역 (왼쪽) */
+.match-personal-stats {
+    background: rgba(30, 41, 59, 0.5);
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid rgba(71, 85, 105, 0.2);
+}
+
+.hero-rank-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.hero-info-compact {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hero-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    border: 2px solid rgba(71, 85, 105, 0.3);
+}
+
+.hero-name-compact {
+    font-weight: 600;
+    color: #FFEFD7;
+    font-size: 14px;
+}
+
+.rank-badge-compact .rank-icon {
+    width: 32px;
+    height: 32px;
+}
+
+.personal-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.kda-display {
+    text-align: center;
+}
+
+.kda-numbers-large {
+    font-size: 18px;
+    font-weight: bold;
+    color: #FFEFD7;
+    font-family: monospace;
+}
+
+.kda-ratio-text {
+    font-size: 12px;
+    color: #94A3B8;
+    margin-top: 4px;
+}
+
+.performance-display {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #94A3B8;
+}
+
+.stat-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: #FFEFD7;
+}
+
+.match-items-compact {
+    border-top: 1px solid rgba(71, 85, 105, 0.2);
+    padding-top: 12px;
+}
+
+.items-label {
+    font-size: 12px;
+    color: #94A3B8;
+    margin-bottom: 8px;
+}
+
+/* 팀 정보 영역 (오른쪽) */
+.match-teams {
+    background: rgba(30, 41, 59, 0.3);
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid rgba(71, 85, 105, 0.2);
+    min-height: 200px;
+}
+
+.teams-header {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.our-team-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #10B981;
+    padding: 4px 8px;
+    background: rgba(16, 185, 129, 0.1);
+    border-radius: 4px;
+}
+
+.enemy-team-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #EF4444;
+    padding: 4px 8px;
+    background: rgba(239, 68, 68, 0.1);
+    border-radius: 4px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .match-content-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .personal-stats-grid {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+    
+    .teams-header {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+}
+}
+
 .match-left-content {
     flex: 1;
     display: flex;
@@ -3710,51 +3870,65 @@ function displayMatchHistory(matches) {
                             </div>
                         </div>
                         
-                        <div class="match-body grid grid-cols-1 md:grid-cols-[auto_1fr_auto] gap-x-4 gap-y-8 bg-card overflow-hidden w-full">
-                            <div class="match-left-content">
-                                <div class="match-main-info">
-                                    <div class="rank-hero-section">
-                                        <div class="rank-badge-container">
-                                            <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/ranks/rank${rankUrlNumber}/badge_sm_subrank${teamRank}.png" 
-                                                 alt="${rankName} ${teamRank}" 
-                                                 class="rank-badge-img"
-                                                 title="${rankName} ${teamRank}"
-                                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-                                            <span class="rank-text-fallback" style="display: none;">${rankName} ${teamRank}</span>
+                        <div class="match-body">
+                            <!-- 새로운 레이아웃: 개인 스탯 왼쪽, 팀 정보 오른쪽 -->
+                            <div class="match-content-grid">
+                                <!-- 왼쪽: 개인 스탯 영역 -->
+                                <div class="match-personal-stats">
+                                    <div class="hero-rank-section">
+                                        <div class="hero-info-compact">
+                                            <img src="${getHeroImage(hero)}" alt="${hero}" class="hero-avatar">
+                                            <span class="hero-name-compact">${hero}</span>
                                         </div>
-                                        <div class="hero-info">
-                                            <img src="${getHeroImage(hero)}" alt="${hero}" class="hero-portrait">
-                                            <span class="hero-name">${hero}</span>
+                                        <div class="rank-badge-compact">
+                                            <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/ranks/rank${rankUrlNumber}/badge_sm_subrank${teamRank}.png" 
+                                                 alt="${rankName}" 
+                                                 class="rank-icon"
+                                                 title="${rankName} ${teamRank}"
+                                                 onerror="this.style.display='none';">
                                         </div>
                                     </div>
                                     
-                                    <div class="stats-section">
-                                        <div class="kda-stats">
-                                            <span class="kda-numbers">${kills} / ${deaths} / ${assists}</span>
-                                            <span class="kda-ratio">${kda} KDA</span>
+                                    <div class="personal-stats-grid">
+                                        <div class="kda-display">
+                                            <div class="kda-numbers-large">${kills} / ${deaths} / ${assists}</div>
+                                            <div class="kda-ratio-text">${kda} KDA</div>
                                         </div>
                                         
-                                        <div class="performance-stats">
-                                            <span class="stat-item">SPM ${soulsPerMin}</span>
-                                            <span class="stat-item">Net Worth ${netWorth}K</span>
-                                            <span class="stat-item">Denies ${denies}</span>
+                                        <div class="performance-display">
+                                            <div class="stat-row">
+                                                <span class="stat-label">SPM</span>
+                                                <span class="stat-value">${soulsPerMin}</span>
+                                            </div>
+                                            <div class="stat-row">
+                                                <span class="stat-label">Net Worth</span>
+                                                <span class="stat-value">${netWorth}K</span>
+                                            </div>
+                                            <div class="stat-row">
+                                                <span class="stat-label">Denies</span>
+                                                <span class="stat-value">${denies}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 아이템 영역도 개인 스탯에 포함 -->
+                                    <div class="match-items-compact">
+                                        <div class="items-label">Final Items</div>
+                                        <div class="items-row" id="match-items-${index}">
+                                            <!-- 아이템들이 여기 표시됩니다 -->
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <!-- 가운데: 아이템 영역 -->
-                            <div class="match-center-content">
-                                <div class="match-items-section">
-                                    <div class="items-row" id="match-items-${index}">
-                                        <!-- 아이템들이 여기 표시됩니다 -->
+                                
+                                <!-- 오른쪽: 팀 정보 영역 -->
+                                <div class="match-teams">
+                                    <div class="teams-header">
+                                        <span class="our-team-label">우리팀</span>
+                                        <span class="enemy-team-label">상대팀</span>
                                     </div>
-                                </div>
-                            </div>
-                            
-                            <div class="match-right-content">
-                                <div class="match-players" id="match-players-${index}">
-                                    <!-- 플레이어 목록이 여기 표시됩니다 -->
+                                    <div class="match-players" id="match-players-${index}">
+                                        <!-- 플레이어 목록이 여기 표시됩니다 -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
