@@ -4419,10 +4419,24 @@ function displayMatchHistory(matches) {
                             enemyTeam = tempEnemyTeam.slice(0, 6);  // 최대 6명
                             console.log(`✅ 팀 기반 분리 성공: 우리팀 ${myTeam.length}명, 상대팀 ${enemyTeam.length}명`);
                         } else {
-                            console.log(`⚠️ 팀 분리 실패 (우리팀: ${tempMyTeam.length}, 상대팀: ${tempEnemyTeam.length}), 강제 6:6 분리`);
-                            // 강제 6:6 분리
-                            myTeam = players.slice(0, 6);
-                            enemyTeam = players.slice(6, 12);
+                            console.log(`⚠️ 팀 분리 실패 (우리팀: ${tempMyTeam.length}, 상대팀: ${tempEnemyTeam.length}), 현재 사용자 중심으로 6:6 분리`);
+                            
+                            // 현재 사용자를 중심으로 6:6 분리
+                            const currentUser = players[currentUserIndex];
+                            const otherPlayers = players.filter((p, i) => i !== currentUserIndex);
+                            
+                            // 현재 사용자를 우리팀 첫 번째로 배치
+                            myTeam = [currentUser];
+                            
+                            // 나머지 플레이어들을 우리팀/상대팀으로 분배 (5명씩)
+                            for (let i = 0; i < otherPlayers.length && myTeam.length < 6; i++) {
+                                myTeam.push(otherPlayers[i]);
+                            }
+                            
+                            // 나머지는 모두 상대팀
+                            enemyTeam = otherPlayers.slice(myTeam.length - 1, myTeam.length - 1 + 6);
+                            
+                            console.log(`✅ 현재 사용자 중심 분리: 우리팀 ${myTeam.length}명, 상대팀 ${enemyTeam.length}명`);
                         }
                     } else {
                         console.log('⚠️ 현재 사용자를 찾을 수 없음, 강제 6:6 분리');
@@ -4431,7 +4445,23 @@ function displayMatchHistory(matches) {
                         enemyTeam = players.slice(6, 12);
                     }
                     
+                    // 현재 사용자가 우리팀에 있는지 마지막 확인
+                    const userInMyTeam = myTeam.some(p => 
+                        p.name === 'aski' || 
+                        p.account_id === 54776284 || 
+                        p.account_id === '54776284' ||
+                        (p.name && p.name.includes('54776284'))
+                    );
+                    
+                    if (!userInMyTeam && currentUserIndex !== -1) {
+                        console.log(`🔄 현재 사용자가 우리팀에 없음, 팀 교체`);
+                        // 팀을 바꿔서 현재 사용자가 우리팀에 오도록 함
+                        [myTeam, enemyTeam] = [enemyTeam, myTeam];
+                    }
+                    
                     console.log(`👥 최종 팀 구성: 우리팀 ${myTeam.length}명, 상대팀 ${enemyTeam.length}명`);
+                    console.log(`📋 우리팀 선수들:`, myTeam.map(p => `${p.name}(${p.account_id})`));
+                    console.log(`📋 상대팀 선수들:`, enemyTeam.map(p => `${p.name}(${p.account_id})`));
                     
                     // 우리팀 HTML 생성 (최대 6명)
                     const myTeamHTML = myTeam.slice(0, 6).map(player => `
