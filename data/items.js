@@ -97,25 +97,31 @@ const deadlockItems = {
         { name: "저지불가", tier: "IV", price: 6400, stats: ["+400 최대 체력", "+8 체력 재생", "사용 시: 6초간 디버프 면역 및 둔화 면역"], description: "모든 방해 효과에 면역이 되어 저지할 수 없게 됩니다." }
     ],
     spirit: [
-        // Tier I (800)
-        { name: "추가 충전", tier: "I", price: 800, stats: ["+1 능력 충전"], description: "능력 사용 횟수를 증가시킵니다." },
-        { name: "추가 영혼력", tier: "I", price: 800, stats: ["+6 영혼력"], description: "영혼력을 증가시킵니다." },
-        { name: "신비한 폭발", tier: "I", price: 800, stats: ["+4 영혼력", "능력 적중 시 주변에 65 정신 피해"], description: "능력 사용 시 주변에 폭발 데미지를 입힙니다." },
-        { name: "신비한 사거리", tier: "I", price: 800, stats: ["+4 영혼력", "+15% 능력 사거리"], description: "능력 사거리를 증가시킵니다." },
-        { name: "신비한 취약점", tier: "I", price: 800, stats: ["+4 영혼력", "능력 적중 시 -15% 영혼 저항력을 7초간 적용"], description: "적의 영혼 저항력을 감소시킵니다." },
-        { name: "정신 강타", tier: "I", price: 800, stats: ["+4 영혼력", "근접 공격이 +32 정신 피해"], description: "근접 공격에 정신 데미지를 추가합니다." },
+        // Tier I (500-1250)
+        { name: "추가 충전", tier: "I", price: 500, stats: ["+1 능력 충전"], description: "능력 사용 횟수를 증가시킵니다." },
+        { name: "추가 영혼력", tier: "I", price: 500, stats: ["+6 영혼력"], description: "영혼력을 증가시킵니다." },
+        { name: "신비한 폭발", tier: "I", price: 500, stats: ["+4 영혼력", "능력 적중 시 주변에 65 정신 피해"], description: "능력 사용 시 주변에 폭발 데미지를 입힙니다." },
+        { name: "신비한 사거리", tier: "I", price: 500, stats: ["+4 영혼력", "+15% 능력 사거리"], description: "능력 사거리를 증가시킵니다." },
+        { name: "신비한 취약점", tier: "I", price: 500, stats: ["+4 영혼력", "능력 적중 시 -15% 영혼 저항력을 7초간 적용"], description: "적의 영혼 저항력을 감소시킵니다." },
+        { name: "정신 강타", tier: "I", price: 500, stats: ["+4 영혼력", "근접 공격이 +32 정신 피해"], description: "근접 공격에 정신 데미지를 추가합니다." },
+        { name: "신령의 힘", tier: "I", price: 500, stats: ["+4 영혼력", "+10% 능력 피해량"], description: "능력 피해량을 증가시킵니다." },
+        { name: "도약", tier: "I", price: 1250, stats: ["+4 영혼력", "+10% 이동 속도", "사용 시: 도약"], description: "높은 점프와 이동 속도를 제공합니다." },
 
-        // Tier II (1600)
-        { name: "비전 쇄도", tier: "II", price: 1600, stats: ["+8 영혼력", "+75 최대 체력", "능력 사용 시 +3 m/s 이동 속도 (4초)"], description: "능력 사용 시 이동 속도가 증가합니다." },
-        { name: "총알 저항 파쇄기", tier: "II", price: 1600, stats: ["+8 영혼력", "+75 최대 체력", "능력 적중 시 -24% 총알 저항력을 6초간 적용"], description: "적의 총알 저항력을 감소시킵니다." },
-        { name: "한랭 전선", tier: "II", price: 1600, stats: ["+8 영혼력", "+75 최대 체력", "능력 적중 시 40% 둔화를 3초간 적용"], description: "능력으로 적을 둔화시킵니다." },
-        { name: "개선된 재사용 대기시간", tier: "II", price: 1600, stats: ["+8 영혼력", "+75 최대 체력", "-12% 능력 재사용 대기시간"], description: "능력 쿨다운을 감소시킵니다." },
-        { name: "지속시간 연장기", tier: "II", price: 1600, stats: ["+8 영혼력", "+75 최대 체력", "+25% 능력 지속시간"], description: "능력 효과 지속시간을 증가시킵니다." },
-        { name: "개선된 영혼력", tier: "II", price: 1600, stats: ["+12 영혼력", "+75 최대 체력"], description: "영혼력을 크게 증가시킵니다." },
-        { name: "신비한 둔화", tier: "II", price: 1600, stats: ["+8 영혼력", "+75 최대 체력", "능력 적중 시 35% 둔화를 2.5초간 적용"], description: "능력으로 적을 둔화시킵니다." },
-        { name: "신속 재장전", tier: "II", price: 1600, stats: ["+8 영혼력", "+75 최대 체력", "능력 사용 시 즉시 재장전"], description: "능력 사용 시 즉시 재장전됩니다." },
-        { name: "둔화 저주", tier: "II", price: 1600, stats: ["+8 영혼력", "+75 최대 체력", "사용 시: 적에게 -3 m/s 이동 속도 (3초)"], description: "적의 이동 속도를 감소시킵니다." },
-        { name: "억제기", tier: "II", price: 1600, stats: ["+8 영혼력", "+75 최대 체력", "능력 적중 시 -30% 화력을 5초간 적용"], description: "적의 공격력을 감소시킵니다." },
+        // Tier II (1250-3000)
+        { name: "포커스 렌즈", tier: "II", price: 1250, stats: ["+8 영혼력", "+75 최대 체력", "+15% 능력 피해량", "+10% 능력 사거리"], description: "능력의 피해량과 사거리를 증가시킵니다." },
+        { name: "비전 쇄도", tier: "II", price: 1250, stats: ["+8 영혼력", "+75 최대 체력", "능력 사용 시 +3 m/s 이동 속도 (4초)"], description: "능력 사용 시 이동 속도가 증가합니다." },
+        { name: "총알 저항 파쇄기", tier: "II", price: 1250, stats: ["+8 영혼력", "+75 최대 체력", "능력 적중 시 -24% 총알 저항력을 6초간 적용"], description: "적의 총알 저항력을 감소시킵니다." },
+        { name: "한랭 전선", tier: "II", price: 1250, stats: ["+8 영혼력", "+75 최대 체력", "능력 적중 시 40% 둔화를 3초간 적용"], description: "능력으로 적을 둔화시킵니다." },
+        { name: "개선된 재사용 대기시간", tier: "II", price: 1250, stats: ["+8 영혼력", "+75 최대 체력", "-12% 능력 재사용 대기시간"], description: "능력 쿨다운을 감소시킵니다." },
+        { name: "지속시간 연장기", tier: "II", price: 1250, stats: ["+8 영혼력", "+75 최대 체력", "+25% 능력 지속시간"], description: "능력 효과 지속시간을 증가시킵니다." },
+        { name: "개선된 영혼력", tier: "II", price: 1250, stats: ["+12 영혼력", "+75 최대 체력"], description: "영혼력을 크게 증가시킵니다." },
+        { name: "신비한 둔화", tier: "II", price: 1250, stats: ["+8 영혼력", "+75 최대 체력", "능력 적중 시 35% 둔화를 2.5초간 적용"], description: "능력으로 적을 둔화시킵니다." },
+        { name: "신속 재장전", tier: "II", price: 1250, stats: ["+8 영혼력", "+75 최대 체력", "능력 사용 시 즉시 재장전"], description: "능력 사용 시 즉시 재장전됩니다." },
+        { name: "둔화 저주", tier: "II", price: 1250, stats: ["+8 영혼력", "+75 최대 체력", "사용 시: 적에게 -3 m/s 이동 속도 (3초)"], description: "적의 이동 속도를 감소시킵니다." },
+        { name: "억제기", tier: "II", price: 1250, stats: ["+8 영혼력", "+75 최대 체력", "능력 적중 시 -30% 화력을 5초간 적용"], description: "적의 공격력을 감소시킵니다." },
+        { name: "능력 관리자", tier: "II", price: 1750, stats: ["+10 영혼력", "+100 최대 체력", "+20% 능력 피해량"], description: "능력 피해량을 크게 증가시킵니다." },
+        { name: "인식 향상", tier: "II", price: 1750, stats: ["+8 영혼력", "+75 최대 체력", "+25% 능력 사거리", "+10% 능력 피해량"], description: "능력 사거리와 피해량을 향상시킵니다." },
+        { name: "영혼 흡수", tier: "II", price: 2500, stats: ["+12 영혼력", "+150 최대 체력", "+15% 정신 흡혈"], description: "정신 공격으로 체력을 회복합니다." },
 
         // Tier III (3200)
         { name: "부패", tier: "III", price: 3200, stats: ["+16 영혼력", "+150 최대 체력", "능력 적중 시 적에게 DPS 지속 피해 (6초)"], description: "능력으로 지속 데미지를 입힙니다." },
