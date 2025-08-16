@@ -2258,49 +2258,87 @@ async function loadMyProfileData() {
         // Progressive Loading - 임시 비활성화 (안정성을 위해)
         console.log('🔄 기본 프로필 데이터 로딩 시작...');
         
-        // 상세 데이터를 병렬로 로드
+        // 타임아웃이 있는 fetch 함수
+        const fetchWithTimeout = (url, timeout = 15000) => {
+            return Promise.race([
+                fetch(url, { 
+                    headers: { 'Accept': 'application/json' },
+                    cache: 'no-cache'
+                }),
+                new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error(`${url} 요청 타임아웃`)), timeout)
+                )
+            ]);
+        };
+        
+        // 상세 데이터를 병렬로 로드 (타임아웃 적용)
         console.log('🔄 상세 API 호출 시작...');
-        const [playerResponse, heroStatsResponse, matchHistoryResponse, partyStatsResponse, mmrResponse] = await Promise.all([
-            fetch(`/api/v1/players/${accountId}`),
-            fetch(`/api/v1/players/${accountId}/hero-stats`),
-            fetch(`/api/v1/players/${accountId}/match-history?limit=10`),
-            fetch(`/api/v1/players/${accountId}/party-stats`),
-            fetch(`/api/v1/players/${accountId}/mmr`)
+        const apiCalls = await Promise.allSettled([
+            fetchWithTimeout(`/api/v1/players/${accountId}`),
+            fetchWithTimeout(`/api/v1/players/${accountId}/hero-stats`),
+            fetchWithTimeout(`/api/v1/players/${accountId}/match-history?limit=10`),
+            fetchWithTimeout(`/api/v1/players/${accountId}/party-stats`),
+            fetchWithTimeout(`/api/v1/players/${accountId}/mmr`)
         ]);
         
-        console.log('📡 상세 API 응답 상태:', {
-            player: playerResponse.status,
-            heroStats: heroStatsResponse.status,
-            matchHistory: matchHistoryResponse.status,
-            partyStats: partyStatsResponse.status,
-            mmr: mmrResponse.status
+        console.log('📡 API 호출 결과:', apiCalls.map((result, index) => ({
+            index,
+            status: result.status,
+            reason: result.reason?.message
+        })));
+        
+        // 응답 처리
+        const results = {
+            player: null,
+            heroStats: [],
+            matchHistory: [],
+            partyStats: [],
+            mmrData: null
+        };
+        
+        // API 결과 처리
+        for (let i = 0; i < apiCalls.length; i++) {
+            const result = apiCalls[i];
+            const apiNames = ['player', 'heroStats', 'matchHistory', 'partyStats', 'mmrData'];
+            
+            if (result.status === 'fulfilled') {
+                try {
+                    if (result.value.ok) {
+                        const data = await result.value.json();
+                        results[apiNames[i]] = data;
+                        console.log(`✅ ${apiNames[i]} 로드 성공`);
+                    } else {
+                        console.warn(`⚠️ ${apiNames[i]} API 실패 (상태: ${result.value.status})`);
+                    }
+                } catch (jsonError) {
+                    console.error(`❌ ${apiNames[i]} JSON 파싱 오류:`, jsonError);
+                }
+            } else {
+                console.error(`❌ ${apiNames[i]} 요청 실패:`, result.reason);
+            }
+        }
+        
+        console.log('📊 최종 받은 데이터:', {
+            player: !!results.player,
+            heroStats: Array.isArray(results.heroStats) ? results.heroStats.length : 0,
+            matchHistory: Array.isArray(results.matchHistory) ? results.matchHistory.length : 0,
+            partyStats: Array.isArray(results.partyStats) ? results.partyStats.length : 0,
+            mmr: !!results.mmrData
         });
         
-        const [playerData, heroStats, matchHistory, partyStats, mmrData] = await Promise.all([
-            playerResponse.json(),
-            heroStatsResponse.json(),
-            matchHistoryResponse.json(),
-            partyStatsResponse.json(),
-            mmrResponse.json()
-        ]);
-        
-        console.log('📊 받은 데이터:', {
-            player: !!playerData,
-            heroStats: heroStats?.length || 0,
-            matchHistory: matchHistory?.length || 0,
-            partyStats: partyStats?.length || 0,
-            mmr: mmrData?.length || 0
-        });
-        
-        if (playerResponse.ok && playerData) {
-            // UI 업데이트
+        // 최소한 플레이어 데이터라도 있으면 UI 업데이트
+        if (results.player && !results.player.error) {
             console.log('🎯 프로필 데이터로 UI 업데이트');
-            updatePlayerUIFast(playerData, heroStats, matchHistory, partyStats, mmrData);
+            updatePlayerUIFast(results.player, results.heroStats, results.matchHistory, results.partyStats, results.mmrData);
             loading.style.display = 'none';
             content.style.display = 'block';
             console.log('✅ 프로필 데이터 로딩 완료');
         } else {
-            throw new Error(playerData?.error || `플레이어 데이터 로딩 실패 (상태: ${playerResponse.status})`);
+            // 모든 API가 실패한 경우 폴백 처리
+            console.warn('⚠️ 플레이어 데이터를 가져올 수 없음, 기본 UI 표시');
+            showFallbackUI(accountId);
+            loading.style.display = 'none';
+            content.style.display = 'block';
         }
         
     } catch (err) {
@@ -2320,6 +2358,41 @@ async function loadMyProfileData() {
         } else {
             console.error('❌ 에러 메시지 요소를 찾을 수 없음');
         }
+    }
+}
+
+// 폴백 UI 표시 함수
+function showFallbackUI(accountId) {
+    console.log('🔄 폴백 UI 표시, Account ID:', accountId);
+    
+    // 기본 플레이어 정보 설정
+    const defaultAvatar = 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg';
+    const defaultName = 'Unknown Player';
+    
+    try {
+        const playerAvatar = document.getElementById('player-avatar');
+        const playerName = document.getElementById('player-name');
+        const playerCountry = document.getElementById('player-country');
+        
+        if (playerAvatar) playerAvatar.src = defaultAvatar;
+        if (playerName) playerName.textContent = defaultName;
+        if (playerCountry) playerCountry.textContent = '🌍';
+        
+        // 빈 매치 히스토리 표시
+        const matchesList = document.getElementById('matches-list');
+        if (matchesList) {
+            matchesList.innerHTML = '<p style="color: #94a3b8; text-align: center; padding: 2rem;">매치 데이터를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.</p>';
+        }
+        
+        // 빈 통계 표시
+        const heroStatsList = document.getElementById('hero-stats-list');
+        if (heroStatsList) {
+            heroStatsList.innerHTML = '<p style="color: #94a3b8; text-align: center; padding: 2rem;">영웅 통계를 불러올 수 없습니다.</p>';
+        }
+        
+        console.log('✅ 폴백 UI 표시 완료');
+    } catch (error) {
+        console.error('❌ 폴백 UI 표시 오류:', error);
     }
 }
 
