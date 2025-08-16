@@ -4363,11 +4363,19 @@ function displayMatchHistory(matches) {
                     `;
                     console.log(`✅ 매치 ${index} 게임 종료 시 최종 보유 아이템 ${finalItems.length}개 표시 완료 (전체 ${itemsData.length}개 중)`);
                 } else {
-                    // 아이템 데이터가 없는 경우 - 더 나은 UI 제공
-                    console.log(`⚠️ 매치 ${index}: 아이템 데이터 없음, 로딩 재시도 중...`);
+                    // 아이템 데이터가 없는 경우 - 바로 빈 슬롯 표시 (무한로딩 방지)
+                    console.log(`⚠️ 매치 ${index}: 아이템 데이터 없음, 빈 슬롯 표시`);
                     
-                    // deadlock-api.com에서 실시간 매치 상세 정보를 가져와서 아이템 표시
-                    setTimeout(async () => {
+                    itemsContainer.innerHTML = `
+                        <div class="grid grid-cols-6 gap-1 w-fit">
+                            ${Array(12).fill('<div class="w-8 h-8 rounded border border-border bg-muted opacity-30"></div>').join('')}
+                        </div>
+                    `;
+                    
+                    // deadlock-api.com에서 실시간 매치 상세 정보를 가져와서 아이템 표시 (한 번만 시도)
+                    if (!match._itemsRetried) {
+                        match._itemsRetried = true; // 재시도 플래그 설정
+                        setTimeout(async () => {
                         try {
                             console.log(`🔄 매치 ${match.matchId}: deadlock-api.com에서 실시간 final items 가져오는 중...`);
                             const matchDetailsResponse = await fetch(`/api/v1/matches/${match.matchId}/details`);
@@ -4428,7 +4436,8 @@ function displayMatchHistory(matches) {
                                 <i class="fas fa-info-circle"></i> 게임 종료 시 아이템 정보 없음
                             </div>
                         `;
-                    }, 1000 + index * 200); // 각 매치마다 약간의 지연을 두어 API 부하 방지
+                        }, 1000 + index * 200); // 각 매치마다 약간의 지연을 두어 API 부하 방지
+                    }
                 }
             } else {
                 console.error(`❌ 매치 ${index}: items-container 요소를 찾을 수 없음`);
