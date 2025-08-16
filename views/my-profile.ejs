@@ -4257,218 +4257,134 @@ function displayMatchHistory(matches) {
                     
                     console.log(`🏆 게임 종료 시 최종 보유 아이템 ${finalItems.length}개:`, finalItems.map(i => i.name));
                     
-                    // deadlock-api.com 스타일로 아이템 표시 (정확한 6x2 그리드)
+                    // deadlock-api.com과 동일한 Final Items 로직
                     const getDeadlockApiItemUrl = (itemName) => {
-                        // 완전한 deadlock-api.com 아이템 매핑
-                        const itemMapping = {
-                            // T1 Weapon (500 souls)
+                        // 정확한 deadlock-api.com 스타일 매핑 (kebab-case 변환 포함)
+                        const directMappings = {
+                            // Items I observed on deadlock-api.com:
+                            'Arcane Surge': 'spirit/arcane_surge_sm',
+                            "Enchanter's Emblem": 'vitality/enchanters_emblem_sm', 
+                            'Rapid Recharge': 'spirit/rapid_recharge_sm',
+                            'Tankbuster': 'spirit/tankbuster_sm',
+                            'Boundless Spirit': 'spirit/boundless_spirit_sm',
+                            'Leech': 'vitality/leech_sm',
+                            'Mystic Shot': 'weapon/mystic_shot_sm',
+                            'Trophy Collector': 'vitality/trophy_collector_sm',
+                            'Greater Expansion': 'spirit/greater_expansion_sm',
+                            'Debuff Remover': 'vitality/debuff_remover_sm',
+                            'Transcendent Cooldown': 'spirit/transcendent_cooldown_sm',
+                            'Arctic Blast': 'spirit/arctic_blast_sm',
+                            'Extra Health': 'vitality/extra_health_sm',
+                            'Titanic Magazine': 'weapon/titanic_magazine_sm',
+                            'Long Range': 'weapon/long_range_sm',
+                            'Battle Vest': 'vitality/battle_vest_sm',
+                            'Glass Cannon': 'weapon/glass_cannon_sm',
+                            'Extra Stamina': 'vitality/extra_stamina_sm',
+                            'Swift Striker': 'weapon/swift_striker_sm',
+                            'Bullet Lifesteal': 'vitality/bullet_lifesteal_sm',
+                            'Express Shot': 'weapon/express_shot_sm',
+                            'Return Fire': 'vitality/return_fire_sm',
+                            'Radiant Regeneration': 'vitality/radiant_regeneration_sm',
+                            'Healbane': 'vitality/healbane_sm',
+                            'Bullet Resilience': 'vitality/bullet_resilience_sm',
+                            'Spirit Resilience': 'vitality/spirit_resilience_sm',
+                            'Siphon Bullets': 'weapon/siphon_bullets_sm',
+                            'Mystic Burst': 'spirit/mystic_burst_sm',
+                            'Cold Front': 'spirit/cold_front_sm',
+                            'Superior Cooldown': 'spirit/superior_cooldown_sm',
+                            'Mystic Expansion': 'spirit/mystic_expansion_sm',
+                            'Extra Charge': 'spirit/extra_charge_sm',
+                            'Improved Spirit': 'spirit/improved_spirit_sm',
+                            'Compress Cooldown': 'spirit/compress_cooldown_sm',
+                            'Sprint Boots': 'vitality/sprint_boots_sm',
+                            'Superior Duration': 'spirit/superior_duration_sm',
+                            'Kinetic Dash': 'weapon/kinetic_dash_sm',
+                            'Burst Fire': 'weapon/burst_fire_sm',
+                            'Berserker': 'weapon/berserker_sm',
+                            'Quicksilver Reload': 'weapon/quicksilver_reload_sm',
+                            'Ricochet': 'weapon/ricochet_sm',
+                            'Vampiric Burst': 'weapon/vampiric_burst_sm',
+                            'Lucky Shot': 'weapon/lucky_shot_sm',
+                            'Mystic Vulnerability': 'spirit/mystic_vulnerability_sm',
+                            'Mystic Slow': 'spirit/mystic_slow_sm',
+                            'Decay': 'vitality/decay_sm',
+                            'Mystic Regeneration': 'spirit/mystic_regeneration_sm',
+                            'Warp Stone': 'spirit/warp_stone_sm',
+                            'Majestic Leap': 'vitality/majestic_leap_sm',
+                            'High-Velocity Rounds': 'weapon/high_velocity_rounds_sm',
+                            'Enduring Speed': 'vitality/enduring_speed_sm',
+                            'Headhunter': 'weapon/headhunter_sm',
+                            'Opening Rounds': 'weapon/opening_rounds_sm',
+                            'Sharpshooter': 'weapon/sharpshooter_sm',
+                            'Spirit Strike': 'spirit/spirit_strike_sm',
+                            'Spirit Lifesteal': 'vitality/spirit_lifesteal_sm',
+                            'Crushing Fists': 'vitality/crushing_fists_sm',
+                            'Healing Tempo': 'vitality/healing_tempo_sm',
+                            'Torment Pulse': 'spirit/torment_pulse_sm',
+                            'Phantom Strike': 'vitality/phantom_strike_sm',
+                            'Healer Tempo': 'vitality/healer_tempo_sm',
+                            'Lifestrike': 'vitality/lifestrike_sm',
+                            'Spirit Snatch': 'spirit/spirit_snatch_sm',
+                            'Cultist Sacrifice': 'spirit/cultist_sacrifice_sm',
+                            'Toxic Bullets': 'weapon/toxic_bullets_sm',
+                            'Stamina Mastery': 'vitality/stamina_mastery_sm',
+                            'Mercurial Magnum': 'weapon/mercurial_magnum_sm',
+                            'Suppressor': 'weapon/suppressor_sm',
+                            'Escalating Resilience': 'weapon/escalating_resilience_sm',
+                            'Surge of Power': 'spirit/surge_of_power_sm',
                             'Basic Magazine': 'weapon/basic_magazine_sm',
                             'Close Quarters': 'weapon/close_quarters_sm',
-                            'Headshot Booster': 'weapon/headshot_booster_sm',
-                            'High-Velocity Mag': 'weapon/high_velocity_mag_sm',
-                            'Hollow Point Ward': 'weapon/hollow_point_ward_sm',
-                            'Monster Rounds': 'weapon/monster_rounds_sm',
-                            'Rapid Rounds': 'weapon/rapid_rounds_sm',
-                            'Restorative Shot': 'weapon/restorative_shot_sm',
-                            'Active Reload': 'weapon/active_reload_sm',
-                            'Melee Lifesteal': 'weapon/melee_lifesteal_sm',
-                            'Soul Shredder Bullets': 'weapon/soul_shredder_bullets_sm',
-                            'Toxic Bullets': 'weapon/toxic_bullets_sm',
-                            
-                            // T2 Weapon (1250 souls)
-                            'Berserker': 'weapon/berserker_sm',
-                            'Hunter\'s Aura': 'weapon/hunters_aura_sm',
-                            'Kinetic Dash': 'weapon/kinetic_dash_sm',
-                            'Long Range': 'weapon/long_range_sm',
-                            'Mystic Shot': 'weapon/mystic_shot_sm',
-                            'Point Blank': 'weapon/point_blank_sm',
-                            'Pristine Emblem': 'weapon/pristine_emblem_sm',
-                            'Slowing Bullets': 'weapon/slowing_bullets_sm',
-                            'Swift Striker': 'weapon/swift_striker_sm',
-                            'Fleetfoot': 'weapon/fleetfoot_sm',
-                            'Burst Fire': 'weapon/burst_fire_sm',
-                            'Escalating Resilience': 'weapon/escalating_resilience_sm',
-                            
-                            // T3 Weapon (3000+ souls)
-                            'Heroic Aura': 'weapon/heroic_aura_sm',
-                            'Headhunter': 'weapon/headhunter_sm',
-                            'Intensifying Magazine': 'weapon/intensifying_magazine_sm',
-                            'Lucky Shot': 'weapon/lucky_shot_sm',
-                            'Ricochet': 'weapon/ricochet_sm',
-                            'Sharpshooter': 'weapon/sharpshooter_sm',
-                            'Silencer': 'weapon/silencer_sm',
-                            'Spiritual Overflow': 'weapon/spiritual_overflow_sm',
-                            'Titanic Magazine': 'weapon/titanic_magazine_sm',
-                            'Tesla Bullets': 'weapon/tesla_bullets_sm',
-                            'Glass Cannon': 'weapon/glass_cannon_sm',
-                            'Vampiric Burst': 'weapon/vampiric_burst_sm',
-                            'Crippling Headshot': 'weapon/crippling_headshot_sm',
-                            'Frenzy': 'weapon/frenzy_sm',
-                            
-                            // T1 Vitality (500 souls)
-                            'Bullet Armor': 'vitality/bullet_armor_sm',
-                            'Bullet Lifesteal': 'vitality/bullet_lifesteal_sm',
-                            'Combat Barrier': 'vitality/combat_barrier_sm',
-                            'Decay': 'vitality/decay_sm',
-                            'Divine Barrier': 'vitality/divine_barrier_sm',
-                            'Enduring Speed': 'vitality/enduring_speed_sm',
-                            'Extra Health': 'vitality/extra_health_sm',
-                            'Extra Regen': 'vitality/extra_regen_sm',
-                            'Extra Stamina': 'vitality/extra_stamina_sm',
-                            'Healbane': 'vitality/healbane_sm',
-                            'Healing Rite': 'vitality/healing_rite_sm',
-                            'Melee Charge': 'vitality/melee_charge_sm',
-                            'Sprint Boots': 'vitality/sprint_boots_sm',
-                            'Spirit Armor': 'vitality/spirit_armor_sm',
-                            'Spirit Lifesteal': 'vitality/spirit_lifesteal_sm',
-                            
-                            // T2 Vitality (1250 souls)
-                            'Debuff Reducer': 'vitality/debuff_reducer_sm',
-                            'Enchanter\'s Barrier': 'vitality/enchanters_barrier_sm',
-                            'Fortitude': 'vitality/fortitude_sm',
-                            'Healing Booster': 'vitality/healing_booster_sm',
-                            'Health Nova': 'vitality/health_nova_sm',
-                            'Lifestrike': 'vitality/lifestrike_sm',
-                            'Majestic Leap': 'vitality/majestic_leap_sm',
-                            'Metal Skin': 'vitality/metal_skin_sm',
-                            'Reactive Barrier': 'vitality/reactive_barrier_sm',
-                            'Regenerative Armor': 'vitality/regenerative_armor_sm',
-                            'Return Fire': 'vitality/return_fire_sm',
-                            'Rescue Beam': 'vitality/rescue_beam_sm',
-                            
-                            // T3 Vitality (3000+ souls)
-                            'Colossus': 'vitality/colossus_sm',
-                            'Debuff Remover': 'vitality/debuff_remover_sm',
-                            'Inhibitor': 'vitality/inhibitor_sm',
-                            'Leech': 'vitality/leech_sm',
-                            'Phantom Strike': 'vitality/phantom_strike_sm',
-                            'Superior Stamina': 'vitality/superior_stamina_sm',
-                            'Unstoppable': 'vitality/unstoppable_sm',
-                            
-                            // T1 Spirit (500 souls)
-                            'Ammo Scavenger': 'spirit/ammo_scavenger_sm',
-                            'Extra Charge': 'spirit/extra_charge_sm',
-                            'Extra Spirit': 'spirit/extra_spirit_sm',
-                            'Infuser': 'spirit/infuser_sm',
-                            'Mystic Burst': 'spirit/mystic_burst_sm',
-                            'Mystic Reach': 'spirit/mystic_reach_sm',
-                            'Mystic Vulnerability': 'spirit/mystic_vulnerability_sm',
-                            'Quicksilver Reload': 'spirit/quicksilver_reload_sm',
-                            'Soul Shredder Spirit': 'spirit/soul_shredder_spirit_sm',
-                            'Spirit Strike': 'spirit/spirit_strike_sm',
-                            
-                            // T2 Spirit (1250 souls)
-                            'Cold Front': 'spirit/cold_front_sm',
-                            'Duration Extender': 'spirit/duration_extender_sm',
-                            'Ethereal Shift': 'spirit/ethereal_shift_sm',
-                            'Improved Burst': 'spirit/improved_burst_sm',
-                            'Improved Cooldown': 'spirit/improved_cooldown_sm',
-                            'Improved Reach': 'spirit/improved_reach_sm',
-                            'Improved Spirit': 'spirit/improved_spirit_sm',
-                            'Knockdown': 'spirit/knockdown_sm',
-                            'Quickening': 'spirit/quickening_sm',
-                            'Rapid Recharge': 'spirit/rapid_recharge_sm',
-                            'Slowing Hex': 'spirit/slowing_hex_sm',
-                            'Superior Cooldown': 'spirit/superior_cooldown_sm',
-                            'Superior Duration': 'spirit/superior_duration_sm',
-                            'Surge of Power': 'spirit/surge_of_power_sm',
-                            'Torment Pulse': 'spirit/torment_pulse_sm',
-                            'Withering Whip': 'spirit/withering_whip_sm',
-                            
-                            // T3 Spirit (3000+ souls) 
-                            'Arcane Surge': 'spirit/arcane_surge_sm',
-                            'Boundless Spirit': 'spirit/boundless_spirit_sm',
-                            'Curse': 'spirit/curse_sm',
-                            'Diviner\'s Kevlar': 'spirit/diviners_kevlar_sm',
-                            'Echo Shard': 'spirit/echo_shard_sm',
-                            'Magic Carpet': 'spirit/magic_carpet_sm',
-                            'Mystic Reverb': 'spirit/mystic_reverb_sm',
-                            'Refresher': 'spirit/refresher_sm',
-                            'Silence Glyph': 'spirit/silence_glyph_sm',
-                            'Superior Stamina': 'spirit/superior_stamina_sm',
-                            
-                            // 한글 매핑
-                            '기본 탄창': 'weapon/basic_magazine_sm',
-                            '근접전': 'weapon/close_quarters_sm',
-                            '헤드샷 부스터': 'weapon/headshot_booster_sm',
-                            '고속 탄창': 'weapon/high_velocity_mag_sm',
-                            '몬스터 탄환': 'weapon/monster_rounds_sm',
-                            '신비한 사격': 'weapon/mystic_shot_sm',
-                            '광전사': 'weapon/berserker_sm',
-                            '추가 체력': 'vitality/extra_health_sm',
-                            '추가 정신력': 'spirit/extra_spirit_sm',
-                            '총알 갑옷': 'vitality/bullet_armor_sm',
-                            '정신력 갑옷': 'vitality/spirit_armor_sm',
-                            '스프린트 부츠': 'vitality/sprint_boots_sm',
-                            '신비한 폭발': 'spirit/mystic_burst_sm',
-                            '금속 피부': 'vitality/metal_skin_sm',
-                            '구조 빔': 'vitality/rescue_beam_sm',
-                            '향상된 정신력': 'spirit/improved_spirit_sm',
-                            '무한한 정신력': 'spirit/boundless_spirit_sm',
-                            '메아리 파편': 'spirit/echo_shard_sm'
+                            'Monster Rounds': 'weapon/monster_rounds_sm'
                         };
                         
-                        const itemPath = itemMapping[itemName];
-                        if (itemPath) {
-                            return `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/${itemPath}.png`;
+                        // 직접 매핑에서 찾기
+                        if (directMappings[itemName]) {
+                            return `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/${directMappings[itemName]}.png`;
                         }
                         
-                        // 매핑이 없으면 Unknown Item인지 확인하고 적절한 기본 이미지 사용
-                        if (itemName && itemName.includes('Unknown Item')) {
-                            return `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/basic_magazine_sm.png`;
+                        // 자동 변환 시도 (대부분의 아이템은 이름을 kebab-case로 변환하면 됨)
+                        const kebabCase = itemName
+                            .toLowerCase()
+                            .replace(/['\s&]+/g, '_')
+                            .replace(/_+/g, '_')
+                            .replace(/^_|_$/g, '');
+                        
+                        // 카테고리 추정 (아이템 이름 기반)
+                        const spiritKeywords = ['mystic', 'spirit', 'arcane', 'charge', 'recharge', 'surge', 'blast', 'expansion', 'cooldown', 'vulnerability', 'slow', 'regeneration', 'warp', 'burst', 'cold', 'compress', 'transcendent', 'boundless', 'greater', 'rapid', 'improved', 'superior', 'torment', 'snatch', 'cultist'];
+                        const vitalityKeywords = ['health', 'armor', 'lifesteal', 'stamina', 'boots', 'emblem', 'vest', 'resilience', 'regeneration', 'healbane', 'bullet', 'debuff', 'remover', 'leech', 'trophy', 'collector', 'radiant', 'return', 'fire', 'siphon', 'battle', 'extra', 'enduring', 'majestic', 'leap', 'decay', 'crushing', 'healing', 'tempo', 'phantom', 'strike', 'lifestrike', 'mastery'];
+                        
+                        let category = 'weapon'; // default
+                        const lowerName = itemName.toLowerCase();
+                        
+                        if (spiritKeywords.some(keyword => lowerName.includes(keyword))) {
+                            category = 'spirit';
+                        } else if (vitalityKeywords.some(keyword => lowerName.includes(keyword))) {
+                            category = 'vitality';
                         }
-                        return `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/mystic_burst_sm.png`;
+                        
+                        return `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/${category}/${kebabCase}_sm.png`;
                     };
                     
-                    // 12슬롯 배치 (6x2 그리드) - 실제 게임 슬롯을 UI 그리드로 매핑
-                    const itemSlots = new Array(12).fill(null);
-                    
-                    finalItems.forEach(item => {
-                        const gameSlot = item.slot || 0;
-                        let uiSlot = -1;
-                        
-                        // 게임 슬롯을 UI 그리드 위치로 변환
-                        if (gameSlot >= 0 && gameSlot <= 11) {
-                            // Weapon items: 게임 슬롯 0-11 → UI 그리드 0-3 (상단 4칸)
-                            uiSlot = Math.floor(gameSlot / 3); // 0-3
-                        } else if (gameSlot >= 12 && gameSlot <= 23) {
-                            // Vitality items: 게임 슬롯 12-23 → UI 그리드 4-7 (중간 4칸)
-                            uiSlot = 4 + Math.floor((gameSlot - 12) / 3); // 4-7
-                        } else if (gameSlot >= 24 && gameSlot <= 35) {
-                            // Spirit items: 게임 슬롯 24-35 → UI 그리드 8-11 (하단 4칸)  
-                            uiSlot = 8 + Math.floor((gameSlot - 24) / 3); // 8-11
-                        }
-                        
-                        // UI 슬롯이 유효하고 비어있으면 아이템 배치
-                        if (uiSlot >= 0 && uiSlot < 12 && !itemSlots[uiSlot]) {
-                            itemSlots[uiSlot] = item;
-                        }
-                    });
-                    
-                    const itemGridHTML = itemSlots.map((item, slotIndex) => {
-                        if (!item) {
-                            return `<div class="w-8 h-8 rounded border border-border bg-muted"></div>`;
-                        }
-                        
+                    // 간단한 12개 슬롯 배치 (deadlock-api.com 스타일)
+                    const itemGridHTML = finalItems.slice(0, 12).map((item, index) => {
                         let itemName = item.name || `Item ${item.itemId || item.id || 'Unknown'}`;
                         const itemUrl = getDeadlockApiItemUrl(itemName);
                         
                         return `
-                            <div>
-                                <picture>
-                                    <source srcset="${itemUrl.replace('.png', '.webp')}" type="image/webp">
-                                    <source srcset="${itemUrl}" type="image/png">
-                                    <img loading="lazy" alt="${itemName}" title="${itemName}" 
-                                         class="size-8 aspect-square w-8 h-8 rounded border border-border" 
-                                         src="${itemUrl}">
-                                </picture>
-                            </div>
+                            <img loading="lazy" alt="${itemName}" title="${itemName}" 
+                                 class="w-8 h-8 rounded border border-border" 
+                                 src="${itemUrl}"
+                                 onerror="this.style.opacity='0.3';">
                         `;
                     }).join('');
                     
+                    // 빈 슬롯으로 12개 채우기
+                    const emptySlots = Math.max(0, 12 - finalItems.length);
+                    const emptyHTML = Array(emptySlots).fill('<div class="w-8 h-8 rounded border border-border bg-muted opacity-30"></div>').join('');
+                    
                     itemsContainer.innerHTML = `
-                        <div class="grid grid-cols-6 gap-2 w-fit mb-1">
-                            ${itemGridHTML}
+                        <div class="grid grid-cols-6 gap-1 w-fit">
+                            ${itemGridHTML}${emptyHTML}
                         </div>
                     `;
                     console.log(`✅ 매치 ${index} 게임 종료 시 최종 보유 아이템 ${finalItems.length}개 표시 완료 (전체 ${itemsData.length}개 중)`);
