@@ -2839,44 +2839,63 @@ class DeadlockItemMatcher {
 
     getFallbackItems() {
         return {
-            // 무기 아이템 (Weapon Items)
-            715762406: { name: '확장 탄창', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/basic_magazine_sm.png', type: 'weapon' },
-            1342610602: { name: '고막력 탄환', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/high_velocity_mag_sm.png', type: 'weapon' },
-            1458044103: { name: '기본 탄창', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/basic_magazine_sm.png', type: 'weapon' },
-            1835738020: { name: '몬스터 탄환', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/monster_rounds_sm.png', type: 'weapon' },
-            2460791803: { name: '광전사', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/berserker_sm.png', type: 'weapon' },
-            3977876567: { name: '테슬라 탄환', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/tesla_bullets_sm.png', type: 'weapon' },
-            3731635960: { name: '신비한 정확도', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/mystic_shot_sm.png', type: 'weapon' },
-            865846625: { name: '거대한 탄창', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/titanic_magazine_sm.png', type: 'weapon' },
-            1414319208: { name: '사냥꾼의 오라', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/hunters_aura_sm.png', type: 'weapon' },
+            // 무기 아이템 (Weapon Items) - API에서 확인된 ID들 추가
+            365620721: { name: 'Glass Cannon', cost: 6400, tier: 4, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/glass_cannon_sm.png', type: 'weapon' },
+            397010810: { name: 'Lucky Shot', cost: 6400, tier: 4, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/lucky_shot_sm.png', type: 'weapon' },
+            715762406: { name: 'Extended Magazine', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/basic_magazine_sm.png', type: 'weapon' },
+            857669956: { name: 'Active Reload', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/active_reload_sm.png', type: 'weapon' },
+            1067869798: { name: 'Berserker', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/berserker_sm.png', type: 'weapon' },
+            1342610602: { name: 'High-Velocity Rounds', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/high_velocity_rounds_sm.png', type: 'weapon' },
+            1458044103: { name: 'Basic Magazine', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/basic_magazine_sm.png', type: 'weapon' },
+            1835738020: { name: 'Monster Rounds', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/monster_rounds_sm.png', type: 'weapon' },
+            1925087134: { name: 'Extended Magazine', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/basic_magazine_sm.png', type: 'weapon' },
+            2460791803: { name: 'Berserker', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/berserker_sm.png', type: 'weapon' },
+            3147316197: { name: 'Monster Rounds', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/monster_rounds_sm.png', type: 'weapon' },
+            3731635960: { name: 'Mystic Shot', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/mystic_shot_sm.png', type: 'weapon' },
+            3977876567: { name: 'Tesla Bullets', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/tesla_bullets_sm.png', type: 'weapon' },
+            865846625: { name: 'Titanic Magazine', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/titanic_magazine_sm.png', type: 'weapon' },
+            1414319208: { name: 'Hunter\'s Aura', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/hunters_aura_sm.png', type: 'weapon' },
             
-            // 생명력 아이템 (Vitality Items)
-            1537272748: { name: '추가 체력', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/vitality/extra_health_sm.jpg', type: 'vitality' },
-            3970837787: { name: '정신력 갑옷', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/vitality/spirit_armor_sm.jpg', type: 'vitality' },
-            3791587546: { name: '총알 갑옷', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/vitality/bullet_armor_sm.jpg', type: 'vitality' },
-            2863754076: { name: '추가 재생', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/vitality/extra_regen_sm.jpg', type: 'vitality' },
-            3675059374: { name: '추가 지구력', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/vitality/extra_stamina_sm.jpg', type: 'vitality' },
-            2598983158: { name: '스프린트 부츠', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/vitality/sprint_boots_sm.jpg', type: 'vitality' },
-            3730717068: { name: '치유 의식', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/vitality/healing_rite_sm.jpg', type: 'vitality' },
-            1845966100: { name: '지속 속도', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/vitality/enduring_speed_sm.jpg', type: 'vitality' },
-            4033043084: { name: '치유 증강기', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/vitality/healing_booster_sm.jpg', type: 'vitality' },
-            1955841979: { name: '금속 피부', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/vitality/metal_skin_sm.jpg', type: 'vitality' },
-            339443430: { name: '거신상', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/vitality/colossus_sm.jpg', type: 'vitality' },
+            // 생명력 아이템 (Vitality Items) - API에서 확인된 ID들 추가
+            1336069669: { name: 'Leech', cost: 6400, tier: 4, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/leech_sm.png', type: 'vitality' },
+            1537272748: { name: 'Extra Health', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/extra_health_sm.png', type: 'vitality' },
+            2081037738: { name: 'Metal Skin', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/metal_skin_sm.png', type: 'vitality' },
+            2603935618: { name: 'Extra Health', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/extra_health_sm.png', type: 'vitality' },
+            2948329856: { name: 'Sprint Boots', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/sprint_boots_sm.png', type: 'vitality' },
+            3261353684: { name: 'Rescue Beam', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/rescue_beam_sm.png', type: 'vitality' },
+            3361075077: { name: 'Bullet Armor', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/bullet_armor_sm.png', type: 'vitality' },
+            3970837787: { name: 'Spirit Armor', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/spirit_armor_sm.png', type: 'vitality' },
+            3791587546: { name: 'Bullet Armor', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/bullet_armor_sm.png', type: 'vitality' },
+            2863754076: { name: 'Extra Regen', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/extra_regen_sm.png', type: 'vitality' },
+            3675059374: { name: 'Extra Stamina', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/extra_stamina_sm.png', type: 'vitality' },
+            2598983158: { name: 'Sprint Boots', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/sprint_boots_sm.png', type: 'vitality' },
+            3730717068: { name: 'Healing Rite', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/healing_rite_sm.png', type: 'vitality' },
+            1845966100: { name: 'Enduring Speed', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/enduring_speed_sm.png', type: 'vitality' },
+            4033043084: { name: 'Healing Booster', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/healing_booster_sm.png', type: 'vitality' },
+            1955841979: { name: 'Metal Skin', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/metal_skin_sm.png', type: 'vitality' },
+            339443430: { name: 'Colossus', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/colossus_sm.png', type: 'vitality' },
             
-            // 정신력 아이템 (Spirit Items)
-            2095565695: { name: '추가 정신력', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/spirit/extra_spirit_sm.jpg', type: 'spirit' },
-            1282141666: { name: '신비한 폭발', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/spirit/mystic_burst_sm.jpg', type: 'spirit' },
-            3677653320: { name: '정신력 타격', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/spirit/spirit_strike_sm.jpg', type: 'spirit' },
-            3702319013: { name: '한파', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/spirit/cold_front_sm.jpg', type: 'spirit' },
-            859037655: { name: '부패', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/spirit/decay_sm.jpg', type: 'spirit' },
-            3574779418: { name: '주입기', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/spirit/infuser_sm.jpg', type: 'spirit' },
-            1673325555: { name: '정신력 흡혈', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/spirit/spirit_lifesteal_sm.jpg', type: 'spirit' },
-            673001892: { name: '이더 변환', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/spirit/ethereal_shift_sm.jpg', type: 'spirit' },
-            1656913918: { name: '상급 쿨다운', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/spirit/superior_cooldown_sm.jpg', type: 'spirit' },
-            3754524659: { name: '향상된 쿨다운', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/spirit/improved_cooldown_sm.jpg', type: 'spirit' },
+            // 정신력 아이템 (Spirit Items) - API에서 확인된 ID들 추가
+            380806748: { name: 'Extra Spirit', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/extra_spirit_sm.png', type: 'spirit' },
+            1829830660: { name: 'Boundless Spirit', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/boundless_spirit_sm.png', type: 'spirit' },
+            2095565695: { name: 'Extra Spirit', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/extra_spirit_sm.png', type: 'spirit' },
+            2152872419: { name: 'Refresher', cost: 6400, tier: 4, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/refresher_sm.png', type: 'spirit' },
+            2717651715: { name: 'Echo Shard', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/echo_shard_sm.png', type: 'spirit' },
+            2820116164: { name: 'Mystic Burst', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/mystic_burst_sm.png', type: 'spirit' },
+            3005970438: { name: 'Extra Spirit', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/extra_spirit_sm.png', type: 'spirit' },
+            3357231760: { name: 'Improved Spirit', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/improved_spirit_sm.png', type: 'spirit' },
             3812615317: { name: 'Arcane Surge', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/arcane_surge_sm.png', type: 'spirit' },
-            1729727717: { name: '신비한 잔향', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/spirit/mystic_reverb_sm.jpg', type: 'spirit' },
-            3802996421: { name: '리프레셔', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/spirit/refresher_sm.jpg', type: 'spirit' }
+            1282141666: { name: 'Mystic Burst', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/mystic_burst_sm.png', type: 'spirit' },
+            3677653320: { name: 'Spirit Strike', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/spirit_strike_sm.png', type: 'spirit' },
+            3702319013: { name: 'Cold Front', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/cold_front_sm.png', type: 'spirit' },
+            859037655: { name: 'Decay', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/decay_sm.png', type: 'spirit' },
+            3574779418: { name: 'Infuser', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/infuser_sm.png', type: 'spirit' },
+            1673325555: { name: 'Spirit Lifesteal', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/spirit_lifesteal_sm.png', type: 'spirit' },
+            673001892: { name: 'Ethereal Shift', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/ethereal_shift_sm.png', type: 'spirit' },
+            1656913918: { name: 'Superior Cooldown', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/superior_cooldown_sm.png', type: 'spirit' },
+            3754524659: { name: 'Improved Cooldown', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/improved_cooldown_sm.png', type: 'spirit' },
+            1729727717: { name: 'Mystic Reverb', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/mystic_reverb_sm.png', type: 'spirit' },
+            3802996421: { name: 'Refresher', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/refresher_sm.png', type: 'spirit' }
         };
     }
 
@@ -2914,25 +2933,24 @@ class DeadlockItemMatcher {
     parseItemName(itemName) {
         if (!itemName) return null;
         
-        // Unknown Item (ID) 형태 파싱
-        const unknownItemMatch = itemName.match(/Unknown Item \((\d+)\)/);
-        if (unknownItemMatch) {
-            const itemId = parseInt(unknownItemMatch[1]);
-            const item = this.getItemById(itemId);
-            if (item) {
-                console.log(`🔄 아이템 ID 매핑: ${itemName} → ${item.name}`);
-                return item;
-            }
-        }
-
-        // 한국어 "특수 아이템 (ID)" 형태 파싱
-        const koreanItemMatch = itemName.match(/특수 아이템 \((\d+)\)/);
-        if (koreanItemMatch) {
-            const itemId = parseInt(koreanItemMatch[1]);
-            const item = this.getItemById(itemId);
-            if (item) {
-                console.log(`🔄 한국어 아이템 ID 매핑: ${itemName} → ${item.name}`);
-                return item;
+        // 다양한 아이템 ID 형태 파싱
+        const itemIdPatterns = [
+            /Unknown Item \((\d+)\)/,           // "Unknown Item (ID)" 
+            /특수 아이템 \((\d+)\)/,           // "특수 아이템 (ID)"
+            /무기 아이템 \((\d+)\)/,           // "무기 아이템 (ID)"
+            /생명력 아이템 \((\d+)\)/,         // "생명력 아이템 (ID)"
+            /정신력 아이템 \((\d+)\)/          // "정신력 아이템 (ID)"
+        ];
+        
+        for (const pattern of itemIdPatterns) {
+            const match = itemName.match(pattern);
+            if (match) {
+                const itemId = parseInt(match[1]);
+                const item = this.getItemById(itemId);
+                if (item) {
+                    console.log(`🔄 아이템 ID 매핑: ${itemName} → ${item.name} (ID: ${itemId})`);
+                    return item;
+                }
             }
         }
 
