@@ -2540,23 +2540,32 @@ function displayHeroStats(heroStats) {
         }
         
         // Player_숫자 형태에서 실제 플레이어 이름을 찾는 함수
-        const getPlayerDisplayName = (player) => {
+        const getPlayerDisplayName = async (player) => {
             let displayName = player.name || player.player_name || player.steam_name || player.hero || 'Player';
             
             // Player_숫자 패턴 감지 (예: Player_92418199)
             const playerIdMatch = displayName.match(/^Player_(\d+)$/);
             if (playerIdMatch) {
                 const playerId = playerIdMatch[1];
-                console.log(`🔍 Player_${playerId} 패턴 감지, 실제 플레이어 정보 검색 중...`);
+                console.log(`🔍 Player_${playerId} 패턴 감지, 실제 플레이어 정보 API 호출 중...`);
                 
-                // 같은 매치의 다른 참가자들에서 동일한 account_id나 steam_id를 가진 플레이어 찾기
-                const accountId = player.account_id || player.steam_id || playerId;
-                
-                // 매치 데이터에서 해당 플레이어의 실제 이름 찾기 시도
-                if (accountId && accountId !== 'undefined') {
-                    // 일단 플레이어 ID를 표시 (나중에 실제 API 호출로 확장 가능)
-                    return `Player #${playerId}`;
+                try {
+                    // 실제 플레이어 정보를 API에서 가져오기
+                    const response = await fetch(`/api/v1/players/${playerId}`);
+                    if (response.ok) {
+                        const playerData = await response.json();
+                        const realName = playerData.name || playerData.player_name || playerData.steam_name;
+                        if (realName && realName !== 'undefined' && realName !== playerId) {
+                            console.log(`✅ Player_${playerId} → 실제 이름: ${realName}`);
+                            return realName;
+                        }
+                    }
+                } catch (error) {
+                    console.error(`❌ Player_${playerId} 정보 가져오기 실패:`, error);
                 }
+                
+                // API 호출이 실패하면 플레이어 ID만 표시
+                return `Player #${playerId}`;
             }
             
             // 일반적인 경우
@@ -3590,23 +3599,32 @@ function displayMatchHistory(matches) {
         }
         
         // Player_숫자 형태에서 실제 플레이어 이름을 찾는 함수
-        const getPlayerDisplayName = (player) => {
+        const getPlayerDisplayName = async (player) => {
             let displayName = player.name || player.player_name || player.steam_name || player.hero || 'Player';
             
             // Player_숫자 패턴 감지 (예: Player_92418199)
             const playerIdMatch = displayName.match(/^Player_(\d+)$/);
             if (playerIdMatch) {
                 const playerId = playerIdMatch[1];
-                console.log(`🔍 Player_${playerId} 패턴 감지, 실제 플레이어 정보 검색 중...`);
+                console.log(`🔍 Player_${playerId} 패턴 감지, 실제 플레이어 정보 API 호출 중...`);
                 
-                // 같은 매치의 다른 참가자들에서 동일한 account_id나 steam_id를 가진 플레이어 찾기
-                const accountId = player.account_id || player.steam_id || playerId;
-                
-                // 매치 데이터에서 해당 플레이어의 실제 이름 찾기 시도
-                if (accountId && accountId !== 'undefined') {
-                    // 일단 플레이어 ID를 표시 (나중에 실제 API 호출로 확장 가능)
-                    return `Player #${playerId}`;
+                try {
+                    // 실제 플레이어 정보를 API에서 가져오기
+                    const response = await fetch(`/api/v1/players/${playerId}`);
+                    if (response.ok) {
+                        const playerData = await response.json();
+                        const realName = playerData.name || playerData.player_name || playerData.steam_name;
+                        if (realName && realName !== 'undefined' && realName !== playerId) {
+                            console.log(`✅ Player_${playerId} → 실제 이름: ${realName}`);
+                            return realName;
+                        }
+                    }
+                } catch (error) {
+                    console.error(`❌ Player_${playerId} 정보 가져오기 실패:`, error);
                 }
+                
+                // API 호출이 실패하면 플레이어 ID만 표시
+                return `Player #${playerId}`;
             }
             
             // 일반적인 경우
@@ -3990,7 +4008,8 @@ function displayMatchHistory(matches) {
         matchesList.innerHTML = matchCards.join('');
         
         // 매치 아이템 데이터와 플레이어 데이터를 즉시 로드하여 표시
-        matches.forEach((match, index) => {
+        for (let index = 0; index < matches.length; index++) {
+            const match = matches[index];
             const itemsContainer = document.getElementById(`match-items-${index}`);
             const playersContainer = document.getElementById(`match-players-${index}`);
             
@@ -4002,12 +4021,12 @@ function displayMatchHistory(matches) {
                 let players = [];
                 if (match.participants && match.participants.length > 0) {
                     console.log(`✅ 매치 ${index}: 실제 participants 데이터 사용 (${match.participants.length}명)`);
-                    players = match.participants.map((p, idx) => ({
+                    players = await Promise.all(match.participants.map(async (p, idx) => ({
                         hero: p.hero || 'Unknown',
-                        name: getPlayerDisplayName(p),
+                        name: await getPlayerDisplayName(p),
                         team: p.team || (idx < 6 ? 1 : 2), // 0-5번은 팀1, 6-11번은 팀2
                         account_id: p.account_id || p.steam_id
-                    }));
+                    })));
                 } else {
                     console.log(`⚠️ 매치 ${index}: participants 데이터가 없어 빈 배열 사용`);
                     players = []; // 빈 배열로 설정, 더미 데이터 사용 안함
@@ -4414,7 +4433,7 @@ function displayMatchHistory(matches) {
             } else {
                 console.error(`❌ 매치 ${index}: items-container 요소를 찾을 수 없음`);
             }
-        });
+        }
         
         console.log('✅ 매치 히스토리 표시 완료');
         
