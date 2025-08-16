@@ -407,10 +407,12 @@
 }
 
 .kda-numbers-large {
-    font-size: 18px;
+    font-size: 14px;
     font-weight: bold;
     color: #FFEFD7;
     font-family: monospace;
+    white-space: nowrap;
+    line-height: 1;
 }
 
 .kda-ratio-text {
@@ -437,7 +439,7 @@
 }
 
 .stat-value {
-    font-size: 13px;
+    font-size: 11px;
     font-weight: 500;
     color: #FFEFD7;
 }
@@ -4006,10 +4008,6 @@ function displayMatchHistory(matches) {
                                 
                                 <!-- 오른쪽: 팀 정보 영역 -->
                                 <div class="match-teams">
-                                    <div class="teams-header">
-                                        <span class="our-team-label">우리팀</span>
-                                        <span class="enemy-team-label">상대팀</span>
-                                    </div>
                                     <div class="match-players" id="match-players-${index}">
                                         <!-- 플레이어 목록이 여기 표시됩니다 -->
                                     </div>
@@ -4051,7 +4049,7 @@ function displayMatchHistory(matches) {
                     console.log(`✅ 매치 ${index}: 실제 participants 데이터 사용 (${match.participants.length}명)`);
                     players = match.participants.map((p, idx) => ({
                         hero: p.hero || 'Unknown',
-                        name: p.name || p.player_name || p.steam_name || 'Unknown Player',
+                        name: p.name || p.player_name || p.steam_name || p.hero || 'Player',
                         team: p.team || (idx < 6 ? 1 : 2), // 0-5번은 팀1, 6-11번은 팀2
                         account_id: p.account_id || p.steam_id
                     }));
@@ -4220,14 +4218,11 @@ function displayMatchHistory(matches) {
                     
                     playersContainer.innerHTML = `
                         <div class="teams-grid">
-                            <!-- 우리팀 섹션 -->
+                            <!-- 팀 섹션 -->
                             <div class="team-section our-team">
-                                <div class="team-label-header">우리팀</div>
                                 ${myTeamHTML}
                             </div>
-                            <!-- 상대팀 섹션 -->
                             <div class="team-section enemy-team">
-                                <div class="team-label-header">상대팀</div>
                                 ${enemyTeamHTML}
                             </div>
                         </div>
