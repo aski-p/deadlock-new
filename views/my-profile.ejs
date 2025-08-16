@@ -2874,7 +2874,7 @@ class DeadlockItemMatcher {
             673001892: { name: '이더 변환', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/spirit/ethereal_shift_sm.jpg', type: 'spirit' },
             1656913918: { name: '상급 쿨다운', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/spirit/superior_cooldown_sm.jpg', type: 'spirit' },
             3754524659: { name: '향상된 쿨다운', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/spirit/improved_cooldown_sm.jpg', type: 'spirit' },
-            3812615317: { name: '메아리 파편', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/spirit/echo_shard_sm.jpg', type: 'spirit' },
+            3812615317: { name: 'Arcane Surge', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/arcane_surge_sm.png', type: 'spirit' },
             1729727717: { name: '신비한 잔향', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/spirit/mystic_reverb_sm.jpg', type: 'spirit' },
             3802996421: { name: '리프레셔', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/spirit/refresher_sm.jpg', type: 'spirit' }
         };
@@ -2921,6 +2921,17 @@ class DeadlockItemMatcher {
             const item = this.getItemById(itemId);
             if (item) {
                 console.log(`🔄 아이템 ID 매핑: ${itemName} → ${item.name}`);
+                return item;
+            }
+        }
+
+        // 한국어 "특수 아이템 (ID)" 형태 파싱
+        const koreanItemMatch = itemName.match(/특수 아이템 \((\d+)\)/);
+        if (koreanItemMatch) {
+            const itemId = parseInt(koreanItemMatch[1]);
+            const item = this.getItemById(itemId);
+            if (item) {
+                console.log(`🔄 한국어 아이템 ID 매핑: ${itemName} → ${item.name}`);
                 return item;
             }
         }
@@ -4416,7 +4427,21 @@ function displayMatchHistory(matches) {
                     // 간단한 12개 슬롯 배치 (deadlock-api.com 스타일)
                     const itemGridHTML = finalItems.slice(0, 12).map((item, index) => {
                         let itemName = item.name || `Item ${item.itemId || item.id || 'Unknown'}`;
-                        const itemUrl = getDeadlockApiItemUrl(itemName);
+                        let itemUrl = '';
+                        
+                        // 먼저 itemMatcher를 사용해서 한국어 이름이나 ID로 매핑 시도
+                        if (window.itemMatcher && window.itemMatcher.initialized) {
+                            const matchedItem = window.itemMatcher.getItemData(itemName);
+                            if (matchedItem && matchedItem.image) {
+                                itemUrl = matchedItem.image;
+                                itemName = matchedItem.name; // 올바른 영어 이름으로 업데이트
+                            }
+                        }
+                        
+                        // itemMatcher에서 찾지 못했으면 기존 방식 사용
+                        if (!itemUrl) {
+                            itemUrl = getDeadlockApiItemUrl(itemName);
+                        }
                         
                         return `
                             <img loading="lazy" alt="${itemName}" title="${itemName}" 
@@ -4472,7 +4497,21 @@ function displayMatchHistory(matches) {
                                         // deadlock-api.com URL 구조로 아이템 표시 (12개 슬롯)
                                         const retryItemsHTML = finalItems.slice(0, 12).map((item, itemIndex) => {
                                             let itemName = item.name || `Item ${item.itemId || item.id || 'Unknown'}`;
-                                            const itemUrl = getDeadlockApiItemUrl(itemName);
+                                            let itemUrl = '';
+                                            
+                                            // 먼저 itemMatcher를 사용해서 한국어 이름이나 ID로 매핑 시도
+                                            if (window.itemMatcher && window.itemMatcher.initialized) {
+                                                const matchedItem = window.itemMatcher.getItemData(itemName);
+                                                if (matchedItem && matchedItem.image) {
+                                                    itemUrl = matchedItem.image;
+                                                    itemName = matchedItem.name; // 올바른 영어 이름으로 업데이트
+                                                }
+                                            }
+                                            
+                                            // itemMatcher에서 찾지 못했으면 기존 방식 사용
+                                            if (!itemUrl) {
+                                                itemUrl = getDeadlockApiItemUrl(itemName);
+                                            }
                                             
                                             return `
                                                 <img loading="lazy" alt="${itemName}" title="${itemName}" 
