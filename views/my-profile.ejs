@@ -4493,13 +4493,30 @@ function displayMatchHistory(matches) {
                                 // deadlock-api에서 플레이어 정보 가져오기 시도
                                 try {
                                     console.log(`🔍 플레이어 ${numberPart}의 실제 이름 검색 중...`);
-                                    const playerResponse = await fetch(`https://api.deadlock-api.com/v1/players/${numberPart}`);
-                                    if (playerResponse.ok) {
-                                        const playerData = await playerResponse.json();
-                                        if (playerData && playerData.name && playerData.name !== player.name) {
-                                            console.log(`✅ 플레이어 ${numberPart}: ${playerData.name} 발견`);
-                                            window.playerNameCache[numberPart] = playerData.name;
-                                            return playerData.name;
+                                    
+                                    // 여러 API 엔드포인트 시도
+                                    const apiUrls = [
+                                        `https://api.deadlock-api.com/v1/players/${numberPart}`,
+                                        `https://api.deadlock-api.com/v1/players/steam/${numberPart}`,
+                                        `https://deadlock-api.com/v1/players/${numberPart}`
+                                    ];
+                                    
+                                    for (const apiUrl of apiUrls) {
+                                        try {
+                                            const playerResponse = await fetch(apiUrl);
+                                            if (playerResponse.ok) {
+                                                const playerData = await playerResponse.json();
+                                                if (playerData && (playerData.name || playerData.steam_name) && 
+                                                    (playerData.name !== player.name || playerData.steam_name !== player.name)) {
+                                                    const realName = playerData.name || playerData.steam_name;
+                                                    console.log(`✅ 플레이어 ${numberPart}: ${realName} 발견`);
+                                                    window.playerNameCache[numberPart] = realName;
+                                                    return realName;
+                                                }
+                                            }
+                                        } catch (apiError) {
+                                            console.log(`⚠️ API ${apiUrl} 호출 실패:`, apiError);
+                                            continue;
                                         }
                                     }
                                 } catch (error) {
@@ -4792,10 +4809,19 @@ function displayMatchHistory(matches) {
                                 try {
                                     const itemsResponse = await fetch('https://assets.deadlock-api.com/v2/items');
                                     if (itemsResponse.ok) {
-                                        const itemsData = await itemsResponse.json();
-                                        window.deadlockItemsCache = itemsData;
-                                        console.log('✅ 아이템 메타데이터 로드 완료:', Object.keys(itemsData).length, '개 아이템');
-                                        console.log('📋 첫 번째 아이템 예시:', Object.values(itemsData)[0]);
+                                        const itemsArray = await itemsResponse.json();
+                                        
+                                        // 배열을 ID를 키로 하는 객체로 변환
+                                        const itemsMap = {};
+                                        itemsArray.forEach(item => {
+                                            if (item.id) {
+                                                itemsMap[item.id] = item;
+                                            }
+                                        });
+                                        
+                                        window.deadlockItemsCache = itemsMap;
+                                        console.log('✅ 아이템 메타데이터 로드 완료:', Object.keys(itemsMap).length, '개 아이템');
+                                        console.log('📋 첫 번째 아이템 예시:', Object.values(itemsMap)[0]);
                                     } else {
                                         console.error('❌ v2/items API 호출 실패:', itemsResponse.status);
                                     }
@@ -4815,24 +4841,26 @@ function displayMatchHistory(matches) {
                                 const itemData = itemsCache[actualItemId];
                                 const displayName = itemData?.name || `Item ${actualItemId}`;
                                 
-                                // deadlock-api.com의 실제 이미지 URL 패턴 사용
-                                let imageUrl = `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/${actualItemId}.webp`;
+                                // v2/items API에서 정확한 이미지 URL 사용
+                                let imageUrl = null;
                                 
-                                // v2/items API에서 이미지 정보가 있다면 우선 사용
-                                if (itemData && itemData.image) {
-                                    imageUrl = itemData.image;
-                                } else if (itemData && itemData.icon) {
-                                    imageUrl = itemData.icon;
+                                if (itemData) {
+                                    // webp 이미지 우선, 없으면 일반 이미지 사용
+                                    imageUrl = itemData.image_webp || itemData.image;
                                 }
                                 
-                                const upgradeInfo = isUpgraded ? ` (업그레이드: ${item.item_id} → ${actualItemId})` : '';
-                                console.log(`🔍 아이템 ${actualItemId}: ${displayName}${upgradeInfo}, 이미지: ${imageUrl}`);
+                                // fallback: 기본 아이템 이미지 패턴
+                                if (!imageUrl) {
+                                    imageUrl = `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/${actualItemId}.webp`;
+                                }
+                                
+                                console.log(`🔍 아이템 ${actualItemId}: ${displayName}, 이미지: ${imageUrl}`);
                                 
                                 return `
-                                    <img loading="lazy" alt="${displayName}" title="${displayName}${upgradeInfo}" 
+                                    <img loading="lazy" alt="${displayName}" title="${displayName}" 
                                          class="w-8 h-8 rounded border ${isUpgraded ? 'border-yellow-500' : 'border-border'}" 
                                          src="${imageUrl}"
-                                         onerror="this.onerror=null; this.src='https://deadlock-api.com/images/items/${actualItemId}.png'; console.log('아이템 이미지 fallback 2:', '${actualItemId}');"
+                                         onerror="this.onerror=null; console.log('❌ 아이템 이미지 로드 실패:', '${actualItemId}'); this.style.opacity='0.3';"
                                          onload="console.log('✅ 아이템 이미지 로드 성공:', '${actualItemId}');">
                                 `;
                             }).join('');
@@ -4859,7 +4887,15 @@ function displayMatchHistory(matches) {
                                     const actualItemId = item.upgrade_id && item.upgrade_id !== 0 ? item.upgrade_id : item.item_id;
                                     const isUpgraded = item.upgrade_id && item.upgrade_id !== 0;
                                     const itemName = `Item ${actualItemId}`;
-                                    const directImageUrl = `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/${actualItemId}.webp`;
+                                    
+                                    // v2/items에서 정확한 이미지 URL 시도
+                                    let directImageUrl = `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/${actualItemId}.webp`;
+                                    
+                                    // 캐시된 아이템 데이터가 있으면 정확한 이미지 URL 사용
+                                    const cachedItem = window.deadlockItemsCache && window.deadlockItemsCache[actualItemId];
+                                    if (cachedItem) {
+                                        directImageUrl = cachedItem.image_webp || cachedItem.image || directImageUrl;
+                                    }
                                     
                                     return `
                                         <img loading="lazy" alt="${itemName}" title="${itemName}" 
