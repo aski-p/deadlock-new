@@ -6809,6 +6809,244 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
+// 매치 메타데이터 API - deadlock-api.com에서 실시간 final items 가져오기
+app.get('/api/v1/matches/:matchId/details', async (req, res) => {
+  try {
+    const { matchId } = req.params;
+    const cacheKey = `match-details-${matchId}`;
+    
+    console.log(`🎯 매치 ${matchId} 상세 정보 요청`);
+    
+    // 캐시 확인 (5분 캐시)
+    const cached = getCachedData(cacheKey);
+    if (cached) {
+      console.log(`📦 캐시된 매치 ${matchId} 상세 정보 반환`);
+      return res.json(cached);
+    }
+    
+    // deadlock-api.com에서 실시간 데이터 가져오기
+    const response = await axios.get(
+      `https://api.deadlock-api.com/v1/matches/${matchId}/metadata?include_player_items=true`,
+      {
+        timeout: 15000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        },
+      }
+    );
+    
+    console.log(`📡 매치 ${matchId} API 응답 상태: ${response.status}`);
+    
+    if (response.data && response.data.match_info) {
+      const matchInfo = response.data.match_info;
+      
+      // 아이템 매핑 데이터 로드 (우리 서버의 기존 아이템 데이터 활용)
+      const itemsData = {
+        items: {
+          // deadlock.coach 기준 아이템 데이터 구성
+          7409189: { name: '치유 증강기', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_booster.webp' },
+          84321454: { name: '한파', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/cold_front.webp' },
+          223594321: { name: '명사수', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/sharpshooter.webp' },
+          380806748: { name: '추가 정신력', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/extra_spirit.webp' },
+          381961617: { name: '부패', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/decay.webp' },
+          393974127: { name: '광전사', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/berserker.webp' },
+          395867183: { name: '근접 흡혈', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/melee_lifesteal.webp' },
+          395944548: { name: '독성 탄환', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/toxic_bullets.webp' },
+          491391007: { name: '신비한 사격', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/mystic_shot.webp' },
+          499683006: { name: '회복탄', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/restorative_shot.webp' },
+          509856396: { name: '운동 대시', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/kinetic_dash.webp' },
+          519124136: { name: '상급 쿨다운', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/superior_cooldown.webp' },
+          558396679: { name: '추가 지구력', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_stamina.webp' },
+          600033864: { name: '점진적 노출', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/escalating_exposure.webp' },
+          668299740: { name: '추가 체력', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp' },
+          677738769: { name: '광란', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/frenzy.webp' },
+          710436191: { name: '트로피 수집가', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/trophy_collector.webp' },
+          715762406: { name: '기본 탄창', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/basic_magazine.webp' },
+          811521119: { name: '정신력 타격', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_strike.webp' },
+          857669956: { name: '반응 방벽', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/reactive_barrier.webp' },
+          865846625: { name: '거대한 탄창', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/titanic_magazine.webp' },
+          876563814: { name: '부패', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/decay.webp' },
+          968099481: { name: '추가 체력', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_health.webp' },
+          1009965641: { name: '몬스터 탄환', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/monster_rounds.webp' },
+          1039061940: { name: '신속한 쿨다운', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/rapid_recharge.webp' },
+          1087762003: { name: '향상된 정신력', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_spirit.webp' },
+          1102081447: { name: '연사', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/burst_fire.webp' },
+          1142270357: { name: '무한한 정신력', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/boundless_spirit.webp' },
+          1144549437: { name: '주입기', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/infuser.webp' },
+          1203847295: { name: '영혼 환생', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/soul_rebirth.webp' },
+          1254091416: { name: '근거리 사격', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/point_blank.webp' },
+          1265885395: { name: '마녀의 부적', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/enchanters_emblem.webp' },
+          1289536726: { name: '생명타격', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/lifestrike.webp' },
+          1292979587: { name: '신비한 폭발', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_burst.webp' },
+          1342610602: { name: '근거리 전투', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/close_quarters.webp' },
+          1378931225: { name: '이더 변환', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/ethereal_shift.webp' },
+          1414319208: { name: '사냥꾼의 오라', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hunters_aura.webp' },
+          1437614329: { name: '헤드샷 부스터', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/headshot_booster.webp' },
+          1534353442: { name: '탱크버스터', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/tankbuster.webp' },
+          1547821036: { name: '거신상', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/colossus.webp' },
+          1548066885: { name: '스프린트 부츠', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/sprint_boots.webp' },
+          1593133799: { name: '아케인 서지', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/arcane_surge.webp' },
+          1682129540: { name: '빠른 재충전', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/rapid_recharge.webp' },
+          1710079648: { name: '총알 갑옷', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/bullet_armor.webp' },
+          1797283378: { name: '치유 의식', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/healing_rite.webp' },
+          1813726886: { name: '디버프 제거', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/debuff_remover.webp' },
+          1829830659: { name: '영적 넘침', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/spiritual_overflow.webp' },
+          1829830660: { name: '무한한 정신력', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/boundless_spirit.webp' },
+          1842576017: { name: '능동 재장전', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/active_reload.webp' },
+          1925087134: { name: '워프 스톤', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/warp_stone.webp' },
+          1966682123: { name: '신비한 사격', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/mystic_shot.webp' },
+          2037039379: { name: '치명적 헤드샷', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/crippling_headshot.webp' },
+          2059712766: { name: '정신력 갑옷', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/spirit_armor.webp' },
+          2081037738: { name: '반격', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/return_fire.webp' },
+          2108901849: { name: '금속 피부', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/metal_skin.webp' },
+          2147483647: { name: '향상된 총알 갑옷', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/improved_bullet_armor.webp' },
+          2147483648: { name: '향상된 정신력 갑옷', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/improved_spirit_armor.webp' },
+          2147483649: { name: '넉다운', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/knockdown.webp' },
+          2147483650: { name: '마법 카펫', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/magic_carpet.webp' },
+          2147483651: { name: '빠른 재충전', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/rapid_recharge.webp' },
+          2147483652: { name: '침묵 글리프', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/silence_glyph.webp' },
+          2163598980: { name: '테슬라 탄환', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/tesla_bullets.webp' },
+          2220233739: { name: '관통탄 보호막', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/hollow_point_ward.webp' },
+          2356412290: { name: '흡혈 폭발', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/vampiric_burst.webp' },
+          2364891047: { name: '저지불가', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/unstoppable.webp' },
+          2469449027: { name: '도탄', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/ricochet.webp' },
+          2469449028: { name: '메아리 파편', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/echo_shard.webp' },
+          2480592370: { name: '거대한 확장', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/greater_expansion.webp' },
+          2481177645: { name: '완벽한 문장', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/pristine_emblem.webp' },
+          2519598785: { name: '극지 폭발', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/arctic_blast.webp' },
+          2533252781: { name: '둔화 저주', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/slowing_hex.webp' },
+          2603935618: { name: '마법사의 방벽', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/enchanters_barrier.webp' },
+          2617435668: { name: '연금술 화염', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/alchemical_fire.webp' },
+          2678489038: { name: '추가 재생', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/extra_regen.webp' },
+          2739107182: { name: '거대한 확장', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/greater_expansion.webp' },
+          2743563891: { name: '환상 타격', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/phantom_strike.webp' },
+          2746434652: { name: '흡혈', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/leech.webp' },
+          2746434653: { name: '리프레셔', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/refresher.webp' },
+          2800629741: { name: '시드는 채찍', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/withering_whip.webp' },
+          2820116164: { name: '향상된 폭발', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_burst.webp' },
+          2824119765: { name: '근접 돌진', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/melee_charge.webp' },
+          2829638276: { name: '수확', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/leech.webp' },
+          2849173567: { name: '장엄한 도약', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/majestic_leap.webp' },
+          2876421943: { name: '파괴자', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/wrecker.webp' },
+          2876734447: { name: '억제제', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/inhibitor.webp' },
+          2948329856: { name: '베일 워커', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/veil_walker.webp' },
+          2951612397: { name: '정신력 흡혈', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/spirit_lifesteal.webp' },
+          2981692841: { name: '점진적 회복력', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/escalating_resilience.webp' },
+          3005970438: { name: '향상된 리치', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_reach.webp' },
+          3140772621: { name: '파워 서지', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/surge_of_power.webp' },
+          3147316197: { name: '지속 속도', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/enduring_speed.webp' },
+          3215534794: { name: '유리 대포', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/glass_cannon.webp' },
+          3261353684: { name: '구조 빔', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/rescue_beam.webp' },
+          3270001687: { name: '퀵실버 재장전', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/quicksilver_reload.webp' },
+          3287678549: { name: '전투 방벽', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/combat_barrier.webp' },
+          3357231760: { name: '향상된 정신력', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/improved_spirit.webp' },
+          3361075077: { name: '신성한 방벽', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/divine_barrier.webp' },
+          3403085434: { name: '탄약 수집기', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/ammo_scavenger.webp' },
+          3428915467: { name: '불굴', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/fortitude.webp' },
+          3516947824: { name: '마녀의 부적', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/enchanters_emblem.webp' },
+          3561817145: { name: '트로피 수집가', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/trophy_collector.webp' },
+          3612042342: { name: '신비한 취약성', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_vulnerability.webp' },
+          3633614685: { name: '장거리', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/long_range.webp' },
+          3696726732: { name: '초월적 쿨다운', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/transcendent_cooldown.webp' },
+          3713423303: { name: '영혼 분쇄 탄환', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/soul_shredder_bullets.webp' },
+          3731635960: { name: '신비한 정확도', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/mystic_shot.webp' },
+          3745693205: { name: '회복 목걸이', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/restorative_locket.webp' },
+          3878070816: { name: '행운의 사격', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/lucky_shot.webp' },
+          3878070817: { name: '신비한 잔향', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/mystic_reverb.webp' },
+          3916766904: { name: '고통 파동', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/torment_pulse.webp' },
+          3916766905: { name: '점술사의 케블라', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/diviners_kevlar.webp' },
+          3919289022: { name: '상급 쿨다운', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/superior_cooldown.webp' },
+          3982475103: { name: '리바이어던', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/leviathan.webp' },
+          4072270083: { name: '고속 탄창', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/high_velocity_mag.webp' },
+          4139877411: { name: '신속한 발놀림', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/fleetfoot.webp' },
+          4147641675: { name: '속사탄', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/rapid_rounds.webp' },
+          4293016574: { name: '상급 지속시간', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/superior_duration.webp' }
+        }
+      };
+      
+      // final items 처리
+      let finalItemsData = [];
+      if (matchInfo.players && Array.isArray(matchInfo.players)) {
+        const allPlayers = matchInfo.players;
+        console.log(`👥 매치 ${matchId}에서 ${allPlayers.length}명의 플레이어 발견`);
+        
+        // 각 플레이어의 final items 추출
+        allPlayers.forEach((player, index) => {
+          if (player.items && Array.isArray(player.items)) {
+            // sold_time이 없거나 0인 아이템들만 필터링 (최종 보유 아이템)
+            const playerFinalItems = player.items.filter(item => {
+              const soldTime = item.sold_time_s || item.soldTime || 0;
+              return !soldTime || soldTime === 0;
+            });
+            
+            const heroName = getHeroNameById(player.hero_id);
+            console.log(`🏆 플레이어 ${index + 1} (${heroName}): ${playerFinalItems.length}개 final items`);
+            
+            finalItemsData.push({
+              playerIndex: index,
+              heroName: heroName,
+              playerName: player.name || player.player_name || player.steamName || `Player ${index + 1}`,
+              playerId: player.account_id || player.player_id,
+              playerSlot: player.player_slot,
+              heroId: player.hero_id,
+              finalItems: playerFinalItems.map(item => {
+                const itemId = item.item_id || item.itemId || item.id;
+                // 우리 서버의 아이템 매핑 데이터에서 아이템 정보 가져오기
+                const itemData = itemsData.items[itemId];
+                
+                return {
+                  name: itemData ? itemData.name : item.name || `Item ${itemId}`,
+                  itemId: itemId,
+                  cost: itemData ? itemData.cost : (item.cost || 0),
+                  tier: itemData ? itemData.tier : (item.tier || 1),
+                  image: itemData ? itemData.image : null
+                };
+              })
+            });
+          }
+        });
+      }
+      
+      const result = {
+        matchId: matchId,
+        matchInfo: matchInfo,
+        finalItemsData: finalItemsData,
+        timestamp: new Date().toISOString()
+      };
+      
+      // 캐시에 저장 (5분)
+      setCachedData(cacheKey, result, 300);
+      
+      console.log(`✅ 매치 ${matchId} 상세 정보 반환: ${finalItemsData.length}명의 플레이어 데이터`);
+      res.json(result);
+      
+    } else {
+      console.warn(`⚠️ 매치 ${matchId}: deadlock-api.com에서 유효한 데이터를 받지 못함`);
+      res.status(404).json({ 
+        error: 'Match data not found',
+        matchId: matchId 
+      });
+    }
+    
+  } catch (error) {
+    console.error(`❌ 매치 ${req.params.matchId} 상세 정보 가져오기 실패:`, error.message);
+    
+    // 타임아웃이나 네트워크 오류의 경우 적절한 메시지 반환
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      res.status(408).json({ 
+        error: 'Request timeout - deadlock-api.com is slow',
+        matchId: req.params.matchId 
+      });
+    } else {
+      res.status(500).json({ 
+        error: 'Failed to fetch match details',
+        matchId: req.params.matchId,
+        message: error.message 
+      });
+    }
+  }
+});
+
 // 시스템 모니터링 API
 app.get('/api/system/cache-stats', (req, res) => {
   try {

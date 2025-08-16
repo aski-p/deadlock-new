@@ -3212,7 +3212,7 @@ class DeadlockItemManager {
 
     getItemImageUrl(itemName) {
         // 새로운 Final Items 로직을 사용하도록 리다이렉트
-        return getDeadlockApiItemUrl(itemName);
+        return window.getDeadlockApiItemUrl ? window.getDeadlockApiItemUrl(itemName) : `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/basic_magazine_sm.png`;
     }
 }
 
@@ -4231,8 +4231,8 @@ function displayMatchHistory(matches) {
                     
                     console.log(`🏆 게임 종료 시 최종 보유 아이템 ${finalItems.length}개:`, finalItems.map(i => i.name));
                     
-                    // deadlock-api.com과 동일한 Final Items 로직
-                    const getDeadlockApiItemUrl = (itemName) => {
+                    // deadlock-api.com과 동일한 Final Items 로직 (전역 함수로 생성)
+                    window.getDeadlockApiItemUrl = function(itemName) {
                         // 정확한 deadlock-api.com 스타일 매핑 (kebab-case 변환 포함)
                         const directMappings = {
                             // Items I observed on deadlock-api.com:
@@ -4366,56 +4366,56 @@ function displayMatchHistory(matches) {
                     // 아이템 데이터가 없는 경우 - 더 나은 UI 제공
                     console.log(`⚠️ 매치 ${index}: 아이템 데이터 없음, 로딩 재시도 중...`);
                     
-                    // 매치 상세 정보를 다시 요청해서 아이템 가져오기 시도
+                    // deadlock-api.com에서 실시간 매치 상세 정보를 가져와서 아이템 표시
                     setTimeout(async () => {
                         try {
+                            console.log(`🔄 매치 ${match.matchId}: deadlock-api.com에서 실시간 final items 가져오는 중...`);
                             const matchDetailsResponse = await fetch(`/api/v1/matches/${match.matchId}/details`);
                             if (matchDetailsResponse.ok) {
                                 const detailsData = await matchDetailsResponse.json();
-                                if (detailsData.items && detailsData.items.length > 0) {
-                                    // 재시도에서도 최종 보유 아이템들 표시
-                                    const finalItems = detailsData.items.filter(item => {
-                                        const soldTime = item.sold_time_s || item.soldTime || 0;
-                                        return !soldTime || soldTime === 0;
-                                    });
+                                console.log(`📡 매치 ${match.matchId} API 응답:`, detailsData);
+                                
+                                // 현재 표시중인 플레이어와 매칭되는 플레이어 찾기
+                                if (detailsData.finalItemsData && detailsData.finalItemsData.length > 0) {
+                                    // 영웅 이름이나 플레이어 이름으로 매칭 시도
+                                    const currentPlayerData = detailsData.finalItemsData.find(playerData => 
+                                        playerData.heroName === match.hero || 
+                                        playerData.playerName === match.playerName
+                                    );
                                     
-                                    const retryItemsHTML = finalItems.map((item, itemIndex) => {
-                                        // Unknown Item인 경우 아이템 ID로 다시 매핑 시도
-                                        let itemName = item.name;
-                                        if (!itemName || itemName.includes('Unknown Item') || itemName.includes('알 수 없는 아이템')) {
-                                            const itemId = item.itemId || item.id;
-                                            if (window.itemMatcher && itemId) {
-                                                const itemData = window.itemMatcher.getItemById(itemId);
-                                                if (itemData && itemData.name && !itemData.name.includes('Unknown')) {
-                                                    itemName = itemData.name;
-                                                }
-                                            }
-                                        }
+                                    if (currentPlayerData && currentPlayerData.finalItems && currentPlayerData.finalItems.length > 0) {
+                                        console.log(`✅ 매치 ${match.matchId}: ${currentPlayerData.heroName}의 final items ${currentPlayerData.finalItems.length}개 발견`);
+                                        const finalItems = currentPlayerData.finalItems;
+                                    
+                                        // deadlock-api.com URL 구조로 아이템 표시 (12개 슬롯)
+                                        const retryItemsHTML = finalItems.slice(0, 12).map((item, itemIndex) => {
+                                            let itemName = item.name || `Item ${item.itemId || item.id || 'Unknown'}`;
+                                            const itemUrl = getDeadlockApiItemUrl(itemName);
+                                            
+                                            return `
+                                                <img loading="lazy" alt="${itemName}" title="${itemName}" 
+                                                     class="w-8 h-8 rounded border border-border" 
+                                                     src="${itemUrl}"
+                                                     onerror="this.style.opacity='0.3';">
+                                            `;
+                                        }).join('');
                                         
-                                        if (!itemName || itemName.includes('Unknown Item') || itemName.includes('알 수 없는 아이템')) {
-                                            itemName = `아이템 ${item.itemId || item.id || 'ID없음'}`;
-                                        }
+                                        // 빈 슬롯으로 12개 채우기
+                                        const emptySlots = Math.max(0, 12 - finalItems.length);
+                                        const emptyHTML = Array(emptySlots).fill('<div class="w-8 h-8 rounded border border-border bg-muted opacity-30"></div>').join('');
                                         
-                                        const imageUrl = getItemImageUrl(itemName);
-                                        const itemTier = item.tier || 1;
-                                        
-                                        return `
-                                            <div class="item-wrapper">
-                                                <img src="${imageUrl}" 
-                                                     alt="${itemName}" 
-                                                     class="item-image tier-${itemTier}"
-                                                     title="${itemName}"
-                                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                                                <div class="item-placeholder tier-${itemTier}" style="display: none;">
-                                                    <span class="item-text">${itemName.substring(0, 3)}</span>
-                                                </div>
+                                        itemsContainer.innerHTML = `
+                                            <div class="grid grid-cols-6 gap-1 w-fit">
+                                                ${retryItemsHTML}${emptyHTML}
                                             </div>
                                         `;
-                                    }).join('');
-                                    
-                                    itemsContainer.innerHTML = retryItemsHTML;
-                                    console.log(`✅ 매치 ${index} 재시도로 최종 보유 아이템 ${finalItems.length}개 표시 완료 (전체 ${detailsData.items.length}개 중)`);
-                                    return;
+                                        console.log(`✅ 매치 ${match.matchId}: deadlock-api.com에서 실시간으로 가져온 ${finalItems.length}개 final items 표시 완료`);
+                                        return;
+                                    } else {
+                                        console.warn(`⚠️ 매치 ${match.matchId}: 현재 플레이어의 final items를 찾을 수 없음`);
+                                    }
+                                } else {
+                                    console.warn(`⚠️ 매치 ${match.matchId}: deadlock-api.com에서 final items 데이터를 찾을 수 없음`);
                                 }
                             }
                         } catch (retryError) {
