@@ -4232,10 +4232,10 @@ function displayMatchHistory(matches) {
                                     </div>
                                 </div>
                                 
-                                <!-- 오른쪽: 팀 정보 영역 -->
+                                <!-- 오른쪽: 팀 정보 영역 (6 VS 6) -->
                                 <div class="match-teams">
-                                    <div class="match-players" id="match-players-${index}">
-                                        <!-- 플레이어 목록이 여기 표시됩니다 -->
+                                    <div class="teams-grid" id="match-players-${index}">
+                                        <!-- 6 VS 6 팀 구성이 여기 표시됩니다 -->
                                     </div>
                                 </div>
                             </div>
@@ -4485,151 +4485,120 @@ function displayMatchHistory(matches) {
                     
                     console.log(`🏆 게임 종료 시 최종 보유 아이템 ${finalItems.length}개:`, finalItems.map(i => i.name));
                     
-                    // deadlock-api.com과 동일한 Final Items 로직 (전역 함수로 생성)
-                    window.getDeadlockApiItemUrl = function(itemName) {
-                        // 정확한 deadlock-api.com 스타일 매핑 (kebab-case 변환 포함)
-                        const directMappings = {
-                            // Items I observed on deadlock-api.com:
-                            'Arcane Surge': 'spirit/arcane_surge_sm',
-                            "Enchanter's Emblem": 'vitality/enchanters_emblem_sm', 
-                            'Rapid Recharge': 'spirit/rapid_recharge_sm',
-                            'Tankbuster': 'spirit/tankbuster_sm',
-                            'Boundless Spirit': 'spirit/boundless_spirit_sm',
-                            'Leech': 'vitality/leech_sm',
-                            'Mystic Shot': 'weapon/mystic_shot_sm',
-                            'Trophy Collector': 'vitality/trophy_collector_sm',
-                            'Greater Expansion': 'spirit/greater_expansion_sm',
-                            'Debuff Remover': 'vitality/debuff_remover_sm',
-                            'Transcendent Cooldown': 'spirit/transcendent_cooldown_sm',
-                            'Arctic Blast': 'spirit/arctic_blast_sm',
-                            'Extra Health': 'vitality/extra_health_sm',
-                            'Titanic Magazine': 'weapon/titanic_magazine_sm',
-                            'Long Range': 'weapon/long_range_sm',
-                            'Battle Vest': 'vitality/battle_vest_sm',
-                            'Glass Cannon': 'weapon/glass_cannon_sm',
-                            'Extra Stamina': 'vitality/extra_stamina_sm',
-                            'Swift Striker': 'weapon/swift_striker_sm',
-                            'Bullet Lifesteal': 'vitality/bullet_lifesteal_sm',
-                            'Express Shot': 'weapon/express_shot_sm',
-                            'Return Fire': 'vitality/return_fire_sm',
-                            'Radiant Regeneration': 'vitality/radiant_regeneration_sm',
-                            'Healbane': 'vitality/healbane_sm',
-                            'Bullet Resilience': 'vitality/bullet_resilience_sm',
-                            'Spirit Resilience': 'vitality/spirit_resilience_sm',
-                            'Siphon Bullets': 'weapon/siphon_bullets_sm',
-                            'Mystic Burst': 'spirit/mystic_burst_sm',
-                            'Cold Front': 'spirit/cold_front_sm',
-                            'Superior Cooldown': 'spirit/superior_cooldown_sm',
-                            'Mystic Expansion': 'spirit/mystic_expansion_sm',
-                            'Extra Charge': 'spirit/extra_charge_sm',
-                            'Improved Spirit': 'spirit/improved_spirit_sm',
-                            'Compress Cooldown': 'spirit/compress_cooldown_sm',
-                            'Sprint Boots': 'vitality/sprint_boots_sm',
-                            'Superior Duration': 'spirit/superior_duration_sm',
-                            'Kinetic Dash': 'weapon/kinetic_dash_sm',
-                            'Burst Fire': 'weapon/burst_fire_sm',
-                            'Berserker': 'weapon/berserker_sm',
-                            'Quicksilver Reload': 'weapon/quicksilver_reload_sm',
-                            'Ricochet': 'weapon/ricochet_sm',
-                            'Vampiric Burst': 'weapon/vampiric_burst_sm',
-                            'Lucky Shot': 'weapon/lucky_shot_sm',
-                            'Mystic Vulnerability': 'spirit/mystic_vulnerability_sm',
-                            'Mystic Slow': 'spirit/mystic_slow_sm',
-                            'Decay': 'vitality/decay_sm',
-                            'Mystic Regeneration': 'spirit/mystic_regeneration_sm',
-                            'Warp Stone': 'spirit/warp_stone_sm',
-                            'Majestic Leap': 'vitality/majestic_leap_sm',
-                            'High-Velocity Rounds': 'weapon/high_velocity_rounds_sm',
-                            'Enduring Speed': 'vitality/enduring_speed_sm',
-                            'Headhunter': 'weapon/headhunter_sm',
-                            'Opening Rounds': 'weapon/opening_rounds_sm',
-                            'Sharpshooter': 'weapon/sharpshooter_sm',
-                            'Spirit Strike': 'spirit/spirit_strike_sm',
-                            'Spirit Lifesteal': 'vitality/spirit_lifesteal_sm',
-                            'Crushing Fists': 'vitality/crushing_fists_sm',
-                            'Healing Tempo': 'vitality/healing_tempo_sm',
-                            'Torment Pulse': 'spirit/torment_pulse_sm',
-                            'Phantom Strike': 'vitality/phantom_strike_sm',
-                            'Healer Tempo': 'vitality/healer_tempo_sm',
-                            'Lifestrike': 'vitality/lifestrike_sm',
-                            'Spirit Snatch': 'spirit/spirit_snatch_sm',
-                            'Cultist Sacrifice': 'spirit/cultist_sacrifice_sm',
-                            'Toxic Bullets': 'weapon/toxic_bullets_sm',
-                            'Stamina Mastery': 'vitality/stamina_mastery_sm',
-                            'Mercurial Magnum': 'weapon/mercurial_magnum_sm',
-                            'Suppressor': 'weapon/suppressor_sm',
-                            'Escalating Resilience': 'weapon/escalating_resilience_sm',
-                            'Surge of Power': 'spirit/surge_of_power_sm',
-                            'Basic Magazine': 'weapon/basic_magazine_sm',
-                            'Close Quarters': 'weapon/close_quarters_sm',
-                            'Monster Rounds': 'weapon/monster_rounds_sm'
-                        };
-                        
-                        // 직접 매핑에서 찾기
-                        if (directMappings[itemName]) {
-                            return `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/${directMappings[itemName]}.png`;
+                    // deadlock-api.com에서 아이템 정보 가져오기 (v2/items API 기반)
+                    window.getDeadlockApiItemUrl = async function(itemName, itemId) {
+                        try {
+                            // 먼저 캐시된 아이템 데이터 확인
+                            if (!window.deadlockItemsCache) {
+                                console.log('🔄 deadlock-api.com에서 아이템 목록 가져오는 중...');
+                                const response = await fetch('https://assets.deadlock-api.com/v2/items');
+                                if (response.ok) {
+                                    window.deadlockItemsCache = await response.json();
+                                    console.log('✅ 아이템 목록 로드 완료:', Object.keys(window.deadlockItemsCache).length, '개');
+                                } else {
+                                    throw new Error('아이템 API 호출 실패');
+                                }
+                            }
+                            
+                            const itemsData = window.deadlockItemsCache;
+                            
+                            // itemId로 먼저 찾기
+                            if (itemId && itemsData[itemId]) {
+                                const item = itemsData[itemId];
+                                return {
+                                    name: item.name,
+                                    image: item.image,
+                                    category: item.category,
+                                    tier: item.tier,
+                                    cost: item.cost
+                                };
+                            }
+                            
+                            // 이름으로 찾기 (정확한 매칭)
+                            for (const [id, item] of Object.entries(itemsData)) {
+                                if (item.name === itemName) {
+                                    return {
+                                        id: id,
+                                        name: item.name,
+                                        image: item.image,
+                                        category: item.category,
+                                        tier: item.tier,
+                                        cost: item.cost
+                                    };
+                                }
+                            }
+                            
+                            // 부분 매칭 시도
+                            for (const [id, item] of Object.entries(itemsData)) {
+                                if (item.name.toLowerCase().includes(itemName.toLowerCase()) || 
+                                    itemName.toLowerCase().includes(item.name.toLowerCase())) {
+                                    return {
+                                        id: id,
+                                        name: item.name,
+                                        image: item.image,
+                                        category: item.category,
+                                        tier: item.tier,
+                                        cost: item.cost
+                                    };
+                                }
+                            }
+                            
+                            // 찾지 못한 경우 기본값 반환
+                            console.warn('⚠️ 아이템을 찾을 수 없음:', itemName, itemId);
+                            return {
+                                name: itemName,
+                                image: 'https://assets.deadlock-api.com/unknown_item.png',
+                                category: 'unknown',
+                                tier: 0,
+                                cost: 0
+                            };
+                            
+                        } catch (error) {
+                            console.error('❌ 아이템 URL 생성 오류:', error);
+                            return {
+                                name: itemName,
+                                image: 'https://assets.deadlock-api.com/unknown_item.png',
+                                category: 'unknown',
+                                tier: 0,
+                                cost: 0
+                            };
                         }
-                        
-                        // 자동 변환 시도 (대부분의 아이템은 이름을 kebab-case로 변환하면 됨)
-                        const kebabCase = itemName
-                            .toLowerCase()
-                            .replace(/['\s&]+/g, '_')
-                            .replace(/_+/g, '_')
-                            .replace(/^_|_$/g, '');
-                        
-                        // 카테고리 추정 (아이템 이름 기반)
-                        const spiritKeywords = ['mystic', 'spirit', 'arcane', 'charge', 'recharge', 'surge', 'blast', 'expansion', 'cooldown', 'vulnerability', 'slow', 'regeneration', 'warp', 'burst', 'cold', 'compress', 'transcendent', 'boundless', 'greater', 'rapid', 'improved', 'superior', 'torment', 'snatch', 'cultist'];
-                        const vitalityKeywords = ['health', 'armor', 'lifesteal', 'stamina', 'boots', 'emblem', 'vest', 'resilience', 'regeneration', 'healbane', 'bullet', 'debuff', 'remover', 'leech', 'trophy', 'collector', 'radiant', 'return', 'fire', 'siphon', 'battle', 'extra', 'enduring', 'majestic', 'leap', 'decay', 'crushing', 'healing', 'tempo', 'phantom', 'strike', 'lifestrike', 'mastery'];
-                        
-                        let category = 'weapon'; // default
-                        const lowerName = itemName.toLowerCase();
-                        
-                        if (spiritKeywords.some(keyword => lowerName.includes(keyword))) {
-                            category = 'spirit';
-                        } else if (vitalityKeywords.some(keyword => lowerName.includes(keyword))) {
-                            category = 'vitality';
-                        }
-                        
-                        return `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/${category}/${kebabCase}_sm.png`;
                     };
                     
-                    // 간단한 12개 슬롯 배치 (deadlock-api.com 스타일)
-                    const itemGridHTML = finalItems.slice(0, 12).map((item, index) => {
-                        let itemName = item.name || `Item ${item.itemId || item.id || 'Unknown'}`;
-                        let itemUrl = '';
+                    // 12개 슬롯 배치 (deadlock-api v2/items 기반)
+                    const renderItems = async () => {
+                        const itemGridPromises = finalItems.slice(0, 12).map(async (item, index) => {
+                            let itemName = item.name || `Item ${item.itemId || item.id || 'Unknown'}`;
+                            let itemId = item.itemId || item.id;
+                            
+                            // deadlock-api v2/items에서 아이템 정보 가져오기
+                            const itemData = await getDeadlockApiItemUrl(itemName, itemId);
+                            
+                            return `
+                                <img loading="lazy" alt="${itemData.name}" title="${itemData.name}" 
+                                     class="w-8 h-8 rounded border border-border" 
+                                     src="${itemData.image}"
+                                     onerror="this.style.opacity='0.3';">
+                            `;
+                        });
                         
-                        // 먼저 itemMatcher를 사용해서 한국어 이름이나 ID로 매핑 시도
-                        if (window.itemMatcher && window.itemMatcher.initialized) {
-                            const matchedItem = window.itemMatcher.getItemData(itemName);
-                            if (matchedItem && matchedItem.image) {
-                                itemUrl = matchedItem.image;
-                                itemName = matchedItem.name; // 올바른 영어 이름으로 업데이트
-                            }
-                        }
+                        // 모든 아이템 HTML 생성 완료 대기
+                        const itemGridHTML = (await Promise.all(itemGridPromises)).join('');
                         
-                        // itemMatcher에서 찾지 못했으면 기존 방식 사용
-                        if (!itemUrl) {
-                            itemUrl = getDeadlockApiItemUrl(itemName);
-                        }
+                        // 빈 슬롯으로 12개 채우기
+                        const emptySlots = Math.max(0, 12 - finalItems.length);
+                        const emptyHTML = Array(emptySlots).fill('<div class="w-8 h-8 rounded border border-border bg-muted opacity-30"></div>').join('');
                         
-                        return `
-                            <img loading="lazy" alt="${itemName}" title="${itemName}" 
-                                 class="w-8 h-8 rounded border border-border" 
-                                 src="${itemUrl}"
-                                 onerror="this.style.opacity='0.3';">
+                        itemsContainer.innerHTML = `
+                            <div class="grid grid-cols-6 gap-1 w-fit">
+                                ${itemGridHTML}${emptyHTML}
+                            </div>
                         `;
-                    }).join('');
+                        console.log(`✅ 매치 ${index} 게임 종료 시 최종 보유 아이템 ${finalItems.length}개 표시 완료 (전체 ${itemsData.length}개 중)`);
+                    };
                     
-                    // 빈 슬롯으로 12개 채우기
-                    const emptySlots = Math.max(0, 12 - finalItems.length);
-                    const emptyHTML = Array(emptySlots).fill('<div class="w-8 h-8 rounded border border-border bg-muted opacity-30"></div>').join('');
-                    
-                    itemsContainer.innerHTML = `
-                        <div class="grid grid-cols-6 gap-1 w-fit">
-                            ${itemGridHTML}${emptyHTML}
-                        </div>
-                    `;
-                    console.log(`✅ 매치 ${index} 게임 종료 시 최종 보유 아이템 ${finalItems.length}개 표시 완료 (전체 ${itemsData.length}개 중)`);
+                    // async 함수 실행
+                    renderItems();
                 } else {
                     // 아이템 데이터가 없는 경우 - 바로 빈 슬롯 표시 (무한로딩 방지)
                     console.log(`⚠️ 매치 ${index}: 아이템 데이터 없음, 빈 슬롯 표시`);
@@ -4663,43 +4632,39 @@ function displayMatchHistory(matches) {
                                         console.log(`✅ 매치 ${match.matchId}: ${currentPlayerData.heroName}의 final items ${currentPlayerData.finalItems.length}개 발견`);
                                         const finalItems = currentPlayerData.finalItems;
                                     
-                                        // deadlock-api.com URL 구조로 아이템 표시 (12개 슬롯)
-                                        const retryItemsHTML = finalItems.slice(0, 12).map((item, itemIndex) => {
-                                            let itemName = item.name || `Item ${item.itemId || item.id || 'Unknown'}`;
-                                            let itemUrl = '';
+                                        // deadlock-api v2/items로 아이템 표시 (12개 슬롯)
+                                        const renderRetryItems = async () => {
+                                            const retryItemPromises = finalItems.slice(0, 12).map(async (item, itemIndex) => {
+                                                let itemName = item.name || `Item ${item.itemId || item.id || 'Unknown'}`;
+                                                let itemId = item.itemId || item.id;
+                                                
+                                                // deadlock-api v2/items에서 아이템 정보 가져오기
+                                                const itemData = await getDeadlockApiItemUrl(itemName, itemId);
+                                                
+                                                return `
+                                                    <img loading="lazy" alt="${itemData.name}" title="${itemData.name}" 
+                                                         class="w-8 h-8 rounded border border-border" 
+                                                         src="${itemData.image}"
+                                                         onerror="this.style.opacity='0.3';">
+                                                `;
+                                            });
                                             
-                                            // 먼저 itemMatcher를 사용해서 한국어 이름이나 ID로 매핑 시도
-                                            if (window.itemMatcher && window.itemMatcher.initialized) {
-                                                const matchedItem = window.itemMatcher.getItemData(itemName);
-                                                if (matchedItem && matchedItem.image) {
-                                                    itemUrl = matchedItem.image;
-                                                    itemName = matchedItem.name; // 올바른 영어 이름으로 업데이트
-                                                }
-                                            }
+                                            const retryItemsHTML = (await Promise.all(retryItemPromises)).join('');
                                             
-                                            // itemMatcher에서 찾지 못했으면 기존 방식 사용
-                                            if (!itemUrl) {
-                                                itemUrl = getDeadlockApiItemUrl(itemName);
-                                            }
+                                            // 빈 슬롯으로 12개 채우기
+                                            const emptySlots = Math.max(0, 12 - finalItems.length);
+                                            const emptyHTML = Array(emptySlots).fill('<div class="w-8 h-8 rounded border border-border bg-muted opacity-30"></div>').join('');
                                             
-                                            return `
-                                                <img loading="lazy" alt="${itemName}" title="${itemName}" 
-                                                     class="w-8 h-8 rounded border border-border" 
-                                                     src="${itemUrl}"
-                                                     onerror="this.style.opacity='0.3';">
+                                            itemsContainer.innerHTML = `
+                                                <div class="grid grid-cols-6 gap-1 w-fit">
+                                                    ${retryItemsHTML}${emptyHTML}
+                                                </div>
                                             `;
-                                        }).join('');
+                                            console.log(`✅ 매치 ${match.matchId}: deadlock-api.com에서 실시간으로 가져온 ${finalItems.length}개 final items 표시 완료`);
+                                        };
                                         
-                                        // 빈 슬롯으로 12개 채우기
-                                        const emptySlots = Math.max(0, 12 - finalItems.length);
-                                        const emptyHTML = Array(emptySlots).fill('<div class="w-8 h-8 rounded border border-border bg-muted opacity-30"></div>').join('');
-                                        
-                                        itemsContainer.innerHTML = `
-                                            <div class="grid grid-cols-6 gap-1 w-fit">
-                                                ${retryItemsHTML}${emptyHTML}
-                                            </div>
-                                        `;
-                                        console.log(`✅ 매치 ${match.matchId}: deadlock-api.com에서 실시간으로 가져온 ${finalItems.length}개 final items 표시 완료`);
+                                        // async 함수 실행
+                                        await renderRetryItems();
                                         return;
                                     } else {
                                         console.warn(`⚠️ 매치 ${match.matchId}: 현재 플레이어의 final items를 찾을 수 없음`);
@@ -5004,3 +4969,123 @@ document.addEventListener('DOMContentLoaded', () => {
     })();
 });
 </script>
+
+<style>
+/* 6 VS 6 팀 표시 스타일 */
+.teams-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 15px;
+    background: rgba(20, 25, 35, 0.8);
+    border-radius: 8px;
+    border: 1px solid rgba(99, 162, 226, 0.2);
+}
+
+.team-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.team-section.our-team {
+    border-right: 1px solid rgba(34, 197, 94, 0.3);
+    padding-right: 15px;
+}
+
+.team-section.our-team .player-name-text {
+    color: #22c55e !important;
+    font-weight: 500;
+}
+
+.team-section.enemy-team {
+    padding-left: 15px;
+}
+
+.team-section.enemy-team .player-name-text {
+    color: #ef4444 !important;
+    font-weight: 500;
+}
+
+.team-section .flex {
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.team-section .flex:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(2px);
+}
+
+.player-name-text {
+    font-size: 12px;
+    font-weight: 400;
+    width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 매치 카드 전체 레이아웃 조정 */
+.match-content {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 20px;
+    align-items: start;
+}
+
+.personal-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .teams-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .team-section.our-team {
+        border-right: none;
+        border-bottom: 1px solid rgba(34, 197, 94, 0.3);
+        padding-right: 0;
+        padding-bottom: 15px;
+    }
+    
+    .team-section.enemy-team {
+        padding-left: 0;
+        padding-top: 15px;
+    }
+    
+    .match-content {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}
+
+/* 기존 Tailwind 클래스와의 호환성 */
+.w-32 { width: 8rem; }
+.truncate { 
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.text-xs { font-size: 0.75rem; line-height: 1rem; }
+.text-green-400 { color: #4ade80; }
+.text-red-400 { color: #f87171; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+.gap-2 { gap: 0.5rem; }
+.size-8 { width: 2rem; height: 2rem; }
+.aspect-square { aspect-ratio: 1 / 1; }
+.w-6 { width: 1.5rem; }
+.h-6 { height: 1.5rem; }
+.rounded-full { border-radius: 9999px; }
+.border { border-width: 1px; }
+.border-border { border-color: rgba(255, 255, 255, 0.1); }
+</style>
