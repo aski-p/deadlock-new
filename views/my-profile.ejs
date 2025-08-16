@@ -4460,30 +4460,73 @@ function displayMatchHistory(matches) {
                     }
                     
                     console.log(`👥 최종 팀 구성: 우리팀 ${myTeam.length}명, 상대팀 ${enemyTeam.length}명`);
-                    console.log(`📋 우리팀 선수들:`, myTeam.map(p => `${p.name}(${p.account_id})`));
-                    console.log(`📋 상대팀 선수들:`, enemyTeam.map(p => `${p.name}(${p.account_id})`));
+                    // 플레이어 이름 정리 함수
+                    const cleanPlayerName = (player) => {
+                        if (!player.name) {
+                            return `Player ${player.account_id || 'Unknown'}`;
+                        }
+                        
+                        // Player_숫자 패턴을 깔끔하게 변환
+                        if (player.name.startsWith('Player_')) {
+                            const numberPart = player.name.replace('Player_', '');
+                            if (/^\d+$/.test(numberPart)) {
+                                // Steam 이름이나 다른 이름이 있다면 우선 사용
+                                if (player.steam_name && player.steam_name !== player.name) {
+                                    return player.steam_name;
+                                }
+                                if (player.display_name && player.display_name !== player.name) {
+                                    return player.display_name;
+                                }
+                                // account_id와 매칭되면 간단히 표시
+                                if (player.account_id && numberPart === player.account_id.toString()) {
+                                    return `Player ${numberPart.slice(-4)}`; // 마지막 4자리만
+                                }
+                                return `Player ${numberPart.slice(-4)}`;
+                            }
+                        }
+                        
+                        // 길이가 너무 긴 이름은 줄이기
+                        if (player.name.length > 12) {
+                            return player.name.substring(0, 10) + '..';
+                        }
+                        
+                        return player.name;
+                    };
+                    
+                    console.log(`📋 우리팀 선수들:`, myTeam.map(p => `${cleanPlayerName(p)}(${p.account_id})`));
+                    console.log(`📋 상대팀 선수들:`, enemyTeam.map(p => `${cleanPlayerName(p)}(${p.account_id})`));
                     
                     // 우리팀 HTML 생성 (최대 6명)
-                    const myTeamHTML = myTeam.slice(0, 6).map(player => `
+                    const myTeamHTML = myTeam.slice(0, 6).map(player => {
+                        const displayName = cleanPlayerName(player);
+                        const fullName = player.name || 'Unknown Player';
+                        
+                        return `
                         <div class="team-player">
                             <img loading="lazy" alt="${player.hero}" title="${player.hero}" 
                                  class="w-6 h-6 rounded-full border border-border" 
                                  src="${getHeroApiUrl(player.hero)}"
                                  onerror="this.src='https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/abrams_mm.webp'">
-                            <span class="player-name-text" title="${player.name}">${player.name}</span>
+                            <span class="player-name-text" title="${fullName}">${displayName}</span>
                         </div>
-                    `).join('');
+                        `;
+                    }).join('');
                     
                     // 상대팀 HTML 생성 (최대 6명)
-                    const enemyTeamHTML = enemyTeam.slice(0, 6).map(player => `
+                    const enemyTeamHTML = enemyTeam.slice(0, 6).map(player => {
+                        const displayName = cleanPlayerName(player);
+                        const fullName = player.name || 'Unknown Player';
+                        
+                        return `
                         <div class="team-player">
                             <img loading="lazy" alt="${player.hero}" title="${player.hero}" 
                                  class="w-6 h-6 rounded-full border border-border" 
                                  src="${getHeroApiUrl(player.hero)}"
                                  onerror="this.src='https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/abrams_mm.webp'">
-                            <span class="player-name-text" title="${player.name}">${player.name}</span>
+                            <span class="player-name-text" title="${fullName}">${displayName}</span>
                         </div>
-                    `).join('');
+                        `;
+                    }).join('');
                     
                     playersContainer.innerHTML = `
                         <div class="teams-grid">
