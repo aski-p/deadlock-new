@@ -4416,41 +4416,36 @@ function displayMatchHistory(matches) {
                     
                     console.log(`👥 현재 사용자 팀: ${currentUserTeam}, 우리팀: ${myTeam.length}명, 상대팀: ${enemyTeam.length}명`);
                     
-                    // 우리팀 HTML 생성
-                    const myTeamHTML = myTeam.map(player => `
-                        <div class="flex items-center gap-2">
-                            <picture>
-                                <source srcset="${getHeroApiUrl(player.hero)}" type="image/webp">
-                                <source srcset="${getHeroApiUrl(player.hero).replace('.webp', '.png')}" type="image/png">
-                                <img loading="lazy" alt="${player.hero}" title="${player.hero}" 
-                                     class="size-8 aspect-square w-6 h-6 rounded-full border border-border" 
-                                     src="${getHeroApiUrl(player.hero)}">
-                            </picture>
-                            <span class="player-name-text w-32 truncate text-xs text-green-400" title="${player.name}">${player.name}</span>
+                    // 우리팀 HTML 생성 (최대 6명)
+                    const myTeamHTML = myTeam.slice(0, 6).map(player => `
+                        <div class="team-player">
+                            <img loading="lazy" alt="${player.hero}" title="${player.hero}" 
+                                 class="w-6 h-6 rounded-full border border-border" 
+                                 src="${getHeroApiUrl(player.hero)}"
+                                 onerror="this.src='https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/abrams_mm.webp'">
+                            <span class="player-name-text" title="${player.name}">${player.name}</span>
                         </div>
                     `).join('');
                     
-                    // 상대팀 HTML 생성
-                    const enemyTeamHTML = enemyTeam.map(player => `
-                        <div class="flex items-center gap-2">
-                            <picture>
-                                <source srcset="${getHeroApiUrl(player.hero)}" type="image/webp">
-                                <source srcset="${getHeroApiUrl(player.hero).replace('.webp', '.png')}" type="image/png">
-                                <img loading="lazy" alt="${player.hero}" title="${player.hero}" 
-                                     class="size-8 aspect-square w-6 h-6 rounded-full border border-border" 
-                                     src="${getHeroApiUrl(player.hero)}">
-                            </picture>
-                            <span class="player-name-text w-32 truncate text-xs text-red-400" title="${player.name}">${player.name}</span>
+                    // 상대팀 HTML 생성 (최대 6명)
+                    const enemyTeamHTML = enemyTeam.slice(0, 6).map(player => `
+                        <div class="team-player">
+                            <img loading="lazy" alt="${player.hero}" title="${player.hero}" 
+                                 class="w-6 h-6 rounded-full border border-border" 
+                                 src="${getHeroApiUrl(player.hero)}"
+                                 onerror="this.src='https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/abrams_mm.webp'">
+                            <span class="player-name-text" title="${player.name}">${player.name}</span>
                         </div>
                     `).join('');
                     
                     playersContainer.innerHTML = `
                         <div class="teams-grid">
-                            <!-- 팀 섹션 -->
                             <div class="team-section our-team">
+                                <div class="team-header">우리팀 (${myTeam.length})</div>
                                 ${myTeamHTML}
                             </div>
                             <div class="team-section enemy-team">
+                                <div class="team-header">상대팀 (${enemyTeam.length})</div>
                                 ${enemyTeamHTML}
                             </div>
                         </div>
@@ -4565,36 +4560,80 @@ function displayMatchHistory(matches) {
                         }
                     };
                     
+                    // 아이템 로딩 표시 먼저
+                    itemsContainer.innerHTML = `
+                        <div class="grid grid-cols-6 gap-1 w-fit">
+                            ${Array(12).fill('<div class="w-8 h-8 rounded border border-border bg-muted opacity-50 animate-pulse"></div>').join('')}
+                        </div>
+                    `;
+                    
                     // 12개 슬롯 배치 (deadlock-api v2/items 기반)
                     const renderItems = async () => {
-                        const itemGridPromises = finalItems.slice(0, 12).map(async (item, index) => {
-                            let itemName = item.name || `Item ${item.itemId || item.id || 'Unknown'}`;
-                            let itemId = item.itemId || item.id;
+                        try {
+                            // 아이템 API 데이터 먼저 로드
+                            if (!window.deadlockItemsCache) {
+                                console.log('🔄 deadlock-api.com에서 아이템 목록 가져오는 중...');
+                                const response = await fetch('https://assets.deadlock-api.com/v2/items');
+                                if (response.ok) {
+                                    window.deadlockItemsCache = await response.json();
+                                    console.log('✅ 아이템 목록 로드 완료:', Object.keys(window.deadlockItemsCache).length, '개');
+                                }
+                            }
                             
-                            // deadlock-api v2/items에서 아이템 정보 가져오기
-                            const itemData = await getDeadlockApiItemUrl(itemName, itemId);
+                            const itemGridHTML = finalItems.slice(0, 12).map((item, itemIndex) => {
+                                let itemName = item.name || `Item ${item.itemId || item.id || 'Unknown'}`;
+                                let itemId = item.itemId || item.id;
+                                
+                                // v2/items API에서 아이템 찾기
+                                let itemData = null;
+                                if (window.deadlockItemsCache) {
+                                    // itemId로 먼저 찾기
+                                    if (itemId && window.deadlockItemsCache[itemId]) {
+                                        itemData = window.deadlockItemsCache[itemId];
+                                    } else {
+                                        // 이름으로 찾기
+                                        for (const [id, cachedItem] of Object.entries(window.deadlockItemsCache)) {
+                                            if (cachedItem.name === itemName || 
+                                                cachedItem.name.toLowerCase().includes(itemName.toLowerCase()) ||
+                                                itemName.toLowerCase().includes(cachedItem.name.toLowerCase())) {
+                                                itemData = cachedItem;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                const displayName = itemData?.name || itemName;
+                                const imageUrl = itemData?.image || 'https://assets.deadlock-api.com/unknown_item.png';
+                                
+                                return `
+                                    <img loading="lazy" alt="${displayName}" title="${displayName}" 
+                                         class="w-8 h-8 rounded border border-border" 
+                                         src="${imageUrl}"
+                                         onerror="this.style.opacity='0.3';">
+                                `;
+                            }).join('');
                             
-                            return `
-                                <img loading="lazy" alt="${itemData.name}" title="${itemData.name}" 
-                                     class="w-8 h-8 rounded border border-border" 
-                                     src="${itemData.image}"
-                                     onerror="this.style.opacity='0.3';">
+                            // 빈 슬롯으로 12개 채우기
+                            const emptySlots = Math.max(0, 12 - finalItems.length);
+                            const emptyHTML = Array(emptySlots).fill('<div class="w-8 h-8 rounded border border-border bg-muted opacity-30"></div>').join('');
+                            
+                            itemsContainer.innerHTML = `
+                                <div class="grid grid-cols-6 gap-1 w-fit">
+                                    ${itemGridHTML}${emptyHTML}
+                                </div>
                             `;
-                        });
-                        
-                        // 모든 아이템 HTML 생성 완료 대기
-                        const itemGridHTML = (await Promise.all(itemGridPromises)).join('');
-                        
-                        // 빈 슬롯으로 12개 채우기
-                        const emptySlots = Math.max(0, 12 - finalItems.length);
-                        const emptyHTML = Array(emptySlots).fill('<div class="w-8 h-8 rounded border border-border bg-muted opacity-30"></div>').join('');
-                        
-                        itemsContainer.innerHTML = `
-                            <div class="grid grid-cols-6 gap-1 w-fit">
-                                ${itemGridHTML}${emptyHTML}
-                            </div>
-                        `;
-                        console.log(`✅ 매치 ${index} 게임 종료 시 최종 보유 아이템 ${finalItems.length}개 표시 완료 (전체 ${itemsData.length}개 중)`);
+                            console.log(`✅ 매치 ${index} v2/items API로 최종 아이템 ${finalItems.length}개 표시 완료`);
+                        } catch (error) {
+                            console.error('❌ 아이템 렌더링 오류:', error);
+                            // 오류 시 기본 슬롯 표시
+                            const emptyHTML = Array(12).fill('<div class="w-8 h-8 rounded border border-border bg-muted opacity-30"></div>').join('');
+                            itemsContainer.innerHTML = `
+                                <div class="grid grid-cols-6 gap-1 w-fit">
+                                    ${emptyHTML}
+                                </div>
+                            `;
+                        }
                     };
                     
                     // async 함수 실행
@@ -5007,6 +5046,38 @@ document.addEventListener('DOMContentLoaded', () => {
     font-weight: 500;
 }
 
+.team-header {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+}
+
+.team-section.our-team .team-header {
+    color: #22c55e;
+}
+
+.team-section.enemy-team .team-header {
+    color: #ef4444;
+}
+
+.team-player {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    margin-bottom: 2px;
+}
+
+.team-player:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(2px);
+}
+
 .team-section .flex {
     align-items: center;
     gap: 8px;
@@ -5088,4 +5159,10 @@ document.addEventListener('DOMContentLoaded', () => {
 .rounded-full { border-radius: 9999px; }
 .border { border-width: 1px; }
 .border-border { border-color: rgba(255, 255, 255, 0.1); }
+.animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
 </style>
