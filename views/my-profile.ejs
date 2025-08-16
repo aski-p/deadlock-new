@@ -4375,11 +4375,22 @@ function displayMatchHistory(matches) {
                 };
                 
                 if (players.length > 0) {
-                    // 현재 사용자(aski)의 팀을 찾기 - account_id로도 확인
-                    let currentUserTeam = 1;
-                    let currentUserIndex = -1;
+                    console.log(`🎮 매치 ${index}: 총 ${players.length}명의 플레이어 데이터 처리`);
                     
-                    // aski 사용자 찾기
+                    // 항상 12명으로 맞추기 (부족하면 Unknown Player로 채움)
+                    while (players.length < 12) {
+                        players.push({
+                            hero: 'Unknown',
+                            name: `Player ${players.length + 1}`,
+                            team: players.length < 6 ? 1 : 2,
+                            account_id: null
+                        });
+                    }
+                    
+                    // 현재 사용자(aski) 찾기
+                    let currentUserIndex = -1;
+                    let currentUserTeam = 1;
+                    
                     for (let i = 0; i < players.length; i++) {
                         const p = players[i];
                         if (p.name === 'aski' || 
@@ -4388,33 +4399,39 @@ function displayMatchHistory(matches) {
                             (p.name && p.name.includes('54776284'))) {
                             currentUserIndex = i;
                             currentUserTeam = p.team;
+                            console.log(`✅ 현재 사용자 발견: 인덱스 ${i}, 팀 ${currentUserTeam}`);
                             break;
                         }
                     }
                     
-                    // 팀 분리
                     let myTeam = [];
                     let enemyTeam = [];
                     
-                    // 사용자를 못찾으면 인덱스 기반으로 팀 구분 (강제로 6:6 분리)
-                    if (currentUserIndex === -1) {
-                        console.log('⚠️ 현재 사용자를 찾을 수 없음, 강제로 6:6 분리');
-                        myTeam = players.slice(0, 6);  // 첫 6명
-                        enemyTeam = players.slice(6, 12); // 나머지 6명
-                    } else {
-                        // 사용자를 찾았으면 팀 기반으로 분리
-                        myTeam = players.filter(p => p.team === currentUserTeam);
-                        enemyTeam = players.filter(p => p.team !== currentUserTeam);
+                    if (currentUserIndex !== -1) {
+                        // 사용자를 찾았으면 팀 기반 분리 시도
+                        const tempMyTeam = players.filter(p => p.team === currentUserTeam);
+                        const tempEnemyTeam = players.filter(p => p.team !== currentUserTeam);
                         
-                        // 만약 팀 분리가 이상하면 (한 팀에 12명 등) 강제로 6:6 분리
-                        if (myTeam.length === 12 || enemyTeam.length === 12 || myTeam.length === 0 || enemyTeam.length === 0) {
-                            console.log('⚠️ 팀 분리 이상, 강제로 6:6 분리');
+                        // 팀 분리가 올바른지 확인 (각 팀 3-7명 사이)
+                        if (tempMyTeam.length >= 3 && tempMyTeam.length <= 7 && 
+                            tempEnemyTeam.length >= 3 && tempEnemyTeam.length <= 7) {
+                            myTeam = tempMyTeam.slice(0, 6);  // 최대 6명
+                            enemyTeam = tempEnemyTeam.slice(0, 6);  // 최대 6명
+                            console.log(`✅ 팀 기반 분리 성공: 우리팀 ${myTeam.length}명, 상대팀 ${enemyTeam.length}명`);
+                        } else {
+                            console.log(`⚠️ 팀 분리 실패 (우리팀: ${tempMyTeam.length}, 상대팀: ${tempEnemyTeam.length}), 강제 6:6 분리`);
+                            // 강제 6:6 분리
                             myTeam = players.slice(0, 6);
                             enemyTeam = players.slice(6, 12);
                         }
+                    } else {
+                        console.log('⚠️ 현재 사용자를 찾을 수 없음, 강제 6:6 분리');
+                        // 강제 6:6 분리
+                        myTeam = players.slice(0, 6);
+                        enemyTeam = players.slice(6, 12);
                     }
                     
-                    console.log(`👥 현재 사용자 팀: ${currentUserTeam}, 우리팀: ${myTeam.length}명, 상대팀: ${enemyTeam.length}명`);
+                    console.log(`👥 최종 팀 구성: 우리팀 ${myTeam.length}명, 상대팀 ${enemyTeam.length}명`);
                     
                     // 우리팀 HTML 생성 (최대 6명)
                     const myTeamHTML = myTeam.slice(0, 6).map(player => `
@@ -4560,50 +4577,57 @@ function displayMatchHistory(matches) {
                         }
                     };
                     
-                    // 아이템 로딩 표시 먼저
+                    // Final Items를 deadlock-api.com에서 직접 가져오기
                     itemsContainer.innerHTML = `
                         <div class="grid grid-cols-6 gap-1 w-fit">
                             ${Array(12).fill('<div class="w-8 h-8 rounded border border-border bg-muted opacity-50 animate-pulse"></div>').join('')}
                         </div>
                     `;
                     
-                    // 12개 슬롯 배치 (deadlock-api v2/items 기반)
-                    const renderItems = async () => {
+                    // deadlock-api.com에서 매치별 final items 직접 가져오기
+                    const renderDirectApiItems = async () => {
                         try {
-                            // 아이템 API 데이터 먼저 로드
+                            console.log(`🔄 매치 ${match.matchId}: deadlock-api.com에서 Final Items 직접 가져오는 중...`);
+                            
+                            // 매치 메타데이터 가져오기 (아이템 포함)
+                            const matchResponse = await fetch(`https://api.deadlock-api.com/v1/matches/metadata?match_ids=${match.matchId}&include_player_items=true`);
+                            if (!matchResponse.ok) throw new Error('매치 API 호출 실패');
+                            
+                            const matchData = await matchResponse.json();
+                            if (!matchData || matchData.length === 0) throw new Error('매치 데이터 없음');
+                            
+                            const matchInfo = matchData[0];
+                            
+                            // 현재 플레이어(aski, account_id: 54776284) 찾기
+                            const currentPlayer = matchInfo.players.find(p => 
+                                p.account_id === 54776284 || 
+                                p.account_id === '54776284'
+                            );
+                            
+                            if (!currentPlayer || !currentPlayer.items) {
+                                throw new Error('플레이어 또는 아이템 데이터 없음');
+                            }
+                            
+                            // Final Items 필터링 (sold_time_s가 0인 아이템들)
+                            const finalItems = currentPlayer.items.filter(item => item.sold_time_s === 0);
+                            console.log(`🏆 매치 ${match.matchId}: Final Items ${finalItems.length}개 발견`);
+                            
+                            // v2/items API에서 아이템 정보 가져오기
                             if (!window.deadlockItemsCache) {
-                                console.log('🔄 deadlock-api.com에서 아이템 목록 가져오는 중...');
-                                const response = await fetch('https://assets.deadlock-api.com/v2/items');
-                                if (response.ok) {
-                                    window.deadlockItemsCache = await response.json();
-                                    console.log('✅ 아이템 목록 로드 완료:', Object.keys(window.deadlockItemsCache).length, '개');
+                                console.log('🔄 아이템 메타데이터 로딩 중...');
+                                const itemsResponse = await fetch('https://assets.deadlock-api.com/v2/items');
+                                if (itemsResponse.ok) {
+                                    window.deadlockItemsCache = await itemsResponse.json();
+                                    console.log('✅ 아이템 메타데이터 로드 완료');
                                 }
                             }
                             
-                            const itemGridHTML = finalItems.slice(0, 12).map((item, itemIndex) => {
-                                let itemName = item.name || `Item ${item.itemId || item.id || 'Unknown'}`;
-                                let itemId = item.itemId || item.id;
-                                
-                                // v2/items API에서 아이템 찾기
-                                let itemData = null;
-                                if (window.deadlockItemsCache) {
-                                    // itemId로 먼저 찾기
-                                    if (itemId && window.deadlockItemsCache[itemId]) {
-                                        itemData = window.deadlockItemsCache[itemId];
-                                    } else {
-                                        // 이름으로 찾기
-                                        for (const [id, cachedItem] of Object.entries(window.deadlockItemsCache)) {
-                                            if (cachedItem.name === itemName || 
-                                                cachedItem.name.toLowerCase().includes(itemName.toLowerCase()) ||
-                                                itemName.toLowerCase().includes(cachedItem.name.toLowerCase())) {
-                                                itemData = cachedItem;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
-                                
-                                const displayName = itemData?.name || itemName;
+                            const itemsCache = window.deadlockItemsCache || {};
+                            
+                            // 아이템 HTML 생성
+                            const itemGridHTML = finalItems.slice(0, 12).map(item => {
+                                const itemData = itemsCache[item.item_id];
+                                const displayName = itemData?.name || `Item ${item.item_id}`;
                                 const imageUrl = itemData?.image || 'https://assets.deadlock-api.com/unknown_item.png';
                                 
                                 return `
@@ -4623,21 +4647,45 @@ function displayMatchHistory(matches) {
                                     ${itemGridHTML}${emptyHTML}
                                 </div>
                             `;
-                            console.log(`✅ 매치 ${index} v2/items API로 최종 아이템 ${finalItems.length}개 표시 완료`);
+                            console.log(`✅ 매치 ${match.matchId}: deadlock-api.com에서 Final Items ${finalItems.length}개 직접 로드 완료`);
+                            
                         } catch (error) {
-                            console.error('❌ 아이템 렌더링 오류:', error);
-                            // 오류 시 기본 슬롯 표시
-                            const emptyHTML = Array(12).fill('<div class="w-8 h-8 rounded border border-border bg-muted opacity-30"></div>').join('');
-                            itemsContainer.innerHTML = `
-                                <div class="grid grid-cols-6 gap-1 w-fit">
-                                    ${emptyHTML}
-                                </div>
-                            `;
+                            console.error(`❌ 매치 ${match.matchId} Final Items 직접 로드 실패:`, error);
+                            
+                            // 기존 방식으로 fallback
+                            if (finalItems && finalItems.length > 0) {
+                                console.log(`🔄 매치 ${index}: 기존 방식으로 fallback`);
+                                const fallbackHTML = finalItems.slice(0, 12).map(item => {
+                                    const itemName = item.name || `Item ${item.itemId || item.id || 'Unknown'}`;
+                                    return `
+                                        <div class="w-8 h-8 rounded border border-border bg-gray-700 flex items-center justify-center text-xs" title="${itemName}">
+                                            ?
+                                        </div>
+                                    `;
+                                }).join('');
+                                
+                                const emptySlots = Math.max(0, 12 - finalItems.length);
+                                const emptyHTML = Array(emptySlots).fill('<div class="w-8 h-8 rounded border border-border bg-muted opacity-30"></div>').join('');
+                                
+                                itemsContainer.innerHTML = `
+                                    <div class="grid grid-cols-6 gap-1 w-fit">
+                                        ${fallbackHTML}${emptyHTML}
+                                    </div>
+                                `;
+                            } else {
+                                // 완전 실패 시 빈 슬롯
+                                const emptyHTML = Array(12).fill('<div class="w-8 h-8 rounded border border-border bg-muted opacity-30"></div>').join('');
+                                itemsContainer.innerHTML = `
+                                    <div class="grid grid-cols-6 gap-1 w-fit">
+                                        ${emptyHTML}
+                                    </div>
+                                `;
+                            }
                         }
                     };
                     
                     // async 함수 실행
-                    renderItems();
+                    renderDirectApiItems();
                 } else {
                     // 아이템 데이터가 없는 경우 - 바로 빈 슬롯 표시 (무한로딩 방지)
                     console.log(`⚠️ 매치 ${index}: 아이템 데이터 없음, 빈 슬롯 표시`);
