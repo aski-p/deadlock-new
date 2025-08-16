@@ -4471,11 +4471,16 @@ function displayMatchHistory(matches) {
                             return `Player ${player.account_id || 'Unknown'}`;
                         }
                         
-                        // Player_숫자 패턴일 때 실제 Steam 이름 가져오기
-                        if (player.name.startsWith('Player_')) {
-                            const numberPart = player.name.replace('Player_', '');
+                        // Player_숫자 또는 Player 숫자 패턴일 때 실제 Steam 이름 가져오기
+                        const playerNamePattern = /^Player[_\s]?(\d+)$/;
+                        const match = player.name.match(playerNamePattern);
+                        if (match) {
+                            const numberPart = match[1];
                             if (/^\d+$/.test(numberPart)) {
-                                // 캐시된 이름이 있으면 사용
+                                // 캐시된 이름이 있으면 사용 (account_id 우선, numberPart 다음)
+                                if (window.playerNameCache[player.account_id]) {
+                                    return window.playerNameCache[player.account_id];
+                                }
                                 if (window.playerNameCache[numberPart]) {
                                     return window.playerNameCache[numberPart];
                                 }
@@ -4492,10 +4497,13 @@ function displayMatchHistory(matches) {
                                 
                                 // deadlock-api에서 플레이어 정보 가져오기 시도
                                 try {
-                                    console.log(`🔍 플레이어 ${numberPart}의 실제 이름 검색 중...`);
+                                    console.log(`🔍 플레이어 ${numberPart}의 실제 이름 검색 중... (account_id: ${player.account_id})`);
                                     
-                                    // 여러 API 엔드포인트 시도
+                                    // 여러 API 엔드포인트 시도 - account_id와 numberPart 둘 다 시도
                                     const apiUrls = [
+                                        `https://api.deadlock-api.com/v1/players/${player.account_id}`,
+                                        `https://api.deadlock-api.com/v1/players/steam/${player.account_id}`,
+                                        `https://deadlock-api.com/v1/players/${player.account_id}`,
                                         `https://api.deadlock-api.com/v1/players/${numberPart}`,
                                         `https://api.deadlock-api.com/v1/players/steam/${numberPart}`,
                                         `https://deadlock-api.com/v1/players/${numberPart}`
@@ -4506,10 +4514,17 @@ function displayMatchHistory(matches) {
                                             const playerResponse = await fetch(apiUrl);
                                             if (playerResponse.ok) {
                                                 const playerData = await playerResponse.json();
+                                                let realName = null;
+                                                
+                                                // 일반적인 deadlock-api 응답 처리
                                                 if (playerData && (playerData.name || playerData.steam_name) && 
                                                     (playerData.name !== player.name || playerData.steam_name !== player.name)) {
-                                                    const realName = playerData.name || playerData.steam_name;
-                                                    console.log(`✅ 플레이어 ${numberPart}: ${realName} 발견`);
+                                                    realName = playerData.name || playerData.steam_name;
+                                                }
+                                                
+                                                if (realName && realName.trim() && realName !== player.name) {
+                                                    console.log(`✅ 플레이어 ${numberPart}: ${realName} 발견 (${apiUrl})`);
+                                                    window.playerNameCache[player.account_id] = realName; // account_id로도 캐시
                                                     window.playerNameCache[numberPart] = realName;
                                                     return realName;
                                                 }
