@@ -4371,7 +4371,8 @@ function displayMatchHistory(matches) {
                     }
                     
                     const heroKey = heroMap[normalizedName] || heroMap[normalizedName.toLowerCase()] || 'abrams';
-                    return `https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/${heroKey}_mm.webp`;
+                    // 실제 존재하는 abilities 폴더 이미지 사용 (heroes 폴더가 404이므로)
+                    return `https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp`;
                 };
                 
                 if (players.length > 0) {
@@ -4471,11 +4472,12 @@ function displayMatchHistory(matches) {
                             return `Player ${player.account_id || 'Unknown'}`;
                         }
                         
-                        // Player_숫자 또는 Player 숫자 패턴일 때 실제 Steam 이름 가져오기
+                        // Player_숫자 또는 Player 숫자 패턴일 때 실제 Steam 이름 가져오기 (긴 숫자도 포함)
                         const playerNamePattern = /^Player[_\s]?(\d+)$/;
                         const match = player.name.match(playerNamePattern);
                         if (match) {
                             const numberPart = match[1];
+                            console.log(`🔍 Player 패턴 감지: ${player.name} → 숫자: ${numberPart}, account_id: ${player.account_id}`);
                             if (/^\d+$/.test(numberPart)) {
                                 // 캐시된 이름이 있으면 사용 (account_id 우선, numberPart 다음)
                                 if (window.playerNameCache[player.account_id]) {
@@ -4583,7 +4585,7 @@ function displayMatchHistory(matches) {
                                     <img loading="lazy" alt="${player.hero}" title="${player.hero}" 
                                          class="w-6 h-6 rounded-full border border-border" 
                                          src="${getHeroApiUrl(player.hero)}"
-                                         onerror="this.src='https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/abrams_mm.webp'">
+                                         onerror="this.src='https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp'">
                                     <span class="player-name-text" title="${fullName}">${player.displayName}</span>
                                 </div>
                                 `;
@@ -4598,7 +4600,7 @@ function displayMatchHistory(matches) {
                                     <img loading="lazy" alt="${player.hero}" title="${player.hero}" 
                                          class="w-6 h-6 rounded-full border border-border" 
                                          src="${getHeroApiUrl(player.hero)}"
-                                         onerror="this.src='https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/abrams_mm.webp'">
+                                         onerror="this.src='https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp'">
                                     <span class="player-name-text" title="${fullName}">${player.displayName}</span>
                                 </div>
                                 `;
@@ -4631,7 +4633,7 @@ function displayMatchHistory(matches) {
                                     <img loading="lazy" alt="${player.hero}" title="${player.hero}" 
                                          class="w-6 h-6 rounded-full border border-border" 
                                          src="${getHeroApiUrl(player.hero)}"
-                                         onerror="this.src='https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/abrams_mm.webp'">
+                                         onerror="this.src='https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp'">
                                     <span class="player-name-text" title="${displayName}">${displayName}</span>
                                 </div>
                                 `;
@@ -4645,7 +4647,7 @@ function displayMatchHistory(matches) {
                                     <img loading="lazy" alt="${player.hero}" title="${player.hero}" 
                                          class="w-6 h-6 rounded-full border border-border" 
                                          src="${getHeroApiUrl(player.hero)}"
-                                         onerror="this.src='https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/abrams_mm.webp'">
+                                         onerror="this.src='https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp'">
                                     <span class="player-name-text" title="${displayName}">${displayName}</span>
                                 </div>
                                 `;
@@ -4849,89 +4851,91 @@ function displayMatchHistory(matches) {
                             
                             // 포괄적인 아이템 ID → 이미지 매핑 시스템
                             const getItemImageByName = (itemName, itemId) => {
-                                // Item ID 기반 매핑 (실제 게임 데이터 기반)
+                                // Item ID 기반 매핑 - 실제 존재하는 abilities 폴더 이미지 사용
                                 const itemIdMapping = {
-                                    // Common items by ID
-                                    '3817461040': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/melee_lifesteal.webp', // 근접전
-                                    '2859015099': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/extended_mag.webp', // 확장 탄창
-                                    '3617449734': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/headshot_booster.webp', // 헤드샷 부스터
-                                    '3281632308': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/high_velocity_mag.webp', // 고속탄
-                                    '893298734': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/monster_rounds.webp', // 괴수탄
-                                    '1889982162': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/rapid_rounds.webp', // 급속탄
-                                    '519124136': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/restorative_shot.webp', // 회복탄
-                                    '1741128720': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/extra_health.webp', // 추가 체력
-                                    '2671070013': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/extra_regen.webp', // 추가 재생
-                                    '4020355504': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/extra_stamina.webp', // 추가 활력
-                                    '2486928654': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/healing_rite.webp', // 치유 의식
-                                    '2765354845': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/melee_charge.webp', // 근거리 치유
-                                    '3561817145': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/return_fire.webp', // 반격
-                                    '4235710040': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/swift_striker.webp', // 쾌속 장화
-                                    '3152051256': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/extra_spirit.webp', // 추가 영혼력
-                                    '4143709951': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/mystic_shot.webp', // 신령 강타
+                                    // 모든 아이템을 기본 weapon_damage 이미지로 설정 (실제 존재하는 이미지)
+                                    '3817461040': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 근접전
+                                    '2859015099': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 확장 탄창
+                                    '3617449734': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 헤드샷 부스터
+                                    '3281632308': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 고속탄
+                                    '893298734': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 괴수탄
+                                    '1889982162': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 급속탄
+                                    '519124136': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 회복탄
+                                    '1741128720': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp', // 추가 체력
+                                    '2671070013': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp', // 추가 재생
+                                    '4020355504': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp', // 추가 활력
+                                    '2486928654': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp', // 치유 의식
+                                    '2765354845': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp', // 근거리 치유
+                                    '3561817145': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp', // 반격
+                                    '4235710040': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp', // 쾌속 장화
+                                    '3152051256': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp', // 추가 영혼력
+                                    '4143709951': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp', // 신령 강타
                                     
-                                    // Tier 2 items
-                                    '1670754804': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/armor_scrap.webp', // 대피소
-                                    '3840831259': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/bullet_lifesteal.webp', // 총알 흡혈
-                                    '2493890324': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/debuff_reducer.webp', // 디버프 감소기
-                                    '1875867043': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/divine_barrier.webp', // 신령 장교
-                                    '3548951014': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/enduring_spirit.webp', // 지구력
-                                    '2767950825': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/healing_booster.webp', // 치유 부스터
-                                    '1580157332': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/superior_stamina.webp', // 향상된 활력
-                                    '2959977555': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/spirit_lifesteal.webp', // 정신 흡혈
-                                    '1495654281': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/combat_barrier.webp', // 혈투 흉갑
+                                    // Tier 2 items - 다른 abilities 이미지 사용
+                                    '1670754804': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 대피소
+                                    '3840831259': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 총알 흡혈
+                                    '2493890324': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 디버프 감소기
+                                    '1875867043': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 신령 장교
+                                    '3548951014': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 지구력
+                                    '2767950825': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 치유 부스터
+                                    '1580157332': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 향상된 활력
+                                    '2959977555': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 정신 흡혈
+                                    '1495654281': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 혈투 흉갑
                                     
                                     // More tier 2 weapon items
-                                    '4261209046': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/active_reload.webp', // 능동 재장전
-                                    '2815297796': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/backstab.webp', // 후방타격
-                                    '554674370': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/slowing_bullets.webp', // 둔화 실탄
-                                    '3720043509': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/improved_magazine.webp', // 강화 탄창
-                                    '4072174992': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/kinetic_dash.webp', // 역학적 돌진
-                                    '970073473': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/long_range.webp', // 장거리
-                                    '1074623778': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/melee_charge.webp', // 근접 충전
-                                    '2994143896': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/sprint.webp', // 질주
-                                    '866020883': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/shock_rounds.webp', // 충격실탄
-                                    '1946154123': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/soul_shred_bullets.webp', // 정신 파쇄탄
-                                    '2875767690': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/bullet_spread.webp', // 탄환 분산
-                                    '3995142999': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/quicksilver_reload.webp', // 신속 타격수
-                                    '3996264036': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/large_magazine.webp', // 거대 탄창
-                                    '4020540608': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/weakening_headshot.webp', // 약화 헤드샷
+                                    '4261209046': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 능동 재장전
+                                    '2815297796': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 후방타격
+                                    '554674370': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 둔화 실탄
+                                    '3720043509': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 강화 탄창
+                                    '4072174992': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 역학적 돌진
+                                    '970073473': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 장거리
+                                    '1074623778': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 근접 충전
+                                    '2994143896': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 질주
+                                    '866020883': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 충격실탄
+                                    '1946154123': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 정신 파쇄탄
+                                    '2875767690': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 탄환 분산
+                                    '3995142999': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 신속 타격수
+                                    '3996264036': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 거대 탄창
+                                    '4020540608': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 약화 헤드샷
                                 };
                                 
-                                // 아이템 이름 기반 매핑 (fallback)
+                                // 아이템 이름 기반 매핑 (fallback) - 실제 존재하는 abilities 이미지 사용
                                 const itemNameMapping = {
-                                    // Korean names
-                                    '근접전': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/melee_lifesteal.webp',
-                                    '확장 탄창': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/extended_mag.webp',
-                                    '헤드샷 부스터': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/headshot_booster.webp',
-                                    '고속탄': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/high_velocity_mag.webp',
-                                    '괴수탄': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/monster_rounds.webp',
-                                    '급속탄': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/rapid_rounds.webp',
-                                    '회복탄': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/restorative_shot.webp',
-                                    '추가 체력': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/extra_health.webp',
-                                    '추가 재생': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/extra_regen.webp',
-                                    '추가 활력': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/extra_stamina.webp',
-                                    '치유 의식': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/healing_rite.webp',
-                                    '근거리 치유': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/melee_charge.webp',
-                                    '반격': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/return_fire.webp',
-                                    '쾌속 장화': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/swift_striker.webp',
-                                    '추가 영혼력': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/extra_spirit.webp',
-                                    '신령 강타': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/mystic_shot.webp',
+                                    // 무기 아이템들 - weapon_damage 이미지 사용
+                                    '근접전': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+                                    '확장 탄창': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+                                    '헤드샷 부스터': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+                                    '고속탄': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+                                    '괴수탄': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+                                    '급속탄': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+                                    '회복탄': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+                                    
+                                    // 생명력 아이템들 - wraith_lift 이미지 사용 (다른 색상으로 구분)
+                                    '추가 체력': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp',
+                                    '추가 재생': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp',
+                                    '추가 활력': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp',
+                                    '치유 의식': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp',
+                                    '근거리 치유': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp',
+                                    '반격': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp',
+                                    '쾌속 장화': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp',
+                                    '추가 영혼력': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp',
+                                    '신령 강타': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp',
                                     
                                     // English names
-                                    'Melee Lifesteal': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/melee_lifesteal.webp',
-                                    'Extended Magazine': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/extended_mag.webp',
-                                    'Headshot Booster': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/headshot_booster.webp',
-                                    'High-Velocity Mag': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/high_velocity_mag.webp',
-                                    'Monster Rounds': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/monster_rounds.webp',
-                                    'Rapid Rounds': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/rapid_rounds.webp',
-                                    'Restorative Shot': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/restorative_shot.webp',
-                                    'Extra Health': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/extra_health.webp',
-                                    'Extra Regen': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/extra_regen.webp',
-                                    'Extra Stamina': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/extra_stamina.webp',
-                                    'Healing Rite': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/healing_rite.webp',
-                                    'Swift Striker': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/swift_striker.webp',
-                                    'Extra Spirit': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/extra_spirit.webp',
-                                    'Mystic Shot': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/mystic_shot.webp',
+                                    'Melee Lifesteal': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+                                    'Extended Magazine': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+                                    'Headshot Booster': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+                                    'High-Velocity Mag': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+                                    'Monster Rounds': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+                                    'Rapid Rounds': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+                                    'Restorative Shot': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+                                    'Extra Health': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp',
+                                    'Extra Regen': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp',
+                                    'Extra Stamina': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp',
+                                    'Healing Rite': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp',
+                                    'Swift Striker': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp',
+                                    'Extra Spirit': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp',
+                                    'Mystic Shot': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp',
                                 };
                                 
                                 // 우선순위: 아이템 ID → 아이템 이름 → 기본값
@@ -4943,8 +4947,8 @@ function displayMatchHistory(matches) {
                                     return itemNameMapping[itemName];
                                 }
                                 
-                                // 기본값 - 사용 가능한 upgrades 폴더 이미지
-                                return 'https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/generic_item.webp';
+                                // 기본값 - 실제로 존재하는 abilities 폴더 이미지 사용
+                                return 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp';
                             };
                             
                             // 아이템 HTML 생성
@@ -4975,7 +4979,7 @@ function displayMatchHistory(matches) {
                                     <img loading="lazy" alt="${displayName}" title="${displayName}" 
                                          class="w-8 h-8 rounded border ${isUpgraded ? 'border-yellow-500' : 'border-border'}" 
                                          src="${imageUrl}"
-                                         onerror="this.onerror=null; this.src='https://assets-bucket.deadlock-api.com/assets-api-res/images/upgrades/generic_item.webp'; console.log('❌ 아이템 이미지 fallback:', '${actualItemId}');"
+                                         onerror="this.onerror=null; this.src='https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp'; console.log('❌ 아이템 이미지 fallback:', '${actualItemId}');"
                                          onload="console.log('✅ 아이템 이미지 로드 성공:', '${actualItemId}');">
                                 `;
                             }).join('');
