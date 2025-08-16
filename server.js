@@ -2001,71 +2001,17 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
 
     console.log(`🔍 플레이어 상세 정보 요청: ${accountId}`);
 
-    // 먼저 리더보드에서 플레이어 데이터를 찾기 시도 - 병렬 처리로 최적화
+    // 리더보드 검색 최적화: 성능상 이유로 기본적으로 건너뛰고 필요시에만 수행
     let leaderboardRankData = null;
-    try {
-      console.log(`🔍 리더보드에서 플레이어 ${accountId} 검색 중...`);
-
-      // 모든 지역의 리더보드를 병렬로 검색하여 성능 최적화
-      const regions = ['asia', 'europe', 'north-america', 'south-america', 'oceania'];
-      
-      // 각 지역별로 캐시 키 생성
-      const leaderboardCacheKey = `leaderboard-search-${accountId}`;
-      const cachedLeaderboardResult = getCachedData(leaderboardCacheKey);
-      
-      if (cachedLeaderboardResult) {
-        console.log(`💾 캐시된 리더보드 데이터 사용: ${accountId}`);
-        leaderboardRankData = cachedLeaderboardResult;
-      } else {
-        // 병렬로 모든 지역 검색
-        const searchPromises = regions.map(async (region) => {
-          try {
-            const leaderboardData = await fetchDeadlockLeaderboard(region, 1, 1000);
-            if (leaderboardData && leaderboardData.data) {
-              const foundPlayer = leaderboardData.data.find(
-                player =>
-                  player.player.accountId === accountId ||
-                  player.player.steamId === accountId ||
-                  (player.player.accountId &&
-                    player.player.accountId.toString() === accountId.toString())
-              );
-
-              if (foundPlayer) {
-                return {
-                  region,
-                  data: {
-                    medal: foundPlayer.medal,
-                    subrank: foundPlayer.subrank,
-                    score: foundPlayer.score,
-                    rank: foundPlayer.rank,
-                  }
-                };
-              }
-            }
-            return null;
-          } catch (regionError) {
-            console.log(`⚠️ 리더보드 ${region} 검색 실패: ${regionError.message}`);
-            return null;
-          }
-        });
-
-        // Promise.allSettled로 실패한 요청이 있어도 다른 결과를 기다림
-        const results = await Promise.allSettled(searchPromises);
-        
-        // 첫 번째로 찾은 결과 사용
-        for (const result of results) {
-          if (result.status === 'fulfilled' && result.value) {
-            leaderboardRankData = result.value.data;
-            console.log(`✅ 리더보드 ${result.value.region}에서 플레이어 발견:`, leaderboardRankData);
-            
-            // 리더보드 검색 결과 캐싱 (10분)
-            setCachedData(leaderboardCacheKey, leaderboardRankData, 10 * 60 * 1000);
-            break;
-          }
-        }
-      }
-    } catch (leaderboardError) {
-      console.log(`⚠️ 리더보드 검색 전체 실패: ${leaderboardError.message}`);
+    const leaderboardCacheKey = `leaderboard-search-${accountId}`;
+    
+    // 캐시된 리더보드 데이터만 확인 (새로운 API 호출은 하지 않음)
+    const cachedLeaderboardResult = getCachedData(leaderboardCacheKey);
+    if (cachedLeaderboardResult) {
+      console.log(`💾 캐시된 리더보드 데이터 사용: ${accountId}`);
+      leaderboardRankData = cachedLeaderboardResult;
+    } else {
+      console.log(`⚡ 성능 최적화를 위해 리더보드 검색 건너뛰기: ${accountId}`);
     }
 
     // 실제 플레이어 카드 API 호출 시도
