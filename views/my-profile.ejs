@@ -4513,26 +4513,47 @@ function displayMatchHistory(matches) {
                                     
                                     for (const apiUrl of apiUrls) {
                                         try {
-                                            const playerResponse = await fetch(apiUrl);
+                                            console.log(`🔍 API 시도: ${apiUrl}`);
+                                            const playerResponse = await fetch(apiUrl, {
+                                                method: 'GET',
+                                                headers: {
+                                                    'Accept': 'application/json',
+                                                    'User-Agent': 'DeadlockCoach/1.0'
+                                                }
+                                            });
+                                            
                                             if (playerResponse.ok) {
                                                 const playerData = await playerResponse.json();
+                                                console.log(`📄 API 응답:`, playerData);
+                                                
                                                 let realName = null;
                                                 
-                                                // 일반적인 deadlock-api 응답 처리
-                                                if (playerData && (playerData.name || playerData.steam_name) && 
-                                                    (playerData.name !== player.name || playerData.steam_name !== player.name)) {
-                                                    realName = playerData.name || playerData.steam_name;
+                                                // deadlock-api 응답에서 이름 추출
+                                                if (playerData) {
+                                                    if (playerData.name && playerData.name !== player.name && !playerData.name.startsWith('Player')) {
+                                                        realName = playerData.name;
+                                                    } else if (playerData.steam_name && playerData.steam_name !== player.name && !playerData.steam_name.startsWith('Player')) {
+                                                        realName = playerData.steam_name;
+                                                    } else if (playerData.personaname && !playerData.personaname.startsWith('Player')) {
+                                                        realName = playerData.personaname;
+                                                    } else if (playerData.display_name && !playerData.display_name.startsWith('Player')) {
+                                                        realName = playerData.display_name;
+                                                    }
                                                 }
                                                 
                                                 if (realName && realName.trim() && realName !== player.name) {
-                                                    console.log(`✅ 플레이어 ${numberPart}: ${realName} 발견 (${apiUrl})`);
-                                                    window.playerNameCache[player.account_id] = realName; // account_id로도 캐시
+                                                    console.log(`✅ 플레이어 ${player.account_id}: ${realName} 발견! (${apiUrl})`);
+                                                    window.playerNameCache[player.account_id] = realName;
                                                     window.playerNameCache[numberPart] = realName;
                                                     return realName;
+                                                } else {
+                                                    console.log(`⚠️ 유효한 이름 없음 - API: ${apiUrl}, 응답:`, playerData);
                                                 }
+                                            } else {
+                                                console.log(`❌ API ${apiUrl} 실패: ${playerResponse.status}`);
                                             }
                                         } catch (apiError) {
-                                            console.log(`⚠️ API ${apiUrl} 호출 실패:`, apiError);
+                                            console.log(`⚠️ API ${apiUrl} 호출 실패:`, apiError.message);
                                             continue;
                                         }
                                     }
@@ -4811,8 +4832,20 @@ function displayMatchHistory(matches) {
                                 throw new Error('플레이어 또는 아이템 데이터 없음');
                             }
                             
-                            // Final Items 필터링 (sold_time_s가 0인 아이템들)
-                            const finalItems = currentPlayer.items.filter(item => item.sold_time_s === 0);
+                            // 실제 Final Items 추출 (sold_time_s가 0인 아이템들을 시간순으로 정렬)
+                            const allUnsoldItems = currentPlayer.items.filter(item => item.sold_time_s === 0);
+                            console.log(`📦 전체 미판매 아이템 ${allUnsoldItems.length}개:`, allUnsoldItems);
+                            
+                            // 아이템을 시간순으로 정렬하고 마지막 12개 추출
+                            const sortedItems = allUnsoldItems.sort((a, b) => b.game_time_s - a.game_time_s);
+                            const finalItems = sortedItems.slice(0, 12);
+                            
+                            console.log(`🎯 최종 Final Items ${finalItems.length}개:`, finalItems.map(item => ({
+                                item_id: item.item_id,
+                                upgrade_id: item.upgrade_id,
+                                game_time: item.game_time_s,
+                                display_id: item.upgrade_id || item.item_id
+                            })));
                             console.log(`🏆 매치 ${match.matchId}: Final Items ${finalItems.length}개 발견`);
                             console.log(`📦 Final Items 데이터:`, finalItems.map(item => ({
                                 item_id: item.item_id,
@@ -4849,55 +4882,122 @@ function displayMatchHistory(matches) {
                             
                             const itemsCache = window.deadlockItemsCache || {};
                             
-                            // 포괄적인 아이템 ID → 이미지 매핑 시스템
-                            const getItemImageByName = (itemName, itemId) => {
-                                // Item ID 기반 매핑 - 실제 존재하는 abilities 폴더 이미지 사용
-                                const itemIdMapping = {
-                                    // 모든 아이템을 기본 weapon_damage 이미지로 설정 (실제 존재하는 이미지)
-                                    '3817461040': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 근접전
-                                    '2859015099': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 확장 탄창
-                                    '3617449734': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 헤드샷 부스터
-                                    '3281632308': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 고속탄
-                                    '893298734': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 괴수탄
-                                    '1889982162': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 급속탄
-                                    '519124136': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 회복탄
-                                    '1741128720': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp', // 추가 체력
-                                    '2671070013': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp', // 추가 재생
-                                    '4020355504': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp', // 추가 활력
-                                    '2486928654': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp', // 치유 의식
-                                    '2765354845': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp', // 근거리 치유
-                                    '3561817145': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp', // 반격
-                                    '4235710040': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp', // 쾌속 장화
-                                    '3152051256': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp', // 추가 영혼력
-                                    '4143709951': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_lift.webp', // 신령 강타
+                            // 실제 매치에서 발견된 아이템 ID → 이름 및 이미지 매핑
+                            const getActualItemImageAndName = async (itemId, upgradeId) => {
+                                const actualItemId = upgradeId || itemId;
+                                
+                                // v2/items API에서 실제 아이템 정보 가져오기
+                                try {
+                                    if (!window.deadlockItemsCache) {
+                                        const itemsResponse = await fetch('https://assets.deadlock-api.com/v2/items');
+                                        if (itemsResponse.ok) {
+                                            const itemsArray = await itemsResponse.json();
+                                            window.deadlockItemsCache = {};
+                                            itemsArray.forEach(item => {
+                                                if (item.id) {
+                                                    window.deadlockItemsCache[item.id] = item;
+                                                }
+                                            });
+                                            console.log('✅ v2/items 캐시 로드 완료:', Object.keys(window.deadlockItemsCache).length, '개');
+                                        }
+                                    }
                                     
-                                    // Tier 2 items - 다른 abilities 이미지 사용
-                                    '1670754804': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 대피소
-                                    '3840831259': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 총알 흡혈
-                                    '2493890324': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 디버프 감소기
-                                    '1875867043': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 신령 장교
-                                    '3548951014': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 지구력
-                                    '2767950825': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 치유 부스터
-                                    '1580157332': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 향상된 활력
-                                    '2959977555': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 정신 흡혈
-                                    '1495654281': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 혈투 흉갑
-                                    
-                                    // More tier 2 weapon items
-                                    '4261209046': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 능동 재장전
-                                    '2815297796': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 후방타격
-                                    '554674370': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 둔화 실탄
-                                    '3720043509': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 강화 탄창
-                                    '4072174992': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 역학적 돌진
-                                    '970073473': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 장거리
-                                    '1074623778': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 근접 충전
-                                    '2994143896': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 질주
-                                    '866020883': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 충격실탄
-                                    '1946154123': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 정신 파쇄탄
-                                    '2875767690': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 탄환 분산
-                                    '3995142999': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 신속 타격수
-                                    '3996264036': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 거대 탄창
-                                    '4020540608': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', // 약화 헤드샷
+                                    const itemData = window.deadlockItemsCache[actualItemId];
+                                    if (itemData) {
+                                        return {
+                                            name: itemData.name || `Item ${actualItemId}`,
+                                            image: itemData.image_webp || itemData.image || getItemImageById(actualItemId),
+                                            found: true
+                                        };
+                                    }
+                                } catch (error) {
+                                    console.error('v2/items API 에러:', error);
+                                }
+                                
+                                // v2/items에서 못 찾으면 직접 매핑
+                                return {
+                                    name: getItemNameById(actualItemId),
+                                    image: getItemImageById(actualItemId),
+                                    found: false
                                 };
+                            };
+                            
+                            // 로컬 이미지 기반 아이템 ID → 이미지 매핑
+                            const getItemImageById = (itemId) => {
+                                const localItemMapping = {
+                                    // Weapon 아이템들 (로컬 이미지 사용)
+                                    '519124136': '/images/items/weapon/basic_magazine.webp',     // Restorative Shot
+                                    '865846625': '/images/items/weapon/headshot_booster.webp',  // Weapon item
+                                    '2519598785': '/images/items/weapon/burst_fire.webp',       // Weapon Power
+                                    '3561817145': '/images/items/weapon/close_quarters.webp',   // Return Fire 
+                                    '519818856': '/images/items/weapon/glass_cannon.webp',      // Upgraded weapon
+                                    '3817461040': '/images/items/weapon/berserker.webp',        // 근접전
+                                    '2859015099': '/images/items/weapon/basic_magazine.webp',   // 확장 탄창
+                                    '3617449734': '/images/items/weapon/headshot_booster.webp', // 헤드샷 부스터
+                                    
+                                    // Vitality 아이템들
+                                    '3731635960': '/images/items/vitality/extra_health.webp',   // Vitality item
+                                    '915014646': '/images/items/vitality/extra_regen.webp',     // Health Item
+                                    '2670099061': '/images/items/vitality/healing_rite.webp',   // Vitality Base
+                                    '856231037': '/images/items/vitality/fortitude.webp',       // Vitality Upgrade
+                                    '1741128720': '/images/items/vitality/extra_health.webp',   // 추가 체력
+                                    '2671070013': '/images/items/vitality/extra_regen.webp',    // 추가 재생
+                                    
+                                    // Spirit 아이템들
+                                    '3812615317': '/images/items/spirit/mystic_burst.webp',     // Spirit item
+                                    '2121044373': '/images/items/spirit/spirit_strike.webp',   // Spirit Power
+                                    '1193964439': '/images/items/spirit/extra_charge.webp',    // Spirit Enhancement
+                                    '3152051256': '/images/items/spirit/improved_cooldown.webp', // 추가 영혼력
+                                    
+                                    // 기타 아이템들
+                                    '397010810': '/images/items/weapon/sharpshooter.svg',      // Base item
+                                    '808565891': '/images/items/weapon/titanic_magazine.webp', // Upgraded version
+                                    '2590': '/images/items/vitality/sprint_boots.webp',        // Basic item
+                                };
+                                
+                                // 매핑된 이미지가 있으면 사용, 없으면 카테고리별 기본 이미지
+                                const mappedImage = localItemMapping[itemId.toString()];
+                                if (mappedImage) return mappedImage;
+                                
+                                // 아이템 ID 범위로 카테고리 추정
+                                const idNum = parseInt(itemId);
+                                if (idNum < 1000000) {
+                                    return '/images/items/vitality/extra_health.webp'; // Vitality
+                                } else if (idNum < 3000000) {
+                                    return '/images/items/weapon/basic_magazine.webp'; // Weapon
+                                } else {
+                                    return '/images/items/spirit/mystic_burst.webp'; // Spirit
+                                }
+                            };
+                            
+                            // 아이템 ID → 이름 매핑
+                            const getItemNameById = (itemId) => {
+                                const itemNameMapping = {
+                                    '519124136': 'Restorative Shot',
+                                    '3812615317': 'Spirit Item',
+                                    '865846625': 'Weapon Item',
+                                    '397010810': 'Base Item',
+                                    '808565891': 'Upgraded Item',
+                                    '3731635960': 'Vitality Item',
+                                    '2590': 'Basic Item',
+                                    '2121044373': 'Spirit Power',
+                                    '3561817145': 'Return Fire',
+                                    '519818856': 'Upgraded Return Fire',
+                                    '915014646': 'Health Item',
+                                    '1193964439': 'Spirit Enhancement',
+                                    '2519598785': 'Weapon Power',
+                                    '2670099061': 'Vitality Base',
+                                    '856231037': 'Vitality Upgrade',
+                                    '3817461040': '근접전',
+                                    '2859015099': '확장 탄창',
+                                    '3617449734': '헤드샷 부스터',
+                                    '1741128720': '추가 체력',
+                                    '2671070013': '추가 재생',
+                                    '3152051256': '추가 영혼력',
+                                };
+                                
+                                return itemNameMapping[itemId.toString()] || `Item ${itemId}`;
+                            };
                                 
                                 // 아이템 이름 기반 매핑 (fallback) - 실제 존재하는 abilities 이미지 사용
                                 const itemNameMapping = {
@@ -4951,38 +5051,34 @@ function displayMatchHistory(matches) {
                                 return 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp';
                             };
                             
-                            // 아이템 HTML 생성
-                            const itemGridHTML = finalItems.slice(0, 12).map(item => {
-                                // upgrade_id가 있으면 상위 아이템 사용, 없으면 기본 아이템 사용
-                                const actualItemId = item.upgrade_id && item.upgrade_id !== 0 ? item.upgrade_id : item.item_id;
-                                const isUpgraded = item.upgrade_id && item.upgrade_id !== 0;
+                            // 실제 Final Items HTML 생성 (async)
+                            const generateItemsHTML = async () => {
+                                const itemPromises = finalItems.slice(0, 12).map(async (item) => {
+                                    // upgrade_id가 있으면 상위 아이템 사용, 없으면 기본 아이템 사용
+                                    const actualItemId = item.upgrade_id && item.upgrade_id !== 0 ? item.upgrade_id : item.item_id;
+                                    const isUpgraded = item.upgrade_id && item.upgrade_id !== 0;
+                                    
+                                    // 실제 아이템 정보 가져오기
+                                    const itemInfo = await getActualItemImageAndName(item.item_id, item.upgrade_id);
+                                    const displayName = itemInfo.name;
+                                    const imageUrl = itemInfo.image;
+                                    
+                                    console.log(`🔍 Final Item ${actualItemId}: ${displayName}, 이미지: ${imageUrl}, 업그레이드: ${isUpgraded}`);
+                                    
+                                    return `
+                                        <img loading="lazy" alt="${displayName}" title="${displayName} (${actualItemId})" 
+                                             class="w-8 h-8 rounded border ${isUpgraded ? 'border-yellow-400 border-2' : 'border-border'}" 
+                                             src="${imageUrl}"
+                                             onerror="this.onerror=null; this.src='/images/items/weapon/basic_magazine.webp'; console.log('❌ 아이템 이미지 fallback:', '${actualItemId}');"
+                                             onload="console.log('✅ 아이템 이미지 로드 성공:', '${actualItemId}');">
+                                    `;
+                                });
                                 
-                                const itemData = itemsCache[actualItemId];
-                                const displayName = itemData?.name || `Item ${actualItemId}`;
-                                
-                                // 우선순위: v2/items API 이미지 → 이름 기반 매칭 → fallback
-                                let imageUrl = null;
-                                
-                                if (itemData) {
-                                    // v2/items API의 이미지 우선 사용
-                                    imageUrl = itemData.image_webp || itemData.image;
-                                }
-                                
-                                // v2/items에서 이미지를 못 찾으면 이름으로 매칭
-                                if (!imageUrl || imageUrl.includes('unknown')) {
-                                    imageUrl = getItemImageByName(displayName, actualItemId);
-                                }
-                                
-                                console.log(`🔍 아이템 ${actualItemId}: ${displayName}, 이미지: ${imageUrl}`);
-                                
-                                return `
-                                    <img loading="lazy" alt="${displayName}" title="${displayName}" 
-                                         class="w-8 h-8 rounded border ${isUpgraded ? 'border-yellow-500' : 'border-border'}" 
-                                         src="${imageUrl}"
-                                         onerror="this.onerror=null; this.src='https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp'; console.log('❌ 아이템 이미지 fallback:', '${actualItemId}');"
-                                         onload="console.log('✅ 아이템 이미지 로드 성공:', '${actualItemId}');">
-                                `;
-                            }).join('');
+                                const itemsHTML = await Promise.all(itemPromises);
+                                return itemsHTML.join('');
+                            };
+                            
+                            const itemGridHTML = await generateItemsHTML();
                             
                             // 빈 슬롯으로 12개 채우기
                             const emptySlots = Math.max(0, 12 - finalItems.length);
@@ -4998,30 +5094,26 @@ function displayMatchHistory(matches) {
                         } catch (error) {
                             console.error(`❌ 매치 ${match.matchId} Final Items 직접 로드 실패:`, error);
                             
-                            // 기존 방식으로 fallback - API 호출 실패 시에도 아이템 이미지 시도
+                            // 기존 방식으로 fallback - API 호출 실패 시에도 로컬 이미지 사용
                             if (finalItems && finalItems.length > 0) {
-                                console.log(`🔄 매치 ${index}: API 실패, ID 기반 매핑으로 fallback`);
+                                console.log(`🔄 매치 ${index}: API 실패, 로컬 이미지로 fallback`);
                                 const fallbackHTML = finalItems.slice(0, 12).map(item => {
                                     // upgrade_id가 있으면 상위 아이템 사용
                                     const actualItemId = item.upgrade_id && item.upgrade_id !== 0 ? item.upgrade_id : item.item_id;
                                     const isUpgraded = item.upgrade_id && item.upgrade_id !== 0;
-                                    const itemName = `Item ${actualItemId}`;
+                                    const itemName = getItemNameById(actualItemId);
                                     
-                                    // 새로운 ID 기반 매핑 시스템 사용
-                                    let imageUrl = getItemImageByName(itemName, actualItemId);
+                                    // 로컬 이미지 매핑 시스템 사용
+                                    const imageUrl = getItemImageById(actualItemId);
                                     
-                                    // 캐시된 아이템 데이터가 있으면 정확한 이미지 URL 사용
-                                    const cachedItem = window.deadlockItemsCache && window.deadlockItemsCache[actualItemId];
-                                    if (cachedItem && cachedItem.image_webp && !cachedItem.image_webp.includes('unknown')) {
-                                        imageUrl = cachedItem.image_webp;
-                                    }
+                                    console.log(`📦 Fallback 아이템 ${actualItemId}: ${itemName}, 이미지: ${imageUrl}`);
                                     
                                     return `
-                                        <img loading="lazy" alt="${itemName}" title="${itemName}" 
-                                             class="w-8 h-8 rounded border ${isUpgraded ? 'border-yellow-500' : 'border-border'}" 
+                                        <img loading="lazy" alt="${itemName}" title="${itemName} (${actualItemId})" 
+                                             class="w-8 h-8 rounded border ${isUpgraded ? 'border-yellow-400 border-2' : 'border-border'}" 
                                              src="${imageUrl}"
                                              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                        <div class="w-8 h-8 rounded border ${isUpgraded ? 'border-yellow-500' : 'border-border'} bg-gray-700 flex items-center justify-center text-xs" title="${itemName}" style="display:none;">
+                                        <div class="w-8 h-8 rounded border ${isUpgraded ? 'border-yellow-400 border-2' : 'border-border'} bg-gray-700 flex items-center justify-center text-xs font-mono" title="${itemName}" style="display:none;">
                                             ${actualItemId.toString().slice(-2)}
                                         </div>
                                     `;
