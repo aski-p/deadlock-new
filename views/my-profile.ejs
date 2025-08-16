@@ -4778,11 +4778,20 @@ function displayMMRGraph(mmrData) {
 }
 
 // Load data when page loads
-document.addEventListener('DOMContentLoaded', async () => {
-    // 아이템 매칭 시스템 먼저 초기화
-    await initializeItemMatching();
-    
-    // 프로필 데이터 로드
-    loadMyProfileData();
+document.addEventListener('DOMContentLoaded', () => {
+    // 아이템 매칭 시스템과 프로필 데이터 로드를 비동기로 처리
+    (async () => {
+        try {
+            // 아이템 매칭 시스템 먼저 초기화
+            await initializeItemMatching();
+            
+            // 프로필 데이터 로드
+            loadMyProfileData();
+        } catch (error) {
+            console.error('❌ 초기화 중 오류:', error);
+            // 에러가 발생해도 프로필 데이터는 로드 시도
+            loadMyProfileData();
+        }
+    })();
 });
 </script>
