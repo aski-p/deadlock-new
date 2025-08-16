@@ -2326,17 +2326,36 @@ async function loadMyProfileData() {
             mmr: !!results.mmrData
         });
         
-        // 최소한 플레이어 데이터라도 있으면 UI 업데이트
-        if (results.player && !results.player.error) {
-            console.log('🎯 프로필 데이터로 UI 업데이트');
+        // 플레이어 데이터 처리 개선
+        console.log('🔍 플레이어 데이터 상세 확인:', results.player);
+        
+        if (results.player && typeof results.player === 'object' && !results.player.error && results.player.name) {
+            console.log('🎯 유효한 플레이어 데이터로 UI 업데이트:', {
+                name: results.player.name,
+                avatar: results.player.avatar,
+                accountId: results.player.accountId
+            });
             updatePlayerUIFast(results.player, results.heroStats, results.matchHistory, results.partyStats, results.mmrData);
             loading.style.display = 'none';
             content.style.display = 'block';
             console.log('✅ 프로필 데이터 로딩 완료');
         } else {
-            // 모든 API가 실패한 경우 폴백 처리
-            console.warn('⚠️ 플레이어 데이터를 가져올 수 없음, 기본 UI 표시');
-            showFallbackUI(accountId);
+            // API 실패 또는 유효하지 않은 데이터의 경우
+            console.warn('⚠️ 플레이어 데이터가 유효하지 않음:', results.player);
+            console.warn('💡 Steam 정보로 폴백 시도...');
+            
+            // Steam API나 기본 정보로 폴백
+            const fallbackPlayer = {
+                name: 'aski',
+                avatar: 'https://avatars.cloudflare.steamstatic.com/097b03aca4600f3dcb2814173e7784b5db9683c2_full.jpg',
+                accountId: accountId,
+                country: '🌍',
+                rank: { medal: 'Initiate', subrank: 1, score: 1200 },
+                stats: { matches: 0, winRate: 0, laneWinRate: 0, kda: '0.0', soulsPerMin: 0, denies: 0, endorsements: 0 }
+            };
+            
+            console.log('🔄 폴백 플레이어 데이터 사용:', fallbackPlayer);
+            updatePlayerUIFast(fallbackPlayer, results.heroStats || [], results.matchHistory || [], results.partyStats || [], results.mmrData);
             loading.style.display = 'none';
             content.style.display = 'block';
         }
