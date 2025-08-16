@@ -2539,36 +2539,37 @@ function displayHeroStats(heroStats) {
         
         const getHeroImage = (heroName) => {
             const heroImageMap = {
-                'Abrams': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp',
-                'Bebop': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp',
-                'Calico': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/nano_card.webp',
-                'Dynamo': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/sumo_card.webp',
-                'Grey Talon': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/archer_card.webp',
-                'Haze': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/haze_card.webp',
-                'Infernus': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/inferno_card.webp',
-                'Ivy': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/tengu_card.webp',
-                'Kelvin': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kelvin_card.webp',
-                'Viper': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/slork_card.webp',
-                'Vyper': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/slork_card.webp',
-                'Lady Geist': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/spectre_card.webp',
-                'Lash': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/lash_card.webp',
-                'McGinnis': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/engineer_card.webp',
-                'Mo & Krill': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/digger_card.webp',
-                'Paradox': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/chrono_card.webp',
-                'Pocket': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/synth_card.webp',
-                'Seven': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/gigawatt_card.webp',
-                'Shiv': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/shiv_card.webp',
-                'Viper': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kali_card.webp',
-                'Viscous': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/viscous_card.webp',
-                'Warden': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/warden_card.webp',
-                'Vyper': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kali_card.webp',
-                'Holliday': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/astro_card.webp',
-                'Mirage': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/mirage_card.webp',
-                'Wraith': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/wraith_card.webp',
-                'Yamato': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/yamato_card.webp',
-                'Sinclair': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/magician_card.webp'
+                'Abrams': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/abrams_mm.webp',
+                'Bebop': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/bebop_mm.webp',
+                'Calico': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/calico_mm.webp',
+                'Dynamo': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/dynamo_mm.webp',
+                'Grey Talon': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/grey_talon_mm.webp',
+                'Haze': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/haze_mm.webp',
+                'Infernus': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/infernus_mm.webp',
+                'Ivy': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/ivy_mm.webp',
+                'Kelvin': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/kelvin_mm.webp',
+                'Viper': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/viper_mm.webp',
+                'Vyper': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/viper_mm.webp',
+                'Lady Geist': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/lady_geist_mm.webp',
+                'Lash': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/lash_mm.webp',
+                'McGinnis': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/mcginnis_mm.webp',
+                'Mo & Krill': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/mo_and_krill_mm.webp',
+                'Paradox': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/paradox_mm.webp',
+                'Pocket': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/pocket_mm.webp',
+                'Seven': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/seven_mm.webp',
+                'Shiv': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/shiv_mm.webp',
+                'Viper': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/viper_mm.webp',
+                'Viscous': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/viscous_mm.webp',
+                'Warden': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/warden_mm.webp',
+                'Vyper': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/viper_mm.webp',
+                'Holliday': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/holliday_mm.webp',
+                'Mirage': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/mirage_mm.webp',
+                'Wraith': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/wraith_mm.webp',
+                'Yamato': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/yamato_mm.webp',
+                'Sinclair': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/sinclair_mm.webp',
+                'Vindicta': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/vindicta_mm.webp'
             };
-            return heroImageMap[heroName] || 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp';
+            return heroImageMap[heroName] || 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/abrams_mm.webp';
         };
         
         const heroCards = heroStats.map((hero, index) => {
@@ -2650,7 +2651,7 @@ function displayHeroStats(heroStats) {
                 console.error('영웅 카드 생성 오류:', heroError, hero);
                 return `
                     <div class="hero-card">
-                        <img src="https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp" alt="Unknown" class="hero-card-image">
+                        <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/abrams_mm.webp" alt="Unknown" class="hero-card-image">
                         <div class="hero-card-info">
                             <h3>Unknown Hero</h3>
                             <div class="hero-card-stats">데이터 오류</div>
@@ -3662,36 +3663,37 @@ function displayMatchHistory(matches) {
         
         const getHeroImage = (heroName) => {
             const heroImageMap = {
-                'Abrams': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp',
-                'Bebop': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp',
-                'Calico': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/nano_card.webp',
-                'Dynamo': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/sumo_card.webp',
-                'Grey Talon': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/archer_card.webp',
-                'Haze': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/haze_card.webp',
-                'Infernus': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/inferno_card.webp',
-                'Ivy': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/tengu_card.webp',
-                'Kelvin': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kelvin_card.webp',
-                'Viper': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/slork_card.webp',
-                'Vyper': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/slork_card.webp',
-                'Lady Geist': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/spectre_card.webp',
-                'Lash': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/lash_card.webp',
-                'McGinnis': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/engineer_card.webp',
-                'Mo & Krill': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/digger_card.webp',
-                'Paradox': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/chrono_card.webp',
-                'Pocket': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/synth_card.webp',
-                'Seven': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/gigawatt_card.webp',
-                'Shiv': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/shiv_card.webp',
-                'Viper': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kali_card.webp',
-                'Viscous': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/viscous_card.webp',
-                'Warden': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/warden_card.webp',
-                'Vyper': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kali_card.webp',
-                'Holliday': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/astro_card.webp',
-                'Mirage': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/mirage_card.webp',
-                'Wraith': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/wraith_card.webp',
-                'Yamato': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/yamato_card.webp',
-                'Sinclair': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/magician_card.webp'
+                'Abrams': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/abrams_mm.webp',
+                'Bebop': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/bebop_mm.webp',
+                'Calico': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/calico_mm.webp',
+                'Dynamo': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/dynamo_mm.webp',
+                'Grey Talon': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/grey_talon_mm.webp',
+                'Haze': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/haze_mm.webp',
+                'Infernus': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/infernus_mm.webp',
+                'Ivy': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/ivy_mm.webp',
+                'Kelvin': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/kelvin_mm.webp',
+                'Viper': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/viper_mm.webp',
+                'Vyper': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/viper_mm.webp',
+                'Lady Geist': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/lady_geist_mm.webp',
+                'Lash': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/lash_mm.webp',
+                'McGinnis': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/mcginnis_mm.webp',
+                'Mo & Krill': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/mo_and_krill_mm.webp',
+                'Paradox': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/paradox_mm.webp',
+                'Pocket': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/pocket_mm.webp',
+                'Seven': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/seven_mm.webp',
+                'Shiv': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/shiv_mm.webp',
+                'Viper': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/viper_mm.webp',
+                'Viscous': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/viscous_mm.webp',
+                'Warden': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/warden_mm.webp',
+                'Vyper': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/viper_mm.webp',
+                'Holliday': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/holliday_mm.webp',
+                'Mirage': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/mirage_mm.webp',
+                'Wraith': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/wraith_mm.webp',
+                'Yamato': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/yamato_mm.webp',
+                'Sinclair': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/sinclair_mm.webp',
+                'Vindicta': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/vindicta_mm.webp'
             };
-            return heroImageMap[heroName] || 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp';
+            return heroImageMap[heroName] || 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/abrams_mm.webp';
         };
         
         const formatDate = (dateString) => {
@@ -4021,7 +4023,7 @@ function displayMatchHistory(matches) {
                 return `
                     <div class="match-card">
                         <div class="match-hero">
-                            <img src="https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp" alt="Unknown" class="match-hero-image">
+                            <img src="https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/abrams_mm.webp" alt="Unknown" class="match-hero-image">
                             <span class="match-hero-name">Unknown</span>
                         </div>
                         <div class="match-result">
@@ -4062,37 +4064,37 @@ function displayMatchHistory(matches) {
                 
                 const getHeroApiUrl = (heroName) => {
                     const heroMap = {
-                        'Infernus': 'inferno',
+                        'Infernus': 'infernus',
                         'Yamato': 'yamato',
-                        'Holliday': 'astro',
+                        'Holliday': 'holliday',
                         'Haze': 'haze',
                         'Lash': 'lash',
-                        'Vindicta': 'hornet',
+                        'Vindicta': 'vindicta',
                         'Bebop': 'bebop', 
                         'Shiv': 'shiv',
-                        'Paradox': 'chrono',
-                        'Calico': 'nano',
-                        'Ivy': 'tengu',
-                        'Abrams': 'bull',
-                        'Mo & Krill': 'digger',  // digger가 정확한 매핑
-                        'McGinnis': 'engineer',  // engineer가 정확한 매핑
+                        'Paradox': 'paradox',
+                        'Calico': 'calico',
+                        'Ivy': 'ivy',
+                        'Abrams': 'abrams',
+                        'Mo & Krill': 'mo_and_krill',
+                        'McGinnis': 'mcginnis',
                         'Mirage': 'mirage',
-                        'Grey Talon': 'archer',  // archer가 정확한 매핑
-                        'Pocket': 'synth',
-                        'Viper': 'slork',
-                        'Vyper': 'slork', // Viper의 대체 철자
+                        'Grey Talon': 'grey_talon',
+                        'Pocket': 'pocket',
+                        'Viper': 'viper',
+                        'Vyper': 'viper', // Viper의 대체 철자
                         'Dynamo': 'dynamo',
                         'Kelvin': 'kelvin',
-                        'Lady Geist': 'ghost',
+                        'Lady Geist': 'lady_geist',
                         'Seven': 'seven',
                         'Warden': 'warden',
                         'Wraith': 'wraith',
                         'Viscous': 'viscous',
-                        'Sinclair': 'atlas',
-                        'Atlas': 'atlas',
+                        'Sinclair': 'sinclair',
+                        'Atlas': 'sinclair',
                         // 새로운 영웅들 추가
                         'Trapper': 'trapper',
-                        'Magician': 'magician', 
+                        'Magician': 'sinclair', 
                         'Fathom': 'fathom',
                         'Wrecker': 'wrecker',
                         'Savage': 'savage',
@@ -4100,30 +4102,30 @@ function displayMatchHistory(matches) {
                         'Buttercup': 'buttercup',
                         'Cadence': 'cadence',
                         // Player나 Unknown 처리
-                        'Player': 'bull',
-                        'Unknown': 'bull',
-                        'player': 'bull',
-                        'unknown': 'bull',
-                        '': 'bull',
-                        null: 'bull',
-                        undefined: 'bull',
+                        'Player': 'abrams',
+                        'Unknown': 'abrams',
+                        'player': 'abrams',
+                        'unknown': 'abrams',
+                        '': 'abrams',
+                        null: 'abrams',
+                        undefined: 'abrams',
                         // 대소문자 변형
-                        'infernus': 'inferno',
+                        'infernus': 'infernus',
                         'yamato': 'yamato',
-                        'holliday': 'astro',
+                        'holliday': 'holliday',
                         'haze': 'haze',
                         'lash': 'lash',
-                        'vindicta': 'hornet',
+                        'vindicta': 'vindicta',
                         'bebop': 'bebop',
                         'shiv': 'shiv',
-                        'paradox': 'chrono',
-                        'calico': 'nano',
-                        'ivy': 'tengu',
-                        'abrams': 'bull',
-                        'mcginnis': 'engineer',
+                        'paradox': 'paradox',
+                        'calico': 'calico',
+                        'ivy': 'ivy',
+                        'abrams': 'abrams',
+                        'mcginnis': 'mcginnis',
                         'mirage': 'mirage',
-                        'pocket': 'synth',
-                        'viper': 'slork',
+                        'pocket': 'pocket',
+                        'viper': 'viper',
                         'dynamo': 'dynamo',
                         'kelvin': 'kelvin',
                         'seven': 'seven',
@@ -4142,7 +4144,7 @@ function displayMatchHistory(matches) {
                         normalizedName = 'Player';
                     }
                     
-                    const heroKey = heroMap[normalizedName] || heroMap[normalizedName.toLowerCase()] || 'bull';
+                    const heroKey = heroMap[normalizedName] || heroMap[normalizedName.toLowerCase()] || 'abrams';
                     return `https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/${heroKey}_mm.webp`;
                 };
                 
