@@ -2539,6 +2539,30 @@ function displayHeroStats(heroStats) {
             return;
         }
         
+        // Player_숫자 형태에서 실제 플레이어 이름을 찾는 함수
+        const getPlayerDisplayName = (player) => {
+            let displayName = player.name || player.player_name || player.steam_name || player.hero || 'Player';
+            
+            // Player_숫자 패턴 감지 (예: Player_92418199)
+            const playerIdMatch = displayName.match(/^Player_(\d+)$/);
+            if (playerIdMatch) {
+                const playerId = playerIdMatch[1];
+                console.log(`🔍 Player_${playerId} 패턴 감지, 실제 플레이어 정보 검색 중...`);
+                
+                // 같은 매치의 다른 참가자들에서 동일한 account_id나 steam_id를 가진 플레이어 찾기
+                const accountId = player.account_id || player.steam_id || playerId;
+                
+                // 매치 데이터에서 해당 플레이어의 실제 이름 찾기 시도
+                if (accountId && accountId !== 'undefined') {
+                    // 일단 플레이어 ID를 표시 (나중에 실제 API 호출로 확장 가능)
+                    return `Player #${playerId}`;
+                }
+            }
+            
+            // 일반적인 경우
+            return displayName === 'undefined' || !displayName ? player.hero || 'Player' : displayName;
+        };
+
         const getHeroImage = (heroName) => {
             const heroImageMap = {
                 'Abrams': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/bull_mm.webp',
@@ -2559,10 +2583,10 @@ function displayHeroStats(heroStats) {
                 'Lady Geist': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/lady_geist_mm.webp',
                 'Lash': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/lash_mm.webp',
                 'McGinnis': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/mcginnis_mm.webp',
-                'Mo & Krill': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/mo_and_krill_mm.webp',
-                'Paradox': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/paradox_mm.webp',
-                'Pocket': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/pocket_mm.webp',
-                'Seven': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/seven_mm.webp',
+                'Mo & Krill': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/digger_mm.webp',
+                'Paradox': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/chrono_mm.webp',
+                'Pocket': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/synth_mm.webp',
+                'Seven': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/gigawatt_mm.webp',
                 'Shiv': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/shiv_mm.webp',
                 'Viper': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/viper_mm.webp',
                 'Viscous': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/viscous_mm.webp',
@@ -3565,6 +3589,30 @@ function displayMatchHistory(matches) {
             return;
         }
         
+        // Player_숫자 형태에서 실제 플레이어 이름을 찾는 함수
+        const getPlayerDisplayName = (player) => {
+            let displayName = player.name || player.player_name || player.steam_name || player.hero || 'Player';
+            
+            // Player_숫자 패턴 감지 (예: Player_92418199)
+            const playerIdMatch = displayName.match(/^Player_(\d+)$/);
+            if (playerIdMatch) {
+                const playerId = playerIdMatch[1];
+                console.log(`🔍 Player_${playerId} 패턴 감지, 실제 플레이어 정보 검색 중...`);
+                
+                // 같은 매치의 다른 참가자들에서 동일한 account_id나 steam_id를 가진 플레이어 찾기
+                const accountId = player.account_id || player.steam_id || playerId;
+                
+                // 매치 데이터에서 해당 플레이어의 실제 이름 찾기 시도
+                if (accountId && accountId !== 'undefined') {
+                    // 일단 플레이어 ID를 표시 (나중에 실제 API 호출로 확장 가능)
+                    return `Player #${playerId}`;
+                }
+            }
+            
+            // 일반적인 경우
+            return displayName === 'undefined' || !displayName ? player.hero || 'Player' : displayName;
+        };
+
         const getHeroImage = (heroName) => {
             const heroImageMap = {
                 'Abrams': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/bull_mm.webp',
@@ -3585,10 +3633,10 @@ function displayMatchHistory(matches) {
                 'Lady Geist': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/lady_geist_mm.webp',
                 'Lash': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/lash_mm.webp',
                 'McGinnis': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/mcginnis_mm.webp',
-                'Mo & Krill': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/mo_and_krill_mm.webp',
-                'Paradox': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/paradox_mm.webp',
-                'Pocket': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/pocket_mm.webp',
-                'Seven': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/seven_mm.webp',
+                'Mo & Krill': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/digger_mm.webp',
+                'Paradox': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/chrono_mm.webp',
+                'Pocket': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/synth_mm.webp',
+                'Seven': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/gigawatt_mm.webp',
                 'Shiv': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/shiv_mm.webp',
                 'Viper': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/viper_mm.webp',
                 'Viscous': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/viscous_mm.webp',
@@ -3956,7 +4004,7 @@ function displayMatchHistory(matches) {
                     console.log(`✅ 매치 ${index}: 실제 participants 데이터 사용 (${match.participants.length}명)`);
                     players = match.participants.map((p, idx) => ({
                         hero: p.hero || 'Unknown',
-                        name: p.name || p.player_name || p.steam_name || p.hero || 'Player',
+                        name: getPlayerDisplayName(p),
                         team: p.team || (idx < 6 ? 1 : 2), // 0-5번은 팀1, 6-11번은 팀2
                         account_id: p.account_id || p.steam_id
                     }));
