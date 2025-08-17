@@ -335,7 +335,7 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'", 'fonts.googleapis.com', 'cdn.deadlock.coach'],
-        scriptSrc: ["'self'", "'unsafe-inline'", 'cdnjs.cloudflare.com'],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-hashes'", 'cdnjs.cloudflare.com'],
         imgSrc: [
           "'self'",
           'data:',
@@ -352,6 +352,7 @@ app.use(
         objectSrc: ["'none'"],
         baseUri: ["'self'"],
         formAction: ["'self'"],
+        'script-src-attr': ["'unsafe-inline'"],
       },
     },
     crossOriginEmbedderPolicy: false,
