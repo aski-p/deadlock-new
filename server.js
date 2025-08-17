@@ -7495,7 +7495,25 @@ app.get('/api/v1/items/mapping', async (req, res) => {
       5678901234: { name: '정신 지배', cost: 3200, tier: 3, category: 'spirit', image: 'spirit/mind_control_sm.png' },
       2468135790: { name: '회복 오브', cost: 800, tier: 1, category: 'vitality', image: 'vitality/healing_orb_sm.png' },
       1357924680: { name: '화염 탄환', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/fire_bullets_sm.png' },
-      8642097531: { name: '얼음 갑옷', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/ice_armor_sm.png' }
+      8642097531: { name: '얼음 갑옷', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/ice_armor_sm.png' },
+      
+      // 에러 로그에서 누락된 아이템들 추가
+      2604653402: { name: 'Boundless Spirit', cost: 3200, tier: 3, category: 'spirit', image: 'spirit/boundless_spirit_sm.png' },
+      2087502794: { name: 'Superior Cooldown', cost: 800, tier: 1, category: 'spirit', image: 'spirit/superior_cooldown_sm.png' },
+      1543976943: { name: 'Rapid Recharge', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/rapid_recharge_sm.png' },
+      2356412290: { name: 'Vampiric Burst', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/vampiric_burst_sm.png' },
+      4104549924: { name: 'Cold Front', cost: 800, tier: 1, category: 'spirit', image: 'spirit/cold_front_sm.png' },
+      3696726732: { name: 'Transcendent Cooldown', cost: 3200, tier: 3, category: 'spirit', image: 'spirit/transcendent_cooldown_sm.png' },
+      4179229681: { name: 'Extended Magazine', cost: 800, tier: 1, category: 'weapon', image: 'weapon/extended_magazine_sm.png' },
+      2240607294: { name: 'Extra Health', cost: 800, tier: 1, category: 'vitality', image: 'vitality/extra_health_sm.png' },
+      901313487: { name: 'Titanic Magazine', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/titanic_magazine_sm.png' },
+      1235098866: { name: 'Extra Stamina', cost: 800, tier: 1, category: 'vitality', image: 'vitality/extra_stamina_sm.png' },
+      779450633: { name: 'Enduring Speed', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/enduring_speed_sm.png' },
+      3077079169: { name: 'Spirit Lifesteal', cost: 800, tier: 1, category: 'spirit', image: 'spirit/spirit_lifesteal_sm.png' },
+      2447176615: { name: 'Mystic Shot', cost: 800, tier: 1, category: 'weapon', image: 'weapon/mystic_shot_sm.png' },
+      2060391097: { name: 'Bullet Lifesteal', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/bullet_lifesteal_sm.png' },
+      3190606822: { name: 'Metal Skin', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/metal_skin_sm.png' },
+      2603935618: { name: 'Enchanters Barrier', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/enchanters_barrier_sm.png' }
       // 필요시 더 많은 아이템 추가 가능
     };
     
