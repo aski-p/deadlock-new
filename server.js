@@ -7352,6 +7352,107 @@ app.get('/api/v1/matches/:matchId/details', async (req, res) => {
 });
 
 // 시스템 모니터링 API
+// 아이템 이미지 매핑 API - 프론트엔드에서 안전하게 아이템 정보 가져오기
+app.get('/api/v1/items/mapping', async (req, res) => {
+  try {
+    console.log('🎯 아이템 매핑 데이터 요청');
+    
+    // deadlock-api.com의 URL을 assets-bucket URL로 변환하는 함수
+    const convertToAssetsBucketUrl = (originalUrl) => {
+      if (!originalUrl) return 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/upgrade_stamina.webp';
+      
+      // deadlock.coach URL을 assets-bucket URL로 변환
+      if (originalUrl.includes('deadlock.coach')) {
+        // 예: https://cdn.deadlock.coach/vpk/panorama/images/items/spirit/arcane_surge.webp
+        // → https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/arcane_surge_sm.png
+        const pathMatch = originalUrl.match(/images\/items\/(.+)\.webp$/);
+        if (pathMatch) {
+          return `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/${pathMatch[1]}_sm.png`;
+        }
+      }
+      
+      // 기본 fallback
+      return 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/upgrade_stamina.webp';
+    };
+    
+    // 아이템 매핑 데이터 (서버에서 관리)
+    const itemMapping = {
+      // Tier 1 Items (800 소울)
+      7409189: { name: '치유 증강기', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/healing_booster_sm.png' },
+      84321454: { name: '한파', cost: 800, tier: 1, category: 'spirit', image: 'spirit/cold_front_sm.png' },
+      223594321: { name: '명사수', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/sharpshooter_sm.png' },
+      380806748: { name: '추가 정신력', cost: 800, tier: 1, category: 'spirit', image: 'spirit/extra_spirit_sm.png' },
+      381961617: { name: '부패', cost: 800, tier: 1, category: 'spirit', image: 'spirit/decay_sm.png' },
+      393974127: { name: '광전사', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/berserker_sm.png' },
+      395867183: { name: '근접 흡혈', cost: 800, tier: 1, category: 'vitality', image: 'vitality/melee_lifesteal_sm.png' },
+      395944548: { name: '독성 탄환', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/toxic_bullets_sm.png' },
+      491391007: { name: '신비한 사격', cost: 800, tier: 1, category: 'weapon', image: 'weapon/mystic_shot_sm.png' },
+      499683006: { name: '회복탄', cost: 800, tier: 1, category: 'weapon', image: 'weapon/restorative_shot_sm.png' },
+      509856396: { name: '운동 대시', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/kinetic_dash_sm.png' },
+      519124136: { name: '상급 쿨다운', cost: 800, tier: 1, category: 'spirit', image: 'spirit/superior_cooldown_sm.png' },
+      558396679: { name: '추가 지구력', cost: 800, tier: 1, category: 'vitality', image: 'vitality/extra_stamina_sm.png' },
+      600033864: { name: '점진적 노출', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/escalating_exposure_sm.png' },
+      668299740: { name: '추가 체력', cost: 800, tier: 1, category: 'vitality', image: 'vitality/extra_health_sm.png' },
+      677738769: { name: '광란', cost: 3200, tier: 3, category: 'weapon', image: 'weapon/frenzy_sm.png' },
+      710436191: { name: '트로피 수집가', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/trophy_collector_sm.png' },
+      715762406: { name: '기본 탄창', cost: 800, tier: 1, category: 'weapon', image: 'weapon/basic_magazine_sm.png' },
+      811521119: { name: '정신력 타격', cost: 800, tier: 1, category: 'spirit', image: 'spirit/spirit_strike_sm.png' },
+      857669956: { name: '반응 방벽', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/reactive_barrier_sm.png' },
+      865846625: { name: '거대한 탄창', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/titanic_magazine_sm.png' },
+      968099481: { name: '추가 체력', cost: 800, tier: 1, category: 'vitality', image: 'vitality/extra_health_sm.png' },
+      1009965641: { name: '몬스터 탄환', cost: 800, tier: 1, category: 'weapon', image: 'weapon/monster_rounds_sm.png' },
+      1039061940: { name: '신속한 쿨다운', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/rapid_recharge_sm.png' },
+      1087762003: { name: '향상된 정신력', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/improved_spirit_sm.png' },
+      1102081447: { name: '연사', cost: 3200, tier: 3, category: 'weapon', image: 'weapon/burst_fire_sm.png' },
+      1142270357: { name: '무한한 정신력', cost: 3200, tier: 3, category: 'spirit', image: 'spirit/boundless_spirit_sm.png' },
+      1144549437: { name: '주입기', cost: 800, tier: 1, category: 'spirit', image: 'spirit/infuser_sm.png' },
+      1203847295: { name: '영혼 환생', cost: 3200, tier: 3, category: 'vitality', image: 'vitality/soul_rebirth_sm.png' },
+      1254091416: { name: '근거리 사격', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/point_blank_sm.png' },
+      1265885395: { name: '마녀의 부적', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/enchanters_emblem_sm.png' },
+      1289536726: { name: '생명타격', cost: 3200, tier: 3, category: 'vitality', image: 'vitality/lifestrike_sm.png' },
+      1292979587: { name: '신비한 폭발', cost: 800, tier: 1, category: 'spirit', image: 'spirit/mystic_burst_sm.png' },
+      1342610602: { name: '근거리 전투', cost: 800, tier: 1, category: 'weapon', image: 'weapon/close_quarters_sm.png' },
+      1378931225: { name: '이더 변환', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/ethereal_shift_sm.png' },
+      1414319208: { name: '사냥꾼의 오라', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/hunters_aura_sm.png' },
+      1437614329: { name: '헤드샷 부스터', cost: 800, tier: 1, category: 'weapon', image: 'weapon/headshot_booster_sm.png' },
+      1534353442: { name: '탱크버스터', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/tankbuster_sm.png' },
+      1547821036: { name: '거신상', cost: 3200, tier: 3, category: 'vitality', image: 'vitality/colossus_sm.png' },
+      1548066885: { name: '스프린트 부츠', cost: 800, tier: 1, category: 'vitality', image: 'vitality/sprint_boots_sm.png' },
+      1593133799: { name: '아케인 서지', cost: 800, tier: 1, category: 'spirit', image: 'spirit/arcane_surge_sm.png' },
+      1682129540: { name: '빠른 재충전', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/rapid_recharge_sm.png' },
+      1710079648: { name: '총알 갑옷', cost: 800, tier: 1, category: 'vitality', image: 'vitality/bullet_armor_sm.png' },
+      1797283378: { name: '치유 의식', cost: 800, tier: 1, category: 'vitality', image: 'vitality/healing_rite_sm.png' },
+      1813726886: { name: '디버프 제거', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/debuff_remover_sm.png' },
+      1593133799: { name: '아케인 서지', cost: 800, tier: 1, category: 'spirit', image: 'spirit/arcane_surge_sm.png' },
+      // 추가적인 아이템들... (필요시 확장)
+    };
+    
+    // 전체 이미지 URL로 변환
+    const finalMapping = {};
+    Object.keys(itemMapping).forEach(itemId => {
+      const item = itemMapping[itemId];
+      finalMapping[itemId] = {
+        ...item,
+        image: `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/${item.image}`,
+        fullUrl: `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/${item.image}`
+      };
+    });
+    
+    console.log(`✅ 아이템 매핑 데이터 반환: ${Object.keys(finalMapping).length}개 아이템`);
+    
+    res.json({
+      itemMapping: finalMapping,
+      totalItems: Object.keys(finalMapping).length,
+      categories: ['weapon', 'vitality', 'spirit'],
+      timestamp: new Date().toISOString()
+    });
+    
+  } catch (error) {
+    console.error('❌ 아이템 매핑 API 오류:', error);
+    res.status(500).json({ error: '아이템 매핑 데이터를 가져올 수 없습니다' });
+  }
+});
+
 app.get('/api/system/cache-stats', (req, res) => {
   try {
     const stats = memoryCache.getStats();
