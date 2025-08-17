@@ -1014,8 +1014,8 @@
 }
 
 .stat-value {
-    font-size: 28px;
-    font-weight: 700;
+    font-size: 20px;
+    font-weight: 600;
     color: #63a2e2;
     margin-bottom: 8px;
     display: block;
@@ -4274,6 +4274,13 @@ function displayMatchHistory(matches) {
                 let players = [];
                 if (match.participants && match.participants.length > 0) {
                     console.log(`✅ 매치 ${index}: 실제 participants 데이터 사용 (${match.participants.length}명)`);
+                    
+                    // 현재 매치의 participants 정보를 전역 변수에 저장 (플레이어 이름 해결용)
+                    window.currentMatchData = {
+                        matchId: match.matchId,
+                        participants: match.participants
+                    };
+                    
                     // 안전한 플레이어 이름 처리 (async 에러 방지)
                     players = match.participants.map((p, idx) => ({
                         hero: p.hero || 'Unknown',
@@ -4284,6 +4291,7 @@ function displayMatchHistory(matches) {
                 } else {
                     console.log(`⚠️ 매치 ${index}: participants 데이터가 없어 빈 배열 사용`);
                     players = []; // 빈 배열로 설정, 더미 데이터 사용 안함
+                    window.currentMatchData = null;
                 }
                 
                 console.log(`👥 매치 ${index} 사용할 플레이어 데이터:`, players);
@@ -4505,79 +4513,21 @@ function displayMatchHistory(matches) {
                                     return player.display_name;
                                 }
                                 
-                                // deadlock-api에서 플레이어 정보 가져오기 시도
-                                try {
-                                    console.log(`🔍 플레이어 ${numberPart}의 실제 이름 검색 중... (account_id: ${player.account_id})`);
+                                // 백엔드에서 이미 해결된 이름 사용 (더 이상 API 호출 안함)
+                                console.log(`🔍 플레이어 ${numberPart}의 이름 처리 - 백엔드에서 해결됨`);
+                                
+                                // 매치 데이터에 participants 정보가 있다면 사용
+                                if (window.currentMatchData && window.currentMatchData.participants) {
+                                    const participant = window.currentMatchData.participants.find(p => 
+                                        p.account_id && p.account_id.toString() === (player.account_id || numberPart).toString()
+                                    );
                                     
-                                    // 여러 API 엔드포인트 시도 - Steam API도 포함
-                                    const steamId = numberPart; // Player_숫자에서 추출한 숫자를 Steam ID로 사용
-                                    const accountId = player.account_id || numberPart;
-                                    
-                                    const apiUrls = [
-                                        // Deadlock API 시도
-                                        `https://api.deadlock-api.com/v1/players/${accountId}`,
-                                        `https://api.deadlock-api.com/v1/players/steam/${accountId}`,
-                                        `https://api.deadlock-api.com/v1/players/${steamId}`,
-                                        `https://api.deadlock-api.com/v1/players/steam/${steamId}`,
-                                        // 서버 API 통해 Steam 정보 가져오기
-                                        `/api/v1/steam/player/${steamId}`,
-                                        `/api/v1/steam/player/${accountId}`
-                                    ];
-                                    
-                                    for (const apiUrl of apiUrls) {
-                                        try {
-                                            console.log(`🔍 API 시도: ${apiUrl}`);
-                                            const playerResponse = await fetch(apiUrl, {
-                                                method: 'GET',
-                                                headers: {
-                                                    'Accept': 'application/json',
-                                                    'User-Agent': 'DeadlockCoach/1.0'
-                                                }
-                                            });
-                                            
-                                            if (playerResponse.ok) {
-                                                const playerData = await playerResponse.json();
-                                                console.log(`📄 API 응답:`, playerData);
-                                                
-                                                let realName = null;
-                                                
-                                                // API 응답에서 이름 추출 (Steam API와 Deadlock API 모두 지원)
-                                                if (playerData) {
-                                                    // Steam API 응답 형태
-                                                    if (playerData.success && playerData.name && !playerData.name.startsWith('Player')) {
-                                                        realName = playerData.name;
-                                                        console.log(`🎮 Steam API에서 이름 발견: ${realName}`);
-                                                    }
-                                                    // Deadlock API 응답 형태
-                                                    else if (playerData.name && playerData.name !== player.name && !playerData.name.startsWith('Player')) {
-                                                        realName = playerData.name;
-                                                    } else if (playerData.steam_name && playerData.steam_name !== player.name && !playerData.steam_name.startsWith('Player')) {
-                                                        realName = playerData.steam_name;
-                                                    } else if (playerData.personaname && !playerData.personaname.startsWith('Player')) {
-                                                        realName = playerData.personaname;
-                                                    } else if (playerData.display_name && !playerData.display_name.startsWith('Player')) {
-                                                        realName = playerData.display_name;
-                                                    }
-                                                }
-                                                
-                                                if (realName && realName.trim() && realName !== player.name) {
-                                                    console.log(`✅ 플레이어 ${player.account_id}: ${realName} 발견! (${apiUrl})`);
-                                                    window.playerNameCache[player.account_id] = realName;
-                                                    window.playerNameCache[numberPart] = realName;
-                                                    return realName;
-                                                } else {
-                                                    console.log(`⚠️ 유효한 이름 없음 - API: ${apiUrl}, 응답:`, playerData);
-                                                }
-                                            } else {
-                                                console.log(`❌ API ${apiUrl} 실패: ${playerResponse.status}`);
-                                            }
-                                        } catch (apiError) {
-                                            console.log(`⚠️ API ${apiUrl} 호출 실패:`, apiError.message);
-                                            continue;
-                                        }
+                                    if (participant && participant.name && !participant.name.startsWith('Player_')) {
+                                        console.log(`✅ 백엔드 참가자 데이터에서 이름 발견: ${participant.name}`);
+                                        window.playerNameCache[player.account_id] = participant.name;
+                                        window.playerNameCache[numberPart] = participant.name;
+                                        return participant.name;
                                     }
-                                } catch (error) {
-                                    console.log(`⚠️ 플레이어 ${numberPart} 이름 검색 실패:`, error);
                                 }
                                 
                                 // 실패 시 기본값으로 fallback

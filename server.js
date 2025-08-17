@@ -4789,6 +4789,64 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
         };
 
 
+        // 모든 매치의 메타데이터에서 플레이어 account_id 수집
+        const allPlayerIds = new Set();
+        console.log(`🔍 ${limit}개 매치의 메타데이터에서 플레이어 ID 수집 중...`);
+        
+        await Promise.all(
+          sortedMatches.slice(0, limit).map(async (match) => {
+            try {
+              const matchDetails = await fetchMatchDetails(match.match_id);
+              if (matchDetails && matchDetails.match_info && matchDetails.match_info.players) {
+                matchDetails.match_info.players.forEach(player => {
+                  if (player.account_id) {
+                    allPlayerIds.add(player.account_id.toString());
+                  }
+                });
+              }
+            } catch (error) {
+              console.log(`⚠️ 매치 ${match.match_id} 메타데이터 가져오기 실패: ${error.message}`);
+              // 현재 플레이어 ID라도 추가
+              if (match.account_id) {
+                allPlayerIds.add(match.account_id.toString());
+              }
+            }
+          })
+        );
+
+        // 모든 플레이어의 이름을 한 번에 해결 (배치 처리)
+        const playerNamesMap = new Map();
+        console.log(`🔍 총 ${allPlayerIds.size}명의 플레이어 이름 해결 시작...`);
+        
+        const playerIds = Array.from(allPlayerIds);
+        const batchSize = 5; // 동시 API 호출 제한
+        
+        for (let i = 0; i < playerIds.length; i += batchSize) {
+          const batch = playerIds.slice(i, i + batchSize);
+          const batchResults = await Promise.allSettled(
+            batch.map(async (playerId) => {
+              try {
+                const playerName = await getPlayerNameById(playerId);
+                playerNamesMap.set(playerId, playerName);
+                console.log(`✅ 플레이어 ${playerId} → ${playerName}`);
+                return { playerId, playerName };
+              } catch (error) {
+                const fallbackName = `Player ${playerId}`;
+                playerNamesMap.set(playerId, fallbackName);
+                console.log(`⚠️ 플레이어 ${playerId} → ${fallbackName} (오류: ${error.message})`);
+                return { playerId, playerName: fallbackName };
+              }
+            })
+          );
+          
+          // Rate limit 방지를 위한 짧은 지연
+          if (i + batchSize < playerIds.length) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+        }
+        
+        console.log(`✅ 플레이어 이름 해결 완료: ${playerNamesMap.size}명`);
+
         // 실제 API 데이터를 프론트엔드 형식으로 변환
         const matches = await Promise.all(
           sortedMatches
@@ -5408,57 +5466,14 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
 
                   console.log(`👥 플레이어 참가자 정보 추출 완료: ${rawParticipants.length}명`);
 
-                  // 각 플레이어의 실제 Steam 이름 조회 (deadlock-api.com 우선)
-                  const participantsWithNames = await Promise.all(
-                    rawParticipants.map(async (participant) => {
-                      if (!participant.account_id) return participant;
-                      
-                      try {
-                        // 1. deadlock-api.com에서 플레이어 정보 조회
-                        const playerResponse = await axios.get(
-                          `https://api.deadlock-api.com/v1/players/${participant.account_id}`,
-                          {
-                            timeout: 3000, // 3초 타임아웃
-                            headers: {
-                              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-                            }
-                          }
-                        );
-
-                        if (playerResponse.data?.steam_name) {
-                          participant.name = playerResponse.data.steam_name;
-                          console.log(`✅ ${participant.account_id} → ${participant.name} (deadlock-api)`);
-                        } else if (playerResponse.data?.name) {
-                          participant.name = playerResponse.data.name;
-                          console.log(`✅ ${participant.account_id} → ${participant.name} (deadlock-api)`);
-                        } else {
-                          throw new Error('No name found in deadlock-api');
-                        }
-                      } catch (error) {
-                        try {
-                          // 2. Steam API에서 직접 조회 시도
-                          const steamId = BigInt(participant.account_id) + 76561197960265728n;
-                          const steamResponse = await axios.get(
-                            `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${process.env.STEAM_API_KEY}&steamids=${steamId}`,
-                            { timeout: 2000 }
-                          );
-                          
-                          if (steamResponse.data?.response?.players?.[0]?.personaname) {
-                            participant.name = steamResponse.data.response.players[0].personaname;
-                            console.log(`✅ ${participant.account_id} → ${participant.name} (Steam API)`);
-                          } else {
-                            throw new Error('No Steam name found');
-                          }
-                        } catch (steamError) {
-                          // 3. 실패 시 계정 ID 기반 이름 사용
-                          participant.name = `Player ${participant.account_id}`;
-                          console.log(`⚠️ ${participant.account_id} → ${participant.name} (fallback)`);
-                        }
-                      }
-                      
-                      return participant;
-                    })
-                  );
+                  // 미리 해결된 플레이어 이름 맵을 사용
+                  const participantsWithNames = rawParticipants.map(participant => {
+                    if (participant.account_id && playerNamesMap.has(participant.account_id.toString())) {
+                      participant.name = playerNamesMap.get(participant.account_id.toString());
+                      console.log(`🔄 ${participant.account_id} → ${participant.name} (캐시됨)`);
+                    }
+                    return participant;
+                  });
 
                   participants = participantsWithNames;
                   console.log(`👥 실제 Steam 이름이 포함된 참가자 정보 완료: ${participants.length}명`);
@@ -6220,7 +6235,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Sinclair',
-        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/magician_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/magician_mm.webp',
         matches: 38760,
         players: 29180,
         kda: '1.46',
