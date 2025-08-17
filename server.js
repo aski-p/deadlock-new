@@ -5619,6 +5619,86 @@ app.get('/api/player/:steamId/recent', async (req, res) => {
   }
 });
 
+// Steam 플레이어 정보 API
+app.get('/api/v1/steam/player/:steamId', async (req, res) => {
+  try {
+    const { steamId } = req.params;
+    console.log(`🔍 Steam 플레이어 정보 요청: ${steamId}`);
+    
+    // Steam API 키가 있는 경우에만 Steam API 호출
+    if (process.env.STEAM_API_KEY) {
+      try {
+        const steamResponse = await axios.get(
+          `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/`,
+          {
+            params: {
+              key: process.env.STEAM_API_KEY,
+              steamids: steamId
+            },
+            timeout: 5000
+          }
+        );
+        
+        if (steamResponse.data?.response?.players?.length > 0) {
+          const player = steamResponse.data.response.players[0];
+          console.log(`✅ Steam API에서 플레이어 정보 발견: ${player.personaname}`);
+          
+          return res.json({
+            success: true,
+            name: player.personaname,
+            avatar: player.avatarfull || player.avatarmedium || player.avatar,
+            profileurl: player.profileurl,
+            steamid: player.steamid,
+            source: 'steam_api'
+          });
+        }
+      } catch (steamError) {
+        console.log(`⚠️ Steam API 호출 실패: ${steamError.message}`);
+      }
+    }
+    
+    // Steam API 실패 시 Deadlock API 시도
+    try {
+      const deadlockResponse = await axios.get(
+        `https://api.deadlock-api.com/v1/players/${steamId}`,
+        { timeout: 5000 }
+      );
+      
+      if (deadlockResponse.data) {
+        const player = deadlockResponse.data;
+        console.log(`✅ Deadlock API에서 플레이어 정보 발견`);
+        
+        return res.json({
+          success: true,
+          name: player.name || player.steam_name || player.personaname,
+          avatar: player.avatar || player.avatarfull,
+          steamid: steamId,
+          source: 'deadlock_api'
+        });
+      }
+    } catch (deadlockError) {
+      console.log(`⚠️ Deadlock API 호출 실패: ${deadlockError.message}`);
+    }
+    
+    // 모든 API 실패 시
+    console.log(`❌ 모든 API에서 플레이어 ${steamId} 정보를 찾을 수 없음`);
+    res.json({
+      success: false,
+      name: `Player ${steamId.slice(-4)}`,
+      avatar: 'https://avatars.cloudflare.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_full.jpg',
+      steamid: steamId,
+      source: 'fallback'
+    });
+    
+  } catch (error) {
+    console.error(`❌ Steam 플레이어 정보 API 에러:`, error.message);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Steam 플레이어 정보를 가져올 수 없습니다' 
+    });
+  }
+});
+
 // 아이템 정보 API
 app.get('/api/v1/items', async (req, res) => {
   try {

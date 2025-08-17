@@ -4472,11 +4472,11 @@ function displayMatchHistory(matches) {
                             return `Player ${player.account_id || 'Unknown'}`;
                         }
                         
-                        // Player_숫자 또는 Player 숫자 패턴일 때 실제 Steam 이름 가져오기 (긴 숫자도 포함)
-                        const playerNamePattern = /^Player[_\s]?(\d+)$/;
+                        // Player_숫자 또는 Player 숫자 패턴일 때 실제 Steam 이름 가져오기 (모든 형태 포함)
+                        const playerNamePattern = /^Player[_\s]?(\d+)$|^(\d+)$/;
                         const match = player.name.match(playerNamePattern);
                         if (match) {
-                            const numberPart = match[1];
+                            const numberPart = match[1] || match[2]; // 첫 번째 또는 두 번째 캡처 그룹
                             console.log(`🔍 Player 패턴 감지: ${player.name} → 숫자: ${numberPart}, account_id: ${player.account_id}`);
                             if (/^\d+$/.test(numberPart)) {
                                 // 캐시된 이름이 있으면 사용 (account_id 우선, numberPart 다음)
@@ -4501,14 +4501,19 @@ function displayMatchHistory(matches) {
                                 try {
                                     console.log(`🔍 플레이어 ${numberPart}의 실제 이름 검색 중... (account_id: ${player.account_id})`);
                                     
-                                    // 여러 API 엔드포인트 시도 - account_id와 numberPart 둘 다 시도
+                                    // 여러 API 엔드포인트 시도 - Steam API도 포함
+                                    const steamId = numberPart; // Player_숫자에서 추출한 숫자를 Steam ID로 사용
+                                    const accountId = player.account_id || numberPart;
+                                    
                                     const apiUrls = [
-                                        `https://api.deadlock-api.com/v1/players/${player.account_id}`,
-                                        `https://api.deadlock-api.com/v1/players/steam/${player.account_id}`,
-                                        `https://deadlock-api.com/v1/players/${player.account_id}`,
-                                        `https://api.deadlock-api.com/v1/players/${numberPart}`,
-                                        `https://api.deadlock-api.com/v1/players/steam/${numberPart}`,
-                                        `https://deadlock-api.com/v1/players/${numberPart}`
+                                        // Deadlock API 시도
+                                        `https://api.deadlock-api.com/v1/players/${accountId}`,
+                                        `https://api.deadlock-api.com/v1/players/steam/${accountId}`,
+                                        `https://api.deadlock-api.com/v1/players/${steamId}`,
+                                        `https://api.deadlock-api.com/v1/players/steam/${steamId}`,
+                                        // 서버 API 통해 Steam 정보 가져오기
+                                        `/api/v1/steam/player/${steamId}`,
+                                        `/api/v1/steam/player/${accountId}`
                                     ];
                                     
                                     for (const apiUrl of apiUrls) {
@@ -4528,9 +4533,15 @@ function displayMatchHistory(matches) {
                                                 
                                                 let realName = null;
                                                 
-                                                // deadlock-api 응답에서 이름 추출
+                                                // API 응답에서 이름 추출 (Steam API와 Deadlock API 모두 지원)
                                                 if (playerData) {
-                                                    if (playerData.name && playerData.name !== player.name && !playerData.name.startsWith('Player')) {
+                                                    // Steam API 응답 형태
+                                                    if (playerData.success && playerData.name && !playerData.name.startsWith('Player')) {
+                                                        realName = playerData.name;
+                                                        console.log(`🎮 Steam API에서 이름 발견: ${realName}`);
+                                                    }
+                                                    // Deadlock API 응답 형태
+                                                    else if (playerData.name && playerData.name !== player.name && !playerData.name.startsWith('Player')) {
                                                         realName = playerData.name;
                                                     } else if (playerData.steam_name && playerData.steam_name !== player.name && !playerData.steam_name.startsWith('Player')) {
                                                         realName = playerData.steam_name;
