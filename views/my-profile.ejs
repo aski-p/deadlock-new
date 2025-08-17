@@ -5217,20 +5217,10 @@ function displayMatchHistory(matches) {
                             }
                         } catch (retryError) {
                             console.error(`❌ 매치 ${index} 아이템 재시도 실패:`, retryError);
-                        }
-                        
-                        // 최종적으로 실패한 경우 빈 슬롯 표시
-                        itemsContainer.innerHTML = `
-                            <div style="grid-column: 1/-1; text-align: center; color: #666; font-size: 11px; padding: 15px;">
-                                <i class="fas fa-info-circle"></i> 게임 종료 시 아이템 정보 없음
-                            </div>
-                        `;
-                        } catch (error) {
-                            console.error(`❌ 매치 ${match.matchId} final items 로드 오류:`, error);
-                            // 오류 시 빈 슬롯 표시
+                            // 최종적으로 실패한 경우 빈 슬롯 표시
                             itemsContainer.innerHTML = `
                                 <div style="grid-column: 1/-1; text-align: center; color: #666; font-size: 11px; padding: 15px;">
-                                    <i class="fas fa-exclamation-triangle"></i> 아이템 정보 로드 실패
+                                    <i class="fas fa-info-circle"></i> 게임 종료 시 아이템 정보 없음
                                 </div>
                             `;
                         }
