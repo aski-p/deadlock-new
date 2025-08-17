@@ -2015,25 +2015,31 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
       console.log(`⚡ 성능 최적화를 위해 리더보드 검색 건너뛰기: ${accountId}`);
     }
 
-    // 실제 플레이어 카드 API 호출 시도
+    // 사용 가능한 API로 플레이어 데이터 수집
     try {
       console.log(
-        `🌐 플레이어 카드 API 호출: https://api.deadlock-api.com/v1/players/${accountId}/card`
+        `🌐 플레이어 MMR 데이터 호출: https://api.deadlock-api.com/v1/players/${accountId}/mmr-history`
       );
-      const cardResponse = await axios.get(
-        `https://api.deadlock-api.com/v1/players/${accountId}/card`,
-        {
-          timeout: 5000, // 10초에서 5초로 단축하여 빠른 응답
-          headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          },
-        }
-      );
-
-      console.log(
-        `📡 플레이어 카드 API 응답 상태: ${cardResponse.status}, 데이터:`,
-        cardResponse.data
-      );
+      
+      // MMR 히스토리로 기본 데이터 수집 (더 안정적)
+      let playerData = null;
+      try {
+        const mmrResponse = await axios.get(
+          `https://api.deadlock-api.com/v1/players/${accountId}/mmr-history`,
+          {
+            timeout: 5000,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            },
+          }
+        );
+        playerData = mmrResponse.data;
+        console.log(`📡 MMR 히스토리 API 응답 성공, 데이터 수:`, playerData?.length || 0);
+      } catch (mmrError) {
+        console.log(`⚠️ MMR 히스토리 API 호출 실패:`, mmrError.message);
+        // 기본 플레이어 데이터 구조 생성
+        playerData = [];
+      }
 
 
       // Calculate Steam ID from account ID
@@ -2116,41 +2122,19 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
           return medalTranslation[englishMedal] || englishMedal;
         };
 
-        // 3순위: 플레이어 카드 API 데이터 (badge_level 기반, 보조용)
-        if (!medal && playerCard.badge_level !== undefined && playerCard.badge_level !== null) {
-          const badgeLevel = playerCard.badge_level;
-          medal = getMedalFromBadgeLevel(badgeLevel);
-          
-          // 정확한 서브랭크 계산 (0-6 range를 1-7로 변환)
-          if (badgeLevel >= 21) {
-            subrank = ((badgeLevel - 21) % 7) + 1;
-          } else {
-            subrank = (badgeLevel % 7) + 1;
-          }
-          
-          score = badgeLevel * 100; // badge_level을 점수로 변환
-          console.log(`🎯 플레이어 ${accountId} 서버 API 랭크 사용 (보조):`, {
-            badgeLevel: badgeLevel,
-            medal: medal,
-            subrank: subrank,
-            source: 'server_api_fallback'
-          });
-        }
-        // 4순위: 기본값
-        else {
+        // 3순위: 기본값 (API 카드 데이터 없음)
+        if (!medal) {
           medal = 'Seeker';
           subrank = 3;
           score = 2800; // Seeker 3 기준 점수
           console.log(`⚠️ 플레이어 ${accountId} 기본 랭크 사용 (Seeker 3)`);
         }
 
-        const playerData = {
+        const playerResponse = {
           accountId: accountId,
           steamId: steamId64,
-          name: playerCard.account_name || `Player_${accountId}`,
-          avatar:
-            playerCard.avatar_url ||
-            'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
+          name: `Player_${accountId}`, // Steam API에서 나중에 업데이트
+          avatar: 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
           country: '🌍', // API에서 제공되지 않는 경우 기본값
           rank: {
             medal: medal,
@@ -2185,7 +2169,7 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
               avgDenies: matchAnalysis.avgDenies,
             });
 
-            playerData.stats = {
+            playerResponse.stats = {
               matches: matchAnalysis.totalMatches,
               winRate: parseFloat(matchAnalysis.winRate),
               laneWinRate: parseFloat(matchAnalysis.laneWinRate),
@@ -2196,9 +2180,9 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
               endorsements: Math.floor(matchAnalysis.totalMatches * 2.5), // 추천수 (매치 수 기반)
               avgMatchDuration: matchAnalysis.avgMatchDuration,
             };
-            playerData.heroes = matchAnalysis.topHeroes;
-            playerData.recentMatches = matchAnalysis.recentMatches;
-            playerData.averageKDA = matchAnalysis.averageKDA;
+            playerResponse.heroes = matchAnalysis.topHeroes;
+            playerResponse.recentMatches = matchAnalysis.recentMatches;
+            playerResponse.averageKDA = matchAnalysis.averageKDA;
 
             console.log(
               `✅ 플레이어 카드에서 매치 분석 완료: ${matchAnalysis.totalMatches}경기, 승률 ${matchAnalysis.winRate}%`
@@ -2207,7 +2191,7 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
         } catch (matchError) {
           console.log(`❌ 플레이어 카드에서 매치 분석 실패: ${matchError.message}`);
           // 매치 분석 실패 시 최소한의 추정값 제공
-          playerData.stats = {
+          playerResponse.stats = {
             matches: 25,
             winRate: 52.0,
             laneWinRate: 48.0,
@@ -2232,12 +2216,12 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
 
           if (steamProfileResponse.data) {
             const steamProfile = steamProfileResponse.data;
-            playerData.name = steamProfile.personaname || steamProfile.real_name || playerData.name;
+            playerResponse.name = steamProfile.personaname || steamProfile.real_name || playerResponse.name;
 
             // 아바타 URL 처리
             if (steamProfile.avatarfull || steamProfile.avatar) {
               const avatarUrl = steamProfile.avatarfull || steamProfile.avatar;
-              playerData.avatar = avatarUrl.replace(
+              playerResponse.avatar = avatarUrl.replace(
                 'avatars.steamstatic.com',
                 'avatars.cloudflare.steamstatic.com'
               );
@@ -2245,18 +2229,18 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
 
             // 국가 코드 처리
             if (steamProfile.loccountrycode) {
-              playerData.country = getCountryFlag(steamProfile.loccountrycode);
-              playerData.countryCode = steamProfile.loccountrycode;
+              playerResponse.country = getCountryFlag(steamProfile.loccountrycode);
+              playerResponse.countryCode = steamProfile.loccountrycode;
             }
 
-            console.log(`✅ 플레이어 카드에서 Steam 프로필 정보 획득: ${playerData.name}`);
+            console.log(`✅ 플레이어 카드에서 Steam 프로필 정보 획득: ${playerResponse.name}`);
           }
         } catch (steamError) {
           console.log(`❌ 플레이어 카드에서 Steam 프로필 호출 실패: ${steamError.message}`);
         }
 
-        setCachedData(cacheKey, playerData);
-        return res.json(playerData);
+        setCachedData(cacheKey, playerResponse);
+        return res.json(playerResponse);
       }
     } catch (error) {
       console.log(`❌ 실제 플레이어 카드 API 실패: ${error.message}`);
