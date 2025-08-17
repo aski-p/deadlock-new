@@ -2134,7 +2134,7 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
         const playerResponse = {
           accountId: accountId,
           steamId: steamId64,
-          name: `Player_${accountId}`, // Steam API에서 나중에 업데이트
+          name: `Player ${accountId}`, // Steam API에서 나중에 업데이트
           avatar: 'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
           country: '🌍', // API에서 제공되지 않는 경우 기본값
           rank: {
@@ -2217,7 +2217,8 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
 
           if (steamProfileResponse.data) {
             const steamProfile = steamProfileResponse.data;
-            playerResponse.name = steamProfile.personaname || steamProfile.real_name || playerResponse.name;
+            // Steam 프로필 이름이 있으면 사용, 없으면 accountId 사용
+            playerResponse.name = steamProfile.personaname || steamProfile.real_name || `Player ${accountId}`;
 
             // 아바타 URL 처리
             if (steamProfile.avatarfull || steamProfile.avatar) {
@@ -2238,6 +2239,10 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
           }
         } catch (steamError) {
           console.log(`❌ 플레이어 카드에서 Steam 프로필 호출 실패: ${steamError.message}`);
+          // Steam 프로필 정보를 가져올 수 없는 경우 accountId 사용
+          if (playerResponse.name.startsWith('Player_')) {
+            playerResponse.name = `Player ${accountId}`;
+          }
         }
 
         setCachedData(cacheKey, playerResponse);
@@ -2289,7 +2294,7 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
     const playerData = {
       accountId: accountId,
       steamId: steamId64,
-      name: `Player_${accountId}`,
+      name: `Player ${accountId}`,
       avatar:
         'https://avatars.cloudflare.steamstatic.com/b5bd56c1aa4644a474a2e4972be27ef9e82e517e_full.jpg',
       country: '🌍',
@@ -2961,7 +2966,7 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
             return {
               accountId: accountId,
               steamId: steamId64,
-              name: `Player_${accountId}`, // Steam API에서 업데이트 예정
+              name: `Player ${accountId}`, // Steam API에서 업데이트 예정
               avatar:
                 'data:image/svg+xml;charset=utf-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"%3E%3Ccircle cx="25" cy="25" r="23" fill="%23666" stroke="%23fff" stroke-width="2"/%3E%3Ccircle cx="25" cy="18" r="8" fill="%23fff"/%3E%3Cpath d="M8 40 Q25 32 42 40" stroke="%23fff" stroke-width="4" fill="none"/%3E%3C/svg%3E', // 기본 아바타
               matches: mate.matches_played,
@@ -3071,7 +3076,7 @@ app.get('/api/v1/players/:accountId/party-stats', async (req, res) => {
           for (const member of topPartyMembers) {
             try {
               // Steam API로 업데이트되지 않았거나 기본 아바타인 경우만 Deadlock API 호출
-              const hasDefaultName = member.name === `Player_${member.accountId}`;
+              const hasDefaultName = member.name === `Player ${member.accountId}` || member.name === `Player_${member.accountId}`;
               const hasDefaultAvatar =
                 member.avatar.includes('data:image/svg+xml') ||
                 member.avatar.includes(
@@ -5267,7 +5272,7 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
                   // 플레이어 참가자 정보 추출 (실제 이름 우선 사용)
                   const rawParticipants = matchDetails.match_info.players.map(player => ({
                     hero: getHeroNameById(player.hero_id) || 'Unknown',
-                    name: player.player_name || player.persona_name || player.name || `Player_${player.account_id}`, // 매치 데이터에서 직접 이름 사용
+                    name: player.player_name || player.persona_name || player.name || `Player ${player.account_id}`, // 매치 데이터에서 직접 이름 사용
                     account_id: player.account_id,
                     hero_id: player.hero_id,
                     team: player.team || 0
@@ -5318,7 +5323,7 @@ app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
                           }
                         } catch (steamError) {
                           // 3. 실패 시 계정 ID 기반 이름 사용
-                          participant.name = `Player_${participant.account_id}`;
+                          participant.name = `Player ${participant.account_id}`;
                           console.log(`⚠️ ${participant.account_id} → ${participant.name} (fallback)`);
                         }
                       }
