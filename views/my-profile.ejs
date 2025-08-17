@@ -2429,14 +2429,19 @@ function updatePlayerUIFast(player, heroStats, matchHistory, partyStats, mmrData
         document.getElementById('player-name').textContent = name;
         document.getElementById('player-country').innerHTML = getCountryImage(country);
         
-        // Rank (안전한 접근)
+        // Rank (안전한 접근) - 로컬 서버 이미지 사용
         const getMedalImage = (medal, subrank) => {
-            const medalRankMap = {
-                'Eternus': 11, 'Phantom': 10, 'Oracle': 9, 'Ritualist': 8,
-                'Alchemist': 7, 'Arcanist': 6, 'Initiate': 5
+            const medalImageMap = {
+                'Eternus': '/images/ranks/eternus.webp',
+                'Phantom': '/images/ranks/phantom.webp',
+                'Oracle': '/images/ranks/oracle.webp',
+                'Ritualist': '/images/ranks/ritualist.webp',
+                'Alchemist': '/images/ranks/alchemist.webp',
+                'Arcanist': '/images/ranks/arcanist.webp',
+                'Initiate': '/images/ranks/initiate.webp',
+                'Seeker': '/images/ranks/seeker.webp'
             };
-            const rankNumber = medalRankMap[medal] || 9;
-            return `https://cdn.deadlock.coach/vpk/panorama/images/ranked/badges/rank${rankNumber}/badge_sm_subrank${subrank || 1}.webp`;
+            return medalImageMap[medal] || '/images/ranks/initiate.webp';
         };
         
         // 영어 등급을 한글로 변환하는 함수

@@ -179,21 +179,21 @@ function getCountryImage(countryFlag) {
 function updateLeaderboardTable(data) {
     const tbody = document.getElementById('leaderboard-tbody');
     
-    // 메달 이미지 매핑 - 실제 메달 이미지 사용
+    // 메달 이미지 매핑 - 로컬 서버 이미지 사용
     const getMedalImage = (medal, subrank) => {
-        // 실제 메달 이미지 URLs
+        // 로컬 서버에 저장된 메달 이미지들
         const medalImageMap = {
-            'eternus': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/ranks/eternus_1.webp',
-            'phantom': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/ranks/phantom_1.webp', 
-            'oracle': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/ranks/oracle_1.webp',
-            'ritualist': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/ranks/ritualist_1.webp',
-            'alchemist': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/ranks/alchemist_1.webp',
-            'arcanist': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/ranks/arcanist_1.webp',
-            'initiate': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/ranks/initiate_1.webp',
-            'seeker': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/ranks/seeker_1.webp'
+            'eternus': '/images/ranks/eternus.webp',
+            'phantom': '/images/ranks/phantom.webp', 
+            'oracle': '/images/ranks/oracle.webp',
+            'ritualist': '/images/ranks/ritualist.webp',
+            'alchemist': '/images/ranks/alchemist.webp',
+            'arcanist': '/images/ranks/arcanist.webp',
+            'initiate': '/images/ranks/initiate.webp',
+            'seeker': '/images/ranks/seeker.webp'
         };
         
-        return medalImageMap[medal.toLowerCase()] || 'https://assets-bucket.deadlock-api.com/assets-api-res/images/ranks/initiate_1.webp';
+        return medalImageMap[medal.toLowerCase()] || '/images/ranks/initiate.webp';
     };
 
     // 영어 메달을 한글로 변환하는 함수
