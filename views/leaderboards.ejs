@@ -181,20 +181,19 @@ function updateLeaderboardTable(data) {
     
     // 메달 이미지 매핑 - deadlock.coach CDN 사용
     const getMedalImage = (medal, subrank) => {
-        const medalRankMap = {
-            'eternus': 11,
-            'phantom': 10,
-            'oracle': 9,
-            'ritualist': 8,
-            'alchemist': 7,
-            'arcanist': 6,
-            'initiate': 5
+        // Placeholder medal badges - using ability icons as fallback
+        const medalImageMap = {
+            'eternus': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+            'phantom': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp', 
+            'oracle': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+            'ritualist': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+            'alchemist': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+            'arcanist': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+            'initiate': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+            'seeker': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp'
         };
         
-        const rankNumber = medalRankMap[medal.toLowerCase()] || 5;
-        const subrankFormatted = subrank || 1;
-        
-        return `https://cdn.deadlock.coach/vpk/panorama/images/ranked/badges/rank${rankNumber}/badge_sm_subrank${subrankFormatted}.webp`;
+        return medalImageMap[medal.toLowerCase()] || 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp';
     };
 
     // 영어 메달을 한글로 변환하는 함수
@@ -214,35 +213,35 @@ function updateLeaderboardTable(data) {
     // 영웅 이미지 매핑 - deadlock.coach CDN 사용
     const getHeroImage = (heroName) => {
         const heroImageMap = {
-            'Abrams': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Bebop': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Dynamo': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Grey Talon': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Haze': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Infernus': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Ivy': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Kelvin': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Lady Geist': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/spectre_mm.webp',
-            'Lash': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'McGinnis': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/engineer_mm.webp',
-            'Mo & Krill': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Paradox': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Pocket': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Seven': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Shiv': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Vindicta': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Viper': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/kali_mm.webp',
-            'Viscous': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Warden': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Wraith': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Yamato': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Calico': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Holliday': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Mirage': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
-            'Sinclair': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp'
+            'Abrams': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/bull_card.webp',
+            'Bebop': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/bebop_card.webp',
+            'Dynamo': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/dynamo_card.webp',
+            'Grey Talon': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/archer_card.webp',
+            'Haze': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/haze_card.webp',
+            'Infernus': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/inferno_card.webp',
+            'Ivy': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/tengu_card.webp',
+            'Kelvin': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/kelvin_card.webp',
+            'Lady Geist': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/spectre_card.webp',
+            'Lash': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/lash_card.webp',
+            'McGinnis': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/engineer_card.webp',
+            'Mo & Krill': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/digger_card.webp',
+            'Paradox': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/chrono_card.webp',
+            'Pocket': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/synth_card.webp',
+            'Seven': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/gigawatt_card.webp',
+            'Shiv': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/shiv_card.webp',
+            'Vindicta': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/hornet_card.webp',
+            'Viper': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/kali_card.webp',
+            'Viscous': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/viscous_card.webp',
+            'Warden': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/warden_card.webp',
+            'Wraith': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/wraith_card.webp',
+            'Yamato': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/yamato_card.webp',
+            'Calico': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/calico_card.webp',
+            'Holliday': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/astro_card.webp',
+            'Mirage': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/mirage_card.webp',
+            'Sinclair': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/magician_card.webp'
         };
         
-        return heroImageMap[heroName] || 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp';
+        return heroImageMap[heroName] || 'https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/bull_card.webp';
     };
     
     tbody.innerHTML = data.map(player => 
