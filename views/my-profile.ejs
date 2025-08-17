@@ -2426,7 +2426,7 @@ function showFallbackUI(accountId) {
 }
 
 // 빠른 UI 업데이트 - 모든 데이터를 한 번에 처리
-function updatePlayerUIFast(player, heroStats, matchHistory, partyStats, mmrData) {
+function updatePlayerUIFast(player, heroStats, matchHistory, partyStats, mmrAPIData) {
     console.log('🎨 UI 업데이트 시작, 플레이어 데이터:', player);
     
     try {
@@ -2539,17 +2539,17 @@ function updatePlayerUIFast(player, heroStats, matchHistory, partyStats, mmrData
         
         // MMR 그래프 표시 - 실제 MMR API 데이터 우선 사용
         console.log('🔍 MMR 데이터 상세 확인:', {
-            type: typeof mmrData,
-            isArray: Array.isArray(mmrData),
-            length: mmrData?.length,
-            firstItem: mmrData?.[0],
-            rawData: mmrData
+            type: typeof mmrAPIData,
+            isArray: Array.isArray(mmrAPIData),
+            length: mmrAPIData?.length,
+            firstItem: mmrAPIData?.[0],
+            rawData: mmrAPIData
         });
         
-        if (mmrData && Array.isArray(mmrData) && mmrData.length > 0) {
+        if (mmrAPIData && Array.isArray(mmrAPIData) && mmrAPIData.length > 0) {
             // 실제 MMR API 데이터 사용
-            console.log('📈 실제 MMR API 데이터로 그래프 생성:', mmrData.length, '개 데이터');
-            displayMMRGraph(mmrData);
+            console.log('📈 실제 MMR API 데이터로 그래프 생성:', mmrAPIData.length, '개 데이터');
+            displayMMRGraph(mmrAPIData);
         } else if (matchHistory && Array.isArray(matchHistory) && matchHistory.length > 0) {
             // MMR API 데이터가 없으면 매치 히스토리에서 랭크 데이터 추출하여 MMR 그래프 생성 (fallback)
             const mmrDataFromMatches = matchHistory
