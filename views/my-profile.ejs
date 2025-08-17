@@ -2326,6 +2326,15 @@ async function loadMyProfileData() {
             mmr: !!results.mmrData
         });
         
+        // 매치 히스토리 상세 로그
+        console.log('🔍 매치 히스토리 상세 확인:', {
+            type: typeof results.matchHistory,
+            isArray: Array.isArray(results.matchHistory),
+            length: results.matchHistory?.length,
+            firstMatch: results.matchHistory?.[0],
+            rawData: results.matchHistory
+        });
+        
         // 플레이어 데이터 처리 개선
         console.log('🔍 플레이어 데이터 상세 확인:', results.player);
         
@@ -2505,9 +2514,17 @@ function updatePlayerUIFast(player, heroStats, matchHistory, partyStats, mmrData
         
         if (matchHistory && Array.isArray(matchHistory) && matchHistory.length > 0) {
             console.log('📋 매치 히스토리 표시:', matchHistory.length, '개');
+            console.log('🎮 첫 번째 매치 샘플:', matchHistory[0]);
             displayMatchHistory(matchHistory);
         } else {
-            console.log('⚠️ 매치 히스토리 없음');
+            console.log('⚠️ 매치 히스토리 조건 실패:', {
+                matchHistory: !!matchHistory,
+                isArray: Array.isArray(matchHistory),
+                length: matchHistory?.length,
+                condition1: !!matchHistory,
+                condition2: Array.isArray(matchHistory),
+                condition3: matchHistory?.length > 0
+            });
             document.getElementById('matches-list').innerHTML = '<p style="color: #999; text-align: center;">최근 매치 데이터가 없습니다.</p>';
         }
         
@@ -2519,9 +2536,21 @@ function updatePlayerUIFast(player, heroStats, matchHistory, partyStats, mmrData
             document.getElementById('party-stats-list').innerHTML = '<p style="color: #999; text-align: center;">파티 데이터가 없습니다.</p>';
         }
         
-        // MMR 그래프 표시 - 매치 히스토리에서 랭크 데이터 추출
-        if (matchHistory && Array.isArray(matchHistory) && matchHistory.length > 0) {
-            // 매치 히스토리에서 랭크 정보 추출하여 MMR 그래프 생성
+        // MMR 그래프 표시 - 실제 MMR API 데이터 우선 사용
+        console.log('🔍 MMR 데이터 상세 확인:', {
+            type: typeof results.mmrData,
+            isArray: Array.isArray(results.mmrData),
+            length: results.mmrData?.length,
+            firstItem: results.mmrData?.[0],
+            rawData: results.mmrData
+        });
+        
+        if (results.mmrData && Array.isArray(results.mmrData) && results.mmrData.length > 0) {
+            // 실제 MMR API 데이터 사용
+            console.log('📈 실제 MMR API 데이터로 그래프 생성:', results.mmrData.length, '개 데이터');
+            displayMMRGraph(results.mmrData);
+        } else if (matchHistory && Array.isArray(matchHistory) && matchHistory.length > 0) {
+            // MMR API 데이터가 없으면 매치 히스토리에서 랭크 데이터 추출하여 MMR 그래프 생성 (fallback)
             const mmrDataFromMatches = matchHistory
                 .filter(match => match.teamRank && match.playedAt)
                 .map(match => ({
@@ -2532,15 +2561,15 @@ function updatePlayerUIFast(player, heroStats, matchHistory, partyStats, mmrData
                 .reverse(); // 시간순으로 정렬
                 
             if (mmrDataFromMatches.length > 0) {
-                console.log('📈 매치 히스토리에서 MMR 그래프 생성:', mmrDataFromMatches.length, '개 데이터');
+                console.log('📈 매치 히스토리에서 MMR 그래프 생성 (fallback):', mmrDataFromMatches.length, '개 데이터');
                 displayMMRGraph(mmrDataFromMatches);
             } else {
                 console.log('⚠️ 랭크 데이터가 있는 매치가 없음');
                 document.getElementById('mmr-graph-container').innerHTML = '<p style="color: #999; text-align: center;">랭크 데이터를 찾을 수 없습니다.</p>';
             }
         } else {
-            console.log('⚠️ 매치 히스토리 없음');
-            document.getElementById('mmr-graph-container').innerHTML = '<p style="color: #999; text-align: center;">매치 데이터가 없어 MMR 그래프를 표시할 수 없습니다.</p>';
+            console.log('⚠️ MMR 데이터와 매치 히스토리 모두 없음');
+            document.getElementById('mmr-graph-container').innerHTML = '<p style="color: #999; text-align: center;">MMR 데이터를 불러올 수 없습니다.</p>';
         }
         
         console.log('🎉 모든 UI 업데이트 완료');
