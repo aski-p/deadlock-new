@@ -2288,24 +2288,25 @@ async function loadMyProfileData() {
         })));
         
         // 응답 처리
-        const results = {
-            player: null,
-            heroStats: [],
-            matchHistory: [],
-            partyStats: [],
-            mmrData: null
+        const apiData = {
+            playerData: null,
+            heroStatsData: [],
+            matchHistoryData: [],
+            partyStatsData: [],
+            mmrAPIData: null
         };
         
         // API 결과 처리
         for (let i = 0; i < apiCalls.length; i++) {
             const result = apiCalls[i];
+            const dataKeys = ['playerData', 'heroStatsData', 'matchHistoryData', 'partyStatsData', 'mmrAPIData'];
             const apiNames = ['player', 'heroStats', 'matchHistory', 'partyStats', 'mmrData'];
             
             if (result.status === 'fulfilled') {
                 try {
                     if (result.value.ok) {
                         const data = await result.value.json();
-                        results[apiNames[i]] = data;
+                        apiData[dataKeys[i]] = data;
                         console.log(`✅ ${apiNames[i]} 로드 성공`);
                     } else {
                         console.warn(`⚠️ ${apiNames[i]} API 실패 (상태: ${result.value.status})`);
@@ -2319,38 +2320,38 @@ async function loadMyProfileData() {
         }
         
         console.log('📊 최종 받은 데이터:', {
-            player: !!results.player,
-            heroStats: Array.isArray(results.heroStats) ? results.heroStats.length : 0,
-            matchHistory: Array.isArray(results.matchHistory) ? results.matchHistory.length : 0,
-            partyStats: Array.isArray(results.partyStats) ? results.partyStats.length : 0,
-            mmr: !!results.mmrData
+            player: !!apiData.playerData,
+            heroStats: Array.isArray(apiData.heroStatsData) ? apiData.heroStatsData.length : 0,
+            matchHistory: Array.isArray(apiData.matchHistoryData) ? apiData.matchHistoryData.length : 0,
+            partyStats: Array.isArray(apiData.partyStatsData) ? apiData.partyStatsData.length : 0,
+            mmr: !!apiData.mmrAPIData
         });
         
         // 매치 히스토리 상세 로그
         console.log('🔍 매치 히스토리 상세 확인:', {
-            type: typeof results.matchHistory,
-            isArray: Array.isArray(results.matchHistory),
-            length: results.matchHistory?.length,
-            firstMatch: results.matchHistory?.[0],
-            rawData: results.matchHistory
+            type: typeof apiData.matchHistoryData,
+            isArray: Array.isArray(apiData.matchHistoryData),
+            length: apiData.matchHistoryData?.length,
+            firstMatch: apiData.matchHistoryData?.[0],
+            rawData: apiData.matchHistoryData
         });
         
         // 플레이어 데이터 처리 개선
-        console.log('🔍 플레이어 데이터 상세 확인:', results.player);
+        console.log('🔍 플레이어 데이터 상세 확인:', apiData.playerData);
         
-        if (results.player && typeof results.player === 'object' && !results.player.error && results.player.name) {
+        if (apiData.playerData && typeof apiData.playerData === 'object' && !apiData.playerData.error && apiData.playerData.name) {
             console.log('🎯 유효한 플레이어 데이터로 UI 업데이트:', {
-                name: results.player.name,
-                avatar: results.player.avatar,
-                accountId: results.player.accountId
+                name: apiData.playerData.name,
+                avatar: apiData.playerData.avatar,
+                accountId: apiData.playerData.accountId
             });
-            updatePlayerUIFast(results.player, results.heroStats, results.matchHistory, results.partyStats, results.mmrData);
+            updatePlayerUIFast(apiData.playerData, apiData.heroStatsData, apiData.matchHistoryData, apiData.partyStatsData, apiData.mmrAPIData);
             loading.style.display = 'none';
             content.style.display = 'block';
             console.log('✅ 프로필 데이터 로딩 완료');
         } else {
             // API 실패 또는 유효하지 않은 데이터의 경우
-            console.warn('⚠️ 플레이어 데이터가 유효하지 않음:', results.player);
+            console.warn('⚠️ 플레이어 데이터가 유효하지 않음:', apiData.playerData);
             console.warn('💡 Steam 정보로 폴백 시도...');
             
             // Steam API나 기본 정보로 폴백
@@ -2364,7 +2365,7 @@ async function loadMyProfileData() {
             };
             
             console.log('🔄 폴백 플레이어 데이터 사용:', fallbackPlayer);
-            updatePlayerUIFast(fallbackPlayer, results.heroStats || [], results.matchHistory || [], results.partyStats || [], results.mmrData);
+            updatePlayerUIFast(fallbackPlayer, apiData.heroStatsData || [], apiData.matchHistoryData || [], apiData.partyStatsData || [], apiData.mmrAPIData);
             loading.style.display = 'none';
             content.style.display = 'block';
         }
