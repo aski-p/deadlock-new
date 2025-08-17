@@ -19,6 +19,200 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ============== API 호출 제한 시스템 ==============
+class APIRateLimiter {
+  constructor() {
+    this.requestQueue = [];
+    this.lastRequestTime = 0;
+    this.isProcessing = false;
+    this.requestCount = 0;
+    this.resetTime = Date.now();
+    
+    // deadlock-api.com rate limits: 추정 값
+    this.limits = {
+      requestsPerMinute: 30,  // 분당 최대 30회
+      requestsPerHour: 500,   // 시간당 최대 500회
+      minDelay: 2000,         // 최소 2초 간격
+      maxRetries: 3,          // 최대 재시도 3회
+      backoffMultiplier: 2    // 백오프 배수
+    };
+    
+    // 요청 통계
+    this.stats = {
+      totalRequests: 0,
+      successfulRequests: 0,
+      failedRequests: 0,
+      rateLimitedRequests: 0,
+      averageDelay: 0
+    };
+  }
+  
+  // Rate limit 체크
+  checkRateLimit() {
+    const now = Date.now();
+    const timeSinceReset = now - this.resetTime;
+    
+    // 1분마다 카운터 리셋
+    if (timeSinceReset > 60000) {
+      this.requestCount = 0;
+      this.resetTime = now;
+    }
+    
+    // 분당 제한 체크
+    if (this.requestCount >= this.limits.requestsPerMinute) {
+      console.log('⚠️ API Rate limit reached - 분당 요청 수 초과');
+      return false;
+    }
+    
+    // 최소 간격 체크
+    const timeSinceLastRequest = now - this.lastRequestTime;
+    if (timeSinceLastRequest < this.limits.minDelay) {
+      console.log(`⏱️ API Rate limit - ${this.limits.minDelay - timeSinceLastRequest}ms 더 대기 필요`);
+      return false;
+    }
+    
+    return true;
+  }
+  
+  // 큐에 API 요청 추가
+  async queueRequest(url, options = {}) {
+    return new Promise((resolve, reject) => {
+      this.requestQueue.push({
+        url,
+        options,
+        resolve,
+        reject,
+        timestamp: Date.now(),
+        retries: 0
+      });
+      
+      this.processQueue();
+    });
+  }
+  
+  // 큐 처리
+  async processQueue() {
+    if (this.isProcessing || this.requestQueue.length === 0) {
+      return;
+    }
+    
+    this.isProcessing = true;
+    
+    while (this.requestQueue.length > 0) {
+      const request = this.requestQueue.shift();
+      
+      try {
+        await this.executeRequest(request);
+      } catch (error) {
+        console.error('❌ 큐 처리 중 오류:', error);
+      }
+      
+      // 다음 요청 전 최소 지연
+      await this.delay(this.limits.minDelay);
+    }
+    
+    this.isProcessing = false;
+  }
+  
+  // 실제 API 요청 실행
+  async executeRequest(request) {
+    const { url, options, resolve, reject } = request;
+    
+    // Rate limit 체크
+    while (!this.checkRateLimit()) {
+      await this.delay(1000); // 1초 대기
+    }
+    
+    try {
+      this.stats.totalRequests++;
+      this.requestCount++;
+      this.lastRequestTime = Date.now();
+      
+      console.log(`📡 API 요청 실행: ${url} (큐 대기: ${this.requestQueue.length}개)`);
+      
+      const response = await axios.get(url, {
+        timeout: 10000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          'Accept': 'application/json',
+          'Cache-Control': 'no-cache',
+          ...options.headers
+        },
+        ...options
+      });
+      
+      this.stats.successfulRequests++;
+      console.log(`✅ API 요청 성공: ${url}`);
+      resolve(response.data);
+      
+    } catch (error) {
+      console.log(`❌ API 요청 실패: ${url} - ${error.message}`);
+      
+      // 429 (Too Many Requests) 또는 503 에러 처리
+      if (error.response?.status === 429 || error.response?.status === 503) {
+        this.stats.rateLimitedRequests++;
+        
+        // 재시도 로직
+        if (request.retries < this.limits.maxRetries) {
+          request.retries++;
+          const delay = this.limits.minDelay * Math.pow(this.limits.backoffMultiplier, request.retries);
+          
+          console.log(`🔄 Rate limit 감지 - ${delay}ms 후 재시도 (${request.retries}/${this.limits.maxRetries})`);
+          
+          await this.delay(delay);
+          this.requestQueue.unshift(request); // 큐 앞쪽에 재추가
+          return;
+        }
+      }
+      
+      this.stats.failedRequests++;
+      reject(error);
+    }
+  }
+  
+  // 지연 함수
+  delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+  
+  // 통계 출력
+  getStats() {
+    return {
+      ...this.stats,
+      queueLength: this.requestQueue.length,
+      requestsThisMinute: this.requestCount,
+      isProcessing: this.isProcessing
+    };
+  }
+}
+
+// 전역 API Rate Limiter 인스턴스
+const deadlockAPILimiter = new APIRateLimiter();
+
+// 개선된 API 호출 함수
+async function safeAPICall(url, options = {}) {
+  try {
+    return await deadlockAPILimiter.queueRequest(url, options);
+  } catch (error) {
+    console.error(`❌ Safe API Call 실패: ${url}`, error.message);
+    throw error;
+  }
+}
+
+// 통계 모니터링 (5분마다)
+setInterval(() => {
+  const stats = deadlockAPILimiter.getStats();
+  console.log('📊 API 호출 통계:', {
+    '성공률': `${((stats.successfulRequests / stats.totalRequests) * 100 || 0).toFixed(1)}%`,
+    '총 요청': stats.totalRequests,
+    '성공': stats.successfulRequests,
+    '실패': stats.failedRequests,
+    'Rate Limited': stats.rateLimitedRequests,
+    '대기 중': stats.queueLength
+  });
+}, 300000); // 5분마다
+// ============== API 호출 제한 시스템 끝 ==============
+
 // Basic health check endpoint for Railway (early registration)
 app.get('/health', (req, res) => {
   res.status(200).json({
@@ -837,26 +1031,28 @@ const fetchDeadlockLeaderboard = async (region, page = 1, limit = 50) => {
       return null;
     }
 
-    // deadlock-api.com의 실제 리더보드 API 호출
-    const response = await axios.get(`https://api.deadlock-api.com/v1/leaderboard/${apiRegion}`, {
+    // deadlock-api.com의 실제 리더보드 API 호출 (Rate limiting 적용)
+    const response = await safeAPICall(`https://api.deadlock-api.com/v1/leaderboard/${apiRegion}`, {
       timeout: 15000,
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         Accept: 'application/json',
       },
     });
+    
+    // 응답 객체 구조 맞추기
+    const responseData = { data: response };
 
-    if (response.data && response.data.entries && Array.isArray(response.data.entries)) {
+    if (response && response.entries && Array.isArray(response.entries)) {
       console.log(
-        `✅ 실제 데드락 API 성공! ${response.data.entries.length}명의 플레이어 데이터 획득`
+        `✅ 실제 데드락 API 성공! ${response.entries.length}명의 플레이어 데이터 획득`
       );
 
       // API 응답을 우리 형식으로 변환 (전체 1000명, 페이징 없음)
-      const convertedData = await convertDeadlockApiToOurFormat(response.data.entries, region);
+      const convertedData = await convertDeadlockApiToOurFormat(response.entries, region);
       return convertedData;
     }
 
-    console.log('❌ 데드락 API 응답 형식 오류:', response.data);
+    console.log('❌ 데드락 API 응답 형식 오류:', response);
     return null;
   } catch (error) {
     console.log(`❌ 데드락 API 실패: ${error.message}`);
@@ -4103,38 +4299,8 @@ const fetchAndAnalyzeAllMatches = async accountId => {
             return `${category} 아이템 (${itemId})`;
           };
 
-          // API 재시도 함수
-          const retryAPICall = async (url, maxRetries = 3, delay = 1000) => {
-            console.log(`🔄 API 호출 시도: ${url}`);
-            
-            for (let attempt = 1; attempt <= maxRetries; attempt++) {
-              try {
-                console.log(`📡 시도 ${attempt}/${maxRetries}: ${url}`);
-                
-                const response = await axios.get(url, {
-                  timeout: 8000,
-                  headers: {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-                  }
-                });
-                
-                console.log(`✅ API 호출 성공 (시도 ${attempt}): ${response.data ? 'Data received' : 'No data'}`);
-                return response.data;
-                
-              } catch (error) {
-                console.log(`❌ API 호출 실패 (시도 ${attempt}/${maxRetries}): ${error.message}`);
-                
-                if (attempt === maxRetries) {
-                  throw error;
-                }
-                
-                // 지수 백오프: 1초, 2초, 4초 대기
-                const waitTime = delay * Math.pow(2, attempt - 1);
-                console.log(`⏱️ ${waitTime}ms 대기 후 재시도...`);
-                await new Promise(resolve => setTimeout(resolve, waitTime));
-              }
-            }
-          };
+          // 개선된 API 호출 함수 사용 (Rate limiting 적용)
+          const retryAPICall = safeAPICall;
 
           // 매치별 최종 아이템 생성 (실제 API 데이터 우선, 최대한 실제 데이터 확보)
           const generateMatchItems = async () => {
@@ -7384,8 +7550,8 @@ app.get('/api/v1/matches/:matchId/details', async (req, res) => {
         timestamp: new Date().toISOString()
       };
       
-      // 캐시에 저장 (5분)
-      setCachedData(cacheKey, result, 300);
+      // 캐시에 저장 (30분으로 증가 - API 호출 제한)
+      setCachedData(cacheKey, result, 1800);
       
       console.log(`✅ 매치 ${matchId} 상세 정보 반환: ${finalItemsData.length}명의 플레이어 데이터`);
       res.json(result);
