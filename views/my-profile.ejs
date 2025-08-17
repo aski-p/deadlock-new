@@ -4833,6 +4833,21 @@ function displayMatchHistory(matches) {
                             
                             const matchInfo = matchData[0];
                             
+                            // 매치 메타데이터에서 플레이어 이름 정보 업데이트
+                            if (matchInfo.players && Array.isArray(matchInfo.players)) {
+                                console.log(`👥 매치 메타데이터에서 ${matchInfo.players.length}명의 플레이어 정보 발견`);
+                                
+                                // 매치 플레이어 정보로 현재 표시된 플레이어들 이름 업데이트
+                                matchInfo.players.forEach(apiPlayer => {
+                                    if (apiPlayer.account_id && apiPlayer.name && !apiPlayer.name.startsWith('Player')) {
+                                        // 캐시에 저장
+                                        if (!window.playerNameCache) window.playerNameCache = {};
+                                        window.playerNameCache[apiPlayer.account_id] = apiPlayer.name;
+                                        console.log(`💾 플레이어 이름 캐시 업데이트: ${apiPlayer.account_id} → ${apiPlayer.name}`);
+                                    }
+                                });
+                            }
+                            
                             // 현재 플레이어(aski, account_id: 54776284) 찾기
                             const currentPlayer = matchInfo.players.find(p => 
                                 p.account_id === 54776284 || 
@@ -4857,31 +4872,39 @@ function displayMatchHistory(matches) {
                             })));
                             
                             
-                            // v2/items API에서 아이템 정보 가져오기
-                            if (!window.deadlockItemsCache) {
-                                console.log('🔄 아이템 메타데이터 로딩 중...');
-                                try {
-                                    const itemsResponse = await fetch('https://assets.deadlock-api.com/v2/items');
-                                    if (itemsResponse.ok) {
-                                        const itemsArray = await itemsResponse.json();
-                                        
-                                        // 배열을 ID를 키로 하는 객체로 변환
-                                        const itemsMap = {};
-                                        itemsArray.forEach(item => {
-                                            if (item.id) {
-                                                itemsMap[item.id] = item;
-                                            }
-                                        });
-                                        
-                                        window.deadlockItemsCache = itemsMap;
-                                        console.log('✅ 아이템 메타데이터 로드 완료:', Object.keys(itemsMap).length, '개 아이템');
-                                        console.log('📋 첫 번째 아이템 예시:', Object.values(itemsMap)[0]);
-                                    } else {
-                                        console.error('❌ v2/items API 호출 실패:', itemsResponse.status);
-                                    }
-                                } catch (error) {
-                                    console.error('❌ v2/items API 에러:', error);
+                            // v2/items API에서 아이템 정보 가져오기 (강제 로딩)
+                            console.log('🔄 아이템 메타데이터 로딩 중...');
+                            try {
+                                const itemsResponse = await fetch('https://assets.deadlock-api.com/v2/items');
+                                if (itemsResponse.ok) {
+                                    const itemsArray = await itemsResponse.json();
+                                    console.log(`📦 API에서 아이템 배열 받음: ${itemsArray.length}개`);
+                                    
+                                    // 배열을 ID를 키로 하는 객체로 변환
+                                    const itemsMap = {};
+                                    itemsArray.forEach(item => {
+                                        if (item.id) {
+                                            itemsMap[item.id] = {
+                                                id: item.id,
+                                                name: item.name,
+                                                image: item.image_webp || item.image,
+                                                class_name: item.class_name,
+                                                tier: item.tier || 1
+                                            };
+                                        }
+                                    });
+                                    
+                                    window.deadlockItemsCache = itemsMap;
+                                    console.log('✅ 아이템 메타데이터 로드 완료:', Object.keys(itemsMap).length, '개 아이템');
+                                    console.log('📋 첫 번째 아이템 예시:', Object.values(itemsMap)[0]);
+                                    console.log('🔍 몇 개 아이템 ID 예시:', Object.keys(itemsMap).slice(0, 5));
+                                } else {
+                                    console.error('❌ v2/items API 호출 실패:', itemsResponse.status);
+                                    window.deadlockItemsCache = {};
                                 }
+                            } catch (error) {
+                                console.error('❌ v2/items API 에러:', error);
+                                window.deadlockItemsCache = {};
                             }
                             
                             // 아이템 정보 가져오기 함수 (캐시 사용)
@@ -5020,7 +5043,7 @@ function displayMatchHistory(matches) {
                                 }
                                 
                                 itemsContainer.innerHTML = `
-                                    <div class="grid grid-cols-6 gap-1 w-fit">
+                                    <div class="grid grid-cols-6 gap-2 w-fit mb-1">
                                         ${itemSlots.join('')}
                                     </div>
                                 `;
@@ -5029,9 +5052,7 @@ function displayMatchHistory(matches) {
                             };
                             
                             // 캐시 로딩 완료 후 아이템 렌더링
-                            setTimeout(() => {
-                                renderFinalItemsGrid();
-                            }, 100);
+                            await renderFinalItemsGrid();
                             
                         } catch (error) {
                             console.error(`❌ 매치 ${match.matchId} Final Items 직접 로드 실패:`, error);
