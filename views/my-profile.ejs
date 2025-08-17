@@ -2276,7 +2276,7 @@ async function loadMyProfileData() {
         const apiCalls = await Promise.allSettled([
             fetchWithTimeout(`/api/v1/players/${accountId}`, 20000),
             fetchWithTimeout(`/api/v1/players/${accountId}/hero-stats`, 15000),
-            fetchWithTimeout(`/api/v1/players/${accountId}/match-history?limit=5`, 30000),
+            fetchWithTimeout(`/api/v1/players/${accountId}/match-history?limit=10`, 30000),
             fetchWithTimeout(`/api/v1/players/${accountId}/party-stats`, 10000),
             fetchWithTimeout(`/api/v1/players/${accountId}/mmr`, 20000)
         ]);
@@ -2873,7 +2873,7 @@ async function loadMatchHistory(accountId) {
     const matchesList = document.getElementById('matches-list');
     
     try {
-        const response = await fetch(`/api/v1/players/${accountId}/match-history?limit=20`);
+        const response = await fetch(`/api/v1/players/${accountId}/match-history?limit=10`);
         const matches = await response.json();
         
         if (response.ok && matches.length > 0) {
