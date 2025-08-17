@@ -4832,26 +4832,19 @@ function displayMatchHistory(matches) {
                                 throw new Error('플레이어 또는 아이템 데이터 없음');
                             }
                             
-                            // 실제 Final Items 추출 (sold_time_s가 0인 아이템들을 시간순으로 정렬)
-                            const allUnsoldItems = currentPlayer.items.filter(item => item.sold_time_s === 0);
-                            console.log(`📦 전체 미판매 아이템 ${allUnsoldItems.length}개:`, allUnsoldItems);
+                            // 실제 Final Items 추출 (sold_time_s가 0인 아이템들 = 최종 보유 아이템)
+                            const finalItems = currentPlayer.items
+                                .filter(item => item.sold_time_s === 0)
+                                .sort((a, b) => a.game_time_s - b.game_time_s); // 획득 시간 순으로 정렬
                             
-                            // 아이템을 시간순으로 정렬하고 마지막 12개 추출
-                            const sortedItems = allUnsoldItems.sort((a, b) => b.game_time_s - a.game_time_s);
-                            const finalItems = sortedItems.slice(0, 12);
-                            
-                            console.log(`🎯 최종 Final Items ${finalItems.length}개:`, finalItems.map(item => ({
+                            console.log(`🏆 매치 ${match.matchId}: 최종 보유 아이템 ${finalItems.length}개 발견`);
+                            console.log(`📦 Final Items:`, finalItems.map(item => ({
                                 item_id: item.item_id,
                                 upgrade_id: item.upgrade_id,
                                 game_time: item.game_time_s,
-                                display_id: item.upgrade_id || item.item_id
+                                flags: item.flags
                             })));
-                            console.log(`🏆 매치 ${match.matchId}: Final Items ${finalItems.length}개 발견`);
-                            console.log(`📦 Final Items 데이터:`, finalItems.map(item => ({
-                                item_id: item.item_id,
-                                sold_time: item.sold_time_s,
-                                upgrade_level: item.upgrade_level
-                            })));
+                            
                             
                             // v2/items API에서 아이템 정보 가져오기
                             if (!window.deadlockItemsCache) {
@@ -4882,43 +4875,26 @@ function displayMatchHistory(matches) {
                             
                             const itemsCache = window.deadlockItemsCache || {};
                             
-                            // 실제 매치에서 발견된 아이템 ID → 이름 및 이미지 매핑
-                            const getActualItemImageAndName = async (itemId, upgradeId) => {
-                                const actualItemId = upgradeId || itemId;
+                            // 아이템 정보 가져오기 함수 (캐시 사용)
+                            const getItemInfo = (itemId, upgradeId) => {
+                                const actualItemId = upgradeId && upgradeId !== 0 ? upgradeId : itemId;
+                                const itemData = itemsCache[actualItemId];
                                 
-                                // v2/items API에서 실제 아이템 정보 가져오기
-                                try {
-                                    if (!window.deadlockItemsCache) {
-                                        const itemsResponse = await fetch('https://assets.deadlock-api.com/v2/items');
-                                        if (itemsResponse.ok) {
-                                            const itemsArray = await itemsResponse.json();
-                                            window.deadlockItemsCache = {};
-                                            itemsArray.forEach(item => {
-                                                if (item.id) {
-                                                    window.deadlockItemsCache[item.id] = item;
-                                                }
-                                            });
-                                            console.log('✅ v2/items 캐시 로드 완료:', Object.keys(window.deadlockItemsCache).length, '개');
-                                        }
-                                    }
-                                    
-                                    const itemData = window.deadlockItemsCache[actualItemId];
-                                    if (itemData) {
-                                        return {
-                                            name: itemData.name || `Item ${actualItemId}`,
-                                            image: itemData.image_webp || itemData.image || getItemImageById(actualItemId),
-                                            found: true
-                                        };
-                                    }
-                                } catch (error) {
-                                    console.error('v2/items API 에러:', error);
+                                if (itemData) {
+                                    return {
+                                        name: itemData.name || `Item ${actualItemId}`,
+                                        image: itemData.image_webp || itemData.image,
+                                        tier: itemData.tier || 1,
+                                        cost: itemData.cost || 0
+                                    };
                                 }
                                 
-                                // v2/items에서 못 찾으면 직접 매핑
+                                // 캐시에 없으면 기본값
                                 return {
-                                    name: getItemNameById(actualItemId),
-                                    image: getItemImageById(actualItemId),
-                                    found: false
+                                    name: `Item ${actualItemId}`,
+                                    image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+                                    tier: 1,
+                                    cost: 0
                                 };
                             };
                             
@@ -4999,45 +4975,48 @@ function displayMatchHistory(matches) {
                                 return itemNameMapping[itemId.toString()] || `Item ${itemId}`;
                             };
                             
-                            // 실제 Final Items HTML 생성 (async)
-                            const generateItemsHTML = async () => {
-                                const itemPromises = finalItems.slice(0, 12).map(async (item) => {
-                                    // upgrade_id가 있으면 상위 아이템 사용, 없으면 기본 아이템 사용
-                                    const actualItemId = item.upgrade_id && item.upgrade_id !== 0 ? item.upgrade_id : item.item_id;
-                                    const isUpgraded = item.upgrade_id && item.upgrade_id !== 0;
-                                    
-                                    // 실제 아이템 정보 가져오기
-                                    const itemInfo = await getActualItemImageAndName(item.item_id, item.upgrade_id);
-                                    const displayName = itemInfo.name;
-                                    const imageUrl = itemInfo.image;
-                                    
-                                    console.log(`🔍 Final Item ${actualItemId}: ${displayName}, 이미지: ${imageUrl}, 업그레이드: ${isUpgraded}`);
-                                    
-                                    return `
-                                        <img loading="lazy" alt="${displayName}" title="${displayName} (${actualItemId})" 
-                                             class="w-8 h-8 rounded border ${isUpgraded ? 'border-yellow-400 border-2' : 'border-border'}" 
-                                             src="${imageUrl}"
-                                             onerror="this.onerror=null; this.src='/images/items/weapon/basic_magazine.webp'; console.log('❌ 아이템 이미지 fallback:', '${actualItemId}');"
-                                             onload="console.log('✅ 아이템 이미지 로드 성공:', '${actualItemId}');">
-                                    `;
-                                });
+                            // 12개 슬롯에 최종 아이템 배치 (빈 슬롯 포함)
+                            const renderFinalItemsGrid = () => {
+                                const itemSlots = [];
                                 
-                                const itemsHTML = await Promise.all(itemPromises);
-                                return itemsHTML.join('');
+                                // 실제 아이템들을 슬롯에 배치 (최대 12개)
+                                for (let i = 0; i < 12; i++) {
+                                    if (i < finalItems.length) {
+                                        const item = finalItems[i];
+                                        const itemInfo = getItemInfo(item.item_id, item.upgrade_id);
+                                        const isUpgraded = item.upgrade_id && item.upgrade_id !== 0;
+                                        const actualItemId = isUpgraded ? item.upgrade_id : item.item_id;
+                                        
+                                        itemSlots.push(`
+                                            <div class="item-slot">
+                                                <img loading="lazy" 
+                                                     alt="${itemInfo.name}" 
+                                                     title="${itemInfo.name} (ID: ${actualItemId})" 
+                                                     class="w-8 h-8 rounded border ${isUpgraded ? 'border-yellow-400 border-2' : 'border-border'}" 
+                                                     src="${itemInfo.image}"
+                                                     onerror="this.src='https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp';">
+                                            </div>
+                                        `);
+                                    } else {
+                                        // 빈 슬롯
+                                        itemSlots.push(`
+                                            <div class="item-slot">
+                                                <div class="w-8 h-8 rounded border border-border bg-muted opacity-30"></div>
+                                            </div>
+                                        `);
+                                    }
+                                }
+                                
+                                itemsContainer.innerHTML = `
+                                    <div class="grid grid-cols-6 gap-1 w-fit">
+                                        ${itemSlots.join('')}
+                                    </div>
+                                `;
+                                
+                                console.log(`✅ 매치 ${match.matchId}: 최종 아이템 ${finalItems.length}/12개 표시 완료`);
                             };
                             
-                            const itemGridHTML = await generateItemsHTML();
-                            
-                            // 빈 슬롯으로 12개 채우기
-                            const emptySlots = Math.max(0, 12 - finalItems.length);
-                            const emptyHTML = Array(emptySlots).fill('<div class="w-8 h-8 rounded border border-border bg-muted opacity-30"></div>').join('');
-                            
-                            itemsContainer.innerHTML = `
-                                <div class="grid grid-cols-6 gap-1 w-fit">
-                                    ${itemGridHTML}${emptyHTML}
-                                </div>
-                            `;
-                            console.log(`✅ 매치 ${match.matchId}: deadlock-api.com에서 Final Items ${finalItems.length}개 직접 로드 완료`);
+                            renderFinalItemsGrid();
                             
                         } catch (error) {
                             console.error(`❌ 매치 ${match.matchId} Final Items 직접 로드 실패:`, error);
