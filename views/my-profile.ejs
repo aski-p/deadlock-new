@@ -2259,7 +2259,7 @@ async function loadMyProfileData() {
         console.log('🔄 기본 프로필 데이터 로딩 시작...');
         
         // 타임아웃이 있는 fetch 함수
-        const fetchWithTimeout = (url, timeout = 15000) => {
+        const fetchWithTimeout = (url, timeout = 25000) => {
             return Promise.race([
                 fetch(url, { 
                     headers: { 'Accept': 'application/json' },
@@ -2274,11 +2274,11 @@ async function loadMyProfileData() {
         // 상세 데이터를 병렬로 로드 (타임아웃 적용)
         console.log('🔄 상세 API 호출 시작...');
         const apiCalls = await Promise.allSettled([
-            fetchWithTimeout(`/api/v1/players/${accountId}`),
-            fetchWithTimeout(`/api/v1/players/${accountId}/hero-stats`),
-            fetchWithTimeout(`/api/v1/players/${accountId}/match-history?limit=10`),
-            fetchWithTimeout(`/api/v1/players/${accountId}/party-stats`),
-            fetchWithTimeout(`/api/v1/players/${accountId}/mmr`)
+            fetchWithTimeout(`/api/v1/players/${accountId}`, 20000),
+            fetchWithTimeout(`/api/v1/players/${accountId}/hero-stats`, 15000),
+            fetchWithTimeout(`/api/v1/players/${accountId}/match-history?limit=5`, 30000),
+            fetchWithTimeout(`/api/v1/players/${accountId}/party-stats`, 10000),
+            fetchWithTimeout(`/api/v1/players/${accountId}/mmr`, 20000)
         ]);
         
         console.log('📡 API 호출 결과:', apiCalls.map((result, index) => ({
@@ -2538,17 +2538,17 @@ function updatePlayerUIFast(player, heroStats, matchHistory, partyStats, mmrData
         
         // MMR 그래프 표시 - 실제 MMR API 데이터 우선 사용
         console.log('🔍 MMR 데이터 상세 확인:', {
-            type: typeof results.mmrData,
-            isArray: Array.isArray(results.mmrData),
-            length: results.mmrData?.length,
-            firstItem: results.mmrData?.[0],
-            rawData: results.mmrData
+            type: typeof mmrData,
+            isArray: Array.isArray(mmrData),
+            length: mmrData?.length,
+            firstItem: mmrData?.[0],
+            rawData: mmrData
         });
         
-        if (results.mmrData && Array.isArray(results.mmrData) && results.mmrData.length > 0) {
+        if (mmrData && Array.isArray(mmrData) && mmrData.length > 0) {
             // 실제 MMR API 데이터 사용
-            console.log('📈 실제 MMR API 데이터로 그래프 생성:', results.mmrData.length, '개 데이터');
-            displayMMRGraph(results.mmrData);
+            console.log('📈 실제 MMR API 데이터로 그래프 생성:', mmrData.length, '개 데이터');
+            displayMMRGraph(mmrData);
         } else if (matchHistory && Array.isArray(matchHistory) && matchHistory.length > 0) {
             // MMR API 데이터가 없으면 매치 히스토리에서 랭크 데이터 추출하여 MMR 그래프 생성 (fallback)
             const mmrDataFromMatches = matchHistory
