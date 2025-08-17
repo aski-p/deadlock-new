@@ -2168,7 +2168,14 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
               kda: matchAnalysis.averageKDA.ratio,
               avgSoulsPerMin: matchAnalysis.avgSoulsPerMin,
               avgDenies: matchAnalysis.avgDenies,
+              playerName: matchAnalysis.playerName,
             });
+
+            // 매치 데이터에서 실제 플레이어 이름이 있으면 사용
+            if (matchAnalysis.playerName) {
+              playerResponse.name = matchAnalysis.playerName;
+              console.log(`🎮 매치 분석에서 실제 플레이어 이름 적용: ${matchAnalysis.playerName}`);
+            }
 
             playerResponse.stats = {
               matches: matchAnalysis.totalMatches,
@@ -2319,6 +2326,12 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
       const matchAnalysis = await fetchAndAnalyzeAllMatches(accountId);
 
       if (matchAnalysis) {
+        // 매치 데이터에서 실제 플레이어 이름이 있으면 사용
+        if (matchAnalysis.playerName) {
+          playerData.name = matchAnalysis.playerName;
+          console.log(`🎮 fallback에서 실제 플레이어 이름 적용: ${matchAnalysis.playerName}`);
+        }
+
         // 실제 매치 데이터 적용
         playerData.stats = {
           matches: matchAnalysis.totalMatches,
@@ -3504,6 +3517,16 @@ const fetchAndAnalyzeAllMatches = async accountId => {
     let totalShots = 0;
     let totalDenies = 0; // 디나이 총합 추가
     const heroStats = {};
+    
+    // 첫 번째 매치에서 플레이어 이름 추출
+    let playerName = null;
+    if (matches.length > 0) {
+      const firstMatch = matches[0];
+      playerName = firstMatch.player_name || firstMatch.persona_name || firstMatch.name || null;
+      if (playerName) {
+        console.log(`🎮 매치 데이터에서 플레이어 이름 발견: ${playerName}`);
+      }
+    }
 
     // 매치 데이터 형식 디버깅
     console.log(`🔍 매치 데이터 샘플 (첫 3개):`);
@@ -3764,6 +3787,7 @@ const fetchAndAnalyzeAllMatches = async accountId => {
 
     // deadlock.coach 스타일 분석 결과
     const analysis = {
+      playerName, // 매치 데이터에서 추출한 실제 플레이어 이름
       totalMatches,
       matchWins,
       laneWins,
