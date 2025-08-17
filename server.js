@@ -633,37 +633,37 @@ const getUserTopHero = async (req, res, next) => {
 
         // 영웅 이미지 매핑
         const heroImageMap = {
-          Abrams: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp',
-          Bebop: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp',
-          Dynamo: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/sumo_card.webp',
-          'Grey Talon': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/archer_card.webp',
-          Haze: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/haze_card.webp',
-          Infernus: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/inferno_card.webp',
-          Ivy: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/ivy_card.webp',
-          Kelvin: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kelvin_card.webp',
-          'Lady Geist': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/spectre_card.webp',
-          Lash: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/lash_card.webp',
-          McGinnis: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/engineer_card.webp',
-          'Mo & Krill': 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/digger_card.webp',
-          Paradox: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/chrono_card.webp',
-          Pocket: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/synth_card.webp',
-          Seven: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/gigawatt_card.webp',
-          Shiv: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/shiv_card.webp',
-          Vindicta: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/hornet_card.webp',
-          Viper: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kali_card.webp',
-          Viscous: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/viscous_card.webp',
-          Warden: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/warden_card.webp',
-          Holliday: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/astro_card.webp',
-          Mirage: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/mirage_card.webp',
-          Wraith: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/wraith_card.webp',
-          Yamato: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/yamato_card.webp',
+          Abrams: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          Bebop: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          Dynamo: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          'Grey Talon': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          Haze: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          Infernus: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          Ivy: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          Kelvin: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          'Lady Geist': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          Lash: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          McGinnis: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          'Mo & Krill': 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          Paradox: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          Pocket: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          Seven: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          Shiv: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          Vindicta: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          Viper: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          Viscous: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          Warden: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          Holliday: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          Mirage: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          Wraith: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
+          Yamato: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
         };
 
         req.user.topHero = {
           name: topHero.name,
           image:
             heroImageMap[topHero.name] ||
-            'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp',
+            'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
           matches: topHero.matches,
         };
 
@@ -674,7 +674,7 @@ const getUserTopHero = async (req, res, next) => {
         // 기본값 설정
         req.user.topHero = {
           name: 'Bebop',
-          image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp',
+          image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
           matches: 0,
         };
         console.log(`⚠️ 사용자 매치 데이터 없음 - 기본 영웅 설정`);
@@ -684,7 +684,7 @@ const getUserTopHero = async (req, res, next) => {
       // 기본값 설정
       req.user.topHero = {
         name: 'Bebop',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
         matches: 0,
       };
     }
@@ -2171,11 +2171,10 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
               playerName: matchAnalysis.playerName,
             });
 
-            // 매치 데이터에서 실제 플레이어 이름이 있으면 사용
-            if (matchAnalysis.playerName) {
-              playerResponse.name = matchAnalysis.playerName;
-              console.log(`🎮 매치 분석에서 실제 플레이어 이름 적용: ${matchAnalysis.playerName}`);
-            }
+            // 전용 함수로 플레이어 이름 해결
+            const resolvedName = await getPlayerNameById(accountId);
+            playerResponse.name = resolvedName;
+            console.log(`🎮 전용 함수로 플레이어 이름 해결: ${accountId} → ${resolvedName}`);
 
             playerResponse.stats = {
               matches: matchAnalysis.totalMatches,
@@ -2326,11 +2325,10 @@ app.get('/api/v1/players/:accountId', async (req, res) => {
       const matchAnalysis = await fetchAndAnalyzeAllMatches(accountId);
 
       if (matchAnalysis) {
-        // 매치 데이터에서 실제 플레이어 이름이 있으면 사용
-        if (matchAnalysis.playerName) {
-          playerData.name = matchAnalysis.playerName;
-          console.log(`🎮 fallback에서 실제 플레이어 이름 적용: ${matchAnalysis.playerName}`);
-        }
+        // 전용 함수로 플레이어 이름 해결
+        const resolvedName = await getPlayerNameById(accountId);
+        playerData.name = resolvedName;
+        console.log(`🎮 fallback에서 플레이어 이름 해결: ${accountId} → ${resolvedName}`);
 
         // 실제 매치 데이터 적용
         playerData.stats = {
@@ -4467,6 +4465,72 @@ const fetchAndAnalyzeAllMatches = async accountId => {
   }
 };
 
+// 플레이어 ID를 닉네임으로 변환하는 전용 함수
+const getPlayerNameById = async (accountId) => {
+  try {
+    console.log(`🔍 플레이어 ${accountId} 닉네임 조회 시작...`);
+    
+    // 1. 매치 히스토리에서 플레이어 이름 추출 시도
+    try {
+      const matchResponse = await axios.get(
+        `https://api.deadlock-api.com/v1/players/${accountId}/match-history?limit=1`,
+        {
+          timeout: 5000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          },
+        }
+      );
+
+      if (matchResponse.data && Array.isArray(matchResponse.data) && matchResponse.data.length > 0) {
+        const firstMatch = matchResponse.data[0];
+        const playerName = firstMatch.player_name || firstMatch.persona_name || firstMatch.name;
+        
+        if (playerName && !playerName.startsWith('Player')) {
+          console.log(`✅ 매치 데이터에서 플레이어 이름 발견: ${accountId} → ${playerName}`);
+          return playerName;
+        }
+      }
+    } catch (matchError) {
+      console.log(`⚠️ 매치 히스토리 조회 실패 (${accountId}): ${matchError.message}`);
+    }
+
+    // 2. Deadlock API 플레이어 프로필에서 Steam 정보 시도
+    try {
+      const profileResponse = await axios.get(
+        `https://api.deadlock-api.com/v1/players/${accountId}/steam`,
+        {
+          timeout: 5000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          },
+        }
+      );
+
+      if (profileResponse.data) {
+        const steamProfile = profileResponse.data;
+        const steamName = steamProfile.personaname || steamProfile.real_name;
+        
+        if (steamName) {
+          console.log(`✅ Steam 프로필에서 플레이어 이름 발견: ${accountId} → ${steamName}`);
+          return steamName;
+        }
+      }
+    } catch (steamError) {
+      console.log(`⚠️ Steam 프로필 조회 실패 (${accountId}): ${steamError.message}`);
+    }
+
+    // 3. 최종 대안: 게임 계정 ID 형식
+    const fallbackName = `Player ${accountId}`;
+    console.log(`❌ 실제 이름을 찾을 수 없어 대안 사용: ${accountId} → ${fallbackName}`);
+    return fallbackName;
+
+  } catch (error) {
+    console.error(`❌ 플레이어 이름 조회 중 오류 (${accountId}):`, error.message);
+    return `Player ${accountId}`;
+  }
+};
+
 // 영웅 ID를 이름으로 변환하는 함수
 const getHeroNameById = heroId => {
   const heroMap = {
@@ -4503,6 +4567,46 @@ const getHeroNameById = heroId => {
   };
   return heroMap[heroId] || `Hero_${heroId}`;
 };
+
+// 플레이어 이름 해결 API 엔드포인트
+app.get('/api/v1/players/:accountId/name', async (req, res) => {
+  try {
+    const { accountId } = req.params;
+    const cacheKey = `player-name-${accountId}`;
+    
+    // 캐시 확인 (30분 캐시)
+    const cached = getCachedData(cacheKey, 30 * 60 * 1000);
+    if (cached) {
+      console.log(`📦 캐시된 플레이어 이름 반환: ${accountId} → ${cached.name}`);
+      return res.json(cached);
+    }
+
+    // 실제 플레이어 이름 조회
+    const playerName = await getPlayerNameById(accountId);
+    
+    const result = {
+      accountId: accountId,
+      name: playerName,
+      source: playerName.startsWith('Player') ? 'fallback' : 'game_data',
+      timestamp: new Date().toISOString()
+    };
+
+    // 결과 캐싱 (30분)
+    setCachedData(cacheKey, result, 30 * 60 * 1000);
+    
+    console.log(`✅ 플레이어 이름 조회 완료: ${accountId} → ${playerName}`);
+    res.json(result);
+
+  } catch (error) {
+    console.error(`❌ 플레이어 이름 API 오류:`, error.message);
+    res.status(500).json({
+      error: 'Failed to resolve player name',
+      accountId: req.params.accountId,
+      name: `Player ${req.params.accountId}`,
+      source: 'error_fallback'
+    });
+  }
+});
 
 // 매치 히스토리 API - 실제 API 데이터 변환
 app.get('/api/v1/players/:accountId/match-history', async (req, res) => {
@@ -5891,7 +5995,7 @@ app.get('/api/v1/heroes', async (req, res) => {
     const heroes = [
       {
         name: 'Abrams',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bull_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
         matches: 125420,
         players: 89234,
         kda: '1.34',
@@ -5900,7 +6004,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Bebop',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/bebop_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
         matches: 98760,
         players: 72140,
         kda: '1.28',
@@ -5909,7 +6013,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Dynamo',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/astro_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
         matches: 87320,
         players: 63510,
         kda: '1.42',
@@ -5918,7 +6022,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Grey Talon',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/archer_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
         matches: 105670,
         players: 78430,
         kda: '1.56',
@@ -5927,7 +6031,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Haze',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/haze_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
         matches: 142350,
         players: 95820,
         kda: '1.48',
@@ -5936,7 +6040,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Infernus',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/inferno_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
         matches: 91240,
         players: 68370,
         kda: '1.39',
@@ -5945,7 +6049,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Ivy',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/tengu_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
         matches: 76890,
         players: 56720,
         kda: '1.31',
@@ -5954,7 +6058,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Kelvin',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kelvin_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
         matches: 83450,
         players: 61230,
         kda: '1.25',
@@ -5963,7 +6067,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Lady Geist',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/spectre_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
         matches: 96340,
         players: 71580,
         kda: '1.44',
@@ -5972,7 +6076,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Lash',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/lash_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
         matches: 118720,
         players: 86940,
         kda: '1.52',
@@ -5981,7 +6085,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'McGinnis',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/engineer_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
         matches: 67420,
         players: 51230,
         kda: '1.18',
@@ -5990,7 +6094,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Mo & Krill',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/digger_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
         matches: 71560,
         players: 53840,
         kda: '1.29',
@@ -5999,7 +6103,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Paradox',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/chrono_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
         matches: 89670,
         players: 66720,
         kda: '1.36',
@@ -6008,7 +6112,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Pocket',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/synth_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/synth_card.webp',
         matches: 78230,
         players: 58910,
         kda: '1.27',
@@ -6017,7 +6121,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Seven',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/gigawatt_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/gigawatt_card.webp',
         matches: 94580,
         players: 70450,
         kda: '1.41',
@@ -6026,7 +6130,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Shiv',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/shiv_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/shiv_card.webp',
         matches: 103290,
         players: 76840,
         kda: '1.47',
@@ -6035,7 +6139,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Vindicta',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/hornet_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/hornet_card.webp',
         matches: 112450,
         players: 82370,
         kda: '1.61',
@@ -6044,7 +6148,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Viscous',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/viscous_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/viscous_card.webp',
         matches: 85730,
         players: 63280,
         kda: '1.33',
@@ -6053,7 +6157,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Warden',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/warden_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/warden_card.webp',
         matches: 79850,
         players: 59620,
         kda: '1.24',
@@ -6062,7 +6166,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Wraith',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/wraith_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/wraith_card.webp',
         matches: 108340,
         players: 80150,
         kda: '1.43',
@@ -6071,7 +6175,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Yamato',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/yamato_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/yamato_card.webp',
         matches: 91780,
         players: 68940,
         kda: '1.38',
@@ -6080,7 +6184,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Calico',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/nano_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/nano_card.webp',
         matches: 45620,
         players: 34210,
         kda: '1.41',
@@ -6089,7 +6193,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Mirage',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/mirage_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/mirage_card.webp',
         matches: 52840,
         players: 39750,
         kda: '1.35',
@@ -6098,7 +6202,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Viper',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/kali_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/kali_card.webp',
         matches: 58930,
         players: 43280,
         kda: '1.58',
@@ -6107,7 +6211,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Holliday',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/astro_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
         matches: 41870,
         players: 31450,
         kda: '1.33',
@@ -6116,7 +6220,7 @@ app.get('/api/v1/heroes', async (req, res) => {
       },
       {
         name: 'Sinclair',
-        image: 'https://cdn.deadlock.coach/vpk/panorama/images/heroes/magician_card.webp',
+        image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/magician_card.webp',
         matches: 38760,
         players: 29180,
         kda: '1.46',
