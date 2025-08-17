@@ -5225,6 +5225,15 @@ function displayMatchHistory(matches) {
                                 <i class="fas fa-info-circle"></i> 게임 종료 시 아이템 정보 없음
                             </div>
                         `;
+                        } catch (error) {
+                            console.error(`❌ 매치 ${match.matchId} final items 로드 오류:`, error);
+                            // 오류 시 빈 슬롯 표시
+                            itemsContainer.innerHTML = `
+                                <div style="grid-column: 1/-1; text-align: center; color: #666; font-size: 11px; padding: 15px;">
+                                    <i class="fas fa-exclamation-triangle"></i> 아이템 정보 로드 실패
+                                </div>
+                            `;
+                        }
                         }, 1000 + index * 200); // 각 매치마다 약간의 지연을 두어 API 부하 방지
                     }
                 }
