@@ -4472,7 +4472,15 @@ function displayMatchHistory(matches) {
                             return `Player ${player.account_id || 'Unknown'}`;
                         }
                         
-                        // Player_숫자 또는 Player 숫자 패턴일 때 실제 Steam 이름 가져오기 (모든 형태 포함)
+                        console.log(`🔍 플레이어 이름 처리 시작: "${player.name}", account_id: ${player.account_id}`);
+                        
+                        // 먼저 캐시된 이름이 있는지 확인
+                        if (window.playerNameCache && player.account_id && window.playerNameCache[player.account_id]) {
+                            console.log(`💾 캐시에서 이름 발견: ${window.playerNameCache[player.account_id]}`);
+                            return window.playerNameCache[player.account_id];
+                        }
+                        
+                        // Player_숫자 또는 Player 숫자 또는 순수 숫자 패턴 감지
                         const playerNamePattern = /^Player[_\s]?(\d+)$|^(\d+)$/;
                         const match = player.name.match(playerNamePattern);
                         if (match) {
@@ -4839,11 +4847,24 @@ function displayMatchHistory(matches) {
                                 
                                 // 매치 플레이어 정보로 현재 표시된 플레이어들 이름 업데이트
                                 matchInfo.players.forEach(apiPlayer => {
-                                    if (apiPlayer.account_id && apiPlayer.name && !apiPlayer.name.startsWith('Player')) {
+                                    if (apiPlayer.account_id) {
                                         // 캐시에 저장
                                         if (!window.playerNameCache) window.playerNameCache = {};
-                                        window.playerNameCache[apiPlayer.account_id] = apiPlayer.name;
-                                        console.log(`💾 플레이어 이름 캐시 업데이트: ${apiPlayer.account_id} → ${apiPlayer.name}`);
+                                        
+                                        // Steam 이름 우선순위: steam_name > name > display_name
+                                        let realName = null;
+                                        if (apiPlayer.steam_name && !apiPlayer.steam_name.startsWith('Player')) {
+                                            realName = apiPlayer.steam_name;
+                                        } else if (apiPlayer.name && !apiPlayer.name.startsWith('Player')) {
+                                            realName = apiPlayer.name;
+                                        } else if (apiPlayer.display_name && !apiPlayer.display_name.startsWith('Player')) {
+                                            realName = apiPlayer.display_name;
+                                        }
+                                        
+                                        if (realName) {
+                                            window.playerNameCache[apiPlayer.account_id] = realName;
+                                            console.log(`💾 플레이어 이름 캐시 업데이트: ${apiPlayer.account_id} → ${realName}`);
+                                        }
                                     }
                                 });
                             }
@@ -4911,20 +4932,27 @@ function displayMatchHistory(matches) {
                             const getItemInfo = (itemId, upgradeId) => {
                                 const actualItemId = upgradeId && upgradeId !== 0 ? upgradeId : itemId;
                                 const itemsCache = window.deadlockItemsCache || {};
+                                
+                                console.log(`🔍 아이템 정보 요청: itemId=${itemId}, upgradeId=${upgradeId}, actualItemId=${actualItemId}`);
+                                console.log(`📊 캐시 상태: ${Object.keys(itemsCache).length}개 아이템, 캐시 존재: ${!!window.deadlockItemsCache}`);
+                                
+                                // 실제 아이템 ID로 캐시에서 찾기
                                 const itemData = itemsCache[actualItemId];
                                 
                                 if (itemData) {
-                                    console.log(`✅ 아이템 발견: ${itemData.name} (${actualItemId})`);
+                                    console.log(`✅ 아이템 발견: ${itemData.name} (${actualItemId}), 이미지: ${itemData.image}`);
                                     return {
                                         name: itemData.name || `Item ${actualItemId}`,
-                                        image: itemData.image_webp || itemData.image,
+                                        image: itemData.image || itemData.image_webp,
                                         tier: itemData.tier || 1,
                                         cost: itemData.cost || 0
                                     };
                                 }
                                 
-                                // 캐시에 없으면 로그 출력하고 기본값
-                                console.warn(`⚠️ 아이템 캐시에서 찾을 수 없음: ${actualItemId}, 캐시 크기: ${Object.keys(itemsCache).length}`);
+                                // 캐시에 없으면 상세 로그 출력
+                                console.warn(`⚠️ 아이템 캐시에서 찾을 수 없음: ${actualItemId}`);
+                                console.warn(`📋 사용 가능한 아이템 ID 예시:`, Object.keys(itemsCache).slice(0, 10));
+                                
                                 return {
                                     name: `Item ${actualItemId}`,
                                     image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp',
@@ -5057,48 +5085,9 @@ function displayMatchHistory(matches) {
                         } catch (error) {
                             console.error(`❌ 매치 ${match.matchId} Final Items 직접 로드 실패:`, error);
                             
-                            // 기존 방식으로 fallback - API 호출 실패 시에도 로컬 이미지 사용
-                            if (finalItems && finalItems.length > 0) {
-                                console.log(`🔄 매치 ${index}: API 실패, 로컬 이미지로 fallback`);
-                                const fallbackHTML = finalItems.slice(0, 12).map(item => {
-                                    // upgrade_id가 있으면 상위 아이템 사용
-                                    const actualItemId = item.upgrade_id && item.upgrade_id !== 0 ? item.upgrade_id : item.item_id;
-                                    const isUpgraded = item.upgrade_id && item.upgrade_id !== 0;
-                                    const itemName = getItemNameById(actualItemId);
-                                    
-                                    // 로컬 이미지 매핑 시스템 사용
-                                    const imageUrl = getItemImageById(actualItemId);
-                                    
-                                    console.log(`📦 Fallback 아이템 ${actualItemId}: ${itemName}, 이미지: ${imageUrl}`);
-                                    
-                                    return `
-                                        <img loading="lazy" alt="${itemName}" title="${itemName} (${actualItemId})" 
-                                             class="w-8 h-8 rounded border ${isUpgraded ? 'border-yellow-400 border-2' : 'border-border'}" 
-                                             src="${imageUrl}"
-                                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                                        <div class="w-8 h-8 rounded border ${isUpgraded ? 'border-yellow-400 border-2' : 'border-border'} bg-gray-700 flex items-center justify-center text-xs font-mono" title="${itemName}" style="display:none;">
-                                            ${actualItemId.toString().slice(-2)}
-                                        </div>
-                                    `;
-                                }).join('');
-                                
-                                const emptySlots = Math.max(0, 12 - finalItems.length);
-                                const emptyHTML = Array(emptySlots).fill('<div class="w-8 h-8 rounded border border-border bg-muted opacity-30"></div>').join('');
-                                
-                                itemsContainer.innerHTML = `
-                                    <div class="grid grid-cols-6 gap-1 w-fit">
-                                        ${fallbackHTML}${emptyHTML}
-                                    </div>
-                                `;
-                            } else {
-                                // 완전 실패 시 빈 슬롯
-                                const emptyHTML = Array(12).fill('<div class="w-8 h-8 rounded border border-border bg-muted opacity-30"></div>').join('');
-                                itemsContainer.innerHTML = `
-                                    <div class="grid grid-cols-6 gap-1 w-fit">
-                                        ${emptyHTML}
-                                    </div>
-                                `;
-                            }
+                            // 기존 방식으로 fallback - 동일한 renderFinalItemsGrid 함수 사용
+                            console.log(`🔄 매치 ${index}: API 실패, fallback으로 동일한 렌더링 함수 사용`);
+                            renderFinalItemsGrid();
                         }
                     };
                     
