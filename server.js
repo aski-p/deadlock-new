@@ -7298,7 +7298,24 @@ app.get('/api/v1/matches/:matchId/details', async (req, res) => {
           4072270083: { name: '고속 탄창', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/high_velocity_mag.webp' },
           4139877411: { name: '신속한 발놀림', cost: 1600, tier: 2, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/fleetfoot.webp' },
           4147641675: { name: '속사탄', cost: 800, tier: 1, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/weapon/rapid_rounds.webp' },
-          4293016574: { name: '상급 지속시간', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/superior_duration.webp' }
+          4293016574: { name: '상급 지속시간', cost: 3200, tier: 3, image: 'https://cdn.deadlock.coach/vpk/panorama/images/items/vitality/superior_duration.webp' },
+          
+          // 누락된 아이템 ID들 추가 (에러 로그 기반)
+          2604653402: { name: 'Boundless Spirit', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/boundless_spirit_sm.png' },
+          2087502794: { name: 'Superior Cooldown', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/superior_cooldown_sm.png' },
+          1543976943: { name: 'Rapid Recharge', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/rapid_recharge_sm.png' },
+          2356412290: { name: 'Vampiric Burst', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/vampiric_burst_sm.png' },
+          4104549924: { name: 'Cold Front', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/cold_front_sm.png' },
+          3696726732: { name: 'Transcendent Cooldown', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/transcendent_cooldown_sm.png' },
+          4179229681: { name: 'Extended Magazine', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/extended_magazine_sm.png' },
+          2240607294: { name: 'Extra Health', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/extra_health_sm.png' },
+          901313487: { name: 'Titanic Magazine', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/titanic_magazine_sm.png' },
+          1235098866: { name: 'Extra Stamina', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/extra_stamina_sm.png' },
+          779450633: { name: 'Enduring Speed', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/enduring_speed_sm.png' },
+          3077079169: { name: 'Spirit Lifesteal', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/spirit_lifesteal_sm.png' },
+          2447176615: { name: 'Mystic Shot', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/mystic_shot_sm.png' },
+          2060391097: { name: 'Bullet Lifesteal', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/bullet_lifesteal_sm.png' },
+          3190606822: { name: 'Metal Skin', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/metal_skin_sm.png' }
         }
       };
       

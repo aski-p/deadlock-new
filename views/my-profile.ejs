@@ -5057,7 +5057,39 @@ function displayMatchHistory(matches) {
                                     };
                                 }
                                 
-                                // 2. 기존 캐시에서 찾기 (fallback)
+                                // 2. deadlock-api v2/items에서 직접 가져오기
+                                try {
+                                    if (!window.deadlockApiItemsCache) {
+                                        console.log(`🔄 deadlock-api v2/items 로드 중...`);
+                                        const response = await fetch('https://assets-bucket.deadlock-api.com/v2/items');
+                                        if (response.ok) {
+                                            const itemsArray = await response.json();
+                                            // 배열을 ID 기반 객체로 변환
+                                            window.deadlockApiItemsCache = {};
+                                            itemsArray.forEach(item => {
+                                                if (item.id) {
+                                                    window.deadlockApiItemsCache[item.id] = item;
+                                                }
+                                            });
+                                            console.log(`✅ deadlock-api v2/items 로드 완료: ${itemsArray.length}개`);
+                                        }
+                                    }
+                                    
+                                    const apiItem = window.deadlockApiItemsCache[actualItemId];
+                                    if (apiItem) {
+                                        console.log(`✅ deadlock-api에서 발견: ${apiItem.name} (${actualItemId})`);
+                                        return {
+                                            name: apiItem.name || `Item ${actualItemId}`,
+                                            image: apiItem.image_url || `https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/arcane_surge_sm.png`,
+                                            tier: apiItem.tier || 1,
+                                            cost: apiItem.cost || 0
+                                        };
+                                    }
+                                } catch (error) {
+                                    console.error(`❌ deadlock-api v2/items 로드 실패:`, error);
+                                }
+                                
+                                // 3. 기존 캐시에서 찾기 (fallback)
                                 const itemsCache = window.deadlockItemsCache || {};
                                 if (itemsCache[actualItemId]) {
                                     const itemData = itemsCache[actualItemId];
@@ -5070,7 +5102,7 @@ function displayMatchHistory(matches) {
                                     };
                                 }
                                 
-                                // 3. 기본 fallback
+                                // 4. 기본 fallback
                                 console.warn(`⚠️ 아이템을 찾을 수 없음: ${actualItemId}, 기본 이미지 사용`);
                                 return {
                                     name: `Item ${actualItemId}`,
