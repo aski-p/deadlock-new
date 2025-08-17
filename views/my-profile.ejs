@@ -5248,24 +5248,29 @@ function displayMatchHistory(matches) {
                                         console.log(`✅ 매치 ${match.matchId}: ${currentPlayerData.heroName}의 final items ${currentPlayerData.finalItems.length}개 발견`);
                                         const finalItems = currentPlayerData.finalItems;
                                     
-                                        // deadlock-api v2/items로 아이템 표시 (12개 슬롯)
-                                        const renderRetryItems = async () => {
-                                            const retryItemPromises = finalItems.slice(0, 12).map(async (item, itemIndex) => {
-                                                let itemName = item.name || `Item ${item.itemId || item.id || 'Unknown'}`;
-                                                let itemId = item.itemId || item.id;
+                                        // 서버에서 제공한 finalItems 데이터 직접 사용
+                                        const renderRetryItems = () => {
+                                            const retryItemsHTML = finalItems.slice(0, 12).map((item, itemIndex) => {
+                                                // 서버에서 이미 처리된 아이템 정보 사용
+                                                const itemName = item.name || `Item ${item.itemId || item.displayId || 'Unknown'}`;
+                                                const itemImage = item.image || 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/arcane_surge_sm.png';
+                                                const isUpgraded = item.upgradeId && item.upgradeId !== 0;
                                                 
-                                                // deadlock-api v2/items에서 아이템 정보 가져오기
-                                                const itemData = await getDeadlockApiItemUrl(itemName, itemId);
+                                                console.log(`📦 Final Item ${itemIndex}: ${itemName}, 이미지: ${itemImage}`);
                                                 
                                                 return `
-                                                    <img loading="lazy" alt="${itemData.name}" title="${itemData.name}" 
-                                                         class="w-8 h-8 rounded border border-border" 
-                                                         src="${itemData.image}"
-                                                         onerror="this.style.opacity='0.3';">
+                                                    <div>
+                                                        <picture>
+                                                            <source srcset="${itemImage.replace('.png', '.webp')}" type="image/webp">
+                                                            <source srcset="${itemImage}" type="image/png">
+                                                            <img loading="lazy" alt="${itemName}" title="${itemName}" 
+                                                                 class="size-8 aspect-square w-8 h-8 rounded border ${isUpgraded ? 'border-yellow-400 border-2' : 'border-border'}" 
+                                                                 src="${itemImage}"
+                                                                 onerror="this.onerror=null; this.src='https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/arcane_surge_sm.png';">
+                                                        </picture>
+                                                    </div>
                                                 `;
-                                            });
-                                            
-                                            const retryItemsHTML = (await Promise.all(retryItemPromises)).join('');
+                                            }).join('');
                                             
                                             // 빈 슬롯으로 12개 채우기
                                             const emptySlots = Math.max(0, 12 - finalItems.length);
@@ -5276,11 +5281,11 @@ function displayMatchHistory(matches) {
                                                     ${retryItemsHTML}${emptyHTML}
                                                 </div>
                                             `;
-                                            console.log(`✅ 매치 ${match.matchId}: deadlock-api.com에서 실시간으로 가져온 ${finalItems.length}개 final items 표시 완료`);
+                                            console.log(`✅ 매치 ${match.matchId}: 서버에서 제공한 ${finalItems.length}개 final items 표시 완료`);
                                         };
                                         
-                                        // async 함수 실행
-                                        await renderRetryItems();
+                                        // 동기 함수 실행
+                                        renderRetryItems();
                                         return;
                                     } else {
                                         console.warn(`⚠️ 매치 ${match.matchId}: 현재 플레이어의 final items를 찾을 수 없음`);
