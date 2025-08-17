@@ -7315,7 +7315,22 @@ app.get('/api/v1/matches/:matchId/details', async (req, res) => {
           3077079169: { name: 'Spirit Lifesteal', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/spirit_lifesteal_sm.png' },
           2447176615: { name: 'Mystic Shot', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/mystic_shot_sm.png' },
           2060391097: { name: 'Bullet Lifesteal', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/bullet_lifesteal_sm.png' },
-          3190606822: { name: 'Metal Skin', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/metal_skin_sm.png' }
+          3190606822: { name: 'Metal Skin', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/metal_skin_sm.png' },
+          
+          // 매치 데이터 분석으로 추가된 아이템들
+          1258914460: { name: 'Mystic Shot', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/mystic_shot_sm.png' },
+          519818856: { name: 'Glass Cannon', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/glass_cannon_sm.png' },
+          856231037: { name: 'Fortitude', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/fortitude_sm.png' },
+          1150006784: { name: 'Basic Magazine', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/basic_magazine_sm.png' },
+          808565891: { name: 'Titanic Magazine', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/weapon/titanic_magazine_sm.png' },
+          3970837787: { name: 'Debuff Remover', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/debuff_remover_sm.png' },
+          787198704: { name: 'Greater Expansion', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/greater_expansion_sm.png' },
+          1193964439: { name: 'Tankbuster', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/tankbuster_sm.png' },
+          2121044373: { name: 'Transcendent Cooldown', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/transcendent_cooldown_sm.png' },
+          3812615317: { name: 'Arcane Surge', cost: 800, tier: 1, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/arcane_surge_sm.png' },
+          316248406: { name: "Enchanter's Emblem", cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/vitality/enchanters_emblem_sm.png' },
+          297793196: { name: 'Rapid Recharge', cost: 1600, tier: 2, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/rapid_recharge_sm.png' },
+          1142270357: { name: 'Boundless Spirit', cost: 3200, tier: 3, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/boundless_spirit_sm.png' }
         }
       };
       
@@ -7513,7 +7528,22 @@ app.get('/api/v1/items/mapping', async (req, res) => {
       2447176615: { name: 'Mystic Shot', cost: 800, tier: 1, category: 'weapon', image: 'weapon/mystic_shot_sm.png' },
       2060391097: { name: 'Bullet Lifesteal', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/bullet_lifesteal_sm.png' },
       3190606822: { name: 'Metal Skin', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/metal_skin_sm.png' },
-      2603935618: { name: 'Enchanters Barrier', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/enchanters_barrier_sm.png' }
+      2603935618: { name: 'Enchanters Barrier', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/enchanters_barrier_sm.png' },
+      
+      // 매치 데이터 분석으로 추가된 아이템들
+      1258914460: { name: 'Mystic Shot', cost: 800, tier: 1, category: 'weapon', image: 'weapon/mystic_shot_sm.png' },
+      519818856: { name: 'Glass Cannon', cost: 3200, tier: 3, category: 'weapon', image: 'weapon/glass_cannon_sm.png' },
+      856231037: { name: 'Fortitude', cost: 3200, tier: 3, category: 'vitality', image: 'vitality/fortitude_sm.png' },
+      1150006784: { name: 'Basic Magazine', cost: 800, tier: 1, category: 'weapon', image: 'weapon/basic_magazine_sm.png' },
+      808565891: { name: 'Titanic Magazine', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/titanic_magazine_sm.png' },
+      3970837787: { name: 'Debuff Remover', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/debuff_remover_sm.png' },
+      787198704: { name: 'Greater Expansion', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/greater_expansion_sm.png' },
+      1193964439: { name: 'Tankbuster', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/tankbuster_sm.png' },
+      2121044373: { name: 'Transcendent Cooldown', cost: 3200, tier: 3, category: 'spirit', image: 'spirit/transcendent_cooldown_sm.png' },
+      3812615317: { name: 'Arcane Surge', cost: 800, tier: 1, category: 'spirit', image: 'spirit/arcane_surge_sm.png' },
+      316248406: { name: "Enchanter's Emblem", cost: 1600, tier: 2, category: 'vitality', image: 'vitality/enchanters_emblem_sm.png' },
+      297793196: { name: 'Rapid Recharge', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/rapid_recharge_sm.png' },
+      1142270357: { name: 'Boundless Spirit', cost: 3200, tier: 3, category: 'spirit', image: 'spirit/boundless_spirit_sm.png' }
       // 필요시 더 많은 아이템 추가 가능
     };
     
