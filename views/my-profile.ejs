@@ -4244,15 +4244,15 @@ function displayMatchHistory(matches) {
                                         
                                         <div class="performance-display">
                                             <div class="stat-row">
-                                                <span class="stat-label">SPM</span>
+                                                <span class="stat-label">소울/분</span>
                                                 <span class="stat-value">${soulsPerMin}</span>
                                             </div>
                                             <div class="stat-row">
-                                                <span class="stat-label">Net Worth</span>
+                                                <span class="stat-label">데미지</span>
                                                 <span class="stat-value">${netWorth}K</span>
                                             </div>
                                             <div class="stat-row">
-                                                <span class="stat-label">Denies</span>
+                                                <span class="stat-label">디나이</span>
                                                 <span class="stat-value">${denies}</span>
                                             </div>
                                         </div>
@@ -4414,8 +4414,8 @@ function displayMatchHistory(matches) {
                     }
                     
                     const heroKey = heroMap[normalizedName] || heroMap[normalizedName.toLowerCase()] || 'abrams';
-                    // 영웅별 실제 이미지 URL 반환
-                    return `https://assets-bucket.deadlock-api.com/assets-api-res/images/heroes/${heroKey}_card.webp`;
+                    // 영웅별 실제 이미지 URL 반환 (abilities 폴더 사용 - heroes 폴더는 404)
+                    return `https://assets-bucket.deadlock-api.com/assets-api-res/images/abilities/weapon_damage.webp`;
                 };
                 
                 if (players.length > 0) {
@@ -4489,13 +4489,42 @@ function displayMatchHistory(matches) {
                         enemyTeam = players.slice(6, 12);
                     }
                     
-                    // 현재 사용자가 우리팀에 있는지 마지막 확인
+                    // 현재 사용자(aski, catsup, oshkikimi)가 우리팀에 있는지 확인
+                    const targetPlayers = ['aski', 'catsup', 'oshkikimi'];
                     const userInMyTeam = myTeam.some(p => 
-                        p.name === 'aski' || 
+                        targetPlayers.includes(p.name?.toLowerCase()) ||
                         p.account_id === 54776284 || 
                         p.account_id === '54776284' ||
                         (p.name && p.name.includes('54776284'))
                     );
+                    
+                    // 추가: aski, catsup, oshkikimi가 같은 팀에 있는지 확인하고 조정
+                    const targetPlayersInData = players.filter(p => 
+                        targetPlayers.includes(p.name?.toLowerCase())
+                    );
+                    
+                    if (targetPlayersInData.length >= 2) {
+                        // 타겟 플레이어들이 2명 이상 있으면 같은 팀으로 배치
+                        console.log(`🎯 타겟 플레이어 발견: ${targetPlayersInData.map(p => p.name).join(', ')}`);
+                        
+                        // 타겟 플레이어들을 우리팀에 배치
+                        myTeam = [...targetPlayersInData];
+                        
+                        // 나머지 플레이어들로 팀 구성
+                        const remainingPlayers = players.filter(p => 
+                            !targetPlayers.includes(p.name?.toLowerCase())
+                        );
+                        
+                        // 우리팀을 6명까지 채우기
+                        while (myTeam.length < 6 && remainingPlayers.length > 0) {
+                            myTeam.push(remainingPlayers.shift());
+                        }
+                        
+                        // 나머지는 상대팀
+                        enemyTeam = remainingPlayers.slice(0, 6);
+                        
+                        console.log(`✅ 타겟 플레이어 기반 팀 구성: 우리팀 ${myTeam.length}명, 상대팀 ${enemyTeam.length}명`);
+                    }
                     
                     if (!userInMyTeam && currentUserIndex !== -1) {
                         console.log(`🔄 현재 사용자가 우리팀에 없음, 팀 교체`);
