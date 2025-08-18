@@ -4916,22 +4916,67 @@ function displayMatchHistory(matches) {
                     // deadlock-api.com에서 매치별 final items 직접 가져오기
                     const renderDirectApiItems = async () => {
                         try {
-                            console.log(`🔄 매치 ${match.matchId}: 백엔드 API로 account_id ${accountId}의 Final Items 가져오는 중...`);
+                            console.log(`🔄 매치 ${match.matchId}: deadlock-api.com에서 Final Items 직접 가져오는 중...`);
                             
-                            // 새로운 백엔드 API 사용 - 정확한 account_id 기반 final items 추출
-                            const finalItemsResponse = await fetch(`/api/v1/matches/${match.matchId}/final-items/${accountId}`);
-                            if (!finalItemsResponse.ok) throw new Error('Final Items API 호출 실패');
+                            // 매치 메타데이터 가져오기 (아이템 포함)
+                            const matchResponse = await fetch(`https://api.deadlock-api.com/v1/matches/metadata?match_ids=${match.matchId}&include_player_items=true`);
+                            if (!matchResponse.ok) throw new Error('매치 API 호출 실패');
                             
-                            const finalItemsData = await finalItemsResponse.json();
-                            console.log(`✅ 백엔드 API 응답:`, finalItemsData);
+                            const matchData = await matchResponse.json();
+                            if (!matchData || matchData.length === 0) throw new Error('매치 데이터 없음');
                             
-                            if (finalItemsData.error) {
-                                throw new Error(finalItemsData.error);
+                            const matchInfo = matchData[0];
+                            
+                            // 매치 메타데이터에서 플레이어 이름 정보 업데이트
+                            if (matchInfo.players && Array.isArray(matchInfo.players)) {
+                                console.log(`👥 매치 메타데이터에서 ${matchInfo.players.length}명의 플레이어 정보 발견`);
+                                
+                                // 매치 플레이어 정보로 현재 표시된 플레이어들 이름 업데이트
+                                matchInfo.players.forEach(apiPlayer => {
+                                    if (apiPlayer.account_id) {
+                                        // 캐시에 저장
+                                        if (!window.playerNameCache) window.playerNameCache = {};
+                                        
+                                        // Steam 이름 우선순위: steam_name > name > display_name
+                                        let realName = null;
+                                        if (apiPlayer.steam_name && !apiPlayer.steam_name.startsWith('Player')) {
+                                            realName = apiPlayer.steam_name;
+                                        } else if (apiPlayer.name && !apiPlayer.name.startsWith('Player')) {
+                                            realName = apiPlayer.name;
+                                        } else if (apiPlayer.display_name && !apiPlayer.display_name.startsWith('Player')) {
+                                            realName = apiPlayer.display_name;
+                                        }
+                                        
+                                        if (realName) {
+                                            window.playerNameCache[apiPlayer.account_id] = realName;
+                                            console.log(`💾 플레이어 이름 캐시 업데이트: ${apiPlayer.account_id} → ${realName}`);
+                                        }
+                                    }
+                                });
                             }
                             
-                            const finalItems = finalItemsData.items || [];
-                            console.log(`🏆 매치 ${match.matchId}: account_id ${accountId}의 정확한 final items ${finalItems.length}개 발견`);
-                            console.log(`📦 Final Items IDs:`, finalItemsData.itemIds);
+                            // 현재 플레이어(aski, account_id: 54776284) 찾기
+                            const currentPlayer = matchInfo.players.find(p => 
+                                p.account_id === 54776284 || 
+                                p.account_id === '54776284'
+                            );
+                            
+                            if (!currentPlayer || !currentPlayer.items) {
+                                throw new Error('플레이어 또는 아이템 데이터 없음');
+                            }
+                            
+                            // 실제 Final Items 추출 (sold_time_s가 0인 아이템들 = 최종 보유 아이템)
+                            const finalItems = currentPlayer.items
+                                .filter(item => item.sold_time_s === 0)
+                                .sort((a, b) => a.game_time_s - b.game_time_s); // 획득 시간 순으로 정렬
+                            
+                            console.log(`🏆 매치 ${match.matchId}: 최종 보유 아이템 ${finalItems.length}개 발견`);
+                            console.log(`📦 Final Items:`, finalItems.map(item => ({
+                                item_id: item.item_id,
+                                upgrade_id: item.upgrade_id,
+                                game_time: item.game_time_s,
+                                flags: item.flags
+                            })));
                             
                             
                             // v2/items API에서 아이템 정보 가져오기 (강제 로딩)
@@ -5011,6 +5056,9 @@ function displayMatchHistory(matches) {
                                         cost: item.cost || 0
                                     };
                                 }
+                                
+                                // 2. 우리 서버의 확장된 아이템 매핑에서 가져오기
+                                // 서버 매핑에서 이미 확인했으므로 이 단계는 스킵
                                 
                                 // 2. 기존 캐시에서 찾기 (fallback)
                                 const itemsCache = window.deadlockItemsCache || {};
@@ -5120,11 +5168,9 @@ function displayMatchHistory(matches) {
                                 for (let i = 0; i < 12; i++) {
                                     if (i < finalItems.length) {
                                         const item = finalItems[i];
-                                        // 새로운 API 구조에서는 actual_id 사용, 기존 구조도 지원
-                                        const actualItemId = item.actual_id || (item.upgrade_id && item.upgrade_id !== 0 ? item.upgrade_id : item.item_id);
+                                        const itemInfo = await getItemInfo(item.item_id, item.upgrade_id);
                                         const isUpgraded = item.upgrade_id && item.upgrade_id !== 0;
-                                        
-                                        const itemInfo = await getItemInfo(item.item_id || actualItemId, item.upgrade_id);
+                                        const actualItemId = isUpgraded ? item.upgrade_id : item.item_id;
                                         
                                         itemSlots.push(`
                                             <div class="item-slot">
@@ -5179,68 +5225,73 @@ function displayMatchHistory(matches) {
                         </div>
                     `;
                     
-                    // 백엔드 API로 정확한 final items 가져오기 (한 번만 시도)
+                    // deadlock-api.com에서 실시간 매치 상세 정보를 가져와서 아이템 표시 (한 번만 시도)
                     if (!match._itemsRetried) {
                         match._itemsRetried = true; // 재시도 플래그 설정
                         setTimeout(async () => {
                         try {
-                            console.log(`🔄 매치 ${match.matchId}: 백엔드 API로 account_id ${accountId}의 final items 재시도 중...`);
-                            const finalItemsResponse = await fetch(`/api/v1/matches/${match.matchId}/final-items/${accountId}`);
-                            if (finalItemsResponse.ok) {
-                                const finalItemsData = await finalItemsResponse.json();
-                                console.log(`📡 매치 ${match.matchId} 백엔드 API 응답:`, finalItemsData);
+                            console.log(`🔄 매치 ${match.matchId}: deadlock-api.com에서 실시간 final items 가져오는 중...`);
+                            const matchDetailsResponse = await fetch(`/api/v1/matches/${match.matchId}/details`);
+                            if (matchDetailsResponse.ok) {
+                                const detailsData = await matchDetailsResponse.json();
+                                console.log(`📡 매치 ${match.matchId} API 응답:`, detailsData);
                                 
-                                if (!finalItemsData.error && finalItemsData.items && finalItemsData.items.length > 0) {
-                                    console.log(`✅ 매치 ${match.matchId}: account_id ${accountId}의 final items ${finalItemsData.items.length}개 발견`);
-                                    const finalItems = finalItemsData.items;
+                                // 현재 표시중인 플레이어와 매칭되는 플레이어 찾기
+                                if (detailsData.finalItemsData && detailsData.finalItemsData.length > 0) {
+                                    // 영웅 이름이나 플레이어 이름으로 매칭 시도
+                                    const currentPlayerData = detailsData.finalItemsData.find(playerData => 
+                                        playerData.heroName === match.hero || 
+                                        playerData.playerName === match.playerName
+                                    );
                                     
-                                        // 백엔드 API에서 가져온 정확한 final items 표시 (12개 슬롯)
-                                        const renderRetryItems = async () => {
-                                            // 서버 아이템 매핑 로드
-                                            const serverMapping = await loadServerItemMapping();
-                                            
-                                            const retryItemPromises = finalItems.slice(0, 12).map(async (item, itemIndex) => {
-                                                // 새로운 API 구조에서는 actual_id 사용
-                                                const actualItemId = item.actual_id || (item.upgrade_id && item.upgrade_id !== 0 ? item.upgrade_id : item.item_id);
-                                                const isUpgraded = item.upgrade_id && item.upgrade_id !== 0;
+                                    if (currentPlayerData && currentPlayerData.finalItems && currentPlayerData.finalItems.length > 0) {
+                                        console.log(`✅ 매치 ${match.matchId}: ${currentPlayerData.heroName}의 final items ${currentPlayerData.finalItems.length}개 발견`);
+                                        const finalItems = currentPlayerData.finalItems;
+                                    
+                                        // 서버에서 제공한 finalItems 데이터 직접 사용
+                                        const renderRetryItems = () => {
+                                            const retryItemsHTML = finalItems.slice(0, 12).map((item, itemIndex) => {
+                                                // 서버에서 이미 처리된 아이템 정보 사용
+                                                const itemName = item.name || `Item ${item.itemId || item.displayId || 'Unknown'}`;
+                                                const itemImage = item.image || 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/arcane_surge_sm.png';
+                                                const isUpgraded = item.upgradeId && item.upgradeId !== 0;
                                                 
-                                                // 서버 매핑에서 아이템 정보 가져오기
-                                                let itemInfo = { name: `Item ${actualItemId}`, image: 'https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/arcane_surge_sm.png' };
-                                                if (serverMapping[actualItemId]) {
-                                                    itemInfo = serverMapping[actualItemId];
-                                                }
+                                                console.log(`📦 Final Item ${itemIndex}: ${itemName}, 이미지: ${itemImage}`);
                                                 
                                                 return `
-                                                    <div class="item-slot">
-                                                        <img loading="lazy" 
-                                                             alt="${itemInfo.name}" 
-                                                             title="${itemInfo.name} (ID: ${actualItemId})" 
-                                                             class="w-8 h-8 rounded border ${isUpgraded ? 'border-yellow-400 border-2' : 'border-border'}" 
-                                                             src="${itemInfo.image}"
-                                                             onerror="this.src='https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/arcane_surge_sm.png';">
+                                                    <div>
+                                                        <picture>
+                                                            <source srcset="${itemImage.replace('.png', '.webp')}" type="image/webp">
+                                                            <source srcset="${itemImage}" type="image/png">
+                                                            <img loading="lazy" alt="${itemName}" title="${itemName}" 
+                                                                 class="size-8 aspect-square w-8 h-8 rounded border ${isUpgraded ? 'border-yellow-400 border-2' : 'border-border'}" 
+                                                                 src="${itemImage}"
+                                                                 onerror="this.onerror=null; this.src='https://assets-bucket.deadlock-api.com/assets-api-res/images/items/spirit/arcane_surge_sm.png';">
+                                                        </picture>
                                                     </div>
                                                 `;
-                                            });
-                                            
-                                            const retryItemsHTML = (await Promise.all(retryItemPromises)).join('');
+                                            }).join('');
                                             
                                             // 빈 슬롯으로 12개 채우기
                                             const emptySlots = Math.max(0, 12 - finalItems.length);
-                                            const emptyHTML = Array(emptySlots).fill('<div class="item-slot"><div class="w-8 h-8 rounded border border-border bg-muted opacity-30"></div></div>').join('');
+                                            const emptyHTML = Array(emptySlots).fill('<div class="w-8 h-8 rounded border border-border bg-muted opacity-30"></div>').join('');
                                             
                                             itemsContainer.innerHTML = `
-                                                <div class="grid grid-cols-6 gap-2 w-fit mb-1">
+                                                <div class="grid grid-cols-6 gap-1 w-fit">
                                                     ${retryItemsHTML}${emptyHTML}
                                                 </div>
                                             `;
-                                            console.log(`✅ 매치 ${match.matchId}: 백엔드 API에서 가져온 정확한 ${finalItems.length}개 final items 표시 완료`);
+                                            console.log(`✅ 매치 ${match.matchId}: 서버에서 제공한 ${finalItems.length}개 final items 표시 완료`);
                                         };
                                         
-                                        // async 함수 실행
-                                        await renderRetryItems();
+                                        // 동기 함수 실행
+                                        renderRetryItems();
                                         return;
+                                    } else {
+                                        console.warn(`⚠️ 매치 ${match.matchId}: 현재 플레이어의 final items를 찾을 수 없음`);
+                                    }
                                 } else {
-                                    console.warn(`⚠️ 매치 ${match.matchId}: 백엔드 API에서 final items를 찾을 수 없음`);
+                                    console.warn(`⚠️ 매치 ${match.matchId}: deadlock-api.com에서 final items 데이터를 찾을 수 없음`);
                                 }
                             }
                         } catch (retryError) {
