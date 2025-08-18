@@ -4956,7 +4956,7 @@ function displayMatchHistory(matches) {
                             }
                             
                             // 현재 로그인된 사용자의 account_id 사용
-                            const currentUserId = <%= accountId %> || '54776284'; // 기본값은 aski
+                            const currentUserId = '<%= accountId %>' || '54776284'; // 기본값은 aski
                             const currentPlayer = matchInfo.players.find(p => 
                                 p.account_id == currentUserId || 
                                 p.account_id == String(currentUserId)
