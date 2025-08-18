@@ -7385,6 +7385,119 @@ app.get('/api/v1/matches/:matchId/details', async (req, res) => {
   }
 });
 
+// Final Items 정확한 추출 API - account_id 기반으로 정확한 아이템 매칭
+app.get('/api/v1/matches/:matchId/final-items/:accountId', async (req, res) => {
+  try {
+    const { matchId, accountId } = req.params;
+    const cacheKey = `final-items-${matchId}-${accountId}`;
+    
+    console.log(`🎯 매치 ${matchId}에서 account_id ${accountId}의 final items 요청`);
+    
+    // 캐시 확인 (10분 캐시)
+    const cached = getCachedData(cacheKey, 10 * 60 * 1000);
+    if (cached) {
+      console.log(`📦 캐시된 final items 반환: ${cached.items.length}개`);
+      return res.json(cached);
+    }
+    
+    // deadlock-api.com에서 매치 메타데이터 가져오기
+    const response = await axios.get(
+      `https://api.deadlock-api.com/v1/matches/metadata?match_ids=${matchId}&include_player_items=true`,
+      {
+        timeout: 15000,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'application/json',
+        },
+      }
+    );
+    
+    console.log(`📡 매치 ${matchId} 메타데이터 응답:`, response.status);
+    
+    if (!response.data || !response.data.length) {
+      throw new Error('매치 데이터 없음');
+    }
+    
+    const matchData = response.data[0];
+    if (!matchData.match_info || !matchData.match_info.players) {
+      throw new Error('플레이어 데이터 없음');
+    }
+    
+    // account_id로 플레이어 찾기
+    const targetPlayer = matchData.match_info.players.find(player => 
+      player.account_id === parseInt(accountId) || 
+      player.account_id === accountId
+    );
+    
+    if (!targetPlayer) {
+      console.warn(`⚠️ 매치 ${matchId}에서 account_id ${accountId} 플레이어를 찾을 수 없음`);
+      console.warn(`📋 존재하는 플레이어들:`, matchData.match_info.players.map(p => ({
+        account_id: p.account_id,
+        hero_name: p.hero_name
+      })));
+      
+      return res.json({
+        matchId,
+        accountId,
+        items: [],
+        error: '플레이어를 찾을 수 없음'
+      });
+    }
+    
+    console.log(`✅ 플레이어 발견: ${targetPlayer.hero_name} (account_id: ${targetPlayer.account_id})`);
+    
+    // 플레이어의 아이템 데이터 확인
+    if (!targetPlayer.items || !Array.isArray(targetPlayer.items)) {
+      console.warn(`⚠️ 플레이어 ${accountId}에게 아이템 데이터 없음`);
+      return res.json({
+        matchId,
+        accountId,
+        items: [],
+        playerFound: true,
+        hero: targetPlayer.hero_name
+      });
+    }
+    
+    // Final Items 추출: sold_time_s가 0인 아이템들 (게임 종료 시 보유한 아이템)
+    const finalItems = targetPlayer.items
+      .filter(item => item.sold_time_s === 0)
+      .map(item => ({
+        item_id: item.item_id,
+        upgrade_id: item.upgrade_id,
+        game_time_s: item.game_time_s,
+        flags: item.flags,
+        // 실제 아이템 ID 결정 (upgrade_id가 있으면 우선, 없으면 item_id)
+        actual_id: item.upgrade_id && item.upgrade_id !== 0 ? item.upgrade_id : item.item_id
+      }))
+      .sort((a, b) => a.game_time_s - b.game_time_s); // 획득 시간 순 정렬
+    
+    console.log(`🏆 매치 ${matchId} account_id ${accountId}: ${finalItems.length}개 final items 추출`);
+    console.log(`📦 Final Items IDs:`, finalItems.map(item => item.actual_id));
+    
+    const result = {
+      matchId,
+      accountId,
+      hero: targetPlayer.hero_name,
+      items: finalItems,
+      totalItems: finalItems.length,
+      itemIds: finalItems.map(item => item.actual_id)
+    };
+    
+    // 10분 캐시
+    setCachedData(cacheKey, result, 10 * 60 * 1000);
+    
+    res.json(result);
+    
+  } catch (error) {
+    console.error(`❌ Final Items API 오류 (매치 ${req.params.matchId}):`, error.message);
+    res.status(500).json({ 
+      error: 'Final Items 데이터를 가져올 수 없습니다',
+      matchId: req.params.matchId,
+      accountId: req.params.accountId
+    });
+  }
+});
+
 // 시스템 모니터링 API
 // 아이템 이미지 매핑 API - 프론트엔드에서 안전하게 아이템 정보 가져오기
 app.get('/api/v1/items/mapping', async (req, res) => {
@@ -7478,8 +7591,116 @@ app.get('/api/v1/items/mapping', async (req, res) => {
       5678901234: { name: '정신 지배', cost: 3200, tier: 3, category: 'spirit', image: 'spirit/mind_control_sm.png' },
       2468135790: { name: '회복 오브', cost: 800, tier: 1, category: 'vitality', image: 'vitality/healing_orb_sm.png' },
       1357924680: { name: '화염 탄환', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/fire_bullets_sm.png' },
-      8642097531: { name: '얼음 갑옷', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/ice_armor_sm.png' }
-      // 필요시 더 많은 아이템 추가 가능
+      8642097531: { name: '얼음 갑옷', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/ice_armor_sm.png' },
+      
+      // 실제 게임에서 자주 사용되는 아이템 ID들 추가
+      1925087134: { name: '확장 탄창', cost: 800, tier: 1, category: 'weapon', image: 'weapon/basic_magazine_sm.png' },
+      2081037738: { name: '반격', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/return_fire_sm.png' },
+      2108901849: { name: '금속 피부', cost: 3200, tier: 3, category: 'vitality', image: 'vitality/metal_skin_sm.png' },
+      2120322937: { name: '추가 화약', cost: 800, tier: 1, category: 'weapon', image: 'weapon/extra_charge_sm.png' },
+      2364891047: { name: '저지불가', cost: 3200, tier: 3, category: 'vitality', image: 'vitality/unstoppable_sm.png' },
+      2469449028: { name: '메아리 파편', cost: 3200, tier: 3, category: 'spirit', image: 'spirit/echo_shard_sm.png' },
+      2533252781: { name: '둔화 저주', cost: 800, tier: 1, category: 'spirit', image: 'spirit/slowing_hex_sm.png' },
+      2599824893: { name: '신비한 차가운 전선', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/mystic_slow_sm.png' },
+      2603935618: { name: '마법사의 방벽', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/enduring_spirit_sm.png' },
+      2743563891: { name: '환상 타격', cost: 3200, tier: 3, category: 'vitality', image: 'vitality/phantom_strike_sm.png' },
+      2746434653: { name: '리프레셔', cost: 3200, tier: 3, category: 'spirit', image: 'spirit/refresher_sm.png' },
+      2800629741: { name: '시드는 채찍', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/withering_whip_sm.png' },
+      2820116164: { name: '향상된 폭발', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/improved_burst_sm.png' },
+      2849173567: { name: '장엄한 도약', cost: 3200, tier: 3, category: 'vitality', image: 'vitality/majestic_leap_sm.png' },
+      2863754076: { name: '추가 재생', cost: 800, tier: 1, category: 'vitality', image: 'vitality/extra_regen_sm.png' },
+      2929508123: { name: '속사', cost: 800, tier: 1, category: 'weapon', image: 'weapon/rapid_rounds_sm.png' },
+      2948329856: { name: '베일 워커', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/veil_walker_sm.png' },
+      2951612397: { name: '정신력 흡혈', cost: 800, tier: 1, category: 'spirit', image: 'spirit/spirit_lifesteal_sm.png' },
+      3005970438: { name: '향상된 리치', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/improved_reach_sm.png' },
+      3147316197: { name: '지속 속도', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/enduring_speed_sm.png' },
+      3261353684: { name: '구조 빔', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/rescue_beam_sm.png' },
+      3270001687: { name: '퀵실버 재장전', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/quicksilver_reload_sm.png' },
+      3287678549: { name: '전투 방벽', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/combat_barrier_sm.png' },
+      3357231760: { name: '향상된 정신력', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/improved_spirit_sm.png' },
+      3361075077: { name: '신성한 방벽', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/divine_barrier_sm.png' },
+      3403085434: { name: '탄약 수집기', cost: 800, tier: 1, category: 'spirit', image: 'spirit/ammo_scavenger_sm.png' },
+      3428915467: { name: '불굴', cost: 3200, tier: 3, category: 'vitality', image: 'vitality/fortitude_sm.png' },
+      3612042342: { name: '신비한 취약성', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/mystic_vulnerability_sm.png' },
+      3677653320: { name: '정신력 타격', cost: 800, tier: 1, category: 'spirit', image: 'spirit/spirit_strike_sm.png' },
+      3745693205: { name: '회복 목걸이', cost: 3200, tier: 3, category: 'vitality', image: 'vitality/restorative_locket_sm.png' },
+      3754524659: { name: '향상된 쿨다운', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/improved_cooldown_sm.png' },
+      3878070817: { name: '신비한 잔향', cost: 3200, tier: 3, category: 'spirit', image: 'spirit/mystic_reverb_sm.png' },
+      3916766905: { name: '점술사의 케블라', cost: 3200, tier: 3, category: 'spirit', image: 'spirit/diviners_kevlar_sm.png' },
+      3919289022: { name: '상급 쿨다운', cost: 800, tier: 1, category: 'spirit', image: 'spirit/superior_cooldown_sm.png' },
+      3982475103: { name: '리바이어던', cost: 3200, tier: 3, category: 'vitality', image: 'vitality/leviathan_sm.png' },
+      4033043084: { name: '치유 증강기', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/healing_booster_sm.png' },
+      4089166941: { name: '총구 압박', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/suppressor_sm.png' },
+      4293016574: { name: '상급 지속시간', cost: 3200, tier: 3, category: 'vitality', image: 'vitality/superior_duration_sm.png' },
+      
+      // 매치에서 실제로 나타나는 아이템 ID들 추가
+      519124136: { name: '회복 사격', cost: 800, tier: 1, category: 'weapon', image: 'weapon/restorative_shot_sm.png' },
+      3812615317: { name: '메아리 파편', cost: 3200, tier: 3, category: 'spirit', image: 'spirit/echo_shard_sm.png' },
+      865846625: { name: '거대한 탄창', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/titanic_magazine_sm.png' },
+      397010810: { name: '기본 아이템', cost: 800, tier: 1, category: 'weapon', image: 'weapon/basic_magazine_sm.png' },
+      808565891: { name: '업그레이드 아이템', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/upgraded_magazine_sm.png' },
+      3731635960: { name: '활력 아이템', cost: 800, tier: 1, category: 'vitality', image: 'vitality/extra_health_sm.png' },
+      2590: { name: '기본 아이템', cost: 800, tier: 1, category: 'vitality', image: 'vitality/basic_armor_sm.png' },
+      2121044373: { name: '영혼 파워', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/spirit_power_sm.png' },
+      519818856: { name: '업그레이드 반환 사격', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/upgraded_return_fire_sm.png' },
+      915014646: { name: '체력 아이템', cost: 800, tier: 1, category: 'vitality', image: 'vitality/health_item_sm.png' },
+      1193964439: { name: '영혼 향상', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/spirit_enhancement_sm.png' },
+      856231037: { name: '활력 업그레이드', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/vitality_upgrade_sm.png' },
+      3817461040: { name: '근접전', cost: 800, tier: 1, category: 'weapon', image: 'weapon/melee_combat_sm.png' },
+      2859015099: { name: '확장 탄창', cost: 800, tier: 1, category: 'weapon', image: 'weapon/basic_magazine_sm.png' },
+      3617449734: { name: '헤드샷 부스터', cost: 800, tier: 1, category: 'weapon', image: 'weapon/headshot_booster_sm.png' },
+      1741128720: { name: '추가 체력', cost: 800, tier: 1, category: 'vitality', image: 'vitality/extra_health_sm.png' },
+      2671070013: { name: '추가 재생', cost: 800, tier: 1, category: 'vitality', image: 'vitality/extra_regen_sm.png' },
+      3152051256: { name: '추가 영혼력', cost: 800, tier: 1, category: 'spirit', image: 'spirit/extra_spirit_sm.png' },
+
+      // Tier 2 & 3 추가 아이템들
+      1589066319: { name: '버스트 사격', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/burst_fire_sm.png' },
+      2621516260: { name: '모멘텀', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/momentum_sm.png' },
+      3361134845: { name: '지속 사격', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/sustained_fire_sm.png' },
+      2093037463: { name: '사냥의 본능', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/hunters_instinct_sm.png' },
+      976734265: { name: '신속한 재장전', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/swift_striker_sm.png' },
+      
+      // Vitality Tier 2
+      3459842738: { name: '굳건함', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/enduring_spirit_sm.png' },
+      2847291056: { name: '회복의 고리', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/healing_rite_sm.png' },
+      1738264509: { name: '방어막', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/bullet_armor_sm.png' },
+      3927485172: { name: '영혼 방어구', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/spirit_armor_sm.png' },
+      2591847063: { name: '치유의 약초', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/healing_booster_sm.png' },
+
+      // Spirit Tier 2
+      4293857160: { name: '신비한 반전', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/mystic_reverb_sm.png' },
+      3857029481: { name: '충전된 스트라이크', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/charged_strike_sm.png' },
+      1492836074: { name: '영혼 확장', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/spirit_strike_sm.png' },
+      2649371528: { name: '마법의 방벽', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/magic_barrier_sm.png' },
+      3816495027: { name: '영혼의 도약', cost: 1600, tier: 2, category: 'spirit', image: 'spirit/soul_shredder_bullets_sm.png' },
+
+      // Tier 3 아이템들 (3200 cost)
+      3812615317: { name: '메아리 파편', cost: 3200, tier: 3, category: 'spirit', image: 'spirit/echo_shard_sm.png' },
+      2947381652: { name: '무한 빛', cost: 3200, tier: 3, category: 'weapon', image: 'weapon/escalating_resilience_sm.png' },
+      1582947361: { name: '영혼 충격', cost: 3200, tier: 3, category: 'spirit', image: 'spirit/torment_pulse_sm.png' },
+      4039728145: { name: '가속 부스터', cost: 3200, tier: 3, category: 'weapon', image: 'weapon/kinetic_dash_sm.png' },
+      2738495061: { name: '치유의 수정', cost: 3200, tier: 3, category: 'vitality', image: 'vitality/divine_barrier_sm.png' },
+
+      // 실제 게임에서 자주 나오는 아이템들
+      1847293650: { name: '신속한 발걸음', cost: 800, tier: 1, category: 'vitality', image: 'vitality/swift_striker_sm.png' },
+      3659184072: { name: '영혼 집중', cost: 800, tier: 1, category: 'spirit', image: 'spirit/mystic_shot_sm.png' },
+      2048573961: { name: '강화 탄환', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/enhanced_ammo_sm.png' },
+      3725819046: { name: '마법 저항', cost: 1600, tier: 2, category: 'vitality', image: 'vitality/magic_resist_sm.png' },
+      1693740528: { name: '돌진 공격', cost: 1600, tier: 2, category: 'weapon', image: 'weapon/point_blank_sm.png' },
+      
+      // 고급 아이템들
+      4172859304: { name: '절대 방어', cost: 6400, tier: 4, category: 'vitality', image: 'vitality/colossus_sm.png' },
+      2856417093: { name: '초월의 힘', cost: 6400, tier: 4, category: 'spirit', image: 'spirit/improved_spirit_sm.png' },
+      3947281650: { name: '완벽한 조준', cost: 6400, tier: 4, category: 'weapon', image: 'weapon/glass_cannon_sm.png' },
+      1738296405: { name: '치유의 오라', cost: 3200, tier: 3, category: 'vitality', image: 'vitality/return_fire_sm.png' },
+      2847395162: { name: '마법의 증폭', cost: 3200, tier: 3, category: 'spirit', image: 'spirit/improved_cooldown_sm.png' },
+
+      // 더 많은 Tier 1 기본 아이템들
+      3694820571: { name: '기본 속도', cost: 800, tier: 1, category: 'vitality', image: 'vitality/enduring_speed_sm.png' },
+      2957318046: { name: '영혼 보호', cost: 800, tier: 1, category: 'spirit', image: 'spirit/mystic_vulnerability_sm.png' },
+      1849372650: { name: '탄환 보조', cost: 800, tier: 1, category: 'weapon', image: 'weapon/close_quarters_sm.png' },
+      3748295017: { name: '생명력 강화', cost: 800, tier: 1, category: 'vitality', image: 'vitality/extra_stamina_sm.png' },
+      2639471850: { name: '영혼 강화', cost: 800, tier: 1, category: 'spirit', image: 'spirit/spirit_lifesteal_sm.png' }
     };
     
     // 전체 이미지 URL로 변환
