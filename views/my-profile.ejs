@@ -2339,23 +2339,24 @@ async function loadMyProfileData() {
         // 플레이어 데이터 처리 개선
         console.log('🔍 플레이어 데이터 상세 확인:', apiData.playerData);
         
+        // 항상 로딩 상태 해제 및 콘텐츠 표시 (무한 로딩 방지)
+        console.log('🔄 로딩 상태 해제 및 UI 업데이트 시작...');
+        
+        let playerDataToUse = null;
+        
         if (apiData.playerData && typeof apiData.playerData === 'object' && !apiData.playerData.error && apiData.playerData.name) {
-            console.log('🎯 유효한 플레이어 데이터로 UI 업데이트:', {
+            console.log('✅ 유효한 플레이어 데이터 사용:', {
                 name: apiData.playerData.name,
                 avatar: apiData.playerData.avatar,
                 accountId: apiData.playerData.accountId
             });
-            updatePlayerUIFast(apiData.playerData, apiData.heroStatsData, apiData.matchHistoryData, apiData.partyStatsData, apiData.mmrAPIData);
-            loading.style.display = 'none';
-            content.style.display = 'block';
-            console.log('✅ 프로필 데이터 로딩 완료');
+            playerDataToUse = apiData.playerData;
         } else {
-            // API 실패 또는 유효하지 않은 데이터의 경우
-            console.warn('⚠️ 플레이어 데이터가 유효하지 않음:', apiData.playerData);
-            console.warn('💡 Steam 정보로 폴백 시도...');
+            // API 실패 또는 유효하지 않은 데이터의 경우 폴백 사용
+            console.warn('⚠️ 플레이어 데이터 실패, 폴백 데이터 사용');
+            console.log('🚚 원본 데이터:', apiData.playerData);
             
-            // Steam API나 기본 정보로 폴백
-            const fallbackPlayer = {
+            playerDataToUse = {
                 name: 'aski',
                 avatar: 'https://avatars.cloudflare.steamstatic.com/097b03aca4600f3dcb2814173e7784b5db9683c2_full.jpg',
                 accountId: accountId,
@@ -2363,30 +2364,78 @@ async function loadMyProfileData() {
                 rank: { medal: 'Initiate', subrank: 1, score: 1200 },
                 stats: { matches: 0, winRate: 0, laneWinRate: 0, kda: '0.0', soulsPerMin: 0, denies: 0, endorsements: 0 }
             };
-            
-            console.log('🔄 폴백 플레이어 데이터 사용:', fallbackPlayer);
-            updatePlayerUIFast(fallbackPlayer, apiData.heroStatsData || [], apiData.matchHistoryData || [], apiData.partyStatsData || [], apiData.mmrAPIData);
-            loading.style.display = 'none';
-            content.style.display = 'block';
         }
+        
+        // UI 업데이트 실행
+        try {
+            updatePlayerUIFast(
+                playerDataToUse, 
+                apiData.heroStatsData || [], 
+                apiData.matchHistoryData || [], 
+                apiData.partyStatsData || [], 
+                apiData.mmrAPIData
+            );
+            console.log('✅ UI 업데이트 성공');
+        } catch (uiError) {
+            console.error('❌ UI 업데이트 오류:', uiError);
+            // UI 업데이트 실패에도 로딩은 해제
+        }
+        
+        // 항상 로딩 상태 해제
+        loading.style.display = 'none';
+        content.style.display = 'block';
+        console.log('✅ 프로필 데이터 로딩 완료')
         
     } catch (err) {
         console.error('❌ 프로필 데이터 로딩 실패:', err);
+        console.error('🚚 에러 상세:', err.stack);
         
-        // 안전한 요소 조작
+        // 항상 로딩 상태 해제 (중요!)
         if (loading) {
             loading.style.display = 'none';
         }
+        
+        // 에러 상태 표시 또는 폴백 UI
         if (error) {
             error.style.display = 'block';
-        }
-        
-        const errorMessageEl = document.getElementById('error-message');
-        if (errorMessageEl) {
-            errorMessageEl.textContent = `오류 상세: ${err.message || '알 수 없는 오류'}`;
+            const errorMessageEl = document.getElementById('error-message');
+            if (errorMessageEl) {
+                errorMessageEl.textContent = `오류: ${err.message || '알 수 없는 오류'}`;
+            }
         } else {
-            console.error('❌ 에러 메시지 요소를 찾을 수 없음');
+            // 에러 요소가 없으면 기본 콘텐츠를 표시하고 폴백 데이터 사용
+            console.log('🔄 에러 요소 없음, 콘텐츠 표시 및 폴백 UI 사용');
+            if (content) {
+                content.style.display = 'block';
+            }
+            
+            // 긴급 폴백 UI 표시
+            try {
+                const fallbackPlayer = {
+                    name: 'aski',
+                    avatar: 'https://avatars.cloudflare.steamstatic.com/097b03aca4600f3dcb2814173e7784b5db9683c2_full.jpg',
+                    accountId: '<%= accountId %>',
+                    country: '🌍',
+                    rank: { medal: 'Initiate', subrank: 1, score: 1200 },
+                    stats: { matches: 0, winRate: 0, laneWinRate: 0, kda: '0.0', soulsPerMin: 0, denies: 0, endorsements: 0 }
+                };
+                updatePlayerUIFast(fallbackPlayer, [], [], [], null);
+                console.log('✅ 긴급 폴백 UI 표시 완료');
+            } catch (fallbackError) {
+                console.error('❌ 폴백 UI 마저 실패:', fallbackError);
+            }
         }
+    } finally {
+        // 최종적으로 로딩 상태가 해제되었는지 확인
+        setTimeout(() => {
+            if (loading && loading.style.display !== 'none') {
+                console.warn('⚠️ 로딩이 아직 해제되지 않음, 강제 해제');
+                loading.style.display = 'none';
+                if (content) {
+                    content.style.display = 'block';
+                }
+            }
+        }, 1000);
     }
 }
 
@@ -2513,20 +2562,45 @@ function updatePlayerUIFast(player, heroStats, matchHistory, partyStats, mmrAPID
             document.getElementById('heroes-grid').innerHTML = '<p style="color: #999; text-align: center;">영웅 데이터가 없습니다.</p>';
         }
         
-        if (matchHistory && Array.isArray(matchHistory) && matchHistory.length > 0) {
-            console.log('📋 매치 히스토리 표시:', matchHistory.length, '개');
-            console.log('🎮 첫 번째 매치 샘플:', matchHistory[0]);
-            displayMatchHistory(matchHistory);
-        } else {
-            console.log('⚠️ 매치 히스토리 조건 실패:', {
-                matchHistory: !!matchHistory,
-                isArray: Array.isArray(matchHistory),
-                length: matchHistory?.length,
-                condition1: !!matchHistory,
-                condition2: Array.isArray(matchHistory),
-                condition3: matchHistory?.length > 0
-            });
-            document.getElementById('matches-list').innerHTML = '<p style="color: #999; text-align: center;">최근 매치 데이터가 없습니다.</p>';
+        // 매치 히스토리 안전 처리
+        try {
+            if (matchHistory && Array.isArray(matchHistory) && matchHistory.length > 0) {
+                console.log('📋 매치 히스토리 표시 시작:', matchHistory.length, '개');
+                console.log('🎮 첫 번째 매치 샘플:', matchHistory[0]);
+                await displayMatchHistory(matchHistory);
+                console.log('✅ 매치 히스토리 표시 완료');
+            } else {
+                console.log('⚠️ 매치 히스토리 데이터 없음:', {
+                    exists: !!matchHistory,
+                    isArray: Array.isArray(matchHistory),
+                    length: matchHistory?.length,
+                    data: matchHistory
+                });
+                
+                // 빈 매치 히스토리 메시지 표시
+                const matchesList = document.getElementById('matches-list');
+                if (matchesList) {
+                    matchesList.innerHTML = `
+                        <div style="text-align: center; padding: 3rem; color: #64748b;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🎮</div>
+                            <h3 style="margin: 0 0 0.5rem 0; color: #94a3b8;">매치 데이터가 없습니다</h3>
+                            <p style="margin: 0; font-size: 0.875rem;">최근에 플레이한 매치가 없거나 데이터를 불러올 수 없습니다.</p>
+                        </div>
+                    `;
+                }
+            }
+        } catch (matchError) {
+            console.error('❌ 매치 히스토리 표시 오류:', matchError);
+            const matchesList = document.getElementById('matches-list');
+            if (matchesList) {
+                matchesList.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: #ef4444;">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">❌</div>
+                        <h3 style="margin: 0 0 0.5rem 0;">매치 데이터 로드 오류</h3>
+                        <p style="margin: 0; font-size: 0.875rem;">매치 히스토리를 표시하는 중 오류가 발생했습니다.</p>
+                    </div>
+                `;
+            }
         }
         
         if (partyStats && Array.isArray(partyStats) && partyStats.length > 0) {
